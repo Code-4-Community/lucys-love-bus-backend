@@ -38,23 +38,23 @@ public class ServiceMain {
    * Connect to the database and create a DSLContext so jOOQ can interact with it.
    */
   private void connectDb() {
-    //This block ensures that the MySQL driver is loaded in the classpath
+    //This block ensures that the driver is loaded in the classpath
     try {
       Class.forName(dbProperties.getProperty("database.driver"));
     } catch (ClassNotFoundException e) {
       e.printStackTrace();
     }
 
-    DSLContext db = DSL.using(dbProperties.getProperty("database.url"),
-        dbProperties.getProperty("database.username"), dbProperties.getProperty("database.password"));
-    this.db = db;
+    this.db = DSL.using(dbProperties.getProperty("database.url"),
+        dbProperties.getProperty("database.username"),
+        dbProperties.getProperty("database.password"));
   }
 
   /**
    * Initialize the server and get all the supporting classes going.
    */
   private void initializeServer() {
-    JWTHandler jwtHandler = new JWTHandler("this is secret, don't tell anyone"); //TODO: Dynamically load this
+    JWTHandler jwtHandler = new JWTHandler(PropertiesLoader.getJwtProperties().getProperty("secret_key"));
     JWTAuthorizer jwtAuthorizer = new JWTAuthorizer(jwtHandler);
     JWTCreator jwtCreator = new JWTCreator(jwtHandler);
 

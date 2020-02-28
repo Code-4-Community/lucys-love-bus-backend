@@ -31,6 +31,5 @@ This can be run from the command line with the command `java -jar service-1.0-SN
 By default the API is accessible at `http://localhost:8081`. All routes
 have the `/api/v1` prefix to them.
 
-The HTTP request to get all notes for example would be:
+For example, the HTTP request to get all notes would be:
 `GET http://localhost:8081/api/v1/notes`
-

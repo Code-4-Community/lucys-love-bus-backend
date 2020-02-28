@@ -2,6 +2,7 @@ package com.codeforcommunity.processor;
 
 import com.codeforcommunity.api.IAuthProcessor;
 import com.codeforcommunity.auth.JWTCreator;
+import com.codeforcommunity.auth.Passwords;
 import com.codeforcommunity.dataaccess.AuthDatabaseOperations;
 import com.codeforcommunity.dto.auth.SessionResponse;
 import com.codeforcommunity.dto.auth.LoginRequest;
@@ -9,7 +10,10 @@ import com.codeforcommunity.dto.auth.NewUserRequest;
 import com.codeforcommunity.dto.auth.RefreshSessionRequest;
 import com.codeforcommunity.dto.auth.RefreshSessionResponse;
 import com.codeforcommunity.exceptions.AuthException;
+import com.codeforcommunity.exceptions.EmailAlreadyInUseException;
 import org.jooq.DSLContext;
+
+import java.util.Optional;
 
 public class AuthProcessorImpl implements IAuthProcessor {
 
@@ -28,21 +32,25 @@ public class AuthProcessorImpl implements IAuthProcessor {
      * Creates a new user database row
      * Return the new jwts
      *
-     * @throws com.codeforcommunity.exceptions.CreateUserException if the given username or email
+     * @throws EmailAlreadyInUseException if the given username or email
      *   are already used.
      */
     @Override
     public SessionResponse signUp(NewUserRequest request) {
-        String refreshToken = jwtCreator.createNewRefreshToken(request.getUsername());
-        String accessToken = jwtCreator.getNewAccessToken(refreshToken);
+        String refreshToken = jwtCreator.createNewRefreshToken(request.getEmail());
+        Optional<String> accessToken = jwtCreator.getNewAccessToken(refreshToken);
 
-        authDatabaseOperations.createNewUser(request.getUsername(), request.getEmail(), request.getPassword(),
+        authDatabaseOperations.createNewUser(request.getEmail(), request.getPassword(),
             request.getFirstName(), request.getLastName());
 
-        return new SessionResponse() {{
-            setRefreshToken(refreshToken);
-            setAccessToken(accessToken);
-        }};
+        if (accessToken.isPresent()) {
+            return new SessionResponse() {{
+                setAccessToken(accessToken.get());
+                setRefreshToken(refreshToken);
+            }};
+        } else {
+            throw new IllegalStateException("Newly created refresh token was deemed invalid");
+        }
     }
 
     /**
@@ -55,14 +63,18 @@ public class AuthProcessorImpl implements IAuthProcessor {
      */
     @Override
     public SessionResponse login(LoginRequest loginRequest) throws AuthException {
-        if (authDatabaseOperations.isValidLogin(loginRequest.getUsername(), loginRequest.getPassword())) {
-            String refreshToken = jwtCreator.createNewRefreshToken(loginRequest.getUsername());
-            String accessToken = jwtCreator.getNewAccessToken(refreshToken);
+        if (authDatabaseOperations.isValidLogin(loginRequest.getEmail(), loginRequest.getPassword())) {
+            String refreshToken = jwtCreator.createNewRefreshToken(loginRequest.getEmail());
+            Optional<String> accessToken = jwtCreator.getNewAccessToken(refreshToken);
 
-            return new SessionResponse() {{
-                setAccessToken(accessToken);
-                setRefreshToken(refreshToken);
-            }};
+            if (accessToken.isPresent()) {
+                return new SessionResponse() {{
+                    setAccessToken(accessToken.get());
+                    setRefreshToken(refreshToken);
+                }};
+            } else {
+                throw new IllegalStateException("Newly created refresh token was deemed invalid");
+            }
         } else {
             throw new AuthException("Could not validate username password combination");
         }
@@ -90,11 +102,31 @@ public class AuthProcessorImpl implements IAuthProcessor {
             throw new AuthException("The refresh token has been invalidated by a previous logout");
         }
 
-        String accessToken = jwtCreator.getNewAccessToken(request.getRefreshToken());
+        Optional<String> accessToken = jwtCreator.getNewAccessToken(request.getRefreshToken());
 
-        return new RefreshSessionResponse() {{
-            setFreshAccessToken(accessToken);
-        }};
+        if (accessToken.isPresent()) {
+            return new RefreshSessionResponse() {{
+                setFreshAccessToken(accessToken.get());
+            }};
+        } else {
+            throw new AuthException("The given refresh token is invalid");
+        }
+    }
+
+    @Override
+    public void validateSecretKey(String secretKey) {
+        authDatabaseOperations.validateSecretKey(secretKey);
+    }
+
+    /**
+     * This method creates a secret key for a user that is stored
+     * in the database and can later be verified by the validateSecretKey route.
+     *
+     * TODO: This method should be called as part of the sign-up route and the
+     *  key should be sent to the user's email.
+     */
+    private String createSecretKey(int userId) {
+        return authDatabaseOperations.createSecretKey(userId);
     }
 
     /**

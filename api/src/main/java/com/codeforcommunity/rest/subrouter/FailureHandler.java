@@ -1,15 +1,12 @@
 package com.codeforcommunity.rest.subrouter;
 
-import com.codeforcommunity.exceptions.CreateUserException;
+import com.codeforcommunity.exceptions.EmailAlreadyInUseException;
 import com.codeforcommunity.exceptions.HandledException;
 import com.codeforcommunity.exceptions.MalformedParameterException;
 import com.codeforcommunity.exceptions.MissingHeaderException;
 import com.codeforcommunity.exceptions.MissingParameterException;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-
+import com.codeforcommunity.exceptions.UserDoesNotExistException;
 import io.vertx.ext.web.RoutingContext;
 
 public class FailureHandler {
@@ -48,15 +45,25 @@ public class FailureHandler {
     end(ctx, message, 400);
   }
 
-  public void handleCreateUser(RoutingContext ctx, CreateUserException exception) {
-    CreateUserException.UsedField reason = exception.getUsedField();
-
-    String reasonMessage = reason.equals(CreateUserException.UsedField.BOTH) ? "email and user name":
-            reason.toString();
-
-    String message = String.format("Error creating new user, given %s already used", reasonMessage);
+  public void handleEmailAlreadyInUse(RoutingContext ctx, EmailAlreadyInUseException exception) {
+    String message = String.format("Error creating new user, given email %s already used", exception.getEmail());
 
     end(ctx, message, 409);
+  }
+
+  public void handleUserDoesNotExist(RoutingContext ctx, UserDoesNotExistException exception) {
+    String message = String.format("No user with id '%s' exists", exception.getUserId());
+    end(ctx, message, 400);
+  }
+
+  public void handleInvalidEmailVerificationToken(RoutingContext ctx) {
+    String message = "Given token is invalid";
+    end(ctx, message, 401);
+  }
+
+  public void handleExpiredEmailVerificationToken(RoutingContext ctx) {
+    String message = "Given token is expired";
+    end(ctx, message, 401);
   }
 
   public void handleMalformedParameter(RoutingContext ctx, MalformedParameterException exception) {

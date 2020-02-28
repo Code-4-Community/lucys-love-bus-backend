@@ -5,20 +5,29 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.Verification;
+import com.codeforcommunity.propertiesLoader.PropertiesLoader;
 
 import java.time.Instant;
 import java.util.Date;
+import java.util.Optional;
 
 public class JWTHandler {
 
   private static final String C4C_ISSUER = "c4c";
 
   private final Algorithm algorithm;
-  private Verification verification;
+  private final Verification verification;
+  private final Long MS_REFRESH_EXPIRATION;
+  private final Long MS_ACCESS_EXPIRATION;
 
   public JWTHandler(String secretKey) {
     this.algorithm = Algorithm.HMAC256(secretKey);
     this.verification = getDefaultClaimVerification(this.algorithm);
+
+    this.MS_REFRESH_EXPIRATION = Long.valueOf(PropertiesLoader.getExpirationProperties()
+        .getProperty("ms_refresh_expiration"));
+    this.MS_ACCESS_EXPIRATION = Long.valueOf(PropertiesLoader.getExpirationProperties()
+        .getProperty("ms_access_expiration"));
   }
 
   /**
@@ -36,16 +45,16 @@ public class JWTHandler {
     }
   }
 
-  public String createNewRefreshToken(String username) {
-    return createToken(true, username);
+  public String createNewRefreshToken(String email) {
+    return createToken(true, email);
   }
 
-  public String getNewAccessToken(String refreshToken) {
+  public Optional<String> getNewAccessToken(String refreshToken) {
     if(isAuthorized(refreshToken)) {
-      String username = getDecodedJWT(refreshToken).getClaim("username").asString();
-      return createToken(false, username);
+      String email = getDecodedJWT(refreshToken).getClaim("email").asString();
+      return Optional.of(createToken(false, email));
     } else {
-      throw new IllegalArgumentException("invalid refresh token"); //TODO make auth exception
+      return Optional.empty();
     }
   }
 
@@ -57,14 +66,14 @@ public class JWTHandler {
   }
 
   private Date getTokenExpiration(boolean isRefresh) {
-    long exp = isRefresh ? AuthUtils.refresh_exp : AuthUtils.access_exp;
+    long exp = isRefresh ? MS_REFRESH_EXPIRATION : MS_ACCESS_EXPIRATION;
     return Date.from(Instant.now().plusMillis(exp));
   }
 
-  private String createToken(boolean isRefresh, String username) {
+  private String createToken(boolean isRefresh, String email) {
     Date date = getTokenExpiration(isRefresh);
     return JWT.create()
-        .withClaim("username", username)
+        .withClaim("email", email)
         .withExpiresAt(date)
         .withIssuer(C4C_ISSUER)
         .sign(algorithm);
