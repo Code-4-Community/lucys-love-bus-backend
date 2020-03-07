@@ -1,6 +1,7 @@
 package com.codeforcommunity.dataaccess;
 
 import com.codeforcommunity.auth.Passwords;
+import com.codeforcommunity.enums.PrivilegeLevel;
 import com.codeforcommunity.exceptions.EmailAlreadyInUseException;
 import com.codeforcommunity.exceptions.ExpiredEmailVerificationTokenException;
 import com.codeforcommunity.exceptions.InvalidEmailVerificationTokenException;
@@ -70,7 +71,10 @@ public class AuthDatabaseOperations {
         newUser.setPassHash(Passwords.createHash(password));
         newUser.setFirstName(firstName);
         newUser.setLastName(lastName);
+        newUser.setPrivilegeLevel(PrivilegeLevel.GP);
         newUser.store();
+
+        // TODO: Send verification email
     }
 
     /**
