@@ -52,7 +52,7 @@ public class FailureHandler {
   }
 
   public void handleUserDoesNotExist(RoutingContext ctx, UserDoesNotExistException exception) {
-    String message = String.format("No user with id '%s' exists", exception.getUserId());
+    String message = String.format("No user with property <%s> exists", exception.getIdentifierMessage());
     end(ctx, message, 400);
   }
 

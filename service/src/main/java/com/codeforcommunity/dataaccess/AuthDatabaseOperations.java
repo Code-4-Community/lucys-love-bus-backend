@@ -1,5 +1,6 @@
 package com.codeforcommunity.dataaccess;
 
+import com.codeforcommunity.auth.JWTData;
 import com.codeforcommunity.auth.Passwords;
 import com.codeforcommunity.enums.PrivilegeLevel;
 import com.codeforcommunity.exceptions.EmailAlreadyInUseException;
@@ -37,6 +38,24 @@ public class AuthDatabaseOperations {
             .getExpirationProperties().getProperty("seconds_verification_email_valid"));
         this.MS_REFRESH_EXPIRATION = Integer.parseInt(PropertiesLoader
             .getExpirationProperties().getProperty("ms_refresh_expiration"));
+    }
+
+    /**
+     * Creates a JWTData object for the user with the given email if they exist.
+     *
+     * @throws UserDoesNotExistException if given email does not match a user.
+     */
+    public JWTData getUserJWTData(String email) {
+        Optional<Users> maybeUser = Optional.ofNullable(db.selectFrom(USERS)
+            .where(USERS.EMAIL.eq(email))
+            .fetchOneInto(Users.class));
+
+        if (maybeUser.isPresent()) {
+            Users user = maybeUser.get();
+            return new JWTData(user.getId(), user.getPrivilegeLevel());
+        } else {
+            throw new UserDoesNotExistException(email);
+        }
     }
 
     /**

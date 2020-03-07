@@ -9,8 +9,8 @@ public class JWTCreator {
     this.handler = handler;
   }
 
-  public String createNewRefreshToken(String email) {
-    return handler.createNewRefreshToken(email);
+  public String createNewRefreshToken(JWTData userData) {
+    return handler.createNewRefreshToken(userData);
   }
 
   public Optional<String> getNewAccessToken(String refreshToken) {

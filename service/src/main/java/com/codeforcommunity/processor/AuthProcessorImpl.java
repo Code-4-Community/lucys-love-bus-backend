@@ -2,6 +2,7 @@ package com.codeforcommunity.processor;
 
 import com.codeforcommunity.api.IAuthProcessor;
 import com.codeforcommunity.auth.JWTCreator;
+import com.codeforcommunity.auth.JWTData;
 import com.codeforcommunity.auth.Passwords;
 import com.codeforcommunity.dataaccess.AuthDatabaseOperations;
 import com.codeforcommunity.dto.auth.SessionResponse;
@@ -9,9 +10,11 @@ import com.codeforcommunity.dto.auth.LoginRequest;
 import com.codeforcommunity.dto.auth.NewUserRequest;
 import com.codeforcommunity.dto.auth.RefreshSessionRequest;
 import com.codeforcommunity.dto.auth.RefreshSessionResponse;
+import com.codeforcommunity.enums.PrivilegeLevel;
 import com.codeforcommunity.exceptions.AuthException;
 import com.codeforcommunity.exceptions.EmailAlreadyInUseException;
 import org.jooq.DSLContext;
+import org.jooq.generated.tables.pojos.Users;
 
 import java.util.Optional;
 
@@ -37,20 +40,10 @@ public class AuthProcessorImpl implements IAuthProcessor {
      */
     @Override
     public SessionResponse signUp(NewUserRequest request) {
-        String refreshToken = jwtCreator.createNewRefreshToken(request.getEmail());
-        Optional<String> accessToken = jwtCreator.getNewAccessToken(refreshToken);
-
         authDatabaseOperations.createNewUser(request.getEmail(), request.getPassword(),
             request.getFirstName(), request.getLastName());
 
-        if (accessToken.isPresent()) {
-            return new SessionResponse() {{
-                setAccessToken(accessToken.get());
-                setRefreshToken(refreshToken);
-            }};
-        } else {
-            throw new IllegalStateException("Newly created refresh token was deemed invalid");
-        }
+        return setupSessionResponse(request.getEmail());
     }
 
     /**
@@ -64,17 +57,7 @@ public class AuthProcessorImpl implements IAuthProcessor {
     @Override
     public SessionResponse login(LoginRequest loginRequest) throws AuthException {
         if (authDatabaseOperations.isValidLogin(loginRequest.getEmail(), loginRequest.getPassword())) {
-            String refreshToken = jwtCreator.createNewRefreshToken(loginRequest.getEmail());
-            Optional<String> accessToken = jwtCreator.getNewAccessToken(refreshToken);
-
-            if (accessToken.isPresent()) {
-                return new SessionResponse() {{
-                    setAccessToken(accessToken.get());
-                    setRefreshToken(refreshToken);
-                }};
-            } else {
-                throw new IllegalStateException("Newly created refresh token was deemed invalid");
-            }
+            return setupSessionResponse(loginRequest.getEmail());
         } else {
             throw new AuthException("Could not validate username password combination");
         }
@@ -127,6 +110,26 @@ public class AuthProcessorImpl implements IAuthProcessor {
      */
     private String createSecretKey(int userId) {
         return authDatabaseOperations.createSecretKey(userId);
+    }
+
+    /**
+     * Given a valid user's email, get a corresponding refresh and access token
+     * and return them as a SessionResponse object.
+     */
+    private SessionResponse setupSessionResponse(String email) {
+        JWTData userData = authDatabaseOperations.getUserJWTData(email);
+        String refreshToken = jwtCreator.createNewRefreshToken(userData);
+        Optional<String> accessToken = jwtCreator.getNewAccessToken(refreshToken);
+
+        if (accessToken.isPresent()) {
+            return new SessionResponse() {{
+                setAccessToken(accessToken.get());
+                setRefreshToken(refreshToken);
+            }};
+        } else {
+            // If this is thrown there is probably an error in our JWT creation / validation logic
+            throw new IllegalStateException("Newly created refresh token was deemed invalid");
+        }
     }
 
     /**

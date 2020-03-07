@@ -4,14 +4,18 @@ import com.codeforcommunity.rest.subrouter.FailureHandler;
 import io.vertx.ext.web.RoutingContext;
 
 public class UserDoesNotExistException extends RuntimeException implements HandledException {
-  private int userId;
+  private String identifierMessage;
 
   public UserDoesNotExistException(int userId) {
-    this.userId = userId;
+    this.identifierMessage = "id = " + userId;
   }
 
-  public int getUserId() {
-    return userId;
+  public UserDoesNotExistException(String email) {
+    this.identifierMessage = "email = " + email;
+  }
+
+  public String getIdentifierMessage() {
+    return this.identifierMessage;
   }
 
   @Override

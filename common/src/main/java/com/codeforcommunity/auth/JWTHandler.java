@@ -5,6 +5,7 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.Verification;
+import com.codeforcommunity.enums.PrivilegeLevel;
 import com.codeforcommunity.propertiesLoader.PropertiesLoader;
 
 import java.time.Instant;
@@ -32,7 +33,7 @@ public class JWTHandler {
 
   /**
    * Verifies that given access token is unedited and unexpired. Also will confirm any claims defined in
-   * @code this.getDefaultClaimVerification().
+   *  this.getDefaultClaimVerification().
    * @param accessToken token to be validated
    * @return true if and only if all conforms to all of said conditions.
    */
@@ -45,17 +46,33 @@ public class JWTHandler {
     }
   }
 
-  public String createNewRefreshToken(String email) {
-    return createToken(true, email);
+  /**
+   * Generate a new refresh token that stores the given JWTData object's information.
+   */
+  public String createNewRefreshToken(JWTData jwtData) {
+    return createToken(true, jwtData);
   }
 
+  /**
+   * Create a new access token from the given refresh token.
+   */
   public Optional<String> getNewAccessToken(String refreshToken) {
-    if(isAuthorized(refreshToken)) {
-      String email = getDecodedJWT(refreshToken).getClaim("email").asString();
-      return Optional.of(createToken(false, email));
+    if (isAuthorized(refreshToken)) {
+      JWTData refreshTokenData = getJWTDataFromToken(refreshToken);
+      return Optional.of(createToken(false, refreshTokenData));
     } else {
       return Optional.empty();
     }
+  }
+
+  /**
+   * Get the stored information in the given jwt string.
+   */
+  public JWTData getJWTDataFromToken(String token) {
+    DecodedJWT decodedJWT = getDecodedJWT(token);
+    int userId = decodedJWT.getClaim("userId").asInt();
+    PrivilegeLevel privilegeLevel = PrivilegeLevel.from(decodedJWT.getClaim("privilegeLevel").asInt());
+    return new JWTData(userId, privilegeLevel);
   }
 
   private DecodedJWT getDecodedJWT(String jwt) throws JWTVerificationException {
@@ -70,17 +87,19 @@ public class JWTHandler {
     return Date.from(Instant.now().plusMillis(exp));
   }
 
-  private String createToken(boolean isRefresh, String email) {
+  private String createToken(boolean isRefresh, JWTData jwtData) {
     Date date = getTokenExpiration(isRefresh);
     return JWT.create()
-        .withClaim("email", email)
+        .withClaim("userId", jwtData.getUserId())
+        .withClaim("privilegeLevel", jwtData.getPrivilegeLevel().getVal())
         .withExpiresAt(date)
         .withIssuer(C4C_ISSUER)
         .sign(algorithm);
   }
 
   /**
-   * Create verification object that ensures all default claims we have decided should be in every token are present.
+   * Create verification object that ensures all default claims we have decided should be
+   * in every token are present.
    * @return verification object.
    */
   private static Verification getDefaultClaimVerification(Algorithm algorithm) {
