@@ -32,17 +32,14 @@ public class JWTHandler {
   }
 
   /**
-   * Verifies that given access token is unedited and unexpired. Also will confirm any claims defined in
-   *  this.getDefaultClaimVerification().
-   * @param accessToken token to be validated
-   * @return true if and only if all conforms to all of said conditions.
+   * Given a jwt token, if the token is valid return its data otherwise return an
+   * empty optional.
    */
-  public boolean isAuthorized(String accessToken) {
-    try {
-      getDecodedJWT(accessToken);
-      return true;
-    } catch (JWTVerificationException exception) {
-      return false;
+  public Optional<JWTData> checkTokenAndGetData(String token) {
+    if (isAuthorized(token)) {
+      return Optional.of(getJWTDataFromToken(token));
+    } else {
+      return Optional.empty();
     }
   }
 
@@ -66,9 +63,24 @@ public class JWTHandler {
   }
 
   /**
+   * Verifies that given access token is unedited and unexpired. Also will confirm any claims defined in
+   *  this.getDefaultClaimVerification().
+   * @param accessToken token to be validated
+   * @return true if and only if all conforms to all of said conditions.
+   */
+  private boolean isAuthorized(String accessToken) {
+    try {
+      getDecodedJWT(accessToken);
+      return true;
+    } catch (JWTVerificationException exception) {
+      return false;
+    }
+  }
+
+  /**
    * Get the stored information in the given jwt string.
    */
-  public JWTData getJWTDataFromToken(String token) {
+  private JWTData getJWTDataFromToken(String token) {
     DecodedJWT decodedJWT = getDecodedJWT(token);
     int userId = decodedJWT.getClaim("userId").asInt();
     PrivilegeLevel privilegeLevel = PrivilegeLevel.from(decodedJWT.getClaim("privilegeLevel").asInt());
