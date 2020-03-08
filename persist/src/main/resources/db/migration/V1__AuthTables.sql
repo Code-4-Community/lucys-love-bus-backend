@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS users (
     email VARCHAR(36) UNIQUE NOT NULL,
     pass_hash BYTEA NOT NULL,
     privilege_level INTEGER NOT NULL,
-    verified INT DEFAULT 0
+    verified INTEGER DEFAULT 0
 );
 
 CREATE TABLE IF NOT EXISTS verification_keys (
@@ -24,7 +24,9 @@ CREATE TABLE IF NOT EXISTS verification_keys (
 
 CREATE TABLE  IF NOT EXISTS pf_requests (
     id SERIAL PRIMARY KEY,
-    user_id INT NOT NULL,
+    user_id INTEGER NOT NULL,
+    description TEXT NOT NULL,
+    status INTEGER NOT NULL DEFAULT 0,
     created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT pf_requests_user_id_fk FOREIGN KEY (user_id) REFERENCES users(id)

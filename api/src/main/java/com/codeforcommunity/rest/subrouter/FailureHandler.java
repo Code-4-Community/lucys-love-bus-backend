@@ -1,12 +1,15 @@
 package com.codeforcommunity.rest.subrouter;
 
+import com.codeforcommunity.exceptions.AdminOnlyRouteException;
 import com.codeforcommunity.exceptions.EmailAlreadyInUseException;
 import com.codeforcommunity.exceptions.HandledException;
 import com.codeforcommunity.exceptions.MalformedParameterException;
 import com.codeforcommunity.exceptions.MissingHeaderException;
 import com.codeforcommunity.exceptions.MissingParameterException;
 
+import com.codeforcommunity.exceptions.ResourceNotOwnedException;
 import com.codeforcommunity.exceptions.UserDoesNotExistException;
+import com.codeforcommunity.exceptions.WrongPrivilegeException;
 import io.vertx.ext.web.RoutingContext;
 
 public class FailureHandler {
@@ -69,6 +72,26 @@ public class FailureHandler {
   public void handleMalformedParameter(RoutingContext ctx, MalformedParameterException exception) {
      String message = String.format("Given parameter %s is malformed", exception.getParameterName());
      end(ctx, message, 400);
+  }
+
+  public void handleAdminOnlyRoute(RoutingContext ctx) {
+     String message = "This route is only available to admin users";
+     end(ctx, message, 401);
+  }
+
+  public void handleOutstandingRequestException(RoutingContext ctx) {
+     String message = "This user cannot open another request until all pending requests are reviewed by an admin";
+     end(ctx, message, 429); //TODO
+  }
+
+  public void handleResourceNotOwned(RoutingContext ctx, ResourceNotOwnedException exception) {
+     String message = String.format("The resource <%s> is not owned by the calling user and is thus not accessible", exception.getResource());
+     end(ctx, message, 401);
+  }
+
+  public void handleWrongPrivilegeException(RoutingContext ctx, WrongPrivilegeException exception) {
+     String message = "This route is only available to users with the privilege: " + exception.getRequiredPrivilegeLevel().name();
+     end(ctx, message, 401);
   }
 
 
