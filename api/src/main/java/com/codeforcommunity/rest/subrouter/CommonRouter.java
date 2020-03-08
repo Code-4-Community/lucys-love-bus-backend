@@ -10,6 +10,7 @@ import com.codeforcommunity.rest.RestFunctions;
 
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServerRequest;
+import io.vertx.ext.web.Route;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
@@ -34,6 +35,9 @@ public class CommonRouter implements IRouter {
 
     router.routeWithRegex(".*/protected/.*").handler(this::handleAuthorizeUser); //Add auth checking
 
+    registerGetAllAnnouncements(router);
+    registerPostAnnouncement(router);
+
     return router;
   }
 
@@ -54,5 +58,23 @@ public class CommonRouter implements IRouter {
     } else {
       throw new AccessTokenInvalidException();
     }
+  }
+
+  private void registerGetAllAnnouncements(Router router) {
+    Route getAnnouncementsRoute = router.get("/announcements");
+    getAnnouncementsRoute.handler(this::handleGetAllAnnouncements);
+  }
+
+  private void registerPostAnnouncement(Router router) {
+    Route postAnnouncementRoute = router.post("/announcements");
+    postAnnouncementRoute.handler(this::handlePostAnnouncement);
+  }
+
+  private void handleGetAllAnnouncements(RoutingContext ctx) {
+    //todo implement
+  }
+
+  private void handlePostAnnouncement(RoutingContext ctx) {
+    //todo implement
   }
 }
