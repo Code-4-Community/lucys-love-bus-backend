@@ -111,6 +111,14 @@
                   <includeTypes>.*</includeTypes>
                   <nullability>NOT_NULL</nullability>
                 </forcedType>
+                <forcedType>
+                  <userType>com.codeforcommunity.enums.RequestStatus</userType>
+                  <enumConverter>true</enumConverter>
+
+                  <includeExpression>.*pf_requests\.status</includeExpression>
+                  <includeTypes>.*</includeTypes>
+                  <nullability>NOT_NULL</nullability>
+                </forcedType>
               </forcedTypes>
             </database>
           </generator>
