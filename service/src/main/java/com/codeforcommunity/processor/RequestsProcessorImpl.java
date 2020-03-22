@@ -23,6 +23,10 @@ import static org.jooq.generated.Tables.USERS;
 public class RequestsProcessorImpl implements IRequestsProcessor {
   private DSLContext db;
 
+  public RequestsProcessorImpl(DSLContext db) {
+    this.db = db;
+  }
+
   @Override
   public void createRequest(CreateRequest requestData, JWTData userData) {
     // Check that this user is a GP

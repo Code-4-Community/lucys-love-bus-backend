@@ -1,10 +1,12 @@
 package com.codeforcommunity.rest;
 
 import com.codeforcommunity.api.IAuthProcessor;
+import com.codeforcommunity.api.IRequestsProcessor;
 import com.codeforcommunity.auth.JWTAuthorizer;
 
 import com.codeforcommunity.rest.subrouter.AuthRouter;
 import com.codeforcommunity.rest.subrouter.CommonRouter;
+import com.codeforcommunity.rest.subrouter.PfRequestRouter;
 import io.vertx.core.Vertx;
 
 import io.vertx.core.http.HttpServerResponse;
@@ -14,10 +16,12 @@ import io.vertx.ext.web.Router;
 public class ApiRouter implements IRouter {
     private final CommonRouter commonRouter;
     private final AuthRouter authRouter;
+    private final PfRequestRouter requestRouter;
 
-    public ApiRouter(IAuthProcessor authProcessor, JWTAuthorizer jwtAuthorizer) {
+    public ApiRouter(IAuthProcessor authProcessor, IRequestsProcessor requestsProcessor, JWTAuthorizer jwtAuthorizer) {
         this.commonRouter = new CommonRouter(jwtAuthorizer);
         this.authRouter = new AuthRouter(authProcessor);
+        this.requestRouter = new PfRequestRouter(requestsProcessor);
     }
 
     /**
@@ -27,9 +31,24 @@ public class ApiRouter implements IRouter {
         Router router = commonRouter.initializeRouter(vertx);
 
         router.mountSubRouter("/user", authRouter.initializeRouter(vertx));
+        router.mountSubRouter("/protected", defineProtectedRoutes(vertx));
 
         return router;
     }
+
+    /**
+     * Mounts all routes that require a user to be logged in. All routes defined here
+     * require a user to have a valid JWT access token in their header.
+     */
+    private Router defineProtectedRoutes(Vertx vertx) {
+        Router router = Router.router(vertx);
+
+        router.mountSubRouter("/requests", requestRouter.initializeRouter(vertx));
+
+        return router;
+    }
+
+
     public static void end(HttpServerResponse response, int statusCode) {
         end(response, statusCode, null);
     }

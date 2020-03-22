@@ -62,7 +62,7 @@ public class PfRequestRouter implements IRouter {
   }
 
   private void registerGetRequestStatus(Router router) {
-    Route getRequestStatusRoute = router.post("/:request_id");
+    Route getRequestStatusRoute = router.get("/:request_id");
     getRequestStatusRoute.handler(this::handleGetRequestStatusRoute);
   }
 
@@ -86,7 +86,7 @@ public class PfRequestRouter implements IRouter {
   }
 
   private void handleApproveRequestRoute(RoutingContext ctx) {
-    int requestId = Integer.parseInt(RestFunctions.getRequestHeader(ctx.request(), "request_id"));
+    int requestId = RestFunctions.getRequestParameterAsInt(ctx.request(), "request_id");
     JWTData userData = ctx.get("jwt_data");
 
     requestsProcessor.approveRequest(requestId, userData);
@@ -95,7 +95,7 @@ public class PfRequestRouter implements IRouter {
   }
 
   private void handleRejectRequestRoute(RoutingContext ctx) {
-    int requestId = Integer.parseInt(RestFunctions.getRequestHeader(ctx.request(), "request_id"));
+    int requestId = RestFunctions.getRequestParameterAsInt(ctx.request(), "request_id");
     JWTData userData = ctx.get("jwt_data");
 
     requestsProcessor.rejectRequest(requestId, userData);
@@ -104,7 +104,7 @@ public class PfRequestRouter implements IRouter {
   }
 
   private void handleGetRequestStatusRoute(RoutingContext ctx) {
-    int requestId = Integer.parseInt(RestFunctions.getRequestHeader(ctx.request(), "request_id"));
+    int requestId = RestFunctions.getRequestParameterAsInt(ctx.request(), "request_id");
     JWTData userData = ctx.get("jwt_data");
 
     RequestStatus requestStatus = requestsProcessor.geRequestStatus(requestId, userData);
