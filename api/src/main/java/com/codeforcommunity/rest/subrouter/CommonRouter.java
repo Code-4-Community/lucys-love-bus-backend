@@ -19,11 +19,14 @@ import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
 
+import java.sql.Timestamp;
 import java.util.Optional;
+import java.util.UUID;
 
 public class CommonRouter implements IRouter {
   private final JWTAuthorizer jwtAuthorizer;
   private final FailureHandler failureHandler = new FailureHandler();
+  private static final long MILLIS_IN_WEEK = 1000 * 60 * 60 * 24 * 7;
 
   public CommonRouter(JWTAuthorizer jwtAuthorizer) {
     this.jwtAuthorizer = jwtAuthorizer;
@@ -75,31 +78,27 @@ public class CommonRouter implements IRouter {
   }
 
   private void handleGetAllEvents(RoutingContext ctx) {
-    GetAllEventsRequest request = new GetAllEventsRequest() {{
-      setEndDate(RestFunctions.getNullableQueryParam(ctx, "end",
-          RestFunctions.getDateParamMapper()));
-      setStartDate(RestFunctions.getNullableQueryParam(ctx, "start",
-          RestFunctions.getDateParamMapper()));
-      setCount(RestFunctions.getNullableQueryParam(ctx, "count",
-          RestFunctions.getCountParamMapper()));
-    }};
 
     GetEventsResponse response = userEventsProcessor.getAllEvents(request);
     end(ctx.response(), 200, JsonObject.mapFrom(response).toString());
   }
 
   private void handleGetAnnouncements(RoutingContext ctx) {
+    Optional<Timestamp> start = RestFunctions.getNullableQueryParam(ctx, "start",
+        RestFunctions.getDateParamMapper());
+    Optional<Timestamp> end = RestFunctions.getNullableQueryParam(ctx, "end",
+        RestFunctions.getDateParamMapper());
+    Optional<Integer> count = RestFunctions.getNullableQueryParam(ctx, "count",
+        RestFunctions.getCountParamMapper());
 
-    GetAnnouncementsRequest request = new GetAnnouncementsRequest(
-        RestFunctions.getNullableQueryParam(ctx, "end",
-            RestFunctions.getDateParamMapper()),
-        RestFunctions.getNullableQueryParam(ctx, "end",
-            RestFunctions.getDateParamMapper()),
-        RestFunctions.getNullableQueryParam(ctx, "end",
-            RestFunctions.getDateParamMapper()),
-        RestFunctions.getNullableQueryParam(ctx, "end",
-            RestFunctions.getDateParamMapper())
-        );
+    Timestamp endParam = end.orElseGet(() -> new Timestamp(System.currentTimeMillis()));
+    Timestamp startParam = start.orElseGet(() ->
+        new Timestamp(endParam.getTime() - 3 * MILLIS_IN_WEEK));
+    int countParam = count.orElseGet(() -> 50);
+    UUID uuid = UUID.randomUUID();
+
+
+    GetAnnouncementsRequest request = new GetAnnouncementsRequest(startParam, endParam, countParam, uuid);
 
     //todo implement
   }
