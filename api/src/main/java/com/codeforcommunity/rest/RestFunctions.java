@@ -83,11 +83,11 @@ public interface RestFunctions {
   }
 
   static Function<String, Integer> getCountParamMapper() {
-    return str -> Integer.parseInt(str);
+    return Integer::parseInt;
   }
 
   static Function<String, Timestamp> getDateParamMapper() {
-    return str -> Timestamp.valueOf(str);
+    return Timestamp::valueOf;
   }
 
   //todo if string format in spec lines up with contructor for timestamp

@@ -8,15 +8,13 @@ public class GetAnnouncementsRequest {
   private Timestamp startDate; // optional
   private Timestamp endDate; // optional
   private int count; // optional
-  private UUID id; // required
 
   private GetAnnouncementsRequest() {}
 
-  public GetAnnouncementsRequest(Timestamp startDate, Timestamp endDate, int count, UUID id) {
+  public GetAnnouncementsRequest(Timestamp startDate, Timestamp endDate, int count) {
     this.startDate = startDate;
     this.endDate = endDate;
     this.count = count;
-    this.id = id;
   }
 
   public Timestamp getStartDate() {
@@ -29,9 +27,5 @@ public class GetAnnouncementsRequest {
 
   public int getCount() {
     return count;
-  }
-
-  public UUID getId() {
-    return id;
   }
 }

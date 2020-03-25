@@ -21,6 +21,7 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.Optional;
 
+import static org.jooq.generated.Tables.ANNOUNCEMENTS;
 import static org.jooq.generated.Tables.USERS;
 
 /**
@@ -34,9 +35,26 @@ public class AnnouncementEventsDatabaseOperations {
     this.db = db;
   }
 
-  public List<Announcement> getAnnouncements() {
-    // todo: impl
+  /**
+   * Gets announcements in the specified date range.
+   *
+   * @param start start timestamp
+   * @param end end timestamp
+   * @param count count
+   * @return a list of announcements
+   */
+  public List<Announcement> getAnnouncements(Timestamp start, Timestamp end, int count) {
+    List<Announcement> announcements = db.selectFrom(ANNOUNCEMENTS)
+        .where(ANNOUNCEMENTS.CREATED.between(start, end))
+        .orderBy(ANNOUNCEMENTS.CREATED.desc())
+        .fetchInto(Announcement.class);
+    if (count < announcements.size()) {
+      return announcements.subList(0, count);
+    }
+    return announcements;
   }
+
+
 
   /**
    * Creates a JWTData object for the user with the given email if they exist.

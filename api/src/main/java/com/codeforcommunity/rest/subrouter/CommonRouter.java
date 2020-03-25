@@ -2,10 +2,12 @@ package com.codeforcommunity.rest.subrouter;
 
 import static com.codeforcommunity.rest.ApiRouter.end;
 
+import com.codeforcommunity.api.IAnnouncementEventsProcessor;
 import com.codeforcommunity.auth.JWTAuthorizer;
 import com.codeforcommunity.auth.JWTData;
 import com.codeforcommunity.exceptions.AccessTokenInvalidException;
 import com.codeforcommunity.dto.announcement_event.GetAnnouncementsRequest;
+import com.codeforcommunity.dto.announcement_event.GetAnnouncementsResponse;
 import com.codeforcommunity.exceptions.AuthException;
 import com.codeforcommunity.exceptions.MissingHeaderException;
 import com.codeforcommunity.rest.IRouter;
@@ -26,10 +28,13 @@ import java.util.UUID;
 public class CommonRouter implements IRouter {
   private final JWTAuthorizer jwtAuthorizer;
   private final FailureHandler failureHandler = new FailureHandler();
+  IAnnouncementEventsProcessor announcementEventsProcessor;
   private static final long MILLIS_IN_WEEK = 1000 * 60 * 60 * 24 * 7;
 
-  public CommonRouter(JWTAuthorizer jwtAuthorizer) {
+  public CommonRouter(JWTAuthorizer jwtAuthorizer,
+      IAnnouncementEventsProcessor announcementEventsProcessor) {
     this.jwtAuthorizer = jwtAuthorizer;
+    this.announcementEventsProcessor = announcementEventsProcessor;
   }
 
   @Override
@@ -95,12 +100,10 @@ public class CommonRouter implements IRouter {
     Timestamp startParam = start.orElseGet(() ->
         new Timestamp(endParam.getTime() - 3 * MILLIS_IN_WEEK));
     int countParam = count.orElseGet(() -> 50);
-    UUID uuid = UUID.randomUUID();
 
-
-    GetAnnouncementsRequest request = new GetAnnouncementsRequest(startParam, endParam, countParam, uuid);
-
-    //todo implement
+    GetAnnouncementsRequest request = new GetAnnouncementsRequest(startParam, endParam, countParam);
+    GetAnnouncementsResponse response = announcementEventsProcessor.getAnnouncements(request);
+    end(ctx.response(), 200, JsonObject.mapFrom(response).toString());
   }
 
   private void handlePostAnnouncement(RoutingContext ctx) {
