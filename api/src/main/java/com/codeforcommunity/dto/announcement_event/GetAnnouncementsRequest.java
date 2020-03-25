@@ -1,35 +1,33 @@
 package com.codeforcommunity.dto.announcement_event;
 
 import java.sql.Timestamp;
-import java.util.Optional;
 import java.util.UUID;
 
 public class GetAnnouncementsRequest {
 
-  private Optional<Timestamp> startDate; // optional
-  private Optional<Timestamp> endDate; // optional
-  private Optional<Integer> count; // optional
+  private Timestamp startDate; // optional
+  private Timestamp endDate; // optional
+  private int count; // optional
   private UUID id; // required
 
   private GetAnnouncementsRequest() {}
 
-  public GetAnnouncementsRequest(Optional<Timestamp> endDate,
-      Optional<Timestamp> startDate, Optional<Integer> count, UUID id) {
-    this.endDate = endDate;
+  public GetAnnouncementsRequest(Timestamp startDate, Timestamp endDate, int count, UUID id) {
     this.startDate = startDate;
+    this.endDate = endDate;
     this.count = count;
     this.id = id;
   }
 
-  public Optional<Timestamp> getEndDate() {
-    return endDate;
-  }
-
-  public Optional<Timestamp> getStartDate() {
+  public Timestamp getStartDate() {
     return startDate;
   }
 
-  public Optional<Integer> getCount() {
+  public Timestamp getEndDate() {
+    return endDate;
+  }
+
+  public int getCount() {
     return count;
   }
 

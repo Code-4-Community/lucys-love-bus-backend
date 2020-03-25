@@ -12,13 +12,13 @@ public interface IAnnouncementEventsProcessor {
    * @param request DTO containing optional params, startDate, endDate, and count
    * @return an announcements response DTO
    */
-  GetAnnouncementsResponse getAllAnnouncements(GetAnnouncementsRequest request);
+  GetAnnouncementsResponse getAnnouncements(GetAnnouncementsRequest request);
 
   /**
    * Creates a new announcement.
    *
    * @param request DTO containing the data for the announcement
    */
-  void postAllAnnouncements(PostAnnouncementsRequest request);
+  void postAnnouncements(PostAnnouncementsRequest request);
 
 }

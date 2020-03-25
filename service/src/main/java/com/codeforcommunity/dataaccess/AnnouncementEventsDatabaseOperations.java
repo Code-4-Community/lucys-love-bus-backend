@@ -34,7 +34,7 @@ public class AnnouncementEventsDatabaseOperations {
     this.db = db;
   }
 
-  public List<Announcement> getAllAnnouncements() {
+  public List<Announcement> getAnnouncements() {
     // todo: impl
   }
 

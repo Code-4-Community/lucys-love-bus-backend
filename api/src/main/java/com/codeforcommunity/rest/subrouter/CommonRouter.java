@@ -1,8 +1,11 @@
 package com.codeforcommunity.rest.subrouter;
 
+import static com.codeforcommunity.rest.ApiRouter.end;
+
 import com.codeforcommunity.auth.JWTAuthorizer;
 import com.codeforcommunity.auth.JWTData;
 import com.codeforcommunity.exceptions.AccessTokenInvalidException;
+import com.codeforcommunity.dto.announcement_event.GetAnnouncementsRequest;
 import com.codeforcommunity.exceptions.AuthException;
 import com.codeforcommunity.exceptions.MissingHeaderException;
 import com.codeforcommunity.rest.IRouter;
@@ -10,6 +13,7 @@ import com.codeforcommunity.rest.RestFunctions;
 
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServerRequest;
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Route;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
@@ -35,7 +39,7 @@ public class CommonRouter implements IRouter {
 
     router.routeWithRegex(".*/protected/.*").handler(this::handleAuthorizeUser); //Add auth checking
 
-    registerGetAllAnnouncements(router);
+    registerGetAnnouncements(router);
     registerPostAnnouncement(router);
 
     return router;
@@ -60,17 +64,43 @@ public class CommonRouter implements IRouter {
     }
   }
 
-  private void registerGetAllAnnouncements(Router router) {
-    Route getAnnouncementsRoute = router.get("/announcements");
-    getAnnouncementsRoute.handler(this::handleGetAllAnnouncements);
+  private void registerGetAnnouncements(Router router) {
+    Route getAnnouncementsRoute = router.get("/protected/announcements");
+    getAnnouncementsRoute.handler(this::handleGetAnnouncements);
   }
 
   private void registerPostAnnouncement(Router router) {
-    Route postAnnouncementRoute = router.post("/announcements");
+    Route postAnnouncementRoute = router.post("/protected/announcements");
     postAnnouncementRoute.handler(this::handlePostAnnouncement);
   }
 
-  private void handleGetAllAnnouncements(RoutingContext ctx) {
+  private void handleGetAllEvents(RoutingContext ctx) {
+    GetAllEventsRequest request = new GetAllEventsRequest() {{
+      setEndDate(RestFunctions.getNullableQueryParam(ctx, "end",
+          RestFunctions.getDateParamMapper()));
+      setStartDate(RestFunctions.getNullableQueryParam(ctx, "start",
+          RestFunctions.getDateParamMapper()));
+      setCount(RestFunctions.getNullableQueryParam(ctx, "count",
+          RestFunctions.getCountParamMapper()));
+    }};
+
+    GetEventsResponse response = userEventsProcessor.getAllEvents(request);
+    end(ctx.response(), 200, JsonObject.mapFrom(response).toString());
+  }
+
+  private void handleGetAnnouncements(RoutingContext ctx) {
+
+    GetAnnouncementsRequest request = new GetAnnouncementsRequest(
+        RestFunctions.getNullableQueryParam(ctx, "end",
+            RestFunctions.getDateParamMapper()),
+        RestFunctions.getNullableQueryParam(ctx, "end",
+            RestFunctions.getDateParamMapper()),
+        RestFunctions.getNullableQueryParam(ctx, "end",
+            RestFunctions.getDateParamMapper()),
+        RestFunctions.getNullableQueryParam(ctx, "end",
+            RestFunctions.getDateParamMapper())
+        );
+
     //todo implement
   }
 

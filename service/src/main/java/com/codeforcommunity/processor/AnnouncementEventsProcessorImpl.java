@@ -18,12 +18,12 @@ public class AnnouncementEventsProcessorImpl implements IAnnouncementEventsProce
   }
 
   @Override
-  public GetAnnouncementsResponse getAllAnnouncements(GetAnnouncementsRequest request) {
+  public GetAnnouncementsResponse getAnnouncements(GetAnnouncementsRequest request) {
     return null;
   }
 
   @Override
-  public void postAllAnnouncements(PostAnnouncementsRequest request) {
+  public void postAnnouncements(PostAnnouncementsRequest request) {
 
   }
 }
