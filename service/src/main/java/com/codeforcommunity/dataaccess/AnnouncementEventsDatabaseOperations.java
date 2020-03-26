@@ -20,6 +20,7 @@ import org.jooq.generated.tables.records.VerificationKeysRecord;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.Optional;
+import org.jooq.impl.DSL;
 
 import static org.jooq.generated.Tables.ANNOUNCEMENTS;
 import static org.jooq.generated.Tables.USERS;
@@ -52,6 +53,22 @@ public class AnnouncementEventsDatabaseOperations {
       return announcements.subList(0, count);
     }
     return announcements;
+  }
+
+  /**
+   * Creates a new announcement. The timestamp is set to the current UNIX time and the ID is
+   * set to the current max ID in the database plus 1.
+   *
+   * @param title the title of the announcement
+   * @param description the description for the announcement
+   */
+  public void createNewAnnouncement(String title, String description) {
+    int maxId = db.select(DSL.max(ANNOUNCEMENTS.ID))
+        .from(ANNOUNCEMENTS).fetchOneInto(Integer.class);
+    db.insertInto(ANNOUNCEMENTS,
+        ANNOUNCEMENTS.ID, ANNOUNCEMENTS.TITLE, ANNOUNCEMENTS.DESCRIPTION, ANNOUNCEMENTS.CREATED)
+        .values(maxId + 1, title, description, new Timestamp(System.currentTimeMillis()))
+        .execute();
   }
 
 

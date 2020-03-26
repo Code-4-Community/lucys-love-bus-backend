@@ -8,6 +8,7 @@ import com.codeforcommunity.auth.JWTData;
 import com.codeforcommunity.exceptions.AccessTokenInvalidException;
 import com.codeforcommunity.dto.announcement_event.GetAnnouncementsRequest;
 import com.codeforcommunity.dto.announcement_event.GetAnnouncementsResponse;
+import com.codeforcommunity.dto.announcement_event.PostAnnouncementsRequest;
 import com.codeforcommunity.exceptions.AuthException;
 import com.codeforcommunity.exceptions.MissingHeaderException;
 import com.codeforcommunity.rest.IRouter;
@@ -107,6 +108,11 @@ public class CommonRouter implements IRouter {
   }
 
   private void handlePostAnnouncement(RoutingContext ctx) {
-    //todo implement
+    String title = ctx.queryParam("title").get(0);
+    String description = ctx.queryParam("description").get(0);
+    PostAnnouncementsRequest request = new PostAnnouncementsRequest(title, description);
+
+    announcementEventsProcessor.postAnnouncements(request);
+    end(ctx.response(), 200, null);
   }
 }

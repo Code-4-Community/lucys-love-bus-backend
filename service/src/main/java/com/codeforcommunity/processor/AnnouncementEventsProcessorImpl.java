@@ -29,7 +29,7 @@ public class AnnouncementEventsProcessorImpl implements IAnnouncementEventsProce
 
   @Override
   public void postAnnouncements(PostAnnouncementsRequest request) {
-//    announcementEventsDatabaseOperations.createNewUser(request.getEmail(), request.getPassword(),
-//        request.getFirstName(), request.getLastName());
+    announcementEventsDatabaseOperations.createNewAnnouncement(request.getTitle(),
+        request.getDescription());
   }
 }
