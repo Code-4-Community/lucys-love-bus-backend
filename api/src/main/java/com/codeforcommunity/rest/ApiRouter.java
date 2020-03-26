@@ -1,11 +1,13 @@
 package com.codeforcommunity.rest;
 
 import com.codeforcommunity.api.IAuthProcessor;
+import com.codeforcommunity.api.IEventsProcessor;
 import com.codeforcommunity.api.IRequestsProcessor;
 import com.codeforcommunity.auth.JWTAuthorizer;
 
 import com.codeforcommunity.rest.subrouter.AuthRouter;
 import com.codeforcommunity.rest.subrouter.CommonRouter;
+import com.codeforcommunity.rest.subrouter.EventsRouter;
 import com.codeforcommunity.rest.subrouter.PfRequestRouter;
 import io.vertx.core.Vertx;
 
@@ -17,11 +19,13 @@ public class ApiRouter implements IRouter {
     private final CommonRouter commonRouter;
     private final AuthRouter authRouter;
     private final PfRequestRouter requestRouter;
+    private final EventsRouter eventsRouter;
 
-    public ApiRouter(IAuthProcessor authProcessor, IRequestsProcessor requestsProcessor, JWTAuthorizer jwtAuthorizer) {
+    public ApiRouter(IAuthProcessor authProcessor, IRequestsProcessor requestsProcessor, IEventsProcessor eventsProcessor, JWTAuthorizer jwtAuthorizer) {
         this.commonRouter = new CommonRouter(jwtAuthorizer);
         this.authRouter = new AuthRouter(authProcessor);
         this.requestRouter = new PfRequestRouter(requestsProcessor);
+        this.eventsRouter = new EventsRouter(eventsProcessor);
     }
 
     /**
@@ -44,6 +48,7 @@ public class ApiRouter implements IRouter {
         Router router = Router.router(vertx);
 
         router.mountSubRouter("/requests", requestRouter.initializeRouter(vertx));
+        router.mountSubRouter("/events", eventsRouter.initializeRouter(vertx));
 
         return router;
     }
