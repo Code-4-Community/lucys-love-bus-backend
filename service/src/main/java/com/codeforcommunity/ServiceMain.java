@@ -1,10 +1,12 @@
 package com.codeforcommunity;
 
 import com.codeforcommunity.api.IAuthProcessor;
+import com.codeforcommunity.api.IRequestsProcessor;
 import com.codeforcommunity.auth.JWTAuthorizer;
 import com.codeforcommunity.auth.JWTCreator;
 import com.codeforcommunity.auth.JWTHandler;
 import com.codeforcommunity.processor.AuthProcessorImpl;
+import com.codeforcommunity.processor.RequestsProcessorImpl;
 import com.codeforcommunity.propertiesLoader.PropertiesLoader;
 import com.codeforcommunity.rest.ApiRouter;
 
@@ -59,7 +61,8 @@ public class ServiceMain {
     JWTCreator jwtCreator = new JWTCreator(jwtHandler);
 
     IAuthProcessor authProcessor = new AuthProcessorImpl(this.db, jwtCreator);
-    ApiRouter router = new ApiRouter(authProcessor, jwtAuthorizer);
+    IRequestsProcessor requestsProcessor = new RequestsProcessorImpl(this.db);
+    ApiRouter router = new ApiRouter(authProcessor, requestsProcessor, jwtAuthorizer);
     startApiServer(router);
   }
 
