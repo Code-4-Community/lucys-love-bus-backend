@@ -28,6 +28,11 @@ public class FailureHandler {
     end(ctx, "Unauthorized user", 401);
   }
 
+  public void handleAccessTokenInvalid(RoutingContext ctx) {
+     String message = "Given access token is expired or invalid";
+     end(ctx, message, 401);
+  }
+
   public void handleMissingParameter(RoutingContext ctx, MissingParameterException e) {
     String message = String.format("Missing required path parameter: %s", e.getMissingParameterName());
     end(ctx, message, 400);

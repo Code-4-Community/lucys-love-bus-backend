@@ -2,6 +2,7 @@ package com.codeforcommunity.rest.subrouter;
 
 import com.codeforcommunity.auth.JWTAuthorizer;
 import com.codeforcommunity.auth.JWTData;
+import com.codeforcommunity.exceptions.AccessTokenInvalidException;
 import com.codeforcommunity.exceptions.AuthException;
 import com.codeforcommunity.exceptions.MissingHeaderException;
 import com.codeforcommunity.rest.IRouter;
@@ -51,7 +52,7 @@ public class CommonRouter implements IRouter {
       ctx.put("jwt_data", jwtData.get());
       ctx.next();
     } else {
-      throw new AuthException("Given access token is invalid");
+      throw new AccessTokenInvalidException();
     }
   }
 }
