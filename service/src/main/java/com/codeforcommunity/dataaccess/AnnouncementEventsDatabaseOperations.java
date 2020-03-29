@@ -29,6 +29,7 @@ public class AnnouncementEventsDatabaseOperations {
    * @return a list of announcements
    */
   public List<Announcement> getAnnouncements(Timestamp start, Timestamp end, int count) {
+    // TODO: input checking/sanitizing (e.g. negative numbers for count)
     List<Announcement> announcements = db.selectFrom(ANNOUNCEMENTS)
         .where(ANNOUNCEMENTS.CREATED.between(start, end))
         .orderBy(ANNOUNCEMENTS.CREATED.desc())
@@ -47,6 +48,7 @@ public class AnnouncementEventsDatabaseOperations {
    * @param description the description for the announcement
    */
   public void createNewAnnouncement(String title, String description) {
+    // TODO: deal with no existing announcements
     int maxId = db.select(DSL.max(ANNOUNCEMENTS.ID))
         .from(ANNOUNCEMENTS).fetchOneInto(Integer.class);
     db.insertInto(ANNOUNCEMENTS,
