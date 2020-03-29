@@ -9,4 +9,6 @@ public interface IEventsProcessor {
   SingleEventResponse createEvent(CreateEventRequest request, JWTData userData);
 
   SingleEventResponse getSingleEvent(int eventId);
+
+
 }
