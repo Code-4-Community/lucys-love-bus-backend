@@ -73,7 +73,7 @@ public class AuthRouter implements IRouter {
 
     SessionResponse response = authProcessor.login(userRequest);
 
-    end(ctx.response(), 200, JsonObject.mapFrom(response).encode());
+    end(ctx.response(), 201, JsonObject.mapFrom(response).encode());
   }
 
   private void handlePostRefreshUser(RoutingContext ctx) {
