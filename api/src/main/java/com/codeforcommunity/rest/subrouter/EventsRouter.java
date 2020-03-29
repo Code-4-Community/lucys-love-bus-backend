@@ -44,6 +44,13 @@ public class EventsRouter implements IRouter {
     getRequestsRoute.handler(this::handleGetSingleEventRoute);
   }
 
+  private void registerGetUserEventsSignedUp(Router router) {
+    Route getUserEventsSignedUp = router.get("/signed_up");
+  }
+
+  private void handleGetUserEventsSignedUp(RoutingContext ctx) {
+
+  }
 
   private void handleCreateEventRoute(RoutingContext ctx) {
     CreateEventRequest requestData = RestFunctions.getJsonBodyAsClass(ctx, CreateEventRequest.class);
