@@ -31,7 +31,7 @@ public class AnnouncementsRouter implements IRouter {
     Router router = Router.router(vertx);
 
     registerGetAnnouncements(router);
-    registerGetAnnouncements(router);
+    registerPostAnnouncement(router);
 
     return router;
   }
@@ -47,29 +47,36 @@ public class AnnouncementsRouter implements IRouter {
   }
 
   private void handleGetAnnouncements(RoutingContext ctx) {
-    Optional<Timestamp> start = RestFunctions.getNullableQueryParam(ctx, "start",
-        RestFunctions.getDateParamMapper());
-    Optional<Timestamp> end = RestFunctions.getNullableQueryParam(ctx, "end",
-        RestFunctions.getDateParamMapper());
-    Optional<Integer> count = RestFunctions.getNullableQueryParam(ctx, "count",
-        RestFunctions.getCountParamMapper());
+    try {
+      Optional<Timestamp> start = RestFunctions.getNullableQueryParam(ctx, "start",
+          RestFunctions.getDateParamMapper());
+      Optional<Timestamp> end = RestFunctions.getNullableQueryParam(ctx, "end",
+          RestFunctions.getDateParamMapper());
+      Optional<Integer> count = RestFunctions.getNullableQueryParam(ctx, "count",
+          RestFunctions.getCountParamMapper());
 
-    Timestamp endParam = end.orElseGet(() -> new Timestamp(System.currentTimeMillis()));
-    Timestamp startParam = start.orElseGet(() ->
-        new Timestamp(endParam.getTime() - 3 * MILLIS_IN_WEEK));
-    int countParam = count.orElseGet(() -> 50);
+      Timestamp endParam = end.orElseGet(() -> new Timestamp(System.currentTimeMillis()));
+      Timestamp startParam = start.orElseGet(() ->
+          new Timestamp(endParam.getTime() - 3 * MILLIS_IN_WEEK));
+      int countParam = count.orElseGet(() -> 50);
 
-    GetAnnouncementsRequest request = new GetAnnouncementsRequest(startParam, endParam, countParam);
-    GetAnnouncementsResponse response = announcementEventsProcessor.getAnnouncements(request);
-    end(ctx.response(), 200, JsonObject.mapFrom(response).toString());
+      GetAnnouncementsRequest request = new GetAnnouncementsRequest(startParam, endParam,
+          countParam);
+      GetAnnouncementsResponse response = announcementEventsProcessor.getAnnouncements(request);
+      end(ctx.response(), 200, JsonObject.mapFrom(response).toString());
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
   }
 
   private void handlePostAnnouncement(RoutingContext ctx) {
-    String title = ctx.queryParam("title").get(0);
-    String description = ctx.queryParam("description").get(0);
-    PostAnnouncementsRequest request = new PostAnnouncementsRequest(title, description);
+    try {
+      PostAnnouncementsRequest request = RestFunctions.getJsonBodyAsClass(ctx, PostAnnouncementsRequest.class);
 
-    announcementEventsProcessor.postAnnouncements(request);
-    end(ctx.response(), 200, null);
+      announcementEventsProcessor.postAnnouncements(request);
+      end(ctx.response(), 200, null);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
   }
 }
