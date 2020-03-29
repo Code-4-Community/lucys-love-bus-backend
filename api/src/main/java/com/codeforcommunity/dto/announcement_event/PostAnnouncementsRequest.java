@@ -4,6 +4,8 @@ public class PostAnnouncementsRequest {
   private String title;
   private String description;
 
+  private PostAnnouncementsRequest() {}
+
   public PostAnnouncementsRequest(String title, String description) {
     this.title = title;
     this.description = description;
