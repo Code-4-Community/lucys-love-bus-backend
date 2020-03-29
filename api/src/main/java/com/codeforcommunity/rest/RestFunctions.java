@@ -62,7 +62,7 @@ public interface RestFunctions {
 
   static <T> Optional<T> getNullableQueryParam(RoutingContext ctx, String name,
                                                   Function<String, T> mapper) {
-    Optional<String> paramValue = Optional.ofNullable(ctx.queryParam(name).get(0));
+    Optional<String> paramValue = Optional.ofNullable(ctx.request().getParam(name));
     T returnValue;
     if(paramValue.isPresent()) {
       try {
