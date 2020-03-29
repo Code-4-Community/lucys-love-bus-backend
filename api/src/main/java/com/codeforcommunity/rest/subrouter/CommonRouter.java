@@ -46,7 +46,7 @@ public class CommonRouter implements IRouter {
    * @param ctx routing context to handle.
    */
   private void handleAuthorizeUser(RoutingContext ctx) {
-    String accessToken = RestFunctions.getRequestHeader(ctx.request(), "access_token");
+    String accessToken = RestFunctions.getRequestHeader(ctx.request(), "X-Access-Token");
     Optional<JWTData> jwtData = jwtAuthorizer.checkTokenAndGetData(accessToken);
     if (jwtData.isPresent()) {
       ctx.put("jwt_data", jwtData.get());
