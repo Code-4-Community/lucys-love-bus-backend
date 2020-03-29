@@ -1,10 +1,12 @@
 package com.codeforcommunity.rest;
 
+import com.codeforcommunity.api.IAnnouncementEventsProcessor;
 import com.codeforcommunity.api.IAuthProcessor;
 import com.codeforcommunity.api.IEventsProcessor;
 import com.codeforcommunity.api.IRequestsProcessor;
 import com.codeforcommunity.auth.JWTAuthorizer;
 
+import com.codeforcommunity.rest.subrouter.AnnouncementsRouter;
 import com.codeforcommunity.rest.subrouter.AuthRouter;
 import com.codeforcommunity.rest.subrouter.CommonRouter;
 import com.codeforcommunity.rest.subrouter.EventsRouter;
@@ -20,12 +22,16 @@ public class ApiRouter implements IRouter {
     private final AuthRouter authRouter;
     private final PfRequestRouter requestRouter;
     private final EventsRouter eventsRouter;
+    private final AnnouncementsRouter announcementsRouter;
 
-    public ApiRouter(IAuthProcessor authProcessor, IRequestsProcessor requestsProcessor, IEventsProcessor eventsProcessor, JWTAuthorizer jwtAuthorizer) {
+    public ApiRouter(IAuthProcessor authProcessor, IRequestsProcessor requestsProcessor,
+        IEventsProcessor eventsProcessor, IAnnouncementEventsProcessor announcementEventsProcessor,
+        JWTAuthorizer jwtAuthorizer) {
         this.commonRouter = new CommonRouter(jwtAuthorizer);
         this.authRouter = new AuthRouter(authProcessor);
         this.requestRouter = new PfRequestRouter(requestsProcessor);
         this.eventsRouter = new EventsRouter(eventsProcessor);
+        this.announcementsRouter = new AnnouncementsRouter(announcementEventsProcessor);
     }
 
     /**
@@ -49,6 +55,7 @@ public class ApiRouter implements IRouter {
 
         router.mountSubRouter("/requests", requestRouter.initializeRouter(vertx));
         router.mountSubRouter("/events", eventsRouter.initializeRouter(vertx));
+        router.mountSubRouter("/announcements", announcementsRouter.initializeRouter(vertx));
 
         return router;
     }

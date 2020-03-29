@@ -1,11 +1,13 @@
 package com.codeforcommunity;
 
+import com.codeforcommunity.api.IAnnouncementEventsProcessor;
 import com.codeforcommunity.api.IAuthProcessor;
 import com.codeforcommunity.api.IEventsProcessor;
 import com.codeforcommunity.api.IRequestsProcessor;
 import com.codeforcommunity.auth.JWTAuthorizer;
 import com.codeforcommunity.auth.JWTCreator;
 import com.codeforcommunity.auth.JWTHandler;
+import com.codeforcommunity.processor.AnnouncementEventsProcessorImpl;
 import com.codeforcommunity.processor.AuthProcessorImpl;
 import com.codeforcommunity.processor.EventsProcessorImpl;
 import com.codeforcommunity.processor.RequestsProcessorImpl;
@@ -64,8 +66,9 @@ public class ServiceMain {
 
     IAuthProcessor authProcessor = new AuthProcessorImpl(this.db, jwtCreator);
     IRequestsProcessor requestsProcessor = new RequestsProcessorImpl(this.db);
-    IEventsProcessor eventsProcessor = new EventsProcessorImpl((this.db));
-    ApiRouter router = new ApiRouter(authProcessor, requestsProcessor, eventsProcessor, jwtAuthorizer);
+    IEventsProcessor eventsProcessor = new EventsProcessorImpl(this.db);
+    IAnnouncementEventsProcessor announcementEventsProcessor = new AnnouncementEventsProcessorImpl(this.db);
+    ApiRouter router = new ApiRouter(authProcessor, requestsProcessor, eventsProcessor, announcementEventsProcessor, jwtAuthorizer);
     startApiServer(router);
   }
 

@@ -29,13 +29,9 @@ import java.util.UUID;
 public class CommonRouter implements IRouter {
   private final JWTAuthorizer jwtAuthorizer;
   private final FailureHandler failureHandler = new FailureHandler();
-  IAnnouncementEventsProcessor announcementEventsProcessor;
-  private static final long MILLIS_IN_WEEK = 1000 * 60 * 60 * 24 * 7;
 
-  public CommonRouter(JWTAuthorizer jwtAuthorizer,
-      IAnnouncementEventsProcessor announcementEventsProcessor) {
+  public CommonRouter(JWTAuthorizer jwtAuthorizer) {
     this.jwtAuthorizer = jwtAuthorizer;
-    this.announcementEventsProcessor = announcementEventsProcessor;
   }
 
   @Override
@@ -47,9 +43,6 @@ public class CommonRouter implements IRouter {
     router.route().failureHandler(failureHandler::handleFailure); //Add failure handling
 
     router.routeWithRegex(".*/protected/.*").handler(this::handleAuthorizeUser); //Add auth checking
-
-    registerGetAnnouncements(router);
-    registerPostAnnouncement(router);
 
     return router;
   }
@@ -71,48 +64,5 @@ public class CommonRouter implements IRouter {
     } else {
       throw new AccessTokenInvalidException();
     }
-  }
-
-  private void registerGetAnnouncements(Router router) {
-    Route getAnnouncementsRoute = router.get("/protected/announcements");
-    getAnnouncementsRoute.handler(this::handleGetAnnouncements);
-  }
-
-  private void registerPostAnnouncement(Router router) {
-    Route postAnnouncementRoute = router.post("/protected/announcements");
-    postAnnouncementRoute.handler(this::handlePostAnnouncement);
-  }
-
-  private void handleGetAllEvents(RoutingContext ctx) {
-
-    GetEventsResponse response = userEventsProcessor.getAllEvents(request);
-    end(ctx.response(), 200, JsonObject.mapFrom(response).toString());
-  }
-
-  private void handleGetAnnouncements(RoutingContext ctx) {
-    Optional<Timestamp> start = RestFunctions.getNullableQueryParam(ctx, "start",
-        RestFunctions.getDateParamMapper());
-    Optional<Timestamp> end = RestFunctions.getNullableQueryParam(ctx, "end",
-        RestFunctions.getDateParamMapper());
-    Optional<Integer> count = RestFunctions.getNullableQueryParam(ctx, "count",
-        RestFunctions.getCountParamMapper());
-
-    Timestamp endParam = end.orElseGet(() -> new Timestamp(System.currentTimeMillis()));
-    Timestamp startParam = start.orElseGet(() ->
-        new Timestamp(endParam.getTime() - 3 * MILLIS_IN_WEEK));
-    int countParam = count.orElseGet(() -> 50);
-
-    GetAnnouncementsRequest request = new GetAnnouncementsRequest(startParam, endParam, countParam);
-    GetAnnouncementsResponse response = announcementEventsProcessor.getAnnouncements(request);
-    end(ctx.response(), 200, JsonObject.mapFrom(response).toString());
-  }
-
-  private void handlePostAnnouncement(RoutingContext ctx) {
-    String title = ctx.queryParam("title").get(0);
-    String description = ctx.queryParam("description").get(0);
-    PostAnnouncementsRequest request = new PostAnnouncementsRequest(title, description);
-
-    announcementEventsProcessor.postAnnouncements(request);
-    end(ctx.response(), 200, null);
   }
 }
