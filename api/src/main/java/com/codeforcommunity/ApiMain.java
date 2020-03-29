@@ -26,7 +26,6 @@ public class ApiMain {
 
     Router router = Router.router(vertx);
     router.route().handler(CorsHandler.create("*")
-        .allowCredentials(true)
         .allowedMethod(HttpMethod.GET)
         .allowedMethod(HttpMethod.POST)
         .allowedMethod(HttpMethod.OPTIONS)
