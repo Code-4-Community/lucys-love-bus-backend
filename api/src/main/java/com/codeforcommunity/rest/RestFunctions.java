@@ -43,17 +43,12 @@ public interface RestFunctions {
     throw new MissingHeaderException(name);
   }
 
-  static int getPathParameterAsInt(RoutingContext ctx, String name) {
-    String paramValue = ctx.pathParam(name);
-    if (paramValue != null) {
-      try {
-        return Integer.parseInt(paramValue);
-      } catch (NumberFormatException nex) {
-        throw new MalformedParameterException(name);
-      }
-    }
-    else {
-      throw new MissingParameterException(name);
+  static int getRequestParameterAsInt(HttpServerRequest req, String name) {
+    String paramValue = getRequestParameterAsString(req, name);
+    try {
+      return Integer.parseInt(paramValue);
+    } catch (NumberFormatException ex) {
+      throw new MalformedParameterException(name);
     }
   }
 
