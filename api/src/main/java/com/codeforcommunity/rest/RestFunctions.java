@@ -5,7 +5,12 @@ import com.codeforcommunity.exceptions.MissingHeaderException;
 import com.codeforcommunity.exceptions.MissingParameterException;
 import com.codeforcommunity.exceptions.RequestBodyMappingException;
 
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonObject;
@@ -56,6 +61,37 @@ public interface RestFunctions {
       return paramValue;
     }
     throw new MissingParameterException(name);
+  }
+
+  static <T> Optional<T> getOptionalQueryParam(RoutingContext ctx, String name,
+                                               Function<String, T> mapper) {
+    List<String> params = ctx.queryParam(name);
+    T returnValue;
+    if(!params.isEmpty()) {
+      try {
+        returnValue = mapper.apply(params.get(0));
+      } catch (Throwable t) {
+        throw new MalformedParameterException(name);
+      }
+    }
+    else {
+      returnValue = null;
+    }
+    return Optional.ofNullable(returnValue);
+  }
+
+  static <T> List<T> getMultipleQueryParams(RoutingContext ctx, String name, Function<String, T> mapper) {
+    List<String> queryParam = ctx.queryParam(name);
+    return !queryParam.isEmpty() ? queryParam.stream().map(mapper).distinct().collect(Collectors.toList())
+            : new ArrayList<>();
+  }
+
+  static Function<String, Integer> getParseIntParamMapper() {
+    return str -> Integer.parseInt(str);
+  }
+
+  static Function<String, Timestamp> getDateParamMapper() {
+    return str -> Timestamp.valueOf(str);
   }
 
 }

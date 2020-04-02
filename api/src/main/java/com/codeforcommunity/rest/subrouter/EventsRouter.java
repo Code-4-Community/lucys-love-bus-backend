@@ -2,9 +2,10 @@ package com.codeforcommunity.rest.subrouter;
 
 import com.codeforcommunity.api.IEventsProcessor;
 import com.codeforcommunity.auth.JWTData;
-import com.codeforcommunity.dto.events.CreateEventRequest;
-import com.codeforcommunity.dto.events.SingleEventResponse;
-import com.codeforcommunity.dto.pfrequests.CreateRequest;
+import com.codeforcommunity.dto.userEvents.requests.CreateEventRequest;
+import com.codeforcommunity.dto.userEvents.responses.SingleEventResponse;
+import com.codeforcommunity.dto.userEvents.requests.GetUserEventsRequest;
+import com.codeforcommunity.dto.userEvents.responses.GetEventsResponse;
 import com.codeforcommunity.rest.IRouter;
 import com.codeforcommunity.rest.RestFunctions;
 import io.vertx.core.Vertx;
@@ -12,6 +13,8 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Route;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
+
+import java.util.List;
 
 import static com.codeforcommunity.rest.ApiRouter.end;
 
@@ -28,11 +31,13 @@ public class EventsRouter implements IRouter {
     Router router = Router.router(vertx);
 
     registerCreateEvent(router);
+    registerGetEvents(router);
+    registerGetUserEventsQualified(router);
+    registerGetUserEventsSignedUp(router);
     registerGetSingleEvent(router);
 
     return router;
   }
-
 
   private void registerCreateEvent(Router router) {
     Route createRequestRoute = router.post("/");
@@ -46,10 +51,47 @@ public class EventsRouter implements IRouter {
 
   private void registerGetUserEventsSignedUp(Router router) {
     Route getUserEventsSignedUp = router.get("/signed_up");
+    getUserEventsSignedUp.handler(this::handleGetUserEventsSignedUp);
+  }
+
+  private void registerGetUserEventsQualified(Router router) {
+    Route getUserEventQualified = router.get("/qualified");
+    getUserEventQualified.handler(this::handleGetUserEventsQualified);
+  }
+
+  private void registerGetEvents(Router router) {
+    Route getEvent = router.get("/");
+    getEvent.handler(this::handleGetEvents);
+  }
+
+  private void handleGetEvents(RoutingContext ctx) {
+
+    List<Integer> intIds = RestFunctions.getMultipleQueryParams(ctx, "ids",
+            RestFunctions.getParseIntParamMapper());
+
+    GetEventsResponse response = processor.getEvents(intIds);
+
+    end(ctx.response(), 200, JsonObject.mapFrom(response).encode());
+  }
+
+  private void handleGetUserEventsQualified(RoutingContext ctx) {
+     GetEventsResponse response = processor.getEventsQualified(ctx.get("jwt_data"));
+     end(ctx.response(), 200, JsonObject.mapFrom(response).encode());
   }
 
   private void handleGetUserEventsSignedUp(RoutingContext ctx) {
 
+    GetUserEventsRequest request = new GetUserEventsRequest() {{
+      setCount(RestFunctions.getOptionalQueryParam(ctx, "count", RestFunctions.getParseIntParamMapper()));
+      setEndDate(RestFunctions.getOptionalQueryParam(ctx, "end", RestFunctions.getDateParamMapper()));
+      setStartDate(RestFunctions.getOptionalQueryParam(ctx, "start", RestFunctions.getDateParamMapper()));
+    }};
+
+    JWTData userData = ctx.get("jwt_data");
+
+    GetEventsResponse response = processor.getEventsSignedUp(request, userData);
+
+    end(ctx.response(),200, JsonObject.mapFrom(response).encode());
   }
 
   private void handleCreateEventRoute(RoutingContext ctx) {
@@ -68,4 +110,5 @@ public class EventsRouter implements IRouter {
 
     end(ctx.response(), 200, JsonObject.mapFrom(response).encode());
   }
+
 }
