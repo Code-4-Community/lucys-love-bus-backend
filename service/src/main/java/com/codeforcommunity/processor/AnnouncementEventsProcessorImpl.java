@@ -11,7 +11,9 @@ import com.codeforcommunity.dto.announcement_event.PostAnnouncementsRequest;
 import com.codeforcommunity.dto.announcement_event.PostAnnouncementsResponse;
 import com.codeforcommunity.enums.PrivilegeLevel;
 import com.codeforcommunity.exceptions.AdminOnlyRouteException;
+import com.codeforcommunity.exceptions.MalformedParameterException;
 import java.sql.Timestamp;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.jooq.DSLContext;
@@ -32,11 +34,10 @@ public class AnnouncementEventsProcessorImpl implements IAnnouncementEventsProce
     Timestamp start = request.getStartDate();
     Timestamp end = request.getEndDate();
     if (count < 1) {
-      throw new IllegalArgumentException("Count should be positive, instead received " + count);
+      throw new MalformedParameterException("count");
     }
-    if (end.before(start)) {
-      throw new IllegalArgumentException(
-          String.format("End date %s is before start date %s", end, start));
+    if (end.before(start) || end.after(new Date())) {
+      throw new MalformedParameterException("end");
     }
     List<Announcements> announcements = db.selectFrom(ANNOUNCEMENTS)
         .where(ANNOUNCEMENTS.CREATED.between(start, end))

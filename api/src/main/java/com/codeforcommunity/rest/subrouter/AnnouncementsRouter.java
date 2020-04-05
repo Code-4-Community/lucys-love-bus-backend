@@ -50,37 +50,29 @@ public class AnnouncementsRouter implements IRouter {
   }
 
   private void handleGetAnnouncements(RoutingContext ctx) {
-    try {
-      Optional<Timestamp> start = RestFunctions.getNullableQueryParam(ctx, "start",
-          RestFunctions.getDateParamMapper());
-      Optional<Timestamp> end = RestFunctions.getNullableQueryParam(ctx, "end",
-          RestFunctions.getDateParamMapper());
-      Optional<Integer> count = RestFunctions.getNullableQueryParam(ctx, "count",
-          RestFunctions.getCountParamMapper());
+    Optional<Timestamp> start = RestFunctions.getNullableQueryParam(ctx, "start",
+        RestFunctions.getDateParamMapper());
+    Optional<Timestamp> end = RestFunctions.getNullableQueryParam(ctx, "end",
+        RestFunctions.getDateParamMapper());
+    Optional<Integer> count = RestFunctions.getNullableQueryParam(ctx, "count",
+        RestFunctions.getCountParamMapper());
 
-      Timestamp endParam = end.orElseGet(() -> new Timestamp(System.currentTimeMillis()));
-      Timestamp startParam = start.orElseGet(() ->
-          new Timestamp(endParam.getTime() - 3 * MILLIS_IN_WEEK));
-      int countParam = count.orElseGet(() -> DEFAULT_COUNT);
+    Timestamp endParam = end.orElseGet(() -> new Timestamp(System.currentTimeMillis()));
+    Timestamp startParam = start.orElseGet(() ->
+        new Timestamp(endParam.getTime() - 3 * MILLIS_IN_WEEK));
+    int countParam = count.orElseGet(() -> DEFAULT_COUNT);
 
-      GetAnnouncementsRequest request = new GetAnnouncementsRequest(startParam, endParam,
-          countParam);
-      GetAnnouncementsResponse response = announcementEventsProcessor.getAnnouncements(request);
-      end(ctx.response(), 200, JsonObject.mapFrom(response).toString());
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
+    GetAnnouncementsRequest request = new GetAnnouncementsRequest(startParam, endParam,
+        countParam);
+    GetAnnouncementsResponse response = announcementEventsProcessor.getAnnouncements(request);
+    end(ctx.response(), 200, JsonObject.mapFrom(response).toString());
   }
 
   private void handlePostAnnouncement(RoutingContext ctx) {
-    try {
-      PostAnnouncementsRequest requestData = RestFunctions.getJsonBodyAsClass(ctx, PostAnnouncementsRequest.class);
-      JWTData userData = ctx.get("jwt_data");
+    PostAnnouncementsRequest requestData = RestFunctions.getJsonBodyAsClass(ctx, PostAnnouncementsRequest.class);
+    JWTData userData = ctx.get("jwt_data");
 
-      PostAnnouncementsResponse response = announcementEventsProcessor.postAnnouncements(requestData, userData);
-      end(ctx.response(), 200, JsonObject.mapFrom(response).toString());
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
+    PostAnnouncementsResponse response = announcementEventsProcessor.postAnnouncements(requestData, userData);
+    end(ctx.response(), 200, JsonObject.mapFrom(response).toString());
   }
 }
