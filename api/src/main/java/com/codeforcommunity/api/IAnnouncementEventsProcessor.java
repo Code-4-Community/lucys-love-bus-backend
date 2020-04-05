@@ -1,8 +1,10 @@
 package com.codeforcommunity.api;
 
+import com.codeforcommunity.auth.JWTData;
 import com.codeforcommunity.dto.announcement_event.GetAnnouncementsResponse;
 import com.codeforcommunity.dto.announcement_event.GetAnnouncementsRequest;
 import com.codeforcommunity.dto.announcement_event.PostAnnouncementsRequest;
+import com.codeforcommunity.dto.announcement_event.PostAnnouncementsResponse;
 
 public interface IAnnouncementEventsProcessor {
 
@@ -18,7 +20,8 @@ public interface IAnnouncementEventsProcessor {
    * Creates a new announcement.
    *
    * @param request DTO containing the data for the announcement
+   * @param userData the JWT data for the user making the request
    */
-  void postAnnouncements(PostAnnouncementsRequest request);
+  PostAnnouncementsResponse postAnnouncements(PostAnnouncementsRequest request, JWTData userData);
 
 }

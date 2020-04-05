@@ -1,9 +1,11 @@
 package com.codeforcommunity.rest.subrouter;
 
 import com.codeforcommunity.api.IAnnouncementEventsProcessor;
+import com.codeforcommunity.auth.JWTData;
 import com.codeforcommunity.dto.announcement_event.GetAnnouncementsRequest;
 import com.codeforcommunity.dto.announcement_event.GetAnnouncementsResponse;
 import com.codeforcommunity.dto.announcement_event.PostAnnouncementsRequest;
+import com.codeforcommunity.dto.announcement_event.PostAnnouncementsResponse;
 import com.codeforcommunity.rest.IRouter;
 import com.codeforcommunity.rest.RestFunctions;
 import io.vertx.core.Vertx;
@@ -20,6 +22,7 @@ public class AnnouncementsRouter implements IRouter {
 
   private final IAnnouncementEventsProcessor announcementEventsProcessor;
   private static final long MILLIS_IN_WEEK = 1000 * 60 * 60 * 24 * 7;
+  private static final int DEFAULT_COUNT = 50;
 
   public AnnouncementsRouter(
       IAnnouncementEventsProcessor announcementEventsProcessor) {
@@ -58,7 +61,7 @@ public class AnnouncementsRouter implements IRouter {
       Timestamp endParam = end.orElseGet(() -> new Timestamp(System.currentTimeMillis()));
       Timestamp startParam = start.orElseGet(() ->
           new Timestamp(endParam.getTime() - 3 * MILLIS_IN_WEEK));
-      int countParam = count.orElseGet(() -> 50);
+      int countParam = count.orElseGet(() -> DEFAULT_COUNT);
 
       GetAnnouncementsRequest request = new GetAnnouncementsRequest(startParam, endParam,
           countParam);
@@ -71,10 +74,11 @@ public class AnnouncementsRouter implements IRouter {
 
   private void handlePostAnnouncement(RoutingContext ctx) {
     try {
-      PostAnnouncementsRequest request = RestFunctions.getJsonBodyAsClass(ctx, PostAnnouncementsRequest.class);
+      PostAnnouncementsRequest requestData = RestFunctions.getJsonBodyAsClass(ctx, PostAnnouncementsRequest.class);
+      JWTData userData = ctx.get("jwt_data");
 
-      announcementEventsProcessor.postAnnouncements(request);
-      end(ctx.response(), 200, null);
+      PostAnnouncementsResponse response = announcementEventsProcessor.postAnnouncements(requestData, userData);
+      end(ctx.response(), 200, JsonObject.mapFrom(response).toString());
     } catch (Exception e) {
       e.printStackTrace();
     }
