@@ -2,13 +2,13 @@ package com.codeforcommunity.processor;
 
 import static org.jooq.generated.Tables.ANNOUNCEMENTS;
 
-import com.codeforcommunity.api.IAnnouncementEventsProcessor;
+import com.codeforcommunity.api.IAnnouncementsProcessor;
 import com.codeforcommunity.auth.JWTData;
-import com.codeforcommunity.dto.announcement_event.Announcement;
-import com.codeforcommunity.dto.announcement_event.GetAnnouncementsRequest;
-import com.codeforcommunity.dto.announcement_event.GetAnnouncementsResponse;
-import com.codeforcommunity.dto.announcement_event.PostAnnouncementsRequest;
-import com.codeforcommunity.dto.announcement_event.PostAnnouncementsResponse;
+import com.codeforcommunity.dto.announcements.Announcement;
+import com.codeforcommunity.dto.announcements.GetAnnouncementsRequest;
+import com.codeforcommunity.dto.announcements.GetAnnouncementsResponse;
+import com.codeforcommunity.dto.announcements.PostAnnouncementRequest;
+import com.codeforcommunity.dto.announcements.PostAnnouncementResponse;
 import com.codeforcommunity.enums.PrivilegeLevel;
 import com.codeforcommunity.exceptions.AdminOnlyRouteException;
 import com.codeforcommunity.exceptions.MalformedParameterException;
@@ -20,11 +20,11 @@ import org.jooq.DSLContext;
 import org.jooq.generated.tables.pojos.Announcements;
 import org.jooq.generated.tables.records.AnnouncementsRecord;
 
-public class AnnouncementEventsProcessorImpl implements IAnnouncementEventsProcessor {
+public class AnnouncementsProcessorImpl implements IAnnouncementsProcessor {
 
   private final DSLContext db;
 
-  public AnnouncementEventsProcessorImpl(DSLContext db) {
+  public AnnouncementsProcessorImpl(DSLContext db) {
     this.db = db;
   }
 
@@ -60,7 +60,7 @@ public class AnnouncementEventsProcessorImpl implements IAnnouncementEventsProce
   }
 
   @Override
-  public PostAnnouncementsResponse postAnnouncements(PostAnnouncementsRequest request, JWTData userData) {
+  public PostAnnouncementResponse postAnnouncements(PostAnnouncementRequest request, JWTData userData) {
     if (userData.getPrivilegeLevel() != PrivilegeLevel.ADMIN) {
       throw new AdminOnlyRouteException();
     }
@@ -69,20 +69,20 @@ public class AnnouncementEventsProcessorImpl implements IAnnouncementEventsProce
     System.out.println("AnnouncementsRecord: " + newAnnouncementsRecord);
     newAnnouncementsRecord.store();
     System.out.println("Updated AnnouncementsRecord: " + newAnnouncementsRecord);
-    PostAnnouncementsResponse response = announcementPojoToResponse(
+    PostAnnouncementResponse response = announcementPojoToResponse(
         newAnnouncementsRecord.into(Announcements.class));
     System.out.println("response: " + response);
     return response;
   }
 
-  private PostAnnouncementsResponse announcementPojoToResponse(Announcements announcements) {
-    return new PostAnnouncementsResponse(announcements.getId(),
+  private PostAnnouncementResponse announcementPojoToResponse(Announcements announcements) {
+    return new PostAnnouncementResponse(announcements.getId(),
         announcements.getTitle(),
         announcements.getDescription(),
         announcements.getCreated());
   }
 
-  private AnnouncementsRecord announcementRequestToRecord(PostAnnouncementsRequest request) {
+  private AnnouncementsRecord announcementRequestToRecord(PostAnnouncementRequest request) {
     AnnouncementsRecord newRecord = db.newRecord(ANNOUNCEMENTS);
     newRecord.setTitle(request.getTitle());
     newRecord.setDescription(request.getDescription());

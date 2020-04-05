@@ -2,29 +2,18 @@ package com.codeforcommunity.rest.subrouter;
 
 import static com.codeforcommunity.rest.ApiRouter.end;
 
-import com.codeforcommunity.api.IAnnouncementEventsProcessor;
 import com.codeforcommunity.auth.JWTAuthorizer;
 import com.codeforcommunity.auth.JWTData;
 import com.codeforcommunity.exceptions.AccessTokenInvalidException;
-import com.codeforcommunity.dto.announcement_event.GetAnnouncementsRequest;
-import com.codeforcommunity.dto.announcement_event.GetAnnouncementsResponse;
-import com.codeforcommunity.dto.announcement_event.PostAnnouncementsRequest;
-import com.codeforcommunity.exceptions.AuthException;
-import com.codeforcommunity.exceptions.MissingHeaderException;
 import com.codeforcommunity.rest.IRouter;
 import com.codeforcommunity.rest.RestFunctions;
 
 import io.vertx.core.Vertx;
-import io.vertx.core.http.HttpServerRequest;
-import io.vertx.core.json.JsonObject;
-import io.vertx.ext.web.Route;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
 
-import java.sql.Timestamp;
 import java.util.Optional;
-import java.util.UUID;
 
 public class CommonRouter implements IRouter {
   private final JWTAuthorizer jwtAuthorizer;

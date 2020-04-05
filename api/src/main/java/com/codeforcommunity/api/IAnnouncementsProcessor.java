@@ -1,12 +1,12 @@
 package com.codeforcommunity.api;
 
 import com.codeforcommunity.auth.JWTData;
-import com.codeforcommunity.dto.announcement_event.GetAnnouncementsResponse;
-import com.codeforcommunity.dto.announcement_event.GetAnnouncementsRequest;
-import com.codeforcommunity.dto.announcement_event.PostAnnouncementsRequest;
-import com.codeforcommunity.dto.announcement_event.PostAnnouncementsResponse;
+import com.codeforcommunity.dto.announcements.GetAnnouncementsResponse;
+import com.codeforcommunity.dto.announcements.GetAnnouncementsRequest;
+import com.codeforcommunity.dto.announcements.PostAnnouncementRequest;
+import com.codeforcommunity.dto.announcements.PostAnnouncementResponse;
 
-public interface IAnnouncementEventsProcessor {
+public interface IAnnouncementsProcessor {
 
   /**
    * Gets all announcements.
@@ -22,6 +22,6 @@ public interface IAnnouncementEventsProcessor {
    * @param request DTO containing the data for the announcement
    * @param userData the JWT data for the user making the request
    */
-  PostAnnouncementsResponse postAnnouncements(PostAnnouncementsRequest request, JWTData userData);
+  PostAnnouncementResponse postAnnouncements(PostAnnouncementRequest request, JWTData userData);
 
 }

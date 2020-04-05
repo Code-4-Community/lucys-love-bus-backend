@@ -1,8 +1,8 @@
-package com.codeforcommunity.dto.announcement_event;
+package com.codeforcommunity.dto.announcements;
 
 import java.sql.Timestamp;
 
-public class PostAnnouncementsResponse {
+public class PostAnnouncementResponse {
 
   private int id;
   private String title;
@@ -20,9 +20,9 @@ public class PostAnnouncementsResponse {
   private String description;
   private Timestamp created;
 
-  private PostAnnouncementsResponse() {}
+  private PostAnnouncementResponse() {}
 
-  public PostAnnouncementsResponse(int id, String title, String description,
+  public PostAnnouncementResponse(int id, String title, String description,
       Timestamp created) {
     this.id = id;
     this.title = title;

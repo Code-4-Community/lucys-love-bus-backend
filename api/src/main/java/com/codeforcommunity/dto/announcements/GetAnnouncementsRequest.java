@@ -1,7 +1,6 @@
-package com.codeforcommunity.dto.announcement_event;
+package com.codeforcommunity.dto.announcements;
 
 import java.sql.Timestamp;
-import java.util.UUID;
 
 public class GetAnnouncementsRequest {
 

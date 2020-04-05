@@ -1,12 +1,12 @@
-package com.codeforcommunity.dto.announcement_event;
+package com.codeforcommunity.dto.announcements;
 
-public class PostAnnouncementsRequest {
+public class PostAnnouncementRequest {
   private String title;
   private String description;
 
-  private PostAnnouncementsRequest() {}
+  private PostAnnouncementRequest() {}
 
-  public PostAnnouncementsRequest(String title, String description) {
+  public PostAnnouncementRequest(String title, String description) {
     this.title = title;
     this.description = description;
   }

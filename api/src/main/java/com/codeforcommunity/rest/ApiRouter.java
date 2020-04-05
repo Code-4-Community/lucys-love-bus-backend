@@ -1,6 +1,6 @@
 package com.codeforcommunity.rest;
 
-import com.codeforcommunity.api.IAnnouncementEventsProcessor;
+import com.codeforcommunity.api.IAnnouncementsProcessor;
 import com.codeforcommunity.api.IAuthProcessor;
 import com.codeforcommunity.api.IEventsProcessor;
 import com.codeforcommunity.api.IRequestsProcessor;
@@ -25,7 +25,7 @@ public class ApiRouter implements IRouter {
     private final AnnouncementsRouter announcementsRouter;
 
     public ApiRouter(IAuthProcessor authProcessor, IRequestsProcessor requestsProcessor,
-        IEventsProcessor eventsProcessor, IAnnouncementEventsProcessor announcementEventsProcessor,
+        IEventsProcessor eventsProcessor, IAnnouncementsProcessor announcementEventsProcessor,
         JWTAuthorizer jwtAuthorizer) {
         this.commonRouter = new CommonRouter(jwtAuthorizer);
         this.authRouter = new AuthRouter(authProcessor);

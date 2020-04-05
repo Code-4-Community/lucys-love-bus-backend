@@ -1,4 +1,4 @@
-package com.codeforcommunity.dto.announcement_event;
+package com.codeforcommunity.dto.announcements;
 
 import java.util.List;
 
