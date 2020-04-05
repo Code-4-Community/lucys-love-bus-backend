@@ -66,8 +66,13 @@ public class AnnouncementEventsProcessorImpl implements IAnnouncementEventsProce
     }
     announcementRequestToRecord(request);
     AnnouncementsRecord newAnnouncementsRecord = announcementRequestToRecord(request);
+    System.out.println("AnnouncementsRecord: " + newAnnouncementsRecord);
     newAnnouncementsRecord.store();
-    return announcementPojoToResponse(newAnnouncementsRecord.into(Announcements.class));
+    System.out.println("Updated AnnouncementsRecord: " + newAnnouncementsRecord);
+    PostAnnouncementsResponse response = announcementPojoToResponse(
+        newAnnouncementsRecord.into(Announcements.class));
+    System.out.println("response: " + response);
+    return response;
   }
 
   private PostAnnouncementsResponse announcementPojoToResponse(Announcements announcements) {

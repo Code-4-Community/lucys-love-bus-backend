@@ -6,6 +6,17 @@ public class PostAnnouncementsResponse {
 
   private int id;
   private String title;
+
+  @Override
+  public String toString() {
+    return "PostAnnouncementsResponse{" +
+        "id=" + id +
+        ", title='" + title + '\'' +
+        ", description='" + description + '\'' +
+        ", created=" + created +
+        '}';
+  }
+
   private String description;
   private Timestamp created;
 
