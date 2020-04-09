@@ -69,7 +69,7 @@ public class EventsRouter implements IRouter {
   private void handleGetEvents(RoutingContext ctx) {
 
     List<Integer> intIds = getMultipleQueryParams(ctx, "ids",
-            getParseIntParamMapper());
+            str -> Integer.parseInt(str));
 
     GetEventsResponse response = processor.getEvents(intIds);
 

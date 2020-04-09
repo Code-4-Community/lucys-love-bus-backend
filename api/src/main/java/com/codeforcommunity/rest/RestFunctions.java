@@ -110,13 +110,4 @@ public interface RestFunctions {
       }
     }};
   }
-
-  static Function<String, Integer> getParseIntParamMapper() {
-    return str -> Integer.parseInt(str);
-  }
-
-  static Function<String, Timestamp> getDateParamMapper() {
-    return str -> Timestamp.valueOf(str);
-  }
-
 }
