@@ -10,25 +10,20 @@ import com.codeforcommunity.dto.userEvents.requests.GetUserEventsRequest;
 import com.codeforcommunity.dto.userEvents.responses.GetEventsResponse;
 import com.codeforcommunity.enums.PrivilegeLevel;
 import com.codeforcommunity.exceptions.AdminOnlyRouteException;
-import com.codeforcommunity.propertiesLoader.PropertiesLoader;
-import org.jooq.DSLContext;
-import org.jooq.generated.Tables;
+import org.jooq.*;
 import org.jooq.generated.tables.pojos.Events;
 import org.jooq.generated.tables.records.EventsRecord;
-import org.jooq.impl.DSL;
 
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
-import java.util.Optional;
-import java.util.Properties;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static org.jooq.generated.Tables.EVENTS;
 import static org.jooq.generated.Tables.USER_EVENTS;
+import static org.jooq.generated.Tables.USERS;
 import static org.jooq.impl.DSL.count;
 
 public class EventsProcessorImpl implements IEventsProcessor {
@@ -61,33 +56,70 @@ public class EventsProcessorImpl implements IEventsProcessor {
   @Override
   public GetEventsResponse getEvents(List<Integer> eventIds) {
     List<Events> e = db.selectFrom(EVENTS).where(EVENTS.ID.in(eventIds)).fetchInto(Events.class);
-    return new GetEventsResponse(parseEvents(e), e.size());
+    return new GetEventsResponse(listOfEventsToListOfEvent(e), e.size());
   }
 
   @Override
   public GetEventsResponse getEventsSignedUp(GetUserEventsRequest request, JWTData userData) {
-    List<Events> events = db.selectFrom(Tables.USERS.join(Tables.USER_EVENTS)
-            .on(Tables.USERS.ID.eq(Tables.USER_EVENTS.USERS_ID))
-            .join(Tables.EVENTS).on(Tables.USER_EVENTS.EVENT_ID.eq(Tables.EVENTS.ID)))
-            .where(Tables.USERS.ID.eq(userData.getUserId())).fetchInto(Events.class);
 
-    return mapToResponseAndFilter(events, request.getCount(), request.getStartDate(),
-            request.getEndDate());
+    SelectConditionStep q = db.selectFrom(USERS.join(USER_EVENTS)
+            .onKey()
+            .join(EVENTS).onKey())
+            .where(USERS.ID.eq(userData.getUserId()));
+
+    SelectConditionStep afterDateFilter = q;
+
+    if (request.getEndDate().isPresent()) {
+      if (request.getStartDate().isPresent()) {
+        afterDateFilter = q.and(EVENTS.START_TIME.between(request.getStartDate().get(), request.getEndDate().get()));
+      } else {
+        afterDateFilter = q.and(EVENTS.START_TIME.lessOrEqual(request.getEndDate().get()));
+      }
+    } else {
+      if (request.getStartDate().isPresent()) {
+        afterDateFilter = q.and(EVENTS.START_TIME.greaterOrEqual(request.getStartDate().get()));
+      }
+    }
+
+    SelectSeekStep1 s = afterDateFilter.orderBy(EVENTS.START_TIME.asc());
+    List<Event> res;
+
+    if (request.getCount().isPresent()) {
+      res = s.limit(request.getCount().get()).fetchInto(Events.class);
+    } else {
+      res = s.fetchInto(Events.class);
+    }
+
+    return new GetEventsResponse(res, res.size());
   }
 
   @Override
   public GetEventsResponse getEventsQualified(JWTData userData) {
 
-    Optional<Timestamp> startDate = Optional.of(Timestamp.from(Instant.now()));
-    Optional<Timestamp> fiveDays = Optional.of(Timestamp.from(Instant.now().plusSeconds(432000)));
-    Optional<Timestamp> endDate = userData.getPrivilegeLevel().equals(PrivilegeLevel.GP) ? fiveDays : Optional.empty();
+    Timestamp startDate = Timestamp.from(Instant.now());
+    Timestamp fiveDays = Timestamp.from(Instant.now().plusSeconds(432000));
+    boolean isAdmin = userData.getPrivilegeLevel().equals(PrivilegeLevel.GP);
 
-    List<Events> e = db.selectFrom(EVENTS).fetchInto(Events.class);
-    return mapToResponseAndFilter(e, Optional.empty(), startDate, endDate);
+    SelectWhereStep select = db.selectFrom(EVENTS);
+    SelectConditionStep afterDateFilter;
 
+    if (isAdmin) {
+      afterDateFilter = select.where(EVENTS.START_TIME.greaterOrEqual(startDate));
+    } else {
+      afterDateFilter = select.where(EVENTS.START_TIME.between(startDate, fiveDays));
+    }
+
+    List<Event> res = listOfEventsToListOfEvent(afterDateFilter.fetchInto(Events.class));
+
+    return new GetEventsResponse(res, res.size());
   }
 
-  private List<Event> parseEvents(List<Events> events) {
+  /**
+   * Turns a list of jOOq Events DTO into one of our Event DTO.
+   * @param events jOOq data objects.
+   * @return List of our Event data object.
+   */
+  private List<Event> listOfEventsToListOfEvent(List<Events> events) {
 
     return events.stream().map(event -> {
       EventDetails details = new EventDetails(event.getDescription(), event.getLocation(), event.getStartTime(),
@@ -105,42 +137,16 @@ public class EventsProcessorImpl implements IEventsProcessor {
 
   }
 
-  private GetEventsResponse mapToResponseAndFilter(List<Events> events, Optional<Integer> count,
-                                                   Optional<Timestamp> startDate, Optional<Timestamp> endDate) {
-    List<Event> parsedEvents = parseEvents(events);
-    List<Event> limitedEvents = limitNumberOfElements(parsedEvents, count);
-    List<Event> filteredEvents =
-            filterByDates(limitedEvents, startDate, endDate);
-
-    return new GetEventsResponse(filteredEvents, filteredEvents.size());
-  }
-
-  private List<Event> filterByDates(List<Event> events, Optional<Timestamp> startDate, Optional<Timestamp> endDate) {
-
-    Predicate<Event> pred = event -> {
-
-      Timestamp startTimeToCheck = event.getDetails().getStart();
-      Timestamp endTimeToCheck = event.getDetails().getEnd();
-
-      boolean validEnd = endDate.isPresent() ? endTimeToCheck.before(endDate.get()) : true;
-      boolean validStart = startDate.isPresent() ? startTimeToCheck.after(startDate.get()) : true;
-
-      return validEnd && validStart;
-
-    };
-
-    return events.stream().filter(pred).collect(Collectors.toList());
-  }
-
+  /**
+   * Queries the database to find the number of spots left for a given event by id.
+   * @param eventId
+   * @return
+   */
   private int getSpotsLeft(int eventId) {
 
     return db.select(EVENTS.CAPACITY.minus(count())).from(EVENTS.join(USER_EVENTS).on(EVENTS.ID.eq(USER_EVENTS.EVENT_ID)))
-            .groupBy(EVENTS.ID).fetchOneInto(Integer.class);
+            .where(EVENTS.ID.eq(eventId)).groupBy(EVENTS.ID).fetchOneInto(Integer.class);
 
-  }
-
-  private List<Event> limitNumberOfElements(List<Event> events, Optional<Integer> limit) {
-    return limit.isPresent() ? events.subList(0, limit.get()) : events;
   }
 
   /**

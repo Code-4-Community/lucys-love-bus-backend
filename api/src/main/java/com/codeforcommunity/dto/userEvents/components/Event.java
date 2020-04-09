@@ -9,6 +9,14 @@ public class Event {
   private URL thumbnail;
   private EventDetails details;
 
+  public Event(int id, String title, int spotsAvailable, URL thumbnail, EventDetails details) {
+    this.id = id;
+    this.title = title;
+    this.spotsAvailable = spotsAvailable;
+    this.thumbnail = thumbnail;
+    this.details = details;
+  }
+
   public int getId() {
     return id;
   }
@@ -49,12 +57,5 @@ public class Event {
     this.details = details;
   }
 
-  public Event(int id, String title, int spotsAvailable, URL thumbnail, EventDetails details) {
-    this.id = id;
-    this.title = title;
-    this.spotsAvailable = spotsAvailable;
-    this.thumbnail = thumbnail;
-    this.details = details;
-  }
 }
 

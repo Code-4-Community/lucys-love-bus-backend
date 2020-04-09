@@ -8,6 +8,12 @@ public class GetUserEventsRequest {
   private Optional<Timestamp> startDate; //optional
   private Optional<Integer> count; //optional
 
+  public GetUserEventsRequest(Optional<Timestamp> endDate, Optional<Timestamp> startDate, Optional<Integer> count) {
+    this.endDate = endDate;
+    this.startDate = startDate;
+    this.count = count;
+  }
+
   public Optional<Timestamp> getEndDate() {
     return endDate;
   }

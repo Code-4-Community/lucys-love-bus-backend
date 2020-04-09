@@ -63,6 +63,15 @@ public interface RestFunctions {
     throw new MissingParameterException(name);
   }
 
+  /**
+   * Get's a query parameter that may or may not be there as an optional of the desired type. Attempts to map the
+   * query parameter from a string to an instance of the desired type.
+   * @param ctx routing context to retrieve query param from.
+   * @param name of query param.
+   * @param mapper a function that maps the query param from string to desired type.
+   * @param <T> the desired type.
+   * @return An optional object of the query param as it's desired type.
+   */
   static <T> Optional<T> getOptionalQueryParam(RoutingContext ctx, String name,
                                                Function<String, T> mapper) {
     List<String> params = ctx.queryParam(name);
@@ -80,10 +89,26 @@ public interface RestFunctions {
     return Optional.ofNullable(returnValue);
   }
 
+  /**
+   * Get's List of query parameters associated with given name. Attempts to map each parameter to the desired type.
+   * Only returns the values that can be mapped.
+   * @param ctx routing context to retrieve query param from.
+   * @param name of query param.
+   * @param mapper a function that maps the query param from string to desired type.
+   * @param <T> the desired type.
+   * @return A list of the desired type of all the values of the query param that could successfully be mapped.
+   */
   static <T> List<T> getMultipleQueryParams(RoutingContext ctx, String name, Function<String, T> mapper) {
     List<String> queryParam = ctx.queryParam(name);
-    return !queryParam.isEmpty() ? queryParam.stream().map(mapper).distinct().collect(Collectors.toList())
-            : new ArrayList<>();
+    return new ArrayList() {{
+      for (String s: queryParam) {
+        try {
+          add(mapper.apply(s));
+        } catch (Throwable t) {
+          //do nothing
+        }
+      }
+    }};
   }
 
   static Function<String, Integer> getParseIntParamMapper() {

@@ -5,8 +5,7 @@ CREATE TABLE IF NOT EXISTS events (
     capacity INTEGER NOT NULL,
     location VARCHAR(36) NOT NULL,
     start_time TIMESTAMP NOT NULL,
-    end_time TIMESTAMP NOT NULL,
-    thumbnail VARCHAR(500)
+    end_time TIMESTAMP NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS user_events (

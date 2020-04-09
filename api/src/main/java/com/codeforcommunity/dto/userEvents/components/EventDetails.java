@@ -8,6 +8,13 @@ public class EventDetails {
   private Timestamp start;
   private Timestamp end;
 
+  public EventDetails(String description, String location, Timestamp start, Timestamp end) {
+    this.description = description;
+    this.location = location;
+    this.start = start;
+    this.end = end;
+  }
+
   public String getDescription() {
     return description;
   }
@@ -40,12 +47,6 @@ public class EventDetails {
     this.end = end;
   }
 
-  public EventDetails(String description, String location, Timestamp start, Timestamp end) {
-    this.description = description;
-    this.location = location;
-    this.start = start;
-    this.end = end;
-  }
 }
 
 
