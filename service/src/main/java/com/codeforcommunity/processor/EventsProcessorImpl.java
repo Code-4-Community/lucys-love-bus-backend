@@ -11,8 +11,11 @@ import com.codeforcommunity.dto.userEvents.responses.GetEventsResponse;
 import com.codeforcommunity.enums.PrivilegeLevel;
 import com.codeforcommunity.exceptions.AdminOnlyRouteException;
 import org.jooq.*;
+import org.jooq.DSLContext;
+import org.jooq.Result;
 import org.jooq.generated.tables.pojos.Events;
 import org.jooq.generated.tables.records.EventsRecord;
+import org.jooq.generated.tables.records.UserEventsRecord;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -154,7 +157,7 @@ public class EventsProcessorImpl implements IEventsProcessor {
     EventDetails details = new EventDetails(event.getDescription(), event.getLocation(),
         event.getStartTime(), event.getEndTime());
     return new SingleEventResponse(event.getId(), event.getTitle(),
-        event.getCapacity(), event.getThumbnail(), details);
+        getSpotsAvailable(event), event.getCapacity(), event.getThumbnail(), details);
   }
 
   /**
@@ -172,4 +175,15 @@ public class EventsProcessorImpl implements IEventsProcessor {
     return newRecord;
   }
 
+  /**
+   * Returns the count of spaces available for the given event.
+   *
+   * @param event the Events object to find get the spaces available for.
+   * @return an int representing the number of available spaces.
+   */
+  private int getSpotsAvailable(Events event) {
+    Result<UserEventsRecord> userEventsRecord = db.selectFrom(USER_EVENTS)
+        .where(USER_EVENTS.EVENT_ID.eq(event.getId())).fetch();
+    return event.getCapacity() - userEventsRecord.size();
+  }
 }

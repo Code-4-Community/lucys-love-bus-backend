@@ -27,5 +27,21 @@ RUN rm -rf ${WORK_DIR}/service/test
 RUN rm -rf ${WORK_DIR}/service/src/test
 RUN rm -rf ${WORK_DIR}/common/src/test
 
+
+# The port that YOU should expose when you run this in a container
+# see https://docs.docker.com/engine/reference/builder/#expose
+
+EXPOSE 8081
+
+
+
+# Build the software
+
+RUN mvn -T 2C install
+
+RUN mvn -T 2C package
+
+
+
 # Set a default command to execute
 CMD /lucys-love-bus-backend/deploy.sh
