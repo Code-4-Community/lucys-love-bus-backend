@@ -27,7 +27,6 @@ public class ServiceMain {
     try {
       ServiceMain serviceMain = new ServiceMain();
       serviceMain.initialize();
-      System.out.println("Up and running!");
     } catch (Exception e) {
       e.printStackTrace();
     }

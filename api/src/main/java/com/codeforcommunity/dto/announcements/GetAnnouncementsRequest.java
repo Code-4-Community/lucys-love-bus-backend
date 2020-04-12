@@ -1,6 +1,8 @@
 package com.codeforcommunity.dto.announcements;
 
 import java.sql.Timestamp;
+import com.codeforcommunity.exceptions.MalformedParameterException;
+import java.util.Date;
 
 public class GetAnnouncementsRequest {
 
@@ -26,5 +28,19 @@ public class GetAnnouncementsRequest {
 
   public int getCount() {
     return count;
+  }
+
+  /**
+   * Validates the request.
+   *
+   * @throws MalformedParameterException if any of the request parameters are invalid
+   */
+  public void validate() {
+    if (count < 1) {
+      throw new MalformedParameterException("count");
+    }
+    if (endDate.before(startDate) || endDate.after(new Date())) {
+      throw new MalformedParameterException("end");
+    }
   }
 }
