@@ -68,15 +68,19 @@ public class AnnouncementsProcessorImpl implements IAnnouncementsProcessor {
     }
     AnnouncementsRecord newAnnouncementsRecord = announcementRequestToRecord(request);
     newAnnouncementsRecord.store();
-    return announcementPojoToResponse(
-        newAnnouncementsRecord.into(Announcements.class));
+    // the timestamp wasn't showing correctly, so just
+    // get the announcement directly from the database
+    return announcementPojoToResponse(db.selectFrom(ANNOUNCEMENTS)
+        .where(ANNOUNCEMENTS.ID.eq(newAnnouncementsRecord.getId()))
+        .fetchInto(Announcements.class).get(0));
   }
 
   private PostAnnouncementResponse announcementPojoToResponse(Announcements announcements) {
-    return new PostAnnouncementResponse(announcements.getId(),
+    return new PostAnnouncementResponse(new Announcement(
+        announcements.getId(),
         announcements.getTitle(),
         announcements.getDescription(),
-        announcements.getCreated());
+        announcements.getCreated()));
   }
 
   private AnnouncementsRecord announcementRequestToRecord(PostAnnouncementRequest request) {
