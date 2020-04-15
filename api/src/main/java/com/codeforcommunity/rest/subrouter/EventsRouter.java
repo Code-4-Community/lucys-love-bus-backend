@@ -7,7 +7,7 @@ import com.codeforcommunity.dto.userEvents.responses.SingleEventResponse;
 import com.codeforcommunity.dto.userEvents.requests.GetUserEventsRequest;
 import com.codeforcommunity.dto.userEvents.responses.GetEventsResponse;
 import com.codeforcommunity.rest.IRouter;
-import static com.codeforcommunity.rest.RestFunctions.*;
+
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Route;
@@ -19,6 +19,10 @@ import java.util.List;
 import java.util.Optional;
 
 import static com.codeforcommunity.rest.ApiRouter.end;
+import static com.codeforcommunity.rest.RestFunctions.getJsonBodyAsClass;
+import static com.codeforcommunity.rest.RestFunctions.getMultipleQueryParams;
+import static com.codeforcommunity.rest.RestFunctions.getOptionalQueryParam;
+import static com.codeforcommunity.rest.RestFunctions.getRequestParameterAsInt;
 
 public class EventsRouter implements IRouter {
 

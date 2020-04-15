@@ -98,7 +98,7 @@ public class EventsProcessorImpl implements IEventsProcessor {
 
     Timestamp startDate = Timestamp.from(Instant.now());
     Timestamp fiveDays = Timestamp.from(Instant.now().plusSeconds(432000));
-    boolean isAdmin = userData.getPrivilegeLevel().equals(PrivilegeLevel.GP);
+    boolean isAdmin = userData.getPrivilegeLevel().equals(PrivilegeLevel.ADMIN);
 
     SelectWhereStep select = db.selectFrom(EVENTS);
     SelectConditionStep afterDateFilter;
@@ -124,13 +124,7 @@ public class EventsProcessorImpl implements IEventsProcessor {
     return events.stream().map(event -> {
       EventDetails details = new EventDetails(event.getDescription(), event.getLocation(), event.getStartTime(),
               event.getEndTime());
-      URL thumbnail;
-      try {
-        thumbnail = new URL(event.getThumbnail());
-      } catch (MalformedURLException me) {
-        thumbnail = null; //todo address this exception
-      }
-      Event e = new Event(event.getId(), event.getTitle(), getSpotsLeft(event.getId()), thumbnail,
+      Event e = new Event(event.getId(), event.getTitle(), getSpotsLeft(event.getId()), event.getThumbnail(),
               details);
       return e;
     }).collect(Collectors.toList());

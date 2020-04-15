@@ -1,15 +1,13 @@
 package com.codeforcommunity.dto.userEvents.components;
 
-import java.net.URL;
-
 public class Event {
   private int id;
   private String title;
   private int spotsAvailable;
-  private URL thumbnail;
+  private String thumbnail;
   private EventDetails details;
 
-  public Event(int id, String title, int spotsAvailable, URL thumbnail, EventDetails details) {
+  public Event(int id, String title, int spotsAvailable, String thumbnail, EventDetails details) {
     this.id = id;
     this.title = title;
     this.spotsAvailable = spotsAvailable;
@@ -41,11 +39,11 @@ public class Event {
     this.spotsAvailable = spotsAvailable;
   }
 
-  public URL getThumbnail() {
+  public String getThumbnail() {
     return thumbnail;
   }
 
-  public void setThumbnail(URL thumbnail) {
+  public void setThumbnail(String thumbnail) {
     this.thumbnail = thumbnail;
   }
 
