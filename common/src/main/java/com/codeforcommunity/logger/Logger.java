@@ -3,7 +3,7 @@ package com.codeforcommunity.logger;
 import java.sql.Timestamp;
 import java.time.Instant;
 
-public interface  Logger {
+public interface Logger {
 
   static void log(String message) {
 

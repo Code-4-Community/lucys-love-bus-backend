@@ -4,7 +4,6 @@ import com.codeforcommunity.api.IEventsProcessor;
 import com.codeforcommunity.auth.JWTData;
 import com.codeforcommunity.dto.events.CreateEventRequest;
 import com.codeforcommunity.dto.events.SingleEventResponse;
-import com.codeforcommunity.dto.pfrequests.CreateRequest;
 import com.codeforcommunity.rest.IRouter;
 import com.codeforcommunity.rest.RestFunctions;
 import io.vertx.core.Vertx;
