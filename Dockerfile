@@ -22,9 +22,9 @@ ADD persist ${WORK_DIR}/persist
 ADD service ${WORK_DIR}/service
 ADD pom.xml ${WORK_DIR}/pom.xml
 
-# Build the software
-RUN mvn -T 2C install
-RUN mvn -T 2C package
+RUN rm -rf ${WORK_DIR}/service/test
+RUN rm -rf ${WORK_DIR}/service/src/test
+RUN rm -rf ${WORK_DIR}/common/src/test
 
 # Set a default command to execute
 CMD /lucys-love-bus-backend/deploy.sh
