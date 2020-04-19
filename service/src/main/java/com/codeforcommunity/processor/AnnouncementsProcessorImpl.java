@@ -40,6 +40,7 @@ public class AnnouncementsProcessorImpl implements IAnnouncementsProcessor {
 
     List<Announcements> announcements = db.selectFrom(ANNOUNCEMENTS)
         .where(ANNOUNCEMENTS.CREATED.between(start, end))
+        .and(ANNOUNCEMENTS.EVENT_ID.isNull())
         .orderBy(ANNOUNCEMENTS.CREATED.desc())
         .fetchInto(Announcements.class);
 
