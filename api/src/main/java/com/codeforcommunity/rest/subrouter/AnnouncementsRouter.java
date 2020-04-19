@@ -6,6 +6,8 @@ import com.codeforcommunity.dto.announcements.GetAnnouncementsRequest;
 import com.codeforcommunity.dto.announcements.GetAnnouncementsResponse;
 import com.codeforcommunity.dto.announcements.PostAnnouncementRequest;
 import com.codeforcommunity.dto.announcements.PostAnnouncementResponse;
+import com.codeforcommunity.dto.announcements.PostEventSpecificAnnouncementRequest;
+import com.codeforcommunity.dto.announcements.PostEventSpecificAnnouncementResponse;
 import com.codeforcommunity.rest.IRouter;
 import com.codeforcommunity.rest.RestFunctions;
 import io.vertx.core.Vertx;
