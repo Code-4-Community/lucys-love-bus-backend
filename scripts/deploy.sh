@@ -1,7 +1,7 @@
 #!/bin/bash
 
 DIR_WORK=/lucys-love-bus-backend
-DIR_PERSIST=${DIR_WORK}/common/src/main/resources/db.properties
+DIR_PERSIST=${DIR_WORK}/common/src/main/resources
 DIR_JAR=${DIR_WORK}/service/target
 
 # Check for updated database username
