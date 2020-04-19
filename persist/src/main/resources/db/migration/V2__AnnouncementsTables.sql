@@ -3,5 +3,7 @@ CREATE TABLE IF NOT EXISTS announcements (
     title varchar NOT NULL,
     description varchar NOT NULL,
     created timestamp DEFAULT CURRENT_TIMESTAMP,
-    event_id int DEFAULT NULL
+    event_id int DEFAULT NULL,
+
+    CONSTRAINT event_fkey FOREIGN KEY (event_id) REFERENCES events(id)
 );
