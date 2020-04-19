@@ -4,10 +4,14 @@ import com.codeforcommunity.api.IAnnouncementsProcessor;
 import com.codeforcommunity.auth.JWTData;
 import com.codeforcommunity.dto.announcements.GetAnnouncementsRequest;
 import com.codeforcommunity.dto.announcements.GetAnnouncementsResponse;
+import com.codeforcommunity.dto.announcements.GetEventSpecificAnnouncementsRequest;
+import com.codeforcommunity.dto.announcements.GetEventSpecificAnnouncementsResponse;
 import com.codeforcommunity.dto.announcements.PostAnnouncementRequest;
 import com.codeforcommunity.dto.announcements.PostAnnouncementResponse;
 import com.codeforcommunity.dto.announcements.PostEventSpecificAnnouncementRequest;
 import com.codeforcommunity.dto.announcements.PostEventSpecificAnnouncementResponse;
+import com.codeforcommunity.dto.events.SingleEventResponse;
+import com.codeforcommunity.exceptions.RequestBodyMappingException;
 import com.codeforcommunity.rest.IRouter;
 import com.codeforcommunity.rest.RestFunctions;
 import io.vertx.core.Vertx;
@@ -90,10 +94,36 @@ public class AnnouncementsRouter implements IRouter {
   }
 
   private void handleGetEventSpecificAnnouncements(RoutingContext ctx) {
+    int eventId = RestFunctions.getRequestParameterAsInt(ctx.request(), "event_id");
+    GetEventSpecificAnnouncementsRequest requestData = new GetEventSpecificAnnouncementsRequest(
+        eventId);
+
+    GetEventSpecificAnnouncementsResponse response = processor.getEventSpecificAnnouncements(
+        requestData);
+    end(ctx.response(), 200, JsonObject.mapFrom(response).encode());
 
   }
 
   private void handlePostEventSpecificAnnouncement(RoutingContext ctx) {
+    Optional<JsonObject> body = Optional.ofNullable(ctx.getBodyAsJson());
+    PostEventSpecificAnnouncementRequest requestData;
+    if (body.isPresent()) {
+      try {
+        JsonObject requestBody = body.get();
+        String title = requestBody.getString("title");
+        String description = requestBody.getString("description");
+        int eventId = RestFunctions.getRequestParameterAsInt(ctx.request(), "event_id");
+        requestData = new PostEventSpecificAnnouncementRequest(eventId, title, description);
+      } catch (IllegalArgumentException | NullPointerException | ClassCastException e) {
+        throw new RequestBodyMappingException();
+      }
+    } else {
+      throw new RequestBodyMappingException();
+    }
+    JWTData userData = ctx.get("jwt_data");
 
+    PostEventSpecificAnnouncementResponse response = processor.postEventSpecificAnnouncement(
+        requestData, userData);
+    end(ctx.response(), 200, JsonObject.mapFrom(response).toString());
   }
 }
