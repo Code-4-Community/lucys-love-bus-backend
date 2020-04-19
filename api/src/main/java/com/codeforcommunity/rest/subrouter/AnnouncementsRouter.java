@@ -34,6 +34,8 @@ public class AnnouncementsRouter implements IRouter {
 
     registerGetAnnouncements(router);
     registerPostAnnouncement(router);
+    registerGetEventSpecificAnnouncements(router);
+    registerPostEventSpecificAnnouncement(router);
 
     return router;
   }
@@ -46,6 +48,16 @@ public class AnnouncementsRouter implements IRouter {
   private void registerPostAnnouncement(Router router) {
     Route postAnnouncementRoute = router.post("/");
     postAnnouncementRoute.handler(this::handlePostAnnouncement);
+  }
+
+  private void registerGetEventSpecificAnnouncements(Router router) {
+    Route getEventSpecificAnnouncementsRoute = router.get("/:event_id");
+    getEventSpecificAnnouncementsRoute.handler(this::handleGetEventSpecificAnnouncements);
+  }
+
+  private void registerPostEventSpecificAnnouncement(Router router) {
+    Route postEventSpecificAnnouncementRoute = router.post("/:event_id");
+    postEventSpecificAnnouncementRoute.handler(this::handlePostEventSpecificAnnouncement);
   }
 
   private void handleGetAnnouncements(RoutingContext ctx) {
@@ -73,5 +85,13 @@ public class AnnouncementsRouter implements IRouter {
 
     PostAnnouncementResponse response = processor.postAnnouncements(requestData, userData);
     end(ctx.response(), 200, JsonObject.mapFrom(response).toString());
+  }
+
+  private void handleGetEventSpecificAnnouncements(RoutingContext ctx) {
+
+  }
+
+  private void handlePostEventSpecificAnnouncement(RoutingContext ctx) {
+
   }
 }
