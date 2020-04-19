@@ -10,7 +10,6 @@ import com.codeforcommunity.dto.announcements.GetAnnouncementsResponse;
 import com.codeforcommunity.dto.announcements.GetEventSpecificAnnouncementsRequest;
 import com.codeforcommunity.dto.announcements.PostAnnouncementRequest;
 import com.codeforcommunity.dto.announcements.PostAnnouncementResponse;
-import com.codeforcommunity.dto.announcements.PostEventSpecificAnnouncementRequest;
 import com.codeforcommunity.enums.PrivilegeLevel;
 import com.codeforcommunity.exceptions.AdminOnlyRouteException;
 import java.sql.Timestamp;
@@ -60,7 +59,8 @@ public class AnnouncementsProcessorImpl implements IAnnouncementsProcessor {
     return new Announcement(announcement.getId(),
         announcement.getTitle(),
         announcement.getDescription(),
-        announcement.getCreated());
+        announcement.getCreated(),
+        announcement.getEventId());
   }
 
   @Override
@@ -96,13 +96,13 @@ public class AnnouncementsProcessorImpl implements IAnnouncementsProcessor {
 
   @Override
   public PostAnnouncementResponse postEventSpecificAnnouncement(
-      PostEventSpecificAnnouncementRequest request, JWTData userData) {
+      PostAnnouncementRequest request, JWTData userData) {
     if (userData.getPrivilegeLevel() != PrivilegeLevel.ADMIN) {
       throw new AdminOnlyRouteException();
     }
     request.validate();
 
-    AnnouncementsRecord newAnnouncementsRecord = eventSpecificAnnouncementRequestToRecord(request);
+    AnnouncementsRecord newAnnouncementsRecord = announcementRequestToRecord(request);
     newAnnouncementsRecord.store();
     // the timestamp wasn't showing correctly, so just
     // get the announcement directly from the database
@@ -112,26 +112,16 @@ public class AnnouncementsProcessorImpl implements IAnnouncementsProcessor {
   }
 
   private PostAnnouncementResponse announcementPojoToResponse(Announcements announcements) {
-    return new PostAnnouncementResponse(new Announcement(
-        announcements.getId(),
-        announcements.getTitle(),
-        announcements.getDescription(),
-        announcements.getCreated()));
+    return new PostAnnouncementResponse(convertAnnouncementObject(announcements));
   }
 
   private AnnouncementsRecord announcementRequestToRecord(PostAnnouncementRequest request) {
     AnnouncementsRecord newRecord = db.newRecord(ANNOUNCEMENTS);
     newRecord.setTitle(request.getTitle());
     newRecord.setDescription(request.getDescription());
-    return newRecord;
-  }
-
-  //TODO: Abstract this and the above method, remove effectively duplicated classes
-  private AnnouncementsRecord eventSpecificAnnouncementRequestToRecord(
-      PostEventSpecificAnnouncementRequest request) {
-    AnnouncementsRecord newRecord = db.newRecord(ANNOUNCEMENTS);
-    newRecord.setTitle(request.getTitle());
-    newRecord.setDescription(request.getDescription());
+    if (request.getEventId() != null) {
+      newRecord.setEventId(request.getEventId());
+    }
     return newRecord;
   }
 }

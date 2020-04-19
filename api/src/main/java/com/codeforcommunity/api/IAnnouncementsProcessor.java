@@ -6,7 +6,6 @@ import com.codeforcommunity.dto.announcements.GetAnnouncementsRequest;
 import com.codeforcommunity.dto.announcements.GetEventSpecificAnnouncementsRequest;
 import com.codeforcommunity.dto.announcements.PostAnnouncementRequest;
 import com.codeforcommunity.dto.announcements.PostAnnouncementResponse;
-import com.codeforcommunity.dto.announcements.PostEventSpecificAnnouncementRequest;
 
 public interface IAnnouncementsProcessor {
 
@@ -44,5 +43,5 @@ public interface IAnnouncementsProcessor {
    * @return the created announcement
    */
   PostAnnouncementResponse postEventSpecificAnnouncement(
-      PostEventSpecificAnnouncementRequest request, JWTData userData);
+      PostAnnouncementRequest request, JWTData userData);
 }

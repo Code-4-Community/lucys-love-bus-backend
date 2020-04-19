@@ -7,7 +7,6 @@ import com.codeforcommunity.dto.announcements.GetAnnouncementsResponse;
 import com.codeforcommunity.dto.announcements.GetEventSpecificAnnouncementsRequest;
 import com.codeforcommunity.dto.announcements.PostAnnouncementRequest;
 import com.codeforcommunity.dto.announcements.PostAnnouncementResponse;
-import com.codeforcommunity.dto.announcements.PostEventSpecificAnnouncementRequest;
 import com.codeforcommunity.exceptions.RequestBodyMappingException;
 import com.codeforcommunity.rest.IRouter;
 import com.codeforcommunity.rest.RestFunctions;
@@ -102,14 +101,14 @@ public class AnnouncementsRouter implements IRouter {
 
   private void handlePostEventSpecificAnnouncement(RoutingContext ctx) {
     Optional<JsonObject> body = Optional.ofNullable(ctx.getBodyAsJson());
-    PostEventSpecificAnnouncementRequest requestData;
+    PostAnnouncementRequest requestData;
     if (body.isPresent()) {
       try {
         JsonObject requestBody = body.get();
         String title = requestBody.getString("title");
         String description = requestBody.getString("description");
         int eventId = RestFunctions.getRequestParameterAsInt(ctx.request(), "event_id");
-        requestData = new PostEventSpecificAnnouncementRequest(eventId, title, description);
+        requestData = new PostAnnouncementRequest(eventId, title, description);
       } catch (IllegalArgumentException | NullPointerException | ClassCastException e) {
         throw new RequestBodyMappingException();
       }
