@@ -24,7 +24,7 @@ public interface IAnnouncementsProcessor {
    * @param userData the JWT data for the user making the request
    * @return the created announcement
    */
-  PostAnnouncementResponse postAnnouncements(PostAnnouncementRequest request, JWTData userData);
+  PostAnnouncementResponse postAnnouncement(PostAnnouncementRequest request, JWTData userData);
 
   /**
    * Gets all the announcements for a particular event.
@@ -35,13 +35,4 @@ public interface IAnnouncementsProcessor {
   GetAnnouncementsResponse getEventSpecificAnnouncements(
       GetEventSpecificAnnouncementsRequest request);
 
-  /**
-   * Creates a new event-specific announcement.
-   *
-   * @param request DTO containing the data for the announcement
-   * @param userData the JWT data for the user making the request
-   * @return the created announcement
-   */
-  PostAnnouncementResponse postEventSpecificAnnouncement(
-      PostAnnouncementRequest request, JWTData userData);
 }

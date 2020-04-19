@@ -64,10 +64,11 @@ public class AnnouncementsProcessorImpl implements IAnnouncementsProcessor {
   }
 
   @Override
-  public PostAnnouncementResponse postAnnouncements(PostAnnouncementRequest request, JWTData userData) {
+  public PostAnnouncementResponse postAnnouncement(PostAnnouncementRequest request, JWTData userData) {
     if (userData.getPrivilegeLevel() != PrivilegeLevel.ADMIN) {
       throw new AdminOnlyRouteException();
     }
+    request.validate();
     AnnouncementsRecord newAnnouncementsRecord = announcementRequestToRecord(request);
     newAnnouncementsRecord.store();
     // the timestamp wasn't showing correctly, so just
@@ -94,23 +95,6 @@ public class AnnouncementsProcessorImpl implements IAnnouncementsProcessor {
             .collect(Collectors.toList()));
   }
 
-  @Override
-  public PostAnnouncementResponse postEventSpecificAnnouncement(
-      PostAnnouncementRequest request, JWTData userData) {
-    if (userData.getPrivilegeLevel() != PrivilegeLevel.ADMIN) {
-      throw new AdminOnlyRouteException();
-    }
-    request.validate();
-
-    AnnouncementsRecord newAnnouncementsRecord = announcementRequestToRecord(request);
-    newAnnouncementsRecord.store();
-    // the timestamp wasn't showing correctly, so just
-    // get the announcement directly from the database
-    return announcementPojoToResponse(db.selectFrom(ANNOUNCEMENTS)
-        .where(ANNOUNCEMENTS.ID.eq(newAnnouncementsRecord.getId()))
-        .fetchInto(Announcements.class).get(0));
-  }
-
   private PostAnnouncementResponse announcementPojoToResponse(Announcements announcements) {
     return new PostAnnouncementResponse(convertAnnouncementObject(announcements));
   }
@@ -123,5 +107,9 @@ public class AnnouncementsProcessorImpl implements IAnnouncementsProcessor {
       newRecord.setEventId(request.getEventId());
     }
     return newRecord;
+  }
+
+  private void validateEventId(int eventId) {
+
   }
 }

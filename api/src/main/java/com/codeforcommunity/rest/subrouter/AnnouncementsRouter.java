@@ -85,7 +85,7 @@ public class AnnouncementsRouter implements IRouter {
     PostAnnouncementRequest requestData = RestFunctions.getJsonBodyAsClass(ctx, PostAnnouncementRequest.class);
     JWTData userData = ctx.get("jwt_data");
 
-    PostAnnouncementResponse response = processor.postAnnouncements(requestData, userData);
+    PostAnnouncementResponse response = processor.postAnnouncement(requestData, userData);
     end(ctx.response(), 200, JsonObject.mapFrom(response).toString());
   }
 
@@ -117,7 +117,7 @@ public class AnnouncementsRouter implements IRouter {
     }
     JWTData userData = ctx.get("jwt_data");
 
-    PostAnnouncementResponse response = processor.postEventSpecificAnnouncement(
+    PostAnnouncementResponse response = processor.postAnnouncement(
         requestData, userData);
     end(ctx.response(), 200, JsonObject.mapFrom(response).toString());
   }
