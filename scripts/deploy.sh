@@ -39,6 +39,10 @@ rm user.properties
 rm pass.properties
 rm input.properties
 
+mv emailer.properties.example emailer.properties
+mv expiration.properties.example expiration.properties
+mv jwt.properties.example jwt.properties
+
 echo "SUCCESS: updated database credentials"
 
 # Perform maven install/package
