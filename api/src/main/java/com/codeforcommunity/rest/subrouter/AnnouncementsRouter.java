@@ -5,12 +5,9 @@ import com.codeforcommunity.auth.JWTData;
 import com.codeforcommunity.dto.announcements.GetAnnouncementsRequest;
 import com.codeforcommunity.dto.announcements.GetAnnouncementsResponse;
 import com.codeforcommunity.dto.announcements.GetEventSpecificAnnouncementsRequest;
-import com.codeforcommunity.dto.announcements.GetEventSpecificAnnouncementsResponse;
 import com.codeforcommunity.dto.announcements.PostAnnouncementRequest;
 import com.codeforcommunity.dto.announcements.PostAnnouncementResponse;
 import com.codeforcommunity.dto.announcements.PostEventSpecificAnnouncementRequest;
-import com.codeforcommunity.dto.announcements.PostEventSpecificAnnouncementResponse;
-import com.codeforcommunity.dto.events.SingleEventResponse;
 import com.codeforcommunity.exceptions.RequestBodyMappingException;
 import com.codeforcommunity.rest.IRouter;
 import com.codeforcommunity.rest.RestFunctions;
@@ -98,7 +95,7 @@ public class AnnouncementsRouter implements IRouter {
     GetEventSpecificAnnouncementsRequest requestData = new GetEventSpecificAnnouncementsRequest(
         eventId);
 
-    GetEventSpecificAnnouncementsResponse response = processor.getEventSpecificAnnouncements(
+    GetAnnouncementsResponse response = processor.getEventSpecificAnnouncements(
         requestData);
     end(ctx.response(), 200, JsonObject.mapFrom(response).encode());
   }
@@ -121,7 +118,7 @@ public class AnnouncementsRouter implements IRouter {
     }
     JWTData userData = ctx.get("jwt_data");
 
-    PostEventSpecificAnnouncementResponse response = processor.postEventSpecificAnnouncement(
+    PostAnnouncementResponse response = processor.postEventSpecificAnnouncement(
         requestData, userData);
     end(ctx.response(), 200, JsonObject.mapFrom(response).toString());
   }

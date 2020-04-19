@@ -4,11 +4,9 @@ import com.codeforcommunity.auth.JWTData;
 import com.codeforcommunity.dto.announcements.GetAnnouncementsResponse;
 import com.codeforcommunity.dto.announcements.GetAnnouncementsRequest;
 import com.codeforcommunity.dto.announcements.GetEventSpecificAnnouncementsRequest;
-import com.codeforcommunity.dto.announcements.GetEventSpecificAnnouncementsResponse;
 import com.codeforcommunity.dto.announcements.PostAnnouncementRequest;
 import com.codeforcommunity.dto.announcements.PostAnnouncementResponse;
 import com.codeforcommunity.dto.announcements.PostEventSpecificAnnouncementRequest;
-import com.codeforcommunity.dto.announcements.PostEventSpecificAnnouncementResponse;
 
 public interface IAnnouncementsProcessor {
 
@@ -35,7 +33,7 @@ public interface IAnnouncementsProcessor {
    * @param request DTO containing the event ID
    * @return a list of announcements for the specified event, wrapped in a DTO
    */
-  GetEventSpecificAnnouncementsResponse getEventSpecificAnnouncements(
+  GetAnnouncementsResponse getEventSpecificAnnouncements(
       GetEventSpecificAnnouncementsRequest request);
 
   /**
@@ -45,6 +43,6 @@ public interface IAnnouncementsProcessor {
    * @param userData the JWT data for the user making the request
    * @return the created announcement
    */
-  PostEventSpecificAnnouncementResponse postEventSpecificAnnouncement(
+  PostAnnouncementResponse postEventSpecificAnnouncement(
       PostEventSpecificAnnouncementRequest request, JWTData userData);
 }

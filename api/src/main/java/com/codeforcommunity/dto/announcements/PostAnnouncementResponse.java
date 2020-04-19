@@ -1,7 +1,5 @@
 package com.codeforcommunity.dto.announcements;
 
-import java.sql.Timestamp;
-
 public class PostAnnouncementResponse {
 
   private Announcement announcement;

@@ -8,11 +8,9 @@ import com.codeforcommunity.dto.announcements.Announcement;
 import com.codeforcommunity.dto.announcements.GetAnnouncementsRequest;
 import com.codeforcommunity.dto.announcements.GetAnnouncementsResponse;
 import com.codeforcommunity.dto.announcements.GetEventSpecificAnnouncementsRequest;
-import com.codeforcommunity.dto.announcements.GetEventSpecificAnnouncementsResponse;
 import com.codeforcommunity.dto.announcements.PostAnnouncementRequest;
 import com.codeforcommunity.dto.announcements.PostAnnouncementResponse;
 import com.codeforcommunity.dto.announcements.PostEventSpecificAnnouncementRequest;
-import com.codeforcommunity.dto.announcements.PostEventSpecificAnnouncementResponse;
 import com.codeforcommunity.enums.PrivilegeLevel;
 import com.codeforcommunity.exceptions.AdminOnlyRouteException;
 import java.sql.Timestamp;
@@ -80,7 +78,7 @@ public class AnnouncementsProcessorImpl implements IAnnouncementsProcessor {
   }
 
   @Override
-  public GetEventSpecificAnnouncementsResponse getEventSpecificAnnouncements(
+  public GetAnnouncementsResponse getEventSpecificAnnouncements(
       GetEventSpecificAnnouncementsRequest request) {
     request.validate();
     int eventId = request.getEventId();
@@ -90,14 +88,14 @@ public class AnnouncementsProcessorImpl implements IAnnouncementsProcessor {
         .orderBy(ANNOUNCEMENTS.CREATED.desc())
         .fetchInto(Announcements.class);
 
-    return new GetEventSpecificAnnouncementsResponse(announcements.size(),
+    return new GetAnnouncementsResponse(announcements.size(),
         announcements.stream()
             .map(this::convertAnnouncementObject)
             .collect(Collectors.toList()));
   }
 
   @Override
-  public PostEventSpecificAnnouncementResponse postEventSpecificAnnouncement(
+  public PostAnnouncementResponse postEventSpecificAnnouncement(
       PostEventSpecificAnnouncementRequest request, JWTData userData) {
     if (userData.getPrivilegeLevel() != PrivilegeLevel.ADMIN) {
       throw new AdminOnlyRouteException();
