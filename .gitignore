@@ -6,3 +6,4 @@
 .settings/
 .vscode/
 .classpath
+.DS_Store

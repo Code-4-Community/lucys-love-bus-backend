@@ -15,8 +15,8 @@ import com.codeforcommunity.exceptions.*;
 
 // Contains tests for RestFunctions.java in main
 public class RestFunctionsTest {
-    HttpServerRequest mockRequest = Mockito.mock(HttpServerRequest.class);
-    RoutingContext mockRoutingContext = Mockito.mock(RoutingContext.class);
+    private final HttpServerRequest mockRequest = Mockito.mock(HttpServerRequest.class);
+    private final RoutingContext mockRoutingContext = Mockito.mock(RoutingContext.class);
 
     // Test for empty JSON response
     @Test
@@ -44,8 +44,11 @@ public class RestFunctionsTest {
 
         LoginRequest result = RestFunctions.getJsonBodyAsClass(mockRoutingContext, LoginRequest.class);
 
-        assertEquals(result.getEmail(), "testdata");
-        assertEquals(result.getPassword(), "testdata");
+        String expectedEmail = "testdata";
+        String expectedPassword = "testdata";
+
+        assertEquals(result.getEmail(), expectedEmail);
+        assertEquals(result.getPassword(), expectedPassword);
     }
 
     // Test for JSON response for new user request
@@ -62,10 +65,15 @@ public class RestFunctionsTest {
 
         NewUserRequest result = RestFunctions.getJsonBodyAsClass(mockRoutingContext, NewUserRequest.class);
 
-        assertEquals(result.getEmail(), "brandon@example.com");
-        assertEquals(result.getPassword(), "password");
-        assertEquals(result.getFirstName(), "brandon");
-        assertEquals(result.getLastName(), "liang");
+        String expectedEmail = "brandon@example.com";
+        String expectedPassword = "password";
+        String expectedFirstName = "brandon";
+        String expectedLastName = "liang";
+
+        assertEquals(result.getEmail(), expectedEmail);
+        assertEquals(result.getPassword(), expectedPassword);
+        assertEquals(result.getFirstName(), expectedFirstName);
+        assertEquals(result.getLastName(), expectedLastName);
     }
 
     // test request header for existence
@@ -102,8 +110,9 @@ public class RestFunctionsTest {
         .thenReturn(myInt);
 
         int result = RestFunctions.getRequestParameterAsInt(mockRequest, myInt);
+        int expectedResult = 200;
 
-        assertEquals(result, 200);
+        assertEquals(result, expectedResult);
     }
 
     // test request parameter as int when given negative int
@@ -115,8 +124,9 @@ public class RestFunctionsTest {
         .thenReturn(myInt);
 
         int result = RestFunctions.getRequestParameterAsInt(mockRequest, myInt);
+        int expectedResult = -200;
 
-        assertEquals(result, -200);
+        assertEquals(result, expectedResult);
     }
 
     // test request parameter exception when given malformed int
@@ -141,7 +151,7 @@ public class RestFunctionsTest {
 
         String result = RestFunctions.getRequestParameterAsString(mockRequest, myInt);
 
-        assertEquals(result, "200");
+        assertEquals(result, myInt);
     }
 
     // test request parameter as string when given all letters
