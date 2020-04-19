@@ -7,8 +7,12 @@ import com.codeforcommunity.auth.JWTData;
 import com.codeforcommunity.dto.announcements.Announcement;
 import com.codeforcommunity.dto.announcements.GetAnnouncementsRequest;
 import com.codeforcommunity.dto.announcements.GetAnnouncementsResponse;
+import com.codeforcommunity.dto.announcements.GetEventSpecificAnnouncementsRequest;
+import com.codeforcommunity.dto.announcements.GetEventSpecificAnnouncementsResponse;
 import com.codeforcommunity.dto.announcements.PostAnnouncementRequest;
 import com.codeforcommunity.dto.announcements.PostAnnouncementResponse;
+import com.codeforcommunity.dto.announcements.PostEventSpecificAnnouncementRequest;
+import com.codeforcommunity.dto.announcements.PostEventSpecificAnnouncementResponse;
 import com.codeforcommunity.enums.PrivilegeLevel;
 import com.codeforcommunity.exceptions.AdminOnlyRouteException;
 import java.sql.Timestamp;
@@ -75,6 +79,40 @@ public class AnnouncementsProcessorImpl implements IAnnouncementsProcessor {
         .fetchInto(Announcements.class).get(0));
   }
 
+  @Override
+  public GetEventSpecificAnnouncementsResponse getEventSpecificAnnouncements(
+      GetEventSpecificAnnouncementsRequest request) {
+    request.validate();
+    int eventId = request.getEventId();
+
+    List<Announcements> announcements = db.selectFrom(ANNOUNCEMENTS)
+        .where(ANNOUNCEMENTS.EVENT_ID.eq(eventId))
+        .orderBy(ANNOUNCEMENTS.CREATED.desc())
+        .fetchInto(Announcements.class);
+
+    return new GetEventSpecificAnnouncementsResponse(announcements.size(),
+        announcements.stream()
+            .map(this::convertAnnouncementObject)
+            .collect(Collectors.toList()));
+  }
+
+  @Override
+  public PostEventSpecificAnnouncementResponse postEventSpecificAnnouncement(
+      PostEventSpecificAnnouncementRequest request, JWTData userData) {
+    if (userData.getPrivilegeLevel() != PrivilegeLevel.ADMIN) {
+      throw new AdminOnlyRouteException();
+    }
+    request.validate();
+
+    AnnouncementsRecord newAnnouncementsRecord = eventSpecificAnnouncementRequestToRecord(request);
+    newAnnouncementsRecord.store();
+    // the timestamp wasn't showing correctly, so just
+    // get the announcement directly from the database
+    return announcementPojoToResponse(db.selectFrom(ANNOUNCEMENTS)
+        .where(ANNOUNCEMENTS.ID.eq(newAnnouncementsRecord.getId()))
+        .fetchInto(Announcements.class).get(0));
+  }
+
   private PostAnnouncementResponse announcementPojoToResponse(Announcements announcements) {
     return new PostAnnouncementResponse(new Announcement(
         announcements.getId(),
@@ -84,6 +122,15 @@ public class AnnouncementsProcessorImpl implements IAnnouncementsProcessor {
   }
 
   private AnnouncementsRecord announcementRequestToRecord(PostAnnouncementRequest request) {
+    AnnouncementsRecord newRecord = db.newRecord(ANNOUNCEMENTS);
+    newRecord.setTitle(request.getTitle());
+    newRecord.setDescription(request.getDescription());
+    return newRecord;
+  }
+
+  //TODO: Abstract this and the above method, remove effectively duplicated classes
+  private AnnouncementsRecord eventSpecificAnnouncementRequestToRecord(
+      PostEventSpecificAnnouncementRequest request) {
     AnnouncementsRecord newRecord = db.newRecord(ANNOUNCEMENTS);
     newRecord.setTitle(request.getTitle());
     newRecord.setDescription(request.getDescription());

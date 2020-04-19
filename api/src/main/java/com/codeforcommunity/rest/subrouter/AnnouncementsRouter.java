@@ -101,7 +101,6 @@ public class AnnouncementsRouter implements IRouter {
     GetEventSpecificAnnouncementsResponse response = processor.getEventSpecificAnnouncements(
         requestData);
     end(ctx.response(), 200, JsonObject.mapFrom(response).encode());
-
   }
 
   private void handlePostEventSpecificAnnouncement(RoutingContext ctx) {
