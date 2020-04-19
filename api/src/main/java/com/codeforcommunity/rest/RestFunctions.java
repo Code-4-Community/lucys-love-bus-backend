@@ -5,7 +5,9 @@ import com.codeforcommunity.exceptions.MissingHeaderException;
 import com.codeforcommunity.exceptions.MissingParameterException;
 import com.codeforcommunity.exceptions.RequestBodyMappingException;
 
+import java.sql.Timestamp;
 import java.util.Optional;
+import java.util.function.Function;
 
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonObject;
@@ -57,5 +59,37 @@ public interface RestFunctions {
     }
     throw new MissingParameterException(name);
   }
+
+  static <T> Optional<T> getNullableQueryParam(RoutingContext ctx, String name,
+                                                  Function<String, T> mapper) {
+    Optional<String> paramValue = Optional.ofNullable(ctx.request().getParam(name));
+    T returnValue;
+    if(paramValue.isPresent()) {
+      try {
+        returnValue = mapper.apply(paramValue.get());
+      } catch (Throwable t) {
+        throw new MalformedParameterException(name);
+      }
+    }
+    else {
+      returnValue = null;
+    }
+    return Optional.ofNullable(returnValue);
+  }
+
+  static Function<String, Integer> getCountParamMapper() {
+    return Integer::parseInt;
+  }
+
+  static Function<String, Timestamp> getDateParamMapper() {
+    return Timestamp::valueOf;
+  }
+
+  //todo if string format in spec lines up with contructor for timestamp
+
+
+  //todo unit test this class
+
+
 
 }

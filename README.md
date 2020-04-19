@@ -15,8 +15,10 @@ Right click Databases and select create.
 Set the name to 'checkin' and then select your created user.
 
 #### Update Secret Files
-1. Update the properties file in `/common/src/main/resources/db.properties` to contain your database connection information.
-You should only have to change the username and password. 
+1. Create a copy of the file `/common/src/main/resources/db.properties.example` at `/common/src/main/resources/db.properties`.
+2. Update the file at `/common/src/main/resources/db.properties` to contain your database connection information.
+You should only have to change the username and password.
+3. Copy the other `.example` files and remove the `.example` extension when you do so.
 
 #### Compile the code base
 1. Run `mvn clean install` from the root directory
