@@ -72,14 +72,25 @@ public class AnnouncementsProcessorImpl implements IAnnouncementsProcessor {
     if (userData.getPrivilegeLevel() != PrivilegeLevel.ADMIN) {
       throw new AdminOnlyRouteException();
     }
-    request.validate();
-    if (request.getEventId() != null) {
-      validateEventId(request.getEventId());
-    }
     AnnouncementsRecord newAnnouncementsRecord = announcementRequestToRecord(request);
     newAnnouncementsRecord.store();
     // the timestamp wasn't showing correctly, so just
     // get the announcement directly from the database
+    return announcementPojoToResponse(db.selectFrom(ANNOUNCEMENTS)
+        .where(ANNOUNCEMENTS.ID.eq(newAnnouncementsRecord.getId()))
+        .fetchInto(Announcements.class).get(0));
+  }
+
+  @Override
+  public PostAnnouncementResponse postEventSpecificAnnouncement(PostAnnouncementRequest request,
+      JWTData userData, int eventId) {
+    if (userData.getPrivilegeLevel() != PrivilegeLevel.ADMIN) {
+      throw new AdminOnlyRouteException();
+    }
+    validateEventId(eventId);
+    AnnouncementsRecord newAnnouncementsRecord = announcementRequestToRecord(request);
+    newAnnouncementsRecord.setEventId(eventId);
+    newAnnouncementsRecord.store();
     return announcementPojoToResponse(db.selectFrom(ANNOUNCEMENTS)
         .where(ANNOUNCEMENTS.ID.eq(newAnnouncementsRecord.getId()))
         .fetchInto(Announcements.class).get(0));
@@ -111,9 +122,6 @@ public class AnnouncementsProcessorImpl implements IAnnouncementsProcessor {
     AnnouncementsRecord newRecord = db.newRecord(ANNOUNCEMENTS);
     newRecord.setTitle(request.getTitle());
     newRecord.setDescription(request.getDescription());
-    if (request.getEventId() != null) {
-      newRecord.setEventId(request.getEventId());
-    }
     return newRecord;
   }
 

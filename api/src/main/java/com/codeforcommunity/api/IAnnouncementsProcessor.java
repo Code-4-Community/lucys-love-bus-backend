@@ -35,4 +35,14 @@ public interface IAnnouncementsProcessor {
   GetAnnouncementsResponse getEventSpecificAnnouncements(
       GetEventSpecificAnnouncementsRequest request);
 
+  /**
+   * Creates a new event-specific announcement.
+   *
+   * @param request DTO containing the data for the announcement
+   * @param userData the JWT data for the user making the request
+   * @param eventId the ID of the event
+   * @return the created announcement
+   */
+  PostAnnouncementResponse postEventSpecificAnnouncement(PostAnnouncementRequest request,
+      JWTData userData, int eventId);
 }

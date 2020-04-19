@@ -82,7 +82,8 @@ public class AnnouncementsRouter implements IRouter {
   }
 
   private void handlePostAnnouncement(RoutingContext ctx) {
-    PostAnnouncementRequest requestData = RestFunctions.getJsonBodyAsClass(ctx, PostAnnouncementRequest.class);
+    PostAnnouncementRequest requestData = RestFunctions.getJsonBodyAsClass(ctx,
+        PostAnnouncementRequest.class);
     JWTData userData = ctx.get("jwt_data");
 
     PostAnnouncementResponse response = processor.postAnnouncement(requestData, userData);
@@ -100,25 +101,13 @@ public class AnnouncementsRouter implements IRouter {
   }
 
   private void handlePostEventSpecificAnnouncement(RoutingContext ctx) {
-    Optional<JsonObject> body = Optional.ofNullable(ctx.getBodyAsJson());
-    PostAnnouncementRequest requestData;
-    if (body.isPresent()) {
-      try {
-        JsonObject requestBody = body.get();
-        String title = requestBody.getString("title");
-        String description = requestBody.getString("description");
-        int eventId = RestFunctions.getRequestParameterAsInt(ctx.request(), "event_id");
-        requestData = new PostAnnouncementRequest(eventId, title, description);
-      } catch (IllegalArgumentException | NullPointerException | ClassCastException e) {
-        throw new RequestBodyMappingException();
-      }
-    } else {
-      throw new RequestBodyMappingException();
-    }
+    PostAnnouncementRequest requestData = RestFunctions.getJsonBodyAsClass(ctx,
+        PostAnnouncementRequest.class);
     JWTData userData = ctx.get("jwt_data");
 
-    PostAnnouncementResponse response = processor.postAnnouncement(
-        requestData, userData);
+    PostAnnouncementResponse response = processor.postEventSpecificAnnouncement(
+        requestData, userData, RestFunctions.getRequestParameterAsInt(ctx.request(),
+            "event_id"));
     end(ctx.response(), 200, JsonObject.mapFrom(response).toString());
   }
 }
