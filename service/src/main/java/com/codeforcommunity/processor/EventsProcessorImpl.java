@@ -182,8 +182,7 @@ public class EventsProcessorImpl implements IEventsProcessor {
    * @return an int representing the number of available spaces.
    */
   private int getSpotsAvailable(Events event) {
-    Result<UserEventsRecord> userEventsRecord = db.selectFrom(USER_EVENTS)
-        .where(USER_EVENTS.EVENT_ID.eq(event.getId())).fetch();
-    return event.getCapacity() - userEventsRecord.size();
+    int userEvents = db.fetchCount(USER_EVENTS.where(USER_EVENTS.EVENT_ID.eq(event.getId())));
+    return event.getCapacity() - userEvents;
   }
 }
