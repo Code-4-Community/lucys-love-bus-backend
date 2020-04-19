@@ -21,6 +21,7 @@ ADD common ${WORK_DIR}/common
 ADD persist ${WORK_DIR}/persist
 ADD service ${WORK_DIR}/service
 ADD pom.xml ${WORK_DIR}/pom.xml
+ADD scripts ${WORK_DIR}
 
 RUN rm -rf ${WORK_DIR}/service/test
 RUN rm -rf ${WORK_DIR}/service/src/test
