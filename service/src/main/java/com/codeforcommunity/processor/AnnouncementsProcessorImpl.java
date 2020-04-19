@@ -1,6 +1,7 @@
 package com.codeforcommunity.processor;
 
 import static org.jooq.generated.Tables.ANNOUNCEMENTS;
+import static org.jooq.generated.Tables.EVENTS;
 
 import com.codeforcommunity.api.IAnnouncementsProcessor;
 import com.codeforcommunity.auth.JWTData;
@@ -12,11 +13,13 @@ import com.codeforcommunity.dto.announcements.PostAnnouncementRequest;
 import com.codeforcommunity.dto.announcements.PostAnnouncementResponse;
 import com.codeforcommunity.enums.PrivilegeLevel;
 import com.codeforcommunity.exceptions.AdminOnlyRouteException;
+import com.codeforcommunity.exceptions.MalformedParameterException;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.jooq.DSLContext;
 import org.jooq.generated.tables.pojos.Announcements;
+import org.jooq.generated.tables.pojos.Events;
 import org.jooq.generated.tables.records.AnnouncementsRecord;
 
 public class AnnouncementsProcessorImpl implements IAnnouncementsProcessor {
@@ -69,6 +72,9 @@ public class AnnouncementsProcessorImpl implements IAnnouncementsProcessor {
       throw new AdminOnlyRouteException();
     }
     request.validate();
+    if (request.getEventId() != null) {
+      validateEventId(request.getEventId());
+    }
     AnnouncementsRecord newAnnouncementsRecord = announcementRequestToRecord(request);
     newAnnouncementsRecord.store();
     // the timestamp wasn't showing correctly, so just
@@ -83,6 +89,7 @@ public class AnnouncementsProcessorImpl implements IAnnouncementsProcessor {
       GetEventSpecificAnnouncementsRequest request) {
     request.validate();
     int eventId = request.getEventId();
+    validateEventId(eventId);
 
     List<Announcements> announcements = db.selectFrom(ANNOUNCEMENTS)
         .where(ANNOUNCEMENTS.EVENT_ID.eq(eventId))
@@ -110,6 +117,10 @@ public class AnnouncementsProcessorImpl implements IAnnouncementsProcessor {
   }
 
   private void validateEventId(int eventId) {
-
+    List<Events> matchingEvents = db.selectFrom(EVENTS).where(EVENTS.ID.eq(eventId)).fetchInto(
+        Events.class);
+    if (matchingEvents.size() == 0) {
+      throw new MalformedParameterException("event_id");
+    }
   }
 }
