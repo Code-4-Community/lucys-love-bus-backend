@@ -1,5 +1,6 @@
 package com.codeforcommunity.rest;
 
+import com.codeforcommunity.api.IAnnouncementsProcessor;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.*;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
@@ -32,12 +33,13 @@ public class ApiRouterTest {
     IAuthProcessor myIAuthProcessor = mock(IAuthProcessor.class);
     IRequestsProcessor myIRequestsProcessor = mock(IRequestsProcessor.class);
     IEventsProcessor myIEventsProcessor = mock(IEventsProcessor.class);
+    IAnnouncementsProcessor myIAnnouncementsProcessor = mock(IAnnouncementsProcessor.class);
     JWTAuthorizer myJWTAuthorizer = mock(JWTAuthorizer.class);
 
     @Test
     // example unit test for the main api router
     public void testApiRouter1() {
-        ApiRouter router = new ApiRouter(myIAuthProcessor, myIRequestsProcessor, myIEventsProcessor, myJWTAuthorizer);
+        ApiRouter router = new ApiRouter(myIAuthProcessor, myIRequestsProcessor, myIEventsProcessor, myIAnnouncementsProcessor, myJWTAuthorizer);
         Vertx vertx = Vertx.vertx();
 
         vertx.createHttpServer().requestHandler(router.initializeRouter(vertx)).listen(8080);
