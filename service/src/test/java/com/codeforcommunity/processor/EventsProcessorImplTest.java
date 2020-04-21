@@ -1,10 +1,12 @@
 package com.codeforcommunity.processor;
 
+import com.codeforcommunity.JooqMock;
 import org.jooq.DSLContext;
 import com.codeforcommunity.auth.JWTCreator;
 import com.codeforcommunity.auth.JWTData;
 import com.codeforcommunity.dto.events.*;
 
+import org.junit.Before;
 import org.mockito.Mockito;
 import static org.mockito.Mockito.when;
 import static org.junit.Assert.assertEquals;
@@ -16,7 +18,15 @@ import com.codeforcommunity.exceptions.*;
 
 // Contains tests for EventsProcessorImplTest.java in main
 public class EventsProcessorImplTest {
-  EventsProcessorImpl myEventsProcessorImpl = Mockito.mock(EventsProcessorImpl.class);
+  JooqMock myJooqMock;
+  EventsProcessorImpl myEventsProcessorImpl;
+
+  // set up all the mocks
+  @Before
+  public void setup() {
+    this.myJooqMock = new JooqMock();
+    this.myEventsProcessorImpl = new EventsProcessorImpl(myJooqMock.getContext());
+  }
 
   // test exception thrown for not being an admin
   @Test(expected = AdminOnlyRouteException.class)
@@ -41,8 +51,6 @@ public class EventsProcessorImplTest {
     assertEquals(res.getThumbnail(), "sample thumbnail");
     assertEquals(res.getDetails(), null);
   }
-
-  // add two more tests with details
 
   // test getting an event id that's not there
   @Test(expected = NullPointerException.class)
