@@ -100,19 +100,23 @@ public class AuthProcessorImplTest {
     }
 
     // test log in where all the fields are null
-    @Test(expected = AuthException.class)
+    @Test
     public void testLogin1() {
         List<UpdatableRecordImpl> emptySelectStatement = new ArrayList<UpdatableRecordImpl>();
         myJooqMock.addReturn("SELECT", emptySelectStatement);
 
         LoginRequest myLoginRequest = new LoginRequest();
 
-        when(myAuthProcessorImpl.login(myLoginRequest))
-        .thenThrow(new AuthException("Could not validate username password combination"));
+        try {
+            myAuthProcessorImpl.login(myLoginRequest);
+            fail();
+        } catch (AuthException e) {
+            assertEquals(e.getMessage(), "Could not validate username password combination");
+        }
     }
 
     // test log in with user email not found
-    @Test(expected = AuthException.class)
+    @Test
     public void testLogin2() {
         List<UpdatableRecordImpl> emptySelectStatement = new ArrayList<UpdatableRecordImpl>();
         myJooqMock.addReturn("SELECT", emptySelectStatement);
@@ -122,12 +126,16 @@ public class AuthProcessorImplTest {
         myLoginRequest.setEmail("incorrect@email.com");
         myLoginRequest.setPassword("incorrect");
 
-        when(myAuthProcessorImpl.login(myLoginRequest))
-        .thenThrow(new AuthException("Could not validate username password combination"));
+        try {
+            myAuthProcessorImpl.login(myLoginRequest);
+            fail();
+        } catch (AuthException e) {
+            assertEquals(e.getMessage(), "Could not validate username password combination");
+        }
     }
 
     // test log in with user incorrect password
-    @Test(expected = AuthException.class)
+    @Test
     public void testLogin3() {
         // make a user record
         UsersRecord record = myJooqMock.getContext().newRecord(Tables.USERS);
@@ -150,8 +158,12 @@ public class AuthProcessorImplTest {
         myLoginRequest.setEmail("conner@example.com");
         myLoginRequest.setPassword("incorrect");
 
-        when(myAuthProcessorImpl.login(myLoginRequest))
-                .thenThrow(new AuthException("Could not validate username password combination"));
+        try {
+            myAuthProcessorImpl.login(myLoginRequest);
+            fail();
+        } catch (AuthException e) {
+            assertEquals(e.getMessage(), "Could not validate username password combination");
+        }
     }
 
     // test log in with correct credentials 1
