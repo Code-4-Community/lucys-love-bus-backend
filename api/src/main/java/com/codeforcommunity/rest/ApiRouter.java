@@ -11,6 +11,7 @@ import com.codeforcommunity.rest.subrouter.AuthRouter;
 import com.codeforcommunity.rest.subrouter.CommonRouter;
 import com.codeforcommunity.rest.subrouter.EventsRouter;
 import com.codeforcommunity.rest.subrouter.PfRequestRouter;
+import com.codeforcommunity.rest.subrouter.CheckoutRouter;
 import io.vertx.core.Vertx;
 
 import io.vertx.core.http.HttpServerResponse;
@@ -23,6 +24,7 @@ public class ApiRouter implements IRouter {
     private final PfRequestRouter requestRouter;
     private final EventsRouter eventsRouter;
     private final AnnouncementsRouter announcementsRouter;
+    private final CheckoutRouter checkoutRouter;
 
     public ApiRouter(IAuthProcessor authProcessor, IRequestsProcessor requestsProcessor,
         IEventsProcessor eventsProcessor, IAnnouncementsProcessor announcementEventsProcessor,
@@ -32,6 +34,7 @@ public class ApiRouter implements IRouter {
         this.requestRouter = new PfRequestRouter(requestsProcessor);
         this.eventsRouter = new EventsRouter(eventsProcessor);
         this.announcementsRouter = new AnnouncementsRouter(announcementEventsProcessor);
+        this.checkoutRouter = new CheckoutRouter(null);
     }
 
     /**
@@ -56,6 +59,7 @@ public class ApiRouter implements IRouter {
         router.mountSubRouter("/requests", requestRouter.initializeRouter(vertx));
         router.mountSubRouter("/events", eventsRouter.initializeRouter(vertx));
         router.mountSubRouter("/announcements", announcementsRouter.initializeRouter(vertx));
+        router.mountSubRouter("/checkout", checkoutRouter.initializeRouter(vertx));
 
         return router;
     }
