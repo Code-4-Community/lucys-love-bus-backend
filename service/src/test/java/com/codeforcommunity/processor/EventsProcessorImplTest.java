@@ -50,7 +50,7 @@ public class EventsProcessorImplTest {
     assertEquals(res.getSpotsAvailable(), 5);
     assertEquals(res.getThumbnail(), "sample thumbnail");
     assertEquals(res.getDetails(), null);
-  }
+  } 
 
   // test getting an event id that's not there
   @Test(expected = NullPointerException.class)

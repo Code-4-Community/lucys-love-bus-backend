@@ -7,6 +7,7 @@ import com.codeforcommunity.enums.PrivilegeLevel;
 import java.util.*;
 
 import org.jooq.generated.Tables;
+import org.jooq.generated.tables.records.BlacklistedRefreshesRecord;
 import org.jooq.generated.tables.records.UsersRecord;
 import org.jooq.impl.UpdatableRecordImpl;
 import org.junit.Before;
@@ -213,37 +214,67 @@ public class AuthProcessorImplTest {
         assertEquals(res.getRefreshToken(), "sample refresh token");
     }
 
-    /*
-    // test session refresh with refresh token invalidated by a previous logout
-    @Test(expected = AuthException.class)
+    // test session refresh with correctly refreshed token
+    @Test
     public void testRefreshSession1() {
-        RefreshSessionRequest previouslyInvalidated = new RefreshSessionRequest("invalidated by a previous logout");
+        List<UpdatableRecordImpl> emptySelectStatement = new ArrayList<UpdatableRecordImpl>();
+        myJooqMock.addReturn("SELECT", emptySelectStatement);
 
-        when(myAuthProcessorImpl.refreshSession(previouslyInvalidated))
-        .thenThrow(new AuthException("The refresh token has been invalidated by a previous logout"));
+        Optional<String> accessToken = Optional.of("sample access token");
+
+        when(mockJWTCreator.getNewAccessToken(anyString()))
+                .thenReturn(accessToken);
+
+        RefreshSessionRequest myRefreshSessionRequest = new RefreshSessionRequest("valid. refresh. request");
+
+        RefreshSessionResponse res = myAuthProcessorImpl.refreshSession(myRefreshSessionRequest);
+
+        assertEquals(res.getFreshAccessToken(), "sample access token");
     }
 
     // test session refresh with invalid refresh token 
-    @Test(expected = AuthException.class)
+    @Test
     public void testRefreshSession2() {
-        RefreshSessionRequest invalid = new RefreshSessionRequest("invalid refresh token");
+        List<UpdatableRecordImpl> emptySelectStatement = new ArrayList<UpdatableRecordImpl>();
+        myJooqMock.addReturn("SELECT", emptySelectStatement);
 
-        when(myAuthProcessorImpl.refreshSession(invalid))
-        .thenThrow(new AuthException("The given refresh token is invalid"));
+        Optional<String> accessToken = Optional.empty();
+
+        when(mockJWTCreator.getNewAccessToken(anyString()))
+                .thenReturn(accessToken);
+
+        RefreshSessionRequest invalid = new RefreshSessionRequest("invalid. refresh. request");
+
+        try {
+            myAuthProcessorImpl.refreshSession(invalid);
+            fail();
+        } catch (AuthException e) {
+            assertEquals(e.getMessage(), "The given refresh token is invalid");
+        }
     }
 
-    // test session refresh with correctly refreshed token
+    // test session refresh with token invalidated by a previous logout
     @Test
     public void testRefreshSession3() {
-        JWTCreator jwtCreator = Mockito.mock(JWTCreator.class);
-        String correctToken = "this one works";
-        RefreshSessionRequest valid = new RefreshSessionRequest(correctToken);
+        BlacklistedRefreshesRecord record = myJooqMock.getContext().newRecord(Tables.BLACKLISTED_REFRESHES);
+        record.setRefreshHash("sample access token");
+        myJooqMock.addReturn("SELECT", record);
 
-        RefreshSessionResponse res = new RefreshSessionResponse() {{
-            setFreshAccessToken(jwtCreator.getNewAccessToken(correctToken).get());
-        }};
+        List<UpdatableRecordImpl> emptySelectStatement = new ArrayList<UpdatableRecordImpl>();
+        myJooqMock.addReturn("SELECT", emptySelectStatement);
 
-        assertEquals(myAuthProcessorImpl.refreshSession(valid), res);
+        Optional<String> accessToken = Optional.of("sample access token");
+
+        when(mockJWTCreator.getNewAccessToken(anyString()))
+                .thenReturn(accessToken);
+
+        RefreshSessionRequest invalid = new RefreshSessionRequest("invalid. refresh. request");
+
+        try {
+            myAuthProcessorImpl.refreshSession(invalid);
+            fail();
+        } catch (AuthException e) {
+            assertEquals(e.getMessage(), "The refresh token has been invalidated by a previous logout");
+        }
     }
-    */
 }
