@@ -1,5 +1,6 @@
 package com.codeforcommunity.processor;
 
+import com.codeforcommunity.JooqMock;
 import org.jooq.DSLContext;
 import com.codeforcommunity.auth.JWTCreator;
 import com.codeforcommunity.auth.JWTData;
@@ -9,6 +10,8 @@ import com.codeforcommunity.dto.pfrequests.RequestData;
 import com.codeforcommunity.enums.RequestStatus;
 
 import java.util.*;
+
+import org.junit.Before;
 import org.mockito.Mockito;
 import static org.mockito.Mockito.when;
 import static org.junit.Assert.assertEquals;
@@ -19,7 +22,15 @@ import com.codeforcommunity.exceptions.*;
 
 // Contains tests for RequestsProcessorImpl.java in main
 public class RequestsProcessorImplTest {
+  JooqMock myJooqMock;
   RequestsProcessorImpl myRequestsProcessorImpl = Mockito.mock(RequestsProcessorImpl.class);
+
+  // set up all the mocks
+  @Before
+  public void setup() {
+    this.myJooqMock = new JooqMock();
+    this.myRequestsProcessorImpl = new RequestsProcessorImpl(myJooqMock.getContext());
+  }
   
   // consider using the void methods in RequestsProcessorImpl.java to mutate the DB before running further tests
 
