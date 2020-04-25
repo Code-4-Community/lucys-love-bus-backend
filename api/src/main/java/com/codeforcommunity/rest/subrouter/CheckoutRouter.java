@@ -2,6 +2,7 @@ package com.codeforcommunity.rest.subrouter;
 
 import com.codeforcommunity.api.IEventsProcessor;
 import com.codeforcommunity.auth.JWTData;
+import com.codeforcommunity.dto.checkout.PostCheckoutRequest;
 import com.codeforcommunity.dto.events.CreateEventRequest;
 import com.codeforcommunity.dto.events.SingleEventResponse;
 import com.codeforcommunity.rest.IRouter;
@@ -43,42 +44,33 @@ public class CheckoutRouter implements IRouter {
     private void handleCheckoutSession(RoutingContext ctx) {
         Stripe.apiKey = "sk_test_Q2wTkIY5Z3h9pjtgkksJULj200M84LsI3q";
 
-        List<Object> paymentMethodTypes =
-                new ArrayList<>();
-        paymentMethodTypes.add("card");
-        List<Object> lineItems = new ArrayList<>();
-        Map<String, Object> lineItem1 = new HashMap<>();
-        lineItem1.put("name", "T-shirt");
-        lineItem1.put(
-                "description",
-                "Comfortable cotton t-shirt"
-        );
-        lineItem1.put("amount", 1500);
-        lineItem1.put("currency", "usd");
-        lineItem1.put("quantity", 2);
-        lineItems.add(lineItem1);
+        PostCheckoutRequest request = RestFunctions.getJsonBodyAsClass(ctx, PostCheckoutRequest.class);
+
         Map<String, Object> params = new HashMap<>();
         params.put(
                 "success_url",
-                "https://example.com/success"
+                request.getSuccess_url()
         );
         params.put(
                 "cancel_url",
-                "https://example.com/cancel"
+                request.getCancel_url()
         );
         params.put(
                 "payment_method_types",
-                paymentMethodTypes
+                request.getPayment_method_types()
         );
-        params.put("line_items", lineItems);
+        params.put(
+                "line_items",
+                request.getLine_items()
+        );
 
         try {
             Session session = Session.create(params);
+
+            end(ctx.response(), 200, session.getId());
         } catch (Exception e) {
             end(ctx.response(), 500, "Failed to create session");
         }
-
-        end(ctx.response(), 200, "JsonObject.mapFrom(response).encode()");
     }
 
 }
