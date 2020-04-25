@@ -1,4 +1,6 @@
-package com.codeforcommunity.dto.events;
+package com.codeforcommunity.dto.userEvents.responses;
+
+import com.codeforcommunity.dto.userEvents.components.EventDetails;
 
 public class SingleEventResponse {
   private int id;

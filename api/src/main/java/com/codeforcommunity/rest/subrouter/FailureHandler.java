@@ -86,7 +86,7 @@ public class FailureHandler {
 
   public void handleOutstandingRequestException(RoutingContext ctx) {
      String message = "This user cannot open another request until all pending requests are reviewed by an admin";
-     end(ctx, message, 429); //TODO
+     end(ctx, message, 429);
   }
 
   public void handleResourceNotOwned(RoutingContext ctx, ResourceNotOwnedException exception) {
