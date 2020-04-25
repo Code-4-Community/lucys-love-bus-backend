@@ -6,8 +6,11 @@ import com.codeforcommunity.exceptions.MissingParameterException;
 import com.codeforcommunity.exceptions.RequestBodyMappingException;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonObject;
@@ -60,13 +63,22 @@ public interface RestFunctions {
     throw new MissingParameterException(name);
   }
 
-  static <T> Optional<T> getNullableQueryParam(RoutingContext ctx, String name,
-                                                  Function<String, T> mapper) {
-    Optional<String> paramValue = Optional.ofNullable(ctx.request().getParam(name));
+  /**
+   * Get's a query parameter that may or may not be there as an optional of the desired type. Attempts to map the
+   * query parameter from a string to an instance of the desired type.
+   * @param ctx routing context to retrieve query param from.
+   * @param name of query param.
+   * @param mapper a function that maps the query param from string to desired type.
+   * @param <T> the desired type.
+   * @return An optional object of the query param as it's desired type.
+   */
+  static <T> Optional<T> getOptionalQueryParam(RoutingContext ctx, String name,
+                                               Function<String, T> mapper) {
+    List<String> params = ctx.queryParam(name);
     T returnValue;
-    if(paramValue.isPresent()) {
+    if(!params.isEmpty()) {
       try {
-        returnValue = mapper.apply(paramValue.get());
+        returnValue = mapper.apply(params.get(0));
       } catch (Throwable t) {
         throw new MalformedParameterException(name);
       }
@@ -77,19 +89,25 @@ public interface RestFunctions {
     return Optional.ofNullable(returnValue);
   }
 
-  static Function<String, Integer> getCountParamMapper() {
-    return Integer::parseInt;
+  /**
+   * Get's List of query parameters associated with given name. Attempts to map each parameter to the desired type.
+   * Only returns the values that can be mapped.
+   * @param ctx routing context to retrieve query param from.
+   * @param name of query param.
+   * @param mapper a function that maps the query param from string to desired type.
+   * @param <T> the desired type.
+   * @return A list of the desired type of all the values of the query param that could successfully be mapped.
+   */
+  static <T> List<T> getMultipleQueryParams(RoutingContext ctx, String name, Function<String, T> mapper) {
+    List<String> queryParam = ctx.queryParam(name);
+    return new ArrayList() {{
+      for (String s: queryParam) {
+        try {
+          add(mapper.apply(s));
+        } catch (Throwable t) {
+          //do nothing
+        }
+      }
+    }};
   }
-
-  static Function<String, Timestamp> getDateParamMapper() {
-    return Timestamp::valueOf;
-  }
-
-  //todo if string format in spec lines up with contructor for timestamp
-
-
-  //todo unit test this class
-
-
-
 }
