@@ -1,0 +1,11 @@
+db_creds = { 
+	
+	"database" : "add_me",
+	"user" : "add_me",
+	"password" : "add_me",
+	"host" : "localhost"
+
+}
+
+host = "http://localhost:8081/api/v1";
+
