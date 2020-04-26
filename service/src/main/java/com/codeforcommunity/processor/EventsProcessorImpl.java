@@ -137,10 +137,11 @@ public class EventsProcessorImpl implements IEventsProcessor {
    * @return
    */
   private int getSpotsLeft(int eventId) {
-
-    return db.select(EVENTS.CAPACITY.minus(count())).from(EVENTS.join(USER_EVENTS).on(EVENTS.ID.eq(USER_EVENTS.EVENT_ID)))
-            .where(EVENTS.ID.eq(eventId)).groupBy(EVENTS.ID).fetchOneInto(Integer.class);
-
+    return db.select(EVENTS.CAPACITY.minus(count()))
+        .from(EVENTS.leftJoin(USER_EVENTS).on(EVENTS.ID.eq(USER_EVENTS.EVENT_ID)))
+        .where(EVENTS.ID.eq(eventId))
+        .groupBy(EVENTS.ID)
+        .fetchOneInto(Integer.class);
   }
 
   /**
@@ -160,6 +161,7 @@ public class EventsProcessorImpl implements IEventsProcessor {
     EventsRecord newRecord = db.newRecord(EVENTS);
     newRecord.setTitle(request.getTitle());
     newRecord.setDescription(request.getDetails().getDescription());
+    newRecord.setThumbnail(request.getThumbnail());
     newRecord.setCapacity(request.getSpotsAvailable());
     newRecord.setLocation(request.getDetails().getLocation());
     newRecord.setStartTime(request.getDetails().getStart());
