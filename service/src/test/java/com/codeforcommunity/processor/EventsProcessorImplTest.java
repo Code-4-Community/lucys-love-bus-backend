@@ -2,7 +2,9 @@ package com.codeforcommunity.processor;
 
 import com.codeforcommunity.JooqMock;
 import com.codeforcommunity.auth.JWTData;
-import com.codeforcommunity.dto.events.*;
+import com.codeforcommunity.dto.userEvents.components.*;
+import com.codeforcommunity.dto.userEvents.requests.*;
+import com.codeforcommunity.dto.userEvents.responses.*;
 
 import com.codeforcommunity.enums.PrivilegeLevel;
 import org.jooq.generated.Tables;
