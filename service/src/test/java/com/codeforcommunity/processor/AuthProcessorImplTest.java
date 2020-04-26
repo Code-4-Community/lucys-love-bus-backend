@@ -289,4 +289,18 @@ public class AuthProcessorImplTest {
             assertEquals(e.getMessage(), "The refresh token has been invalidated by a previous logout");
         }
     }
+
+    // test logout
+    @Test
+    public void testLogout() {
+        // mock an empty DB with blacklisted record
+        fail("reminder to go over testing logout in AuthProcessorImplTest.java tmrw");
+    }
+
+    // test validateSecretKey
+    @Test
+    public void testValidateSecretKey() {
+
+        fail("reminder to go over testing validateSecretKey in AuthProcessorImplTest.java tmrw");
+    }
 }
