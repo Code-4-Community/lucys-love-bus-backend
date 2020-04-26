@@ -2,6 +2,7 @@ package com.codeforcommunity.api;
 
 import com.codeforcommunity.auth.JWTData;
 import com.codeforcommunity.dto.userEvents.requests.CreateEventRequest;
+import com.codeforcommunity.dto.userEvents.responses.EventIdResponse;
 import com.codeforcommunity.dto.userEvents.responses.SingleEventResponse;
 import com.codeforcommunity.dto.userEvents.requests.GetUserEventsRequest;
 import com.codeforcommunity.dto.userEvents.responses.GetEventsResponse;
@@ -20,4 +21,7 @@ public interface IEventsProcessor {
 
   GetEventsResponse getEventsQualified(JWTData userData);
 
+  SingleEventResponse modifyEvent(int eventId, CreateEventRequest request, JWTData userData);
+
+  EventIdResponse deleteEvent(int eventId, JWTData userData);
 }

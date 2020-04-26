@@ -4,6 +4,7 @@ import com.codeforcommunity.api.IEventsProcessor;
 import com.codeforcommunity.auth.JWTData;
 import com.codeforcommunity.dataaccess.EventDatabaseOperations;
 import com.codeforcommunity.dto.userEvents.requests.CreateEventRequest;
+import com.codeforcommunity.dto.userEvents.responses.EventIdResponse;
 import com.codeforcommunity.dto.userEvents.responses.SingleEventResponse;
 import com.codeforcommunity.dto.userEvents.components.Event;
 import com.codeforcommunity.dto.userEvents.components.EventDetails;
@@ -116,6 +117,17 @@ public class EventsProcessorImpl implements IEventsProcessor {
     List<Event> res = listOfEventsToListOfEvent(afterDateFilter.fetchInto(Events.class));
 
     return new GetEventsResponse(res, res.size());
+  }
+
+  @Override
+  public SingleEventResponse modifyEvent(int eventId, CreateEventRequest request,
+      JWTData userData) {
+    return null;
+  }
+
+  @Override
+  public EventIdResponse deleteEvent(int eventId, JWTData userData) {
+    return null;
   }
 
   /**
