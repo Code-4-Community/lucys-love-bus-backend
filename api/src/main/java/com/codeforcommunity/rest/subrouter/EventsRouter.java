@@ -3,6 +3,7 @@ package com.codeforcommunity.rest.subrouter;
 import com.codeforcommunity.api.IEventsProcessor;
 import com.codeforcommunity.auth.JWTData;
 import com.codeforcommunity.dto.userEvents.requests.CreateEventRequest;
+import com.codeforcommunity.dto.userEvents.responses.EventIdResponse;
 import com.codeforcommunity.dto.userEvents.responses.SingleEventResponse;
 import com.codeforcommunity.dto.userEvents.requests.GetUserEventsRequest;
 import com.codeforcommunity.dto.userEvents.responses.GetEventsResponse;
@@ -126,6 +127,23 @@ public class EventsRouter implements IRouter {
 
     SingleEventResponse response = processor.getSingleEvent(eventId);
 
+    end(ctx.response(), 200, JsonObject.mapFrom(response).encode());
+  }
+
+  private void handleModifyEventRoute(RoutingContext ctx) {
+    int eventId = getRequestParameterAsInt(ctx.request(), "event_id");
+    CreateEventRequest requestData = getJsonBodyAsClass(ctx, CreateEventRequest.class);
+    JWTData userData = ctx.get("jwt_data");
+
+    SingleEventResponse response = processor.modifyEvent(eventId, requestData, userData);
+    end(ctx.response(), 200, JsonObject.mapFrom(response).encode());
+  }
+
+  private void handleDeleteEventRoute(RoutingContext ctx) {
+    int eventId = getRequestParameterAsInt(ctx.request(), "event_id");
+    JWTData userData = ctx.get("jwt_data");
+
+    EventIdResponse response = processor.deleteEvent(eventId, userData);
     end(ctx.response(), 200, JsonObject.mapFrom(response).encode());
   }
 
