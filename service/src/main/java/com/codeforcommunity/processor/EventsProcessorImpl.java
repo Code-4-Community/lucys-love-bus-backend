@@ -64,10 +64,11 @@ public class EventsProcessorImpl implements IEventsProcessor {
   @Override
   public GetEventsResponse getEventsSignedUp(GetUserEventsRequest request, JWTData userData) {
 
-    SelectConditionStep q = db.selectFrom(USERS.join(USER_EVENTS)
-            .onKey()
+    SelectConditionStep q = db.select(EVENTS.fields())
+        .from(USERS
+            .join(USER_EVENTS).onKey()
             .join(EVENTS).onKey())
-            .where(USERS.ID.eq(userData.getUserId()));
+        .where(USERS.ID.eq(userData.getUserId()));
 
     SelectConditionStep afterDateFilter = q;
 
@@ -84,14 +85,15 @@ public class EventsProcessorImpl implements IEventsProcessor {
     }
 
     SelectSeekStep1 s = afterDateFilter.orderBy(EVENTS.START_TIME.asc());
-    List<Event> res;
+    List<Events> eventPojos;
 
     if (request.getCount().isPresent()) {
-      res = s.limit(request.getCount().get()).fetchInto(Events.class);
+      eventPojos = s.limit(request.getCount().get()).fetchInto(Events.class);
     } else {
-      res = s.fetchInto(Events.class);
+      eventPojos = s.fetchInto(Events.class);
     }
 
+    List<Event> res = listOfEventsToListOfEvent(eventPojos);
     return new GetEventsResponse(res, res.size());
   }
 
@@ -139,10 +141,9 @@ public class EventsProcessorImpl implements IEventsProcessor {
    * @return
    */
   private int getSpotsLeft(int eventId) {
-    return db.select(EVENTS.CAPACITY.minus(count()))
-        .from(EVENTS.leftJoin(USER_EVENTS).on(EVENTS.ID.eq(USER_EVENTS.EVENT_ID)))
+    return db.select(EVENTS.CAPACITY.minus(db.fetchCount(USER_EVENTS.where(USER_EVENTS.EVENT_ID.eq(eventId)))))
+        .from(EVENTS)
         .where(EVENTS.ID.eq(eventId))
-        .groupBy(EVENTS.ID)
         .fetchOneInto(Integer.class);
   }
 
