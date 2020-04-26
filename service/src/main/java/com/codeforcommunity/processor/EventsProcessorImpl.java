@@ -18,7 +18,9 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.time.Period;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static org.jooq.generated.Tables.EVENTS;
@@ -97,16 +99,16 @@ public class EventsProcessorImpl implements IEventsProcessor {
   public GetEventsResponse getEventsQualified(JWTData userData) {
 
     Timestamp startDate = Timestamp.from(Instant.now());
-    Timestamp fiveDays = Timestamp.from(Instant.now().plusSeconds(432000));
-    boolean isAdmin = userData.getPrivilegeLevel().equals(PrivilegeLevel.ADMIN);
+    Timestamp fiveDays = Timestamp.from(Instant.now().plus(Period.ofDays(5)));
+    boolean limitedToFiveDays = userData.getPrivilegeLevel().equals(PrivilegeLevel.GP);
 
     SelectWhereStep select = db.selectFrom(EVENTS);
     SelectConditionStep afterDateFilter;
 
-    if (isAdmin) {
-      afterDateFilter = select.where(EVENTS.START_TIME.greaterOrEqual(startDate));
-    } else {
+    if (limitedToFiveDays) {
       afterDateFilter = select.where(EVENTS.START_TIME.between(startDate, fiveDays));
+    } else {
+      afterDateFilter = select.where(EVENTS.START_TIME.greaterOrEqual(startDate));
     }
 
     List<Event> res = listOfEventsToListOfEvent(afterDateFilter.fetchInto(Events.class));
