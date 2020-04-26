@@ -100,14 +100,6 @@ public interface RestFunctions {
    */
   static <T> List<T> getMultipleQueryParams(RoutingContext ctx, String name, Function<String, T> mapper) {
     List<String> queryParam = ctx.queryParam(name);
-    return new ArrayList() {{
-      for (String s: queryParam) {
-        try {
-          add(mapper.apply(s));
-        } catch (Throwable t) {
-          //do nothing
-        }
-      }
-    }};
+    return queryParam.stream().map(mapper).collect(Collectors.toList());
   }
 }

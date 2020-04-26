@@ -49,12 +49,12 @@ public class AnnouncementsRouter implements IRouter {
   }
 
   private void handleGetAnnouncements(RoutingContext ctx) {
-    Optional<Timestamp> start = RestFunctions.getNullableQueryParam(ctx, "start",
-        RestFunctions.getDateParamMapper());
-    Optional<Timestamp> end = RestFunctions.getNullableQueryParam(ctx, "end",
-        RestFunctions.getDateParamMapper());
-    Optional<Integer> count = RestFunctions.getNullableQueryParam(ctx, "count",
-        RestFunctions.getCountParamMapper());
+    Optional<Timestamp> start = RestFunctions.getOptionalQueryParam(ctx, "start",
+        Timestamp::valueOf);
+    Optional<Timestamp> end = RestFunctions.getOptionalQueryParam(ctx, "end",
+        Timestamp::valueOf);
+    Optional<Integer> count = RestFunctions.getOptionalQueryParam(ctx, "count",
+        Integer::parseInt);
 
     Timestamp endParam = end.orElseGet(() -> new Timestamp(System.currentTimeMillis()));
     Timestamp startParam = start.orElseGet(() ->

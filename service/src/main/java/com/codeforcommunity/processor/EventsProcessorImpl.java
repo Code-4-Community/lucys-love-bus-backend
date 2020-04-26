@@ -18,7 +18,9 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.time.Period;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static org.jooq.generated.Tables.EVENTS;
@@ -62,10 +64,11 @@ public class EventsProcessorImpl implements IEventsProcessor {
   @Override
   public GetEventsResponse getEventsSignedUp(GetUserEventsRequest request, JWTData userData) {
 
-    SelectConditionStep q = db.selectFrom(USERS.join(USER_EVENTS)
-            .onKey()
+    SelectConditionStep q = db.select(EVENTS.fields())
+        .from(USERS
+            .join(USER_EVENTS).onKey()
             .join(EVENTS).onKey())
-            .where(USERS.ID.eq(userData.getUserId()));
+        .where(USERS.ID.eq(userData.getUserId()));
 
     SelectConditionStep afterDateFilter = q;
 
@@ -82,14 +85,15 @@ public class EventsProcessorImpl implements IEventsProcessor {
     }
 
     SelectSeekStep1 s = afterDateFilter.orderBy(EVENTS.START_TIME.asc());
-    List<Event> res;
+    List<Events> eventPojos;
 
     if (request.getCount().isPresent()) {
-      res = s.limit(request.getCount().get()).fetchInto(Events.class);
+      eventPojos = s.limit(request.getCount().get()).fetchInto(Events.class);
     } else {
-      res = s.fetchInto(Events.class);
+      eventPojos = s.fetchInto(Events.class);
     }
 
+    List<Event> res = listOfEventsToListOfEvent(eventPojos);
     return new GetEventsResponse(res, res.size());
   }
 
@@ -97,16 +101,16 @@ public class EventsProcessorImpl implements IEventsProcessor {
   public GetEventsResponse getEventsQualified(JWTData userData) {
 
     Timestamp startDate = Timestamp.from(Instant.now());
-    Timestamp fiveDays = Timestamp.from(Instant.now().plusSeconds(432000));
-    boolean isAdmin = userData.getPrivilegeLevel().equals(PrivilegeLevel.ADMIN);
+    Timestamp fiveDays = Timestamp.from(Instant.now().plus(Period.ofDays(5)));
+    boolean limitedToFiveDays = userData.getPrivilegeLevel().equals(PrivilegeLevel.GP);
 
     SelectWhereStep select = db.selectFrom(EVENTS);
     SelectConditionStep afterDateFilter;
 
-    if (isAdmin) {
-      afterDateFilter = select.where(EVENTS.START_TIME.greaterOrEqual(startDate));
-    } else {
+    if (limitedToFiveDays) {
       afterDateFilter = select.where(EVENTS.START_TIME.between(startDate, fiveDays));
+    } else {
+      afterDateFilter = select.where(EVENTS.START_TIME.greaterOrEqual(startDate));
     }
 
     List<Event> res = listOfEventsToListOfEvent(afterDateFilter.fetchInto(Events.class));
@@ -137,10 +141,10 @@ public class EventsProcessorImpl implements IEventsProcessor {
    * @return
    */
   private int getSpotsLeft(int eventId) {
-
-    return db.select(EVENTS.CAPACITY.minus(count())).from(EVENTS.join(USER_EVENTS).on(EVENTS.ID.eq(USER_EVENTS.EVENT_ID)))
-            .where(EVENTS.ID.eq(eventId)).groupBy(EVENTS.ID).fetchOneInto(Integer.class);
-
+    return db.select(EVENTS.CAPACITY.minus(db.fetchCount(USER_EVENTS.where(USER_EVENTS.EVENT_ID.eq(eventId)))))
+        .from(EVENTS)
+        .where(EVENTS.ID.eq(eventId))
+        .fetchOneInto(Integer.class);
   }
 
   /**
@@ -160,6 +164,7 @@ public class EventsProcessorImpl implements IEventsProcessor {
     EventsRecord newRecord = db.newRecord(EVENTS);
     newRecord.setTitle(request.getTitle());
     newRecord.setDescription(request.getDetails().getDescription());
+    newRecord.setThumbnail(request.getThumbnail());
     newRecord.setCapacity(request.getSpotsAvailable());
     newRecord.setLocation(request.getDetails().getLocation());
     newRecord.setStartTime(request.getDetails().getStart());

@@ -15,6 +15,8 @@ public class EventDetails {
     this.end = end;
   }
 
+  private EventDetails() {}
+
   public String getDescription() {
     return description;
   }
