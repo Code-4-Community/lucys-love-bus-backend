@@ -4,6 +4,7 @@ import com.codeforcommunity.api.IAnnouncementsProcessor;
 import com.codeforcommunity.api.IAuthProcessor;
 import com.codeforcommunity.api.IEventsProcessor;
 import com.codeforcommunity.api.IRequestsProcessor;
+import com.codeforcommunity.api.ICheckoutProcessor;
 import com.codeforcommunity.auth.JWTAuthorizer;
 
 import com.codeforcommunity.rest.subrouter.AnnouncementsRouter;
@@ -28,13 +29,13 @@ public class ApiRouter implements IRouter {
 
     public ApiRouter(IAuthProcessor authProcessor, IRequestsProcessor requestsProcessor,
         IEventsProcessor eventsProcessor, IAnnouncementsProcessor announcementEventsProcessor,
-        JWTAuthorizer jwtAuthorizer) {
+                     ICheckoutProcessor checkoutProcessor, JWTAuthorizer jwtAuthorizer) {
         this.commonRouter = new CommonRouter(jwtAuthorizer);
         this.authRouter = new AuthRouter(authProcessor);
         this.requestRouter = new PfRequestRouter(requestsProcessor);
         this.eventsRouter = new EventsRouter(eventsProcessor);
         this.announcementsRouter = new AnnouncementsRouter(announcementEventsProcessor);
-        this.checkoutRouter = new CheckoutRouter(null);
+        this.checkoutRouter = new CheckoutRouter(checkoutProcessor);
     }
 
     /**

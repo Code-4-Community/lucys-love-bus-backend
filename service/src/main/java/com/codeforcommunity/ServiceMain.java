@@ -1,16 +1,10 @@
 package com.codeforcommunity;
 
-import com.codeforcommunity.api.IAnnouncementsProcessor;
-import com.codeforcommunity.api.IAuthProcessor;
-import com.codeforcommunity.api.IEventsProcessor;
-import com.codeforcommunity.api.IRequestsProcessor;
+import com.codeforcommunity.api.*;
 import com.codeforcommunity.auth.JWTAuthorizer;
 import com.codeforcommunity.auth.JWTCreator;
 import com.codeforcommunity.auth.JWTHandler;
-import com.codeforcommunity.processor.AnnouncementsProcessorImpl;
-import com.codeforcommunity.processor.AuthProcessorImpl;
-import com.codeforcommunity.processor.EventsProcessorImpl;
-import com.codeforcommunity.processor.RequestsProcessorImpl;
+import com.codeforcommunity.processor.*;
 import com.codeforcommunity.propertiesLoader.PropertiesLoader;
 import com.codeforcommunity.rest.ApiRouter;
 
@@ -68,7 +62,9 @@ public class ServiceMain {
     IRequestsProcessor requestsProcessor = new RequestsProcessorImpl(this.db);
     IEventsProcessor eventsProcessor = new EventsProcessorImpl(this.db);
     IAnnouncementsProcessor announcementEventsProcessor = new AnnouncementsProcessorImpl(this.db);
-    ApiRouter router = new ApiRouter(authProcessor, requestsProcessor, eventsProcessor, announcementEventsProcessor, jwtAuthorizer);
+    ICheckoutProcessor checkoutProcessor = new CheckoutProcessorImpl(this.db);
+    ApiRouter router = new ApiRouter(authProcessor, requestsProcessor, eventsProcessor,
+            announcementEventsProcessor, checkoutProcessor, jwtAuthorizer);
     startApiServer(router);
   }
 
