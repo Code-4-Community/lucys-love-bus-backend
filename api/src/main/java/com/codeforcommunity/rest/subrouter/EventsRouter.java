@@ -41,6 +41,8 @@ public class EventsRouter implements IRouter {
     registerGetUserEventsQualified(router);
     registerGetUserEventsSignedUp(router);
     registerGetSingleEvent(router);
+    registerModifyEvent(router);
+    registerDeleteEvent(router);
 
     return router;
   }
@@ -68,6 +70,16 @@ public class EventsRouter implements IRouter {
   private void registerGetEvents(Router router) {
     Route getEvent = router.get("/");
     getEvent.handler(this::handleGetEvents);
+  }
+
+  private void registerModifyEvent(Router router) {
+    Route modifyEventRoute = router.put("/:event_id");
+    modifyEventRoute.handler(this::handleModifyEventRoute);
+  }
+
+  private void registerDeleteEvent(Router router) {
+    Route deleteEventRoute = router.delete("/:event_id");
+    deleteEventRoute.handler(this::handleDeleteEventRoute);
   }
 
   private void handleGetEvents(RoutingContext ctx) {
