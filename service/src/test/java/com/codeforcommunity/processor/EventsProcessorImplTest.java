@@ -82,11 +82,7 @@ public class EventsProcessorImplTest {
     assertEquals(res.getId(), 0);
     assertEquals(res.getTitle(), "sample");
     assertEquals(res.getSpotsAvailable(), 5);
-
-    /* TODO: this test fails because the code in EventsProcessorImpl mistakenly
-        sets the thumbnail to "urls still todo" in eventPojoToResponse() */
-    // assertEquals(res.getThumbnail(), "sample thumbnail");
-
+    assertEquals(res.getThumbnail(), "sample thumbnail");
     assertEquals(res.getDetails().getDescription(), myEventDetails.getDescription());
     assertEquals(res.getDetails().getLocation(), myEventDetails.getLocation());
     assertEquals(res.getDetails().getEnd(), myEventDetails.getEnd());
@@ -119,6 +115,7 @@ public class EventsProcessorImplTest {
     // mock the DB
     EventsRecord record = myJooqMock.getContext().newRecord(Tables.EVENTS);
     record.setId(1);
+    record.setThumbnail(myEventRequest.getThumbnail());
     record.setTitle(myEventRequest.getTitle());
     record.setCapacity(myEventRequest.getSpotsAvailable());
     record.setLocation(myEventDetails.getLocation());
@@ -137,8 +134,7 @@ public class EventsProcessorImplTest {
     assertEquals(res.getDetails().getLocation(), myEventDetails.getLocation());
     assertEquals(res.getDetails().getDescription(), myEventDetails.getDescription());
     assertEquals(res.getSpotsAvailable(), myEventRequest.getSpotsAvailable());
-    // TODO: test fails for the same reason as above
-    // assertEquals(res.getThumbnail(), myEventRequest.getThumbnail());
+    assertEquals(res.getThumbnail(), myEventRequest.getThumbnail());
     assertEquals(res.getTitle(), myEventRequest.getTitle());
   }
 }
