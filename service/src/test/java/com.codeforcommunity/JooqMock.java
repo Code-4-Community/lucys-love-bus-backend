@@ -49,10 +49,7 @@ public class JooqMock implements MockDataProvider {
      * Constructor for 'UNKNOWN' and 'DROP/CREATE' operations.
      */
     Operations() {
-      recordReturns = new ArrayList<>();
-      recordReturns.add(() -> null);
-      handlerSqlCalls = new ArrayList<>();
-      handlerSqlBindings = new ArrayList<>();
+      this(() -> null);
     }
 
     /**
@@ -62,10 +59,7 @@ public class JooqMock implements MockDataProvider {
      * @param record The record to be returned during the first call of this operation.
      */
     Operations(Record record) {
-      recordReturns = new ArrayList<>();
-      recordReturns.add(() -> createResult(record));
-      handlerSqlCalls = new ArrayList<>();
-      handlerSqlBindings = new ArrayList<>();
+      this(() -> createResult(record));
     }
 
     /**
@@ -75,10 +69,7 @@ public class JooqMock implements MockDataProvider {
      * @param records The record to be returned during the first call of this operation.
      */
     Operations(List<? extends Record> records) {
-      recordReturns = new ArrayList<>();
-      recordReturns.add(() -> createResult(records));
-      handlerSqlCalls = new ArrayList<>();
-      handlerSqlBindings = new ArrayList<>();
+      this(() -> createResult(records));
     }
 
     /**
@@ -92,28 +83,6 @@ public class JooqMock implements MockDataProvider {
       recordReturns.add(recordFunction);
       handlerSqlCalls = new ArrayList<>();
       handlerSqlBindings = new ArrayList<>();
-    }
-
-    private Result<? extends Record> createResult(Record r) {
-      if (r == null) {
-        return context.newResult();
-      }
-      Result<Record> res = context.newResult(r.fields());
-      res.add(r);
-      return res;
-    }
-
-    private Result<? extends Record> createResult(List<? extends Record> r) {
-      if (r.parallelStream().anyMatch(Objects::isNull)) {
-        throw new IllegalArgumentException("Record in provided list was null. No records "
-            + "should be null in a list of returns.");
-      }
-      if (r.size() == 0) {
-        return context.newResult();
-      }
-      Result<Record> res = context.newResult(r.get(0).fields());
-      res.addAll(r);
-      return res;
     }
 
     /**
@@ -242,6 +211,39 @@ public class JooqMock implements MockDataProvider {
       classMap.put(table.getName(), table);
     }
   }
+
+  /**
+   * Creates a result from a given record.
+   * @param r the Record to create a result for.
+   * @return the result for the given Record.
+   */
+  private Result<? extends Record> createResult(Record r) {
+    if (r == null) {
+      return context.newResult();
+    }
+    Result<Record> res = context.newResult(r.fields());
+    res.add(r);
+    return res;
+  }
+
+  /**
+   * Creates a result from a given record.
+   * @param r the List of Records to create a result for.
+   * @return the result for the given Records.
+   */
+  private Result<? extends Record> createResult(List<? extends Record> r) {
+    if (r.parallelStream().anyMatch(Objects::isNull)) {
+      throw new IllegalArgumentException("Record in provided list was null. No records "
+          + "should be null in a list of returns.");
+    }
+    if (r.size() == 0) {
+      return context.newResult();
+    }
+    Result<Record> res = context.newResult(r.get(0).fields());
+    res.addAll(r);
+    return res;
+  }
+
 
   /**
    * Add record to return during a call of execute. Will return this record after
