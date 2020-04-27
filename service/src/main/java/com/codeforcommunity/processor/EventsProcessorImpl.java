@@ -157,7 +157,7 @@ public class EventsProcessorImpl implements IEventsProcessor {
     EventDetails details = new EventDetails(event.getDescription(), event.getLocation(),
         event.getStartTime(), event.getEndTime());
     return new SingleEventResponse(event.getId(), event.getTitle(),
-        getSpotsAvailable(event), event.getCapacity(), event.getThumbnail(), details);
+        getSpotsLeft(event.getId()), event.getCapacity(), event.getThumbnail(), details);
   }
 
   /**
@@ -173,16 +173,5 @@ public class EventsProcessorImpl implements IEventsProcessor {
     newRecord.setStartTime(request.getDetails().getStart());
     newRecord.setEndTime(request.getDetails().getEnd());
     return newRecord;
-  }
-
-  /**
-   * Returns the count of spaces available for the given event.
-   *
-   * @param event the Events object to find get the spaces available for.
-   * @return an int representing the number of available spaces.
-   */
-  private int getSpotsAvailable(Events event) {
-    int userEvents = db.fetchCount(USER_EVENTS.where(USER_EVENTS.EVENT_ID.eq(event.getId())));
-    return event.getCapacity() - userEvents;
   }
 }
