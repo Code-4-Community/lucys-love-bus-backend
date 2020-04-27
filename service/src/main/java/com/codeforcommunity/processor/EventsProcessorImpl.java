@@ -11,8 +11,11 @@ import com.codeforcommunity.dto.userEvents.responses.GetEventsResponse;
 import com.codeforcommunity.enums.PrivilegeLevel;
 import com.codeforcommunity.exceptions.AdminOnlyRouteException;
 import org.jooq.*;
+import org.jooq.DSLContext;
+import org.jooq.Result;
 import org.jooq.generated.tables.pojos.Events;
 import org.jooq.generated.tables.records.EventsRecord;
+import org.jooq.generated.tables.records.UserEventsRecord;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -154,7 +157,7 @@ public class EventsProcessorImpl implements IEventsProcessor {
     EventDetails details = new EventDetails(event.getDescription(), event.getLocation(),
         event.getStartTime(), event.getEndTime());
     return new SingleEventResponse(event.getId(), event.getTitle(),
-        event.getCapacity(), event.getThumbnail(), details);
+        getSpotsLeft(event.getId()), event.getCapacity(), event.getThumbnail(), details);
   }
 
   /**
@@ -171,5 +174,4 @@ public class EventsProcessorImpl implements IEventsProcessor {
     newRecord.setEndTime(request.getDetails().getEnd());
     return newRecord;
   }
-
 }

@@ -1,21 +1,25 @@
 package com.codeforcommunity.processor;
 
 import static org.jooq.generated.Tables.ANNOUNCEMENTS;
+import static org.jooq.generated.Tables.EVENTS;
 
 import com.codeforcommunity.api.IAnnouncementsProcessor;
 import com.codeforcommunity.auth.JWTData;
 import com.codeforcommunity.dto.announcements.Announcement;
 import com.codeforcommunity.dto.announcements.GetAnnouncementsRequest;
 import com.codeforcommunity.dto.announcements.GetAnnouncementsResponse;
+import com.codeforcommunity.dto.announcements.GetEventSpecificAnnouncementsRequest;
 import com.codeforcommunity.dto.announcements.PostAnnouncementRequest;
 import com.codeforcommunity.dto.announcements.PostAnnouncementResponse;
 import com.codeforcommunity.enums.PrivilegeLevel;
 import com.codeforcommunity.exceptions.AdminOnlyRouteException;
+import com.codeforcommunity.exceptions.MalformedParameterException;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.jooq.DSLContext;
 import org.jooq.generated.tables.pojos.Announcements;
+import org.jooq.generated.tables.pojos.Events;
 import org.jooq.generated.tables.records.AnnouncementsRecord;
 
 public class AnnouncementsProcessorImpl implements IAnnouncementsProcessor {
@@ -36,6 +40,7 @@ public class AnnouncementsProcessorImpl implements IAnnouncementsProcessor {
 
     List<Announcements> announcements = db.selectFrom(ANNOUNCEMENTS)
         .where(ANNOUNCEMENTS.CREATED.between(start, end))
+        .and(ANNOUNCEMENTS.EVENT_ID.isNull())
         .orderBy(ANNOUNCEMENTS.CREATED.desc())
         .fetchInto(Announcements.class);
 
@@ -58,11 +63,12 @@ public class AnnouncementsProcessorImpl implements IAnnouncementsProcessor {
     return new Announcement(announcement.getId(),
         announcement.getTitle(),
         announcement.getDescription(),
-        announcement.getCreated());
+        announcement.getCreated(),
+        announcement.getEventId());
   }
 
   @Override
-  public PostAnnouncementResponse postAnnouncements(PostAnnouncementRequest request, JWTData userData) {
+  public PostAnnouncementResponse postAnnouncement(PostAnnouncementRequest request, JWTData userData) {
     if (userData.getPrivilegeLevel() != PrivilegeLevel.ADMIN) {
       throw new AdminOnlyRouteException();
     }
@@ -75,12 +81,41 @@ public class AnnouncementsProcessorImpl implements IAnnouncementsProcessor {
         .fetchInto(Announcements.class).get(0));
   }
 
+  @Override
+  public PostAnnouncementResponse postEventSpecificAnnouncement(PostAnnouncementRequest request,
+      JWTData userData, int eventId) {
+    if (userData.getPrivilegeLevel() != PrivilegeLevel.ADMIN) {
+      throw new AdminOnlyRouteException();
+    }
+    validateEventId(eventId);
+    AnnouncementsRecord newAnnouncementsRecord = announcementRequestToRecord(request);
+    newAnnouncementsRecord.setEventId(eventId);
+    newAnnouncementsRecord.store();
+    return announcementPojoToResponse(db.selectFrom(ANNOUNCEMENTS)
+        .where(ANNOUNCEMENTS.ID.eq(newAnnouncementsRecord.getId()))
+        .fetchInto(Announcements.class).get(0));
+  }
+
+  @Override
+  public GetAnnouncementsResponse getEventSpecificAnnouncements(
+      GetEventSpecificAnnouncementsRequest request) {
+    request.validate();
+    int eventId = request.getEventId();
+    validateEventId(eventId);
+
+    List<Announcements> announcements = db.selectFrom(ANNOUNCEMENTS)
+        .where(ANNOUNCEMENTS.EVENT_ID.eq(eventId))
+        .orderBy(ANNOUNCEMENTS.CREATED.desc())
+        .fetchInto(Announcements.class);
+
+    return new GetAnnouncementsResponse(announcements.size(),
+        announcements.stream()
+            .map(this::convertAnnouncementObject)
+            .collect(Collectors.toList()));
+  }
+
   private PostAnnouncementResponse announcementPojoToResponse(Announcements announcements) {
-    return new PostAnnouncementResponse(new Announcement(
-        announcements.getId(),
-        announcements.getTitle(),
-        announcements.getDescription(),
-        announcements.getCreated()));
+    return new PostAnnouncementResponse(convertAnnouncementObject(announcements));
   }
 
   private AnnouncementsRecord announcementRequestToRecord(PostAnnouncementRequest request) {
@@ -88,5 +123,13 @@ public class AnnouncementsProcessorImpl implements IAnnouncementsProcessor {
     newRecord.setTitle(request.getTitle());
     newRecord.setDescription(request.getDescription());
     return newRecord;
+  }
+
+  private void validateEventId(int eventId) {
+    List<Events> matchingEvents = db.selectFrom(EVENTS).where(EVENTS.ID.eq(eventId)).fetchInto(
+        Events.class);
+    if (matchingEvents.size() == 0) {
+      throw new MalformedParameterException("event_id");
+    }
   }
 }
