@@ -1,26 +1,42 @@
 package com.codeforcommunity.dto.checkout;
 
+import com.stripe.param.checkout.SessionCreateParams;
+
 import java.util.List;
+import java.util.ArrayList;
 
 public class PostCheckoutRequest {
 
-    private List<Object> payment_method_types;
-    private List<Object> line_items;
-    private String cancel_url;
-    private String success_url;
+    private List<LineItemRequest> lineItems;
+    private String cancelUrl;
+    private String successUrl;
 
-    public PostCheckoutRequest() {}
+    private PostCheckoutRequest() {}
 
-    public PostCheckoutRequest(List<Object> payment_method_types, List<Object> line_items, String cancel_url, String success_url) {
-        this.payment_method_types = payment_method_types;
-        this.line_items = line_items;
-        this.cancel_url = cancel_url;
-        this.success_url = success_url;
+    public PostCheckoutRequest(List<LineItemRequest> lineItems, String cancelUrl, String successUrl) {
+        this.lineItems = lineItems;
+        this.cancelUrl = cancelUrl;
+        this.successUrl = successUrl;
     }
 
-    public List<Object> getPayment_method_types() { return this.payment_method_types; }
-    public List<Object> getLine_items() { return this.line_items; }
-    public String getCancel_url() { return this.cancel_url; }
-    public String getSuccess_url() { return this.success_url; }
+    public List<LineItemRequest> getLineItems() { return this.lineItems; }
+    public String getCancelUrl() { return this.cancelUrl; }
+    public String getSuccessUrl() { return this.successUrl; }
+
+    public List<SessionCreateParams.LineItem> getStripeLineItems() {
+        List<SessionCreateParams.LineItem> out = new ArrayList<>();
+        for (LineItemRequest item: this.lineItems) {
+            SessionCreateParams.LineItem stripe_line_item = new SessionCreateParams.LineItem
+                    .Builder()
+                    .setName(item.getName())
+                    .setAmount(item.getAmount())
+                    .setCurrency(item.getCurrency())
+                    .setQuantity(item.getQuantity())
+                    .setDescription(item.getDescription())
+                    .build();
+            out.add(stripe_line_item);
+        }
+        return out;
+    }
 
 }

@@ -34,12 +34,9 @@ public class CheckoutRouter implements IRouter {
     private void handleCheckoutSession(RoutingContext ctx) {
         PostCheckoutRequest request = RestFunctions.getJsonBodyAsClass(ctx, PostCheckoutRequest.class);
 
-        try {
-            String response = processor.createCheckoutSession(request);
-            end(ctx.response(), 200, response);
-        } catch (Exception e) {
-            end(ctx.response(), 500, "Failed to create session");
-        }
+        String response = processor.createCheckoutSession(request);
+
+        end(ctx.response(), 200, response);
     }
 
 }
