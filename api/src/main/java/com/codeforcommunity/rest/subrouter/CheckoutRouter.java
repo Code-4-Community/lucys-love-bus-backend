@@ -22,23 +22,32 @@ public class CheckoutRouter implements IRouter {
     public Router initializeRouter(Vertx vertx) {
         Router router = Router.router(vertx);
 
-        registerCheckoutSession(router);
+        registerCheckoutHandler(router);
 
         return router;
     }
 
-    private void registerCheckoutSession(Router router) {
+    private void registerCheckoutHandler(Router router) {
         Route getRequestsRoute = router.post("/");
-        getRequestsRoute.handler(this::handleCheckoutSession);
+        getRequestsRoute.handler(this::handleCheckoutEvents);
     }
 
-    private void handleCheckoutSession(RoutingContext ctx) {
+    private void handleCheckoutEvents(RoutingContext ctx) {
         PostCheckoutRequest requestData = RestFunctions.getJsonBodyAsClass(ctx, PostCheckoutRequest.class);
         JWTData userData = ctx.get("jwt_data");
 
-        String response = processor.createCheckoutSession(requestData, userData);
-
-        end(ctx.response(), 200, response);
+        switch (userData.getPrivilegeLevel()) {
+            case PF:
+            case ADMIN:
+                processor.createEventRegistration(requestData, userData);
+                end(ctx.response(), 200, "Nothing failed, but you weren't actually registered");
+                break;
+            case GP:
+                processor.createEventRegistration(requestData, userData);
+                String checkoutSessionID = processor.createCheckoutSession(requestData, userData);
+                end(ctx.response(), 200, checkoutSessionID);
+                break;
+        }
     }
 
 }
