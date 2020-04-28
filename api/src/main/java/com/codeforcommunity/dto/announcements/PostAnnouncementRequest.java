@@ -1,6 +1,7 @@
 package com.codeforcommunity.dto.announcements;
 
 public class PostAnnouncementRequest {
+
   private String title;
   private String description;
 
