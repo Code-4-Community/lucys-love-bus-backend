@@ -1,6 +1,7 @@
 package com.codeforcommunity.rest.subrouter;
 
 import com.codeforcommunity.api.ICheckoutProcessor;
+import com.codeforcommunity.auth.JWTData;
 import com.codeforcommunity.dto.checkout.PostCheckoutRequest;
 import com.codeforcommunity.rest.IRouter;
 import com.codeforcommunity.rest.RestFunctions;
@@ -32,9 +33,10 @@ public class CheckoutRouter implements IRouter {
     }
 
     private void handleCheckoutSession(RoutingContext ctx) {
-        PostCheckoutRequest request = RestFunctions.getJsonBodyAsClass(ctx, PostCheckoutRequest.class);
+        PostCheckoutRequest requestData = RestFunctions.getJsonBodyAsClass(ctx, PostCheckoutRequest.class);
+        JWTData userData = ctx.get("jwt_data");
 
-        String response = processor.createCheckoutSession(request);
+        String response = processor.createCheckoutSession(requestData, userData);
 
         end(ctx.response(), 200, response);
     }

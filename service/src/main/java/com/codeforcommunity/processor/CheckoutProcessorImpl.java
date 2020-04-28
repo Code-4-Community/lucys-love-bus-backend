@@ -1,8 +1,10 @@
 package com.codeforcommunity.processor;
 
 import com.codeforcommunity.api.ICheckoutProcessor;
+import com.codeforcommunity.auth.JWTData;
 import com.codeforcommunity.dto.checkout.PostCheckoutRequest;
 import com.codeforcommunity.exceptions.StripeExternalException;
+import com.codeforcommunity.enums.PrivilegeLevel;
 import com.stripe.Stripe;
 import com.stripe.exception.StripeException;
 import com.stripe.model.checkout.Session;
@@ -17,12 +19,15 @@ public class CheckoutProcessorImpl implements ICheckoutProcessor {
         this.db = db;
     }
 
-    public String createCheckoutSession(PostCheckoutRequest request) throws StripeExternalException {
+    public String createCheckoutSession(PostCheckoutRequest request, JWTData data) throws StripeExternalException {
 
         // TODO: Move to properties file
         Stripe.apiKey = "sk_test_Q2wTkIY5Z3h9pjtgkksJULj200M84LsI3q";
 
-        // TODO: Add if (isParticipatingFamily) and immediately give 200 code for true
+
+        if (data.getPrivilegeLevel() == PrivilegeLevel.PF) {
+            // TODO: Call endpoint to persist data immediately
+        }
 
         SessionCreateParams params = new SessionCreateParams
                 .Builder()
