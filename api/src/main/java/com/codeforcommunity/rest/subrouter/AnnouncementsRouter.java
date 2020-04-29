@@ -4,8 +4,10 @@ import com.codeforcommunity.api.IAnnouncementsProcessor;
 import com.codeforcommunity.auth.JWTData;
 import com.codeforcommunity.dto.announcements.GetAnnouncementsRequest;
 import com.codeforcommunity.dto.announcements.GetAnnouncementsResponse;
+import com.codeforcommunity.dto.announcements.GetEventSpecificAnnouncementsRequest;
 import com.codeforcommunity.dto.announcements.PostAnnouncementRequest;
 import com.codeforcommunity.dto.announcements.PostAnnouncementResponse;
+import com.codeforcommunity.exceptions.RequestBodyMappingException;
 import com.codeforcommunity.rest.IRouter;
 import com.codeforcommunity.rest.RestFunctions;
 import io.vertx.core.Vertx;
@@ -34,6 +36,8 @@ public class AnnouncementsRouter implements IRouter {
 
     registerGetAnnouncements(router);
     registerPostAnnouncement(router);
+    registerGetEventSpecificAnnouncements(router);
+    registerPostEventSpecificAnnouncement(router);
 
     return router;
   }
@@ -48,13 +52,23 @@ public class AnnouncementsRouter implements IRouter {
     postAnnouncementRoute.handler(this::handlePostAnnouncement);
   }
 
+  private void registerGetEventSpecificAnnouncements(Router router) {
+    Route getEventSpecificAnnouncementsRoute = router.get("/:event_id");
+    getEventSpecificAnnouncementsRoute.handler(this::handleGetEventSpecificAnnouncements);
+  }
+
+  private void registerPostEventSpecificAnnouncement(Router router) {
+    Route postEventSpecificAnnouncementRoute = router.post("/:event_id");
+    postEventSpecificAnnouncementRoute.handler(this::handlePostEventSpecificAnnouncement);
+  }
+
   private void handleGetAnnouncements(RoutingContext ctx) {
-    Optional<Timestamp> start = RestFunctions.getNullableQueryParam(ctx, "start",
-        RestFunctions.getDateParamMapper());
-    Optional<Timestamp> end = RestFunctions.getNullableQueryParam(ctx, "end",
-        RestFunctions.getDateParamMapper());
-    Optional<Integer> count = RestFunctions.getNullableQueryParam(ctx, "count",
-        RestFunctions.getCountParamMapper());
+    Optional<Timestamp> start = RestFunctions.getOptionalQueryParam(ctx, "start",
+        Timestamp::valueOf);
+    Optional<Timestamp> end = RestFunctions.getOptionalQueryParam(ctx, "end",
+        Timestamp::valueOf);
+    Optional<Integer> count = RestFunctions.getOptionalQueryParam(ctx, "count",
+        Integer::parseInt);
 
     Timestamp endParam = end.orElseGet(() -> new Timestamp(System.currentTimeMillis()));
     Timestamp startParam = start.orElseGet(() ->
@@ -68,10 +82,32 @@ public class AnnouncementsRouter implements IRouter {
   }
 
   private void handlePostAnnouncement(RoutingContext ctx) {
-    PostAnnouncementRequest requestData = RestFunctions.getJsonBodyAsClass(ctx, PostAnnouncementRequest.class);
+    PostAnnouncementRequest requestData = RestFunctions.getJsonBodyAsClass(ctx,
+        PostAnnouncementRequest.class);
     JWTData userData = ctx.get("jwt_data");
 
-    PostAnnouncementResponse response = processor.postAnnouncements(requestData, userData);
+    PostAnnouncementResponse response = processor.postAnnouncement(requestData, userData);
+    end(ctx.response(), 200, JsonObject.mapFrom(response).toString());
+  }
+
+  private void handleGetEventSpecificAnnouncements(RoutingContext ctx) {
+    int eventId = RestFunctions.getRequestParameterAsInt(ctx.request(), "event_id");
+    GetEventSpecificAnnouncementsRequest requestData = new GetEventSpecificAnnouncementsRequest(
+        eventId);
+
+    GetAnnouncementsResponse response = processor.getEventSpecificAnnouncements(
+        requestData);
+    end(ctx.response(), 200, JsonObject.mapFrom(response).encode());
+  }
+
+  private void handlePostEventSpecificAnnouncement(RoutingContext ctx) {
+    PostAnnouncementRequest requestData = RestFunctions.getJsonBodyAsClass(ctx,
+        PostAnnouncementRequest.class);
+    JWTData userData = ctx.get("jwt_data");
+
+    PostAnnouncementResponse response = processor.postEventSpecificAnnouncement(
+        requestData, userData, RestFunctions.getRequestParameterAsInt(ctx.request(),
+            "event_id"));
     end(ctx.response(), 200, JsonObject.mapFrom(response).toString());
   }
 }

@@ -1,4 +1,6 @@
-package com.codeforcommunity.dto.events;
+package com.codeforcommunity.dto.userEvents.requests;
+
+import com.codeforcommunity.dto.userEvents.components.EventDetails;
 
 public class CreateEventRequest {
   private String title;

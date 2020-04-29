@@ -4,8 +4,11 @@ FROM openjdk:8
 # Set the working dir env var
 ENV WORK_DIR /lucys-love-bus-backend
 
-# Expose the container ports to the host
+
+# The port that YOU should expose when you run this in a container
+# see https://docs.docker.com/engine/reference/builder/#expose
 EXPOSE 8081
+
 
 # Set default working directory
 WORKDIR ${WORK_DIR}
@@ -26,6 +29,7 @@ ADD scripts ${WORK_DIR}
 RUN rm -rf ${WORK_DIR}/service/test
 RUN rm -rf ${WORK_DIR}/service/src/test
 RUN rm -rf ${WORK_DIR}/common/src/test
+
 
 # Set a default command to execute
 CMD /lucys-love-bus-backend/deploy.sh
