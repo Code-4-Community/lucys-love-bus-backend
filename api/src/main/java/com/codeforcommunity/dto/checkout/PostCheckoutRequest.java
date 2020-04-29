@@ -29,7 +29,7 @@ public class PostCheckoutRequest {
             SessionCreateParams.LineItem stripe_line_item = new SessionCreateParams.LineItem
                     .Builder()
                     .setName(item.getName())
-                    .setAmount(item.getAmount())
+                    .setAmount(item.getAmount() * 100)
                     .setCurrency(item.getCurrency())
                     .setQuantity(item.getQuantity())
                     .setDescription(item.getDescription())

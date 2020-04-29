@@ -13,6 +13,8 @@ import io.vertx.ext.web.Route;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 
+import static com.codeforcommunity.rest.ApiRouter.end;
+
 public class WebhooksRouter implements IRouter {
 
     private final ICheckoutProcessor checkoutProcessor;
@@ -47,11 +49,10 @@ public class WebhooksRouter implements IRouter {
             if (event.getType().equals("checkout.session.completed")) {
                 Session session = (Session) event.getDataObjectDeserializer().getObject().get();
                 checkoutProcessor.handleStripeCheckoutEventComplete(session);
-            } else {
-                throw new StripeExternalException("Invalid event sent to stripe webhook");
             }
         } catch (SignatureVerificationException e) {
             throw new StripeExternalException("Error verifying signature of incoming webhook");
         }
+        end(ctx.response(), 200, "Nothing failed, but you weren't actually marked as having paid");
     }
 }
