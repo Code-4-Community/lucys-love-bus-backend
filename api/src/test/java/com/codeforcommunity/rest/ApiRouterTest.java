@@ -1,58 +1,86 @@
 package com.codeforcommunity.rest;
 
 import com.codeforcommunity.api.IAnnouncementsProcessor;
+import com.codeforcommunity.rest.subrouter.*;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.*;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.*;
 
 import com.codeforcommunity.api.IAuthProcessor;
 import com.codeforcommunity.api.IEventsProcessor;
 import com.codeforcommunity.api.IRequestsProcessor;
 import com.codeforcommunity.auth.JWTAuthorizer;
 
+import io.vertx.ext.web.Router;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.junit.jupiter.api.extension.ExtendWith;
-import static org.mockito.Mockito.mock;
 
-@RunWith(VertxUnitRunner.class)
-@ExtendWith(MockitoExtension.class)
+
 public class ApiRouterTest {
-    /**
-     * public ApiRouter(IAuthProcessor authProcessor, IRequestsProcessor requestsProcessor, IEventsProcessor eventsProcessor, JWTAuthorizer jwtAuthorizer) {
-        this.commonRouter = new CommonRouter(jwtAuthorizer);
-        this.authRouter = new AuthRouter(authProcessor);
-        this.requestRouter = new PfRequestRouter(requestsProcessor);
-        this.eventsRouter = new EventsRouter(eventsProcessor);
+    IAuthProcessor myIAuthProcessor;
+    IRequestsProcessor myIRequestsProcessor;
+    IEventsProcessor myIEventsProcessor;
+    IAnnouncementsProcessor myIAnnouncementsProcessor;
+    JWTAuthorizer myJWTAuthorizer;
+    ApiRouter myAPIRouter;
+
+    CommonRouter myCommonRouter;
+    AuthRouter myAuthRouter;
+    PfRequestRouter myRequestRouter;
+    EventsRouter myEventsRouter;
+    AnnouncementsRouter myAnnouncementsRouter;
+
+    Vertx myVertx;
+    ApiRouter.Externals myExterns;
+    Router myRouter;
+
+    @Before
+    public void setup() {
+        this.myIAuthProcessor = mock(IAuthProcessor.class);
+        this.myIRequestsProcessor = mock(IRequestsProcessor.class);
+        this.myIEventsProcessor = mock(IEventsProcessor.class);
+        this.myIAnnouncementsProcessor = mock(IAnnouncementsProcessor.class);
+        this.myJWTAuthorizer = mock(JWTAuthorizer.class);
+
+        this.myCommonRouter = mock(CommonRouter.class);
+        this.myAuthRouter = mock(AuthRouter.class);
+        this.myRequestRouter = mock(PfRequestRouter.class);
+        this.myEventsRouter = mock(EventsRouter.class);
+        this.myAnnouncementsRouter = mock(AnnouncementsRouter.class);
+
+        this.myVertx = mock(Vertx.class);
+        this.myExterns = mock(ApiRouter.Externals.class);
+        this.myRouter = mock(Router.class);
     }
-     */
-    IAuthProcessor myIAuthProcessor = mock(IAuthProcessor.class);
-    IRequestsProcessor myIRequestsProcessor = mock(IRequestsProcessor.class);
-    IEventsProcessor myIEventsProcessor = mock(IEventsProcessor.class);
-    IAnnouncementsProcessor myIAnnouncementsProcessor = mock(IAnnouncementsProcessor.class);
-    JWTAuthorizer myJWTAuthorizer = mock(JWTAuthorizer.class);
 
     @Test
     // example unit test for the main api router
     public void testApiRouter1() {
-        ApiRouter router = new ApiRouter(myIAuthProcessor, myIRequestsProcessor, myIEventsProcessor, myIAnnouncementsProcessor, myJWTAuthorizer);
-        Vertx vertx = Vertx.vertx();
+        when(myExterns.getCommonRouter()).thenReturn(myCommonRouter);
+        when(myExterns.getAuthRouter()).thenReturn(myAuthRouter);
+        when(myExterns.getRequestRouter()).thenReturn(myRequestRouter);
+        when(myExterns.getEventsRouter()).thenReturn(myEventsRouter);
+        when(myExterns.getAnnouncementsRouter()).thenReturn(myAnnouncementsRouter);
 
-        vertx.createHttpServer().requestHandler(router.initializeRouter(vertx)).listen(8080);
+        when(myCommonRouter.initializeRouter(any(Vertx.class))).thenReturn(myRouter);
+        when(myExterns.getRouter(any(Vertx.class))).thenReturn(myRouter);
 
-        HttpClient client = vertx.createHttpClient();
+        myAPIRouter = new ApiRouter(this.myExterns);
+        myAPIRouter.initializeRouter(myVertx);
 
-        HttpClientRequest requestEvents = client.get(8080, "localhost", "/api/v1/events");
-
-        // TODO: fix as this doesn't run
-        // res is a HttpClientResponse, test for more attributes of that
-        requestEvents.handler(res -> {
-            assertEquals(res.statusCode(), 200);
-        });
+        verify(myCommonRouter).initializeRouter(myVertx);
+        verify(myAuthRouter).initializeRouter(myVertx);
+        verify(myRequestRouter).initializeRouter(myVertx);
+        verify(myEventsRouter).initializeRouter(myVertx);
+        verify(myAnnouncementsRouter).initializeRouter(myVertx);
+        verify(myRouter, times(5)).mountSubRouter(anyString(), any());
     }
 
     /*

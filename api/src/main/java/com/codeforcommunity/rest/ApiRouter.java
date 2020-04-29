@@ -18,29 +18,71 @@ import io.vertx.ext.web.Router;
 
 
 public class ApiRouter implements IRouter {
-    private final CommonRouter commonRouter;
-    private final AuthRouter authRouter;
-    private final PfRequestRouter requestRouter;
-    private final EventsRouter eventsRouter;
-    private final AnnouncementsRouter announcementsRouter;
+    // allows us to test by allowing public access to private fields
+    public static class Externals {
+        private CommonRouter commonRouter;
+        private AuthRouter authRouter;
+        private PfRequestRouter requestRouter;
+        private EventsRouter eventsRouter;
+        private AnnouncementsRouter announcementsRouter;
+
+        public Externals(JWTAuthorizer myJWTAuthorizer,
+                         IAuthProcessor authProcessor,
+                         IRequestsProcessor requestsProcessor,
+                         IEventsProcessor eventsProcessor,
+                         IAnnouncementsProcessor announcementEventsProcessor) {
+            this.commonRouter = new CommonRouter(myJWTAuthorizer);
+            this.authRouter = new AuthRouter(authProcessor);
+            this.requestRouter = new PfRequestRouter(requestsProcessor);
+            this.eventsRouter = new EventsRouter(eventsProcessor);
+            this.announcementsRouter = new AnnouncementsRouter(announcementEventsProcessor);
+        }
+
+        public CommonRouter getCommonRouter() {
+            return this.commonRouter;
+        }
+
+        public AuthRouter getAuthRouter() {
+            return this.authRouter;
+        }
+
+        public PfRequestRouter getRequestRouter() {
+            return this.requestRouter;
+        }
+
+        public EventsRouter getEventsRouter() {
+            return this.eventsRouter;
+        }
+
+        public AnnouncementsRouter getAnnouncementsRouter() {
+            return this.announcementsRouter;
+        }
+
+        public Router getRouter(Vertx vertx) {
+            return Router.router(vertx);
+        }
+    }
+
+    private final Externals externs;
 
     public ApiRouter(IAuthProcessor authProcessor, IRequestsProcessor requestsProcessor,
         IEventsProcessor eventsProcessor, IAnnouncementsProcessor announcementEventsProcessor,
         JWTAuthorizer jwtAuthorizer) {
-        this.commonRouter = new CommonRouter(jwtAuthorizer);
-        this.authRouter = new AuthRouter(authProcessor);
-        this.requestRouter = new PfRequestRouter(requestsProcessor);
-        this.eventsRouter = new EventsRouter(eventsProcessor);
-        this.announcementsRouter = new AnnouncementsRouter(announcementEventsProcessor);
+        this.externs = new Externals(jwtAuthorizer, authProcessor, requestsProcessor, eventsProcessor,
+            announcementEventsProcessor);
+    }
+
+    public ApiRouter(Externals externs) {
+        this.externs = externs;
     }
 
     /**
      * Initialize a router and register all route handlers on it.
      */
     public Router initializeRouter(Vertx vertx) {
-        Router router = commonRouter.initializeRouter(vertx);
+        Router router = externs.getCommonRouter().initializeRouter(vertx);
 
-        router.mountSubRouter("/user", authRouter.initializeRouter(vertx));
+        router.mountSubRouter("/user", externs.getAuthRouter().initializeRouter(vertx));
         router.mountSubRouter("/protected", defineProtectedRoutes(vertx));
 
         return router;
@@ -51,11 +93,11 @@ public class ApiRouter implements IRouter {
      * require a user to have a valid JWT access token in their header.
      */
     private Router defineProtectedRoutes(Vertx vertx) {
-        Router router = Router.router(vertx);
+        Router router = externs.getRouter(vertx);
 
-        router.mountSubRouter("/requests", requestRouter.initializeRouter(vertx));
-        router.mountSubRouter("/events", eventsRouter.initializeRouter(vertx));
-        router.mountSubRouter("/announcements", announcementsRouter.initializeRouter(vertx));
+        router.mountSubRouter("/requests", externs.getRequestRouter().initializeRouter(vertx));
+        router.mountSubRouter("/events", externs.getEventsRouter().initializeRouter(vertx));
+        router.mountSubRouter("/announcements", externs.getAnnouncementsRouter().initializeRouter(vertx));
 
         return router;
     }
