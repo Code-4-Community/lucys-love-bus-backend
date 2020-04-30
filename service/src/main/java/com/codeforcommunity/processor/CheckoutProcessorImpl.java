@@ -3,7 +3,8 @@ package com.codeforcommunity.processor;
 import com.codeforcommunity.api.ICheckoutProcessor;
 import com.codeforcommunity.auth.JWTData;
 import com.codeforcommunity.dto.checkout.LineItemRequest;
-import com.codeforcommunity.dto.checkout.PostCheckoutRequest;
+import com.codeforcommunity.dto.checkout.PostCreateCheckoutSession;
+import com.codeforcommunity.dto.checkout.PostCreateEventRegistrations;
 import com.codeforcommunity.exceptions.StripeExternalException;
 import com.codeforcommunity.enums.PrivilegeLevel;
 import com.codeforcommunity.exceptions.WrongPrivilegeException;
@@ -27,9 +28,9 @@ public class CheckoutProcessorImpl implements ICheckoutProcessor {
         this.db = db;
     }
 
-    public String createCheckoutSession(PostCheckoutRequest request, JWTData user) throws StripeExternalException {
+    public String createCheckoutSession(PostCreateCheckoutSession request, JWTData user) throws StripeExternalException {
 
-        this.createEventRegistration(request, user);
+        this.createEventRegistration(new PostCreateEventRegistrations(request.getLineItems()), user);
 
         // TODO: Move to properties file
         Stripe.apiKey = "sk_test_Q2wTkIY5Z3h9pjtgkksJULj200M84LsI3q";
@@ -53,7 +54,7 @@ public class CheckoutProcessorImpl implements ICheckoutProcessor {
         }
     }
 
-    public void createEventRegistration(PostCheckoutRequest request, JWTData data) {
+    public void createEventRegistration(PostCreateEventRegistrations request, JWTData data) {
         for (LineItemRequest lineItem : request.getLineItems()) {
             UserEventsRecord newRecord = db.newRecord(USER_EVENTS);
             newRecord.setEventId(lineItem.getId());
@@ -70,7 +71,6 @@ public class CheckoutProcessorImpl implements ICheckoutProcessor {
             );
             if (event.getType().equals("checkout.session.completed")) {
                 Session session = (Session) event.getDataObjectDeserializer().getObject().get();
-                // do things
             }
         } catch (SignatureVerificationException e) {
             throw new StripeExternalException("Error verifying signature of incoming webhook");

@@ -5,15 +5,15 @@ import com.stripe.param.checkout.SessionCreateParams;
 import java.util.List;
 import java.util.ArrayList;
 
-public class PostCheckoutRequest {
+public class PostCreateCheckoutSession {
 
     private List<LineItemRequest> lineItems;
     private String cancelUrl;
     private String successUrl;
 
-    private PostCheckoutRequest() {}
+    private PostCreateCheckoutSession() {}
 
-    public PostCheckoutRequest(List<LineItemRequest> lineItems, String cancelUrl, String successUrl) {
+    public PostCreateCheckoutSession(List<LineItemRequest> lineItems, String cancelUrl, String successUrl) {
         this.lineItems = lineItems;
         this.cancelUrl = cancelUrl;
         this.successUrl = successUrl;

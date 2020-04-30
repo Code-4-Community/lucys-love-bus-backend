@@ -2,9 +2,8 @@ package com.codeforcommunity.rest.subrouter;
 
 import com.codeforcommunity.api.ICheckoutProcessor;
 import com.codeforcommunity.auth.JWTData;
-import com.codeforcommunity.dto.checkout.PostCheckoutRequest;
-import com.codeforcommunity.enums.PrivilegeLevel;
-import com.codeforcommunity.exceptions.WrongPrivilegeException;
+import com.codeforcommunity.dto.checkout.PostCreateCheckoutSession;
+import com.codeforcommunity.dto.checkout.PostCreateEventRegistrations;
 import com.codeforcommunity.rest.IRouter;
 import com.codeforcommunity.rest.RestFunctions;
 import io.vertx.core.Vertx;
@@ -24,15 +23,15 @@ public class CheckoutRouter implements IRouter {
     public Router initializeRouter(Vertx vertx) {
         Router router = Router.router(vertx);
 
-        registerCreateEventRegistrationHandler(router);
+        registerCreateEventRegistrationsHandler(router);
         registerCheckoutSessionHandler(router);
 
         return router;
     }
 
-    private void registerCreateEventRegistrationHandler(Router router) {
-        Route getRequestsRoute = router.post("/event");
-        getRequestsRoute.handler(this::handleCreateEventRegistration);
+    private void registerCreateEventRegistrationsHandler(Router router) {
+        Route getRequestsRoute = router.post("/events");
+        getRequestsRoute.handler(this::handleCreateEventsRegistration);
     }
 
     private void registerCheckoutSessionHandler(Router router) {
@@ -40,8 +39,9 @@ public class CheckoutRouter implements IRouter {
         getRequestsRoute.handler(this::handleCreateCheckoutSession);
     }
 
-    private void handleCreateEventRegistration(RoutingContext ctx) {
-        PostCheckoutRequest requestData = RestFunctions.getJsonBodyAsClass(ctx, PostCheckoutRequest.class);
+    private void handleCreateEventsRegistration(RoutingContext ctx) {
+        PostCreateEventRegistrations requestData =
+                RestFunctions.getJsonBodyAsClass(ctx, PostCreateEventRegistrations.class);
         JWTData userData = ctx.get("jwt_data");
 
         processor.createEventRegistration(requestData, userData);
@@ -50,7 +50,7 @@ public class CheckoutRouter implements IRouter {
     }
 
     private void handleCreateCheckoutSession(RoutingContext ctx) {
-        PostCheckoutRequest requestData = RestFunctions.getJsonBodyAsClass(ctx, PostCheckoutRequest.class);
+        PostCreateCheckoutSession requestData = RestFunctions.getJsonBodyAsClass(ctx, PostCreateCheckoutSession.class);
         JWTData userData = ctx.get("jwt_data");
 
         String checkoutSessionID = processor.createCheckoutSession(requestData, userData);

@@ -1,15 +1,15 @@
 package com.codeforcommunity.api;
 
 import com.codeforcommunity.auth.JWTData;
-import com.codeforcommunity.dto.checkout.PostCheckoutRequest;
+import com.codeforcommunity.dto.checkout.PostCreateCheckoutSession;
+import com.codeforcommunity.dto.checkout.PostCreateEventRegistrations;
 import com.codeforcommunity.exceptions.StripeExternalException;
-import com.stripe.model.checkout.Session;
 
 public interface ICheckoutProcessor {
 
-    String createCheckoutSession(PostCheckoutRequest request, JWTData data) throws StripeExternalException;
+    String createCheckoutSession(PostCreateCheckoutSession request, JWTData data) throws StripeExternalException;
 
-    void createEventRegistration(PostCheckoutRequest request, JWTData data);
+    void createEventRegistration(PostCreateEventRegistrations request, JWTData data);
 
     void handleStripeCheckoutEventComplete(String payload, String sigHeader);
 
