@@ -44,12 +44,8 @@ public class CheckoutRouter implements IRouter {
         PostCheckoutRequest requestData = RestFunctions.getJsonBodyAsClass(ctx, PostCheckoutRequest.class);
         JWTData userData = ctx.get("jwt_data");
 
-        if (userData.getPrivilegeLevel() != PrivilegeLevel.PF
-                && userData.getPrivilegeLevel() != PrivilegeLevel.ADMIN) {
-            throw new WrongPrivilegeException(PrivilegeLevel.PF);
-        }
-
         processor.createEventRegistration(requestData, userData);
+
         end(ctx.response(), 200, "Nothing failed, but you weren't actually registered");
     }
 
@@ -57,12 +53,8 @@ public class CheckoutRouter implements IRouter {
         PostCheckoutRequest requestData = RestFunctions.getJsonBodyAsClass(ctx, PostCheckoutRequest.class);
         JWTData userData = ctx.get("jwt_data");
 
-        if (userData.getPrivilegeLevel() != PrivilegeLevel.GP) {
-            throw new WrongPrivilegeException(PrivilegeLevel.GP);
-        }
-
-        processor.createEventRegistration(requestData, userData);
         String checkoutSessionID = processor.createCheckoutSession(requestData, userData);
+
         end(ctx.response(), 200, checkoutSessionID);
     }
 

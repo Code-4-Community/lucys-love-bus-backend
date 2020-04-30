@@ -40,19 +40,9 @@ public class WebhooksRouter implements IRouter {
     private void handleStripeWebhookEvent(RoutingContext ctx) {
         String payload = ctx.getBodyAsString();
         String sigHeader = RestFunctions.getRequestHeader(ctx.request(), "Stripe-Signature");
-        String endpointSecret = "whsec_TXciotTvq1luyU8wMppJAMJE9pBLDZ33"; // TODO: where does this go?
 
-        try {
-            Event event = Webhook.constructEvent(
-                    payload, sigHeader, endpointSecret
-            );
-            if (event.getType().equals("checkout.session.completed")) {
-                Session session = (Session) event.getDataObjectDeserializer().getObject().get();
-                checkoutProcessor.handleStripeCheckoutEventComplete(session);
-            }
-        } catch (SignatureVerificationException e) {
-            throw new StripeExternalException("Error verifying signature of incoming webhook");
-        }
+        this.checkoutProcessor.handleStripeCheckoutEventComplete(payload, sigHeader);
+
         end(ctx.response(), 200, "Nothing failed, but you weren't actually marked as having paid");
     }
 }
