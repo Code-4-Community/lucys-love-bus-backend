@@ -15,7 +15,7 @@ import org.jooq.DSLContext;
 import org.jooq.Result;
 import org.jooq.generated.tables.pojos.Events;
 import org.jooq.generated.tables.records.EventsRecord;
-import org.jooq.generated.tables.records.UserEventsRecord;
+import org.jooq.generated.tables.records.EventRegistrationsRecord;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -27,9 +27,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static org.jooq.generated.Tables.EVENTS;
-import static org.jooq.generated.Tables.USER_EVENTS;
+import static org.jooq.generated.Tables.EVENT_REGISTRATIONS;
 import static org.jooq.generated.Tables.USERS;
-import static org.jooq.impl.DSL.count;
+import static org.jooq.impl.DSL.minus;
+import static org.jooq.impl.DSL.sum;
 
 public class EventsProcessorImpl implements IEventsProcessor {
 
@@ -69,8 +70,8 @@ public class EventsProcessorImpl implements IEventsProcessor {
 
     SelectConditionStep q = db.select(EVENTS.fields())
         .from(USERS
-            .join(USER_EVENTS).onKey()
-            .join(EVENTS).onKey())
+            .join(EVENT_REGISTRATIONS).onKey(EVENT_REGISTRATIONS.USER_ID)
+            .join(EVENTS).onKey(EVENT_REGISTRATIONS.EVENT_ID))
         .where(USERS.ID.eq(userData.getUserId()));
 
     SelectConditionStep afterDateFilter = q;
@@ -144,7 +145,12 @@ public class EventsProcessorImpl implements IEventsProcessor {
    * @return
    */
   private int getSpotsLeft(int eventId) {
-    return db.select(EVENTS.CAPACITY.minus(db.fetchCount(USER_EVENTS.where(USER_EVENTS.EVENT_ID.eq(eventId)))))
+    Integer sumRegistrations =
+            db.select(sum(EVENT_REGISTRATIONS.TICKET_QUANTITY))
+                    .where(EVENT_REGISTRATIONS.EVENT_ID.eq(eventId))
+            .fetchOneInto(Integer.class);
+
+    return db.select(EVENTS.CAPACITY.minus(sumRegistrations))
         .from(EVENTS)
         .where(EVENTS.ID.eq(eventId))
         .fetchOneInto(Integer.class);
