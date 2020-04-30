@@ -119,6 +119,14 @@
                   <includeTypes>.*</includeTypes>
                   <nullability>NOT_NULL</nullability>
                 </forcedType>
+                <forcedType>
+                  <userType>com.codeforcommunity.enums.EventRegistrationStatus</userType>
+                  <enumConverter>true</enumConverter>
+
+                  <includeExpression>.*event_registrations\.registration_status</includeExpression>
+                  <includeTypes>.*</includeTypes>
+                  <nullability>NOT_NULL</nullability>
+                </forcedType>
               </forcedTypes>
             </database>
           </generator>
