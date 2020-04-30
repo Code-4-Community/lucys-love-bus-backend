@@ -145,12 +145,16 @@ public class EventsProcessorImpl implements IEventsProcessor {
    * @return
    */
   private int getSpotsLeft(int eventId) {
-    Integer sumRegistrations =
-            db.select(sum(EVENT_REGISTRATIONS.TICKET_QUANTITY))
+    List<Integer> registrationQuantities =
+            db.select(EVENT_REGISTRATIONS.TICKET_QUANTITY)
+                    .from(EVENT_REGISTRATIONS)
                     .where(EVENT_REGISTRATIONS.EVENT_ID.eq(eventId))
-            .fetchOneInto(Integer.class);
-
-    return db.select(EVENTS.CAPACITY.minus(sumRegistrations))
+            .fetchInto(Integer.class);
+    int sum = 0;
+    for (int i : registrationQuantities) {
+      sum += i;
+    }
+    return db.select(EVENTS.CAPACITY.minus(sum))
         .from(EVENTS)
         .where(EVENTS.ID.eq(eventId))
         .fetchOneInto(Integer.class);
