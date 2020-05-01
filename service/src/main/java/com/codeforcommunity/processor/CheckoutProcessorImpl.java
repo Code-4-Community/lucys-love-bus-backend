@@ -2,6 +2,7 @@ package com.codeforcommunity.processor;
 
 import com.codeforcommunity.api.ICheckoutProcessor;
 import com.codeforcommunity.auth.JWTData;
+import com.codeforcommunity.dataaccess.EventDatabaseOperations;
 import com.codeforcommunity.dto.checkout.LineItemRequest;
 import com.codeforcommunity.dto.checkout.PostCreateCheckoutSession;
 import com.codeforcommunity.dto.checkout.PostCreateEventRegistrations;
@@ -26,10 +27,12 @@ import static org.jooq.generated.Tables.EVENT_REGISTRATIONS;
 
 public class CheckoutProcessorImpl implements ICheckoutProcessor {
 
-    private DSLContext db;
+    private final DSLContext db;
+    private final EventDatabaseOperations eventDatabaseOperations;
 
     public CheckoutProcessorImpl(DSLContext db) {
         this.db = db;
+        this.eventDatabaseOperations = new EventDatabaseOperations(db);
     }
 
     public String createCheckoutSessionAndEventRegistration(PostCreateCheckoutSession request, JWTData user)
@@ -85,7 +88,7 @@ public class CheckoutProcessorImpl implements ICheckoutProcessor {
     private void createEventRegistrationUtil(List<LineItemRequest> lineItemRequests,
                                              JWTData user, String checkoutSessionId) {
         for (LineItemRequest lineItem : lineItemRequests) {
-            if (lineItem.getQuantity() > this.getSpotsLeft(lineItem.getId())) {
+            if (lineItem.getQuantity() > eventDatabaseOperations.getSpotsLeft(lineItem.getId())) {
                 throw new EventRegistrationException("There are insufficient remaining spots for the event "
                         + lineItem.getName());
             }
@@ -103,17 +106,5 @@ public class CheckoutProcessorImpl implements ICheckoutProcessor {
         }
     }
 
-    /**
-     * Queries the database to find the number of spots left for a given event by id.
-     * @param eventId the event id
-     * @return int the number of remaining spots for this event
-     * TODO: This is duplicated from EventsProcessorImpl, we should figure out where common code should live
-     */
-    int getSpotsLeft(int eventId) {
-        return db.execute("SELECT (capacity - (SELECT COALESCE(SUM(ticket_quantity), 0)\n" +
-                "        FROM event_registrations\n" +
-                "        WHERE event_id = " + eventId + ")) as remainingCapacity\n" +
-                "    FROM events\n" +
-                "    WHERE id = " + eventId);
-    }
+
 }

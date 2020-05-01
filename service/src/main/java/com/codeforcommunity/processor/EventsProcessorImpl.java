@@ -2,6 +2,7 @@ package com.codeforcommunity.processor;
 
 import com.codeforcommunity.api.IEventsProcessor;
 import com.codeforcommunity.auth.JWTData;
+import com.codeforcommunity.dataaccess.EventDatabaseOperations;
 import com.codeforcommunity.dto.userEvents.requests.CreateEventRequest;
 import com.codeforcommunity.dto.userEvents.responses.SingleEventResponse;
 import com.codeforcommunity.dto.userEvents.components.Event;
@@ -12,32 +13,27 @@ import com.codeforcommunity.enums.PrivilegeLevel;
 import com.codeforcommunity.exceptions.AdminOnlyRouteException;
 import org.jooq.*;
 import org.jooq.DSLContext;
-import org.jooq.Result;
 import org.jooq.generated.tables.pojos.Events;
 import org.jooq.generated.tables.records.EventsRecord;
-import org.jooq.generated.tables.records.EventRegistrationsRecord;
 
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.Period;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static org.jooq.generated.Tables.EVENTS;
 import static org.jooq.generated.Tables.EVENT_REGISTRATIONS;
 import static org.jooq.generated.Tables.USERS;
-import static org.jooq.impl.DSL.minus;
-import static org.jooq.impl.DSL.sum;
 
 public class EventsProcessorImpl implements IEventsProcessor {
 
   private final DSLContext db;
+  private final EventDatabaseOperations eventDatabaseOperations;
 
   public EventsProcessorImpl(DSLContext db) {
     this.db = db;
+    this.eventDatabaseOperations = new EventDatabaseOperations(db);
   }
 
   @Override
@@ -132,24 +128,12 @@ public class EventsProcessorImpl implements IEventsProcessor {
     return events.stream().map(event -> {
       EventDetails details = new EventDetails(event.getDescription(), event.getLocation(), event.getStartTime(),
               event.getEndTime());
-      Event e = new Event(event.getId(), event.getTitle(), getSpotsLeft(event.getId()), event.getThumbnail(),
+      Event e = new Event(event.getId(), event.getTitle(),
+              eventDatabaseOperations.getSpotsLeft(event.getId()), event.getThumbnail(),
               details);
       return e;
     }).collect(Collectors.toList());
 
-  }
-
-  /**
-   * Queries the database to find the number of spots left for a given event by id.
-   * @param eventId the event id
-   * @return int the number of remaining spots for this event
-   */
-  int getSpotsLeft(int eventId) {
-    return db.execute("SELECT (capacity - (SELECT COALESCE(SUM(ticket_quantity), 0)\n" +
-            "        FROM event_registrations\n" +
-            "        WHERE event_id = " + eventId + ")) as remainingCapacity\n" +
-            "    FROM events\n" +
-            "    WHERE id = " + eventId);
   }
 
   /**
@@ -159,7 +143,7 @@ public class EventsProcessorImpl implements IEventsProcessor {
     EventDetails details = new EventDetails(event.getDescription(), event.getLocation(),
         event.getStartTime(), event.getEndTime());
     return new SingleEventResponse(event.getId(), event.getTitle(),
-        getSpotsLeft(event.getId()), event.getCapacity(), event.getThumbnail(), details);
+        eventDatabaseOperations.getSpotsLeft(event.getId()), event.getCapacity(), event.getThumbnail(), details);
   }
 
   /**
