@@ -141,23 +141,15 @@ public class EventsProcessorImpl implements IEventsProcessor {
 
   /**
    * Queries the database to find the number of spots left for a given event by id.
-   * @param eventId
-   * @return
+   * @param eventId the event id
+   * @return int the number of remaining spots for this event
    */
   private int getSpotsLeft(int eventId) {
-    List<Integer> registrationQuantities =
-            db.select(EVENT_REGISTRATIONS.TICKET_QUANTITY)
-                    .from(EVENT_REGISTRATIONS)
-                    .where(EVENT_REGISTRATIONS.EVENT_ID.eq(eventId))
-            .fetchInto(Integer.class);
-    int sum = 0;
-    for (int i : registrationQuantities) {
-      sum += i;
-    }
-    return db.select(EVENTS.CAPACITY.minus(sum))
-        .from(EVENTS)
-        .where(EVENTS.ID.eq(eventId))
-        .fetchOneInto(Integer.class);
+    return db.execute("SELECT (capacity - (SELECT SUM(ticket_quantity)\n" +
+            "        FROM event_registrations\n" +
+            "        WHERE event_id = " + eventId + ")) as remainingCapacity\n" +
+            "    FROM events\n" +
+            "    WHERE id = " + eventId);
   }
 
   /**

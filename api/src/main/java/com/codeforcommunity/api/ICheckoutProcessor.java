@@ -7,7 +7,8 @@ import com.codeforcommunity.exceptions.StripeExternalException;
 
 public interface ICheckoutProcessor {
 
-    String createCheckoutSession(PostCreateCheckoutSession request, JWTData data) throws StripeExternalException;
+    String createCheckoutSessionAndEventRegistration(PostCreateCheckoutSession request, JWTData data)
+            throws StripeExternalException;
 
     void createEventRegistration(PostCreateEventRegistrations request, JWTData data);
 

@@ -6,6 +6,7 @@ import com.codeforcommunity.dto.checkout.LineItemRequest;
 import com.codeforcommunity.dto.checkout.PostCreateCheckoutSession;
 import com.codeforcommunity.dto.checkout.PostCreateEventRegistrations;
 import com.codeforcommunity.enums.EventRegistrationStatus;
+import com.codeforcommunity.exceptions.EventRegistrationException;
 import com.codeforcommunity.exceptions.StripeExternalException;
 import com.codeforcommunity.enums.PrivilegeLevel;
 import com.codeforcommunity.exceptions.WrongPrivilegeException;
@@ -31,8 +32,8 @@ public class CheckoutProcessorImpl implements ICheckoutProcessor {
         this.db = db;
     }
 
-    public String createCheckoutSession(PostCreateCheckoutSession request, JWTData user) throws StripeExternalException {
-
+    public String createCheckoutSessionAndEventRegistration(PostCreateCheckoutSession request, JWTData user)
+            throws StripeExternalException {
 
         // TODO: Move to properties file
         Stripe.apiKey = "sk_test_Q2wTkIY5Z3h9pjtgkksJULj200M84LsI3q";
@@ -58,25 +59,8 @@ public class CheckoutProcessorImpl implements ICheckoutProcessor {
         }
     }
 
-    public void createEventRegistration(PostCreateEventRegistrations request, JWTData data) {
-        this.createEventRegistrationUtil(request.getLineItems(), data, null);
-    }
-
-    private void createEventRegistrationUtil(List<LineItemRequest> lineItemRequests,
-                                             JWTData data, String checkoutSessionId) {
-        for (LineItemRequest lineItem : lineItemRequests) {
-            EventRegistrationsRecord newRecord = db.newRecord(EVENT_REGISTRATIONS);
-            newRecord.setEventId(lineItem.getId());
-            newRecord.setUserId(data.getUserId());
-            newRecord.setRegistrationStatus(
-                    data.getPrivilegeLevel().getVal() >= PrivilegeLevel.PF.getVal()
-                    ? EventRegistrationStatus.ACTIVE
-                    : EventRegistrationStatus.PAYMENT_INCOMPLETE
-            );
-            newRecord.setTicketQuantity(lineItem.getQuantity().intValue());
-            newRecord.setStripeCheckoutSessionId(checkoutSessionId);
-            newRecord.store();
-        }
+    public void createEventRegistration(PostCreateEventRegistrations request, JWTData user) {
+        this.createEventRegistrationUtil(request.getLineItems(), user, null);
     }
 
     public void handleStripeCheckoutEventComplete(String payload, String sigHeader) {
@@ -96,5 +80,39 @@ public class CheckoutProcessorImpl implements ICheckoutProcessor {
         } catch (SignatureVerificationException e) {
             throw new StripeExternalException("Error verifying signature of incoming webhook");
         }
+    }
+
+    private void createEventRegistrationUtil(List<LineItemRequest> lineItemRequests,
+                                             JWTData user, String checkoutSessionId) {
+        for (LineItemRequest lineItem : lineItemRequests) {
+            if (lineItem.getQuantity() > this.getSpotsLeft(lineItem.getId())) {
+                throw new EventRegistrationException("There are insufficient remaining spots for the event "
+                        + lineItem.getName());
+            }
+            EventRegistrationsRecord newRecord = db.newRecord(EVENT_REGISTRATIONS);
+            newRecord.setEventId(lineItem.getId());
+            newRecord.setUserId(user.getUserId());
+            newRecord.setRegistrationStatus(
+                    user.getPrivilegeLevel().getVal() >= PrivilegeLevel.PF.getVal()
+                            ? EventRegistrationStatus.ACTIVE
+                            : EventRegistrationStatus.PAYMENT_INCOMPLETE
+            );
+            newRecord.setTicketQuantity(lineItem.getQuantity().intValue());
+            newRecord.setStripeCheckoutSessionId(checkoutSessionId);
+            newRecord.store();
+        }
+    }
+
+    /**
+     * Queries the database to find the number of spots left for a given event by id.
+     * @param eventId the event id
+     * @return int the number of remaining spots for this event
+     */
+    private int getSpotsLeft(int eventId) {
+        return db.execute("SELECT (capacity - (SELECT SUM(ticket_quantity)\n" +
+                "        FROM event_registrations\n" +
+                "        WHERE event_id = " + eventId + ")) as remainingCapacity\n" +
+                "    FROM events\n" +
+                "    WHERE id = " + eventId);
     }
 }

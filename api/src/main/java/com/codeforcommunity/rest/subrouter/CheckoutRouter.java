@@ -24,19 +24,19 @@ public class CheckoutRouter implements IRouter {
         Router router = Router.router(vertx);
 
         registerCreateEventRegistrationsHandler(router);
-        registerCheckoutSessionHandler(router);
+        registerCheckoutSessionAndEventRegistrationHandler(router);
 
         return router;
     }
 
     private void registerCreateEventRegistrationsHandler(Router router) {
-        Route getRequestsRoute = router.post("/events");
+        Route getRequestsRoute = router.post("/register");
         getRequestsRoute.handler(this::handleCreateEventsRegistration);
     }
 
-    private void registerCheckoutSessionHandler(Router router) {
-        Route getRequestsRoute = router.post("/session");
-        getRequestsRoute.handler(this::handleCreateCheckoutSession);
+    private void registerCheckoutSessionAndEventRegistrationHandler(Router router) {
+        Route getRequestsRoute = router.post("/payment");
+        getRequestsRoute.handler(this::handleCreateCheckoutSessionAndEventRegistration);
     }
 
     private void handleCreateEventsRegistration(RoutingContext ctx) {
@@ -46,14 +46,14 @@ public class CheckoutRouter implements IRouter {
 
         processor.createEventRegistration(requestData, userData);
 
-        end(ctx.response(), 200, "Nothing failed, but you weren't actually registered");
+        end(ctx.response(), 200, "Successfully registered!");
     }
 
-    private void handleCreateCheckoutSession(RoutingContext ctx) {
+    private void handleCreateCheckoutSessionAndEventRegistration(RoutingContext ctx) {
         PostCreateCheckoutSession requestData = RestFunctions.getJsonBodyAsClass(ctx, PostCreateCheckoutSession.class);
         JWTData userData = ctx.get("jwt_data");
 
-        String checkoutSessionID = processor.createCheckoutSession(requestData, userData);
+        String checkoutSessionID = processor.createCheckoutSessionAndEventRegistration(requestData, userData);
 
         end(ctx.response(), 200, checkoutSessionID);
     }

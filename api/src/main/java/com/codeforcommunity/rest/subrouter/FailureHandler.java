@@ -1,6 +1,7 @@
 package com.codeforcommunity.rest.subrouter;
 
 import com.codeforcommunity.exceptions.EmailAlreadyInUseException;
+import com.codeforcommunity.exceptions.EventRegistrationException;
 import com.codeforcommunity.exceptions.HandledException;
 import com.codeforcommunity.exceptions.MalformedParameterException;
 import com.codeforcommunity.exceptions.MissingHeaderException;
@@ -96,6 +97,11 @@ public class FailureHandler {
   public void handleWrongPrivilegeException(RoutingContext ctx, WrongPrivilegeException exception) {
      String message = "This route is only available to users with the privilege: " + exception.getRequiredPrivilegeLevel().name();
      end(ctx, message, 401);
+  }
+
+  public void handleEventRegistrationException(RoutingContext ctx, EventRegistrationException exception) {
+       String message = "Error registering for event: " + exception.getMessage();
+       end(ctx, message, 400);
   }
 
   public void handleStripeExternalException(RoutingContext ctx, StripeExternalException exception) {
