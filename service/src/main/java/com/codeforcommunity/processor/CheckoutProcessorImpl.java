@@ -70,8 +70,8 @@ public class CheckoutProcessorImpl implements ICheckoutProcessor {
             newRecord.setUserId(data.getUserId());
             newRecord.setRegistrationStatus(
                     data.getPrivilegeLevel().getVal() >= PrivilegeLevel.PF.getVal()
-                    ? EventRegistrationStatus.ACTIVE.getVal()
-                    : EventRegistrationStatus.PAYMENT_INCOMPLETE.getVal()
+                    ? EventRegistrationStatus.ACTIVE
+                    : EventRegistrationStatus.PAYMENT_INCOMPLETE
             );
             newRecord.setTicketQuantity(lineItem.getQuantity().intValue());
             newRecord.setStripeCheckoutSessionId(checkoutSessionId);
@@ -90,7 +90,7 @@ public class CheckoutProcessorImpl implements ICheckoutProcessor {
                 Session session = (Session) event.getDataObjectDeserializer().getObject().get();
                 String checkoutSessionId = session.getId();
                 this.db.update(EVENT_REGISTRATIONS)
-                        .set(EVENT_REGISTRATIONS.REGISTRATION_STATUS, 1)
+                        .set(EVENT_REGISTRATIONS.REGISTRATION_STATUS, EventRegistrationStatus.ACTIVE)
                         .where(EVENT_REGISTRATIONS.STRIPE_CHECKOUT_SESSION_ID.eq(checkoutSessionId));
             }
         } catch (SignatureVerificationException e) {
