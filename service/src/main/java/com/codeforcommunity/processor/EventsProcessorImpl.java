@@ -144,8 +144,8 @@ public class EventsProcessorImpl implements IEventsProcessor {
    * @param eventId the event id
    * @return int the number of remaining spots for this event
    */
-  private int getSpotsLeft(int eventId) {
-    return db.execute("SELECT (capacity - (SELECT SUM(ticket_quantity)\n" +
+  int getSpotsLeft(int eventId) {
+    return db.execute("SELECT (capacity - (SELECT COALESCE(SUM(ticket_quantity), 0)\n" +
             "        FROM event_registrations\n" +
             "        WHERE event_id = " + eventId + ")) as remainingCapacity\n" +
             "    FROM events\n" +

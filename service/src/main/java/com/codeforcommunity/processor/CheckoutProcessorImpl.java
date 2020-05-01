@@ -107,9 +107,10 @@ public class CheckoutProcessorImpl implements ICheckoutProcessor {
      * Queries the database to find the number of spots left for a given event by id.
      * @param eventId the event id
      * @return int the number of remaining spots for this event
+     * TODO: This is duplicated from EventsProcessorImpl, we should figure out where common code should live
      */
-    private int getSpotsLeft(int eventId) {
-        return db.execute("SELECT (capacity - (SELECT SUM(ticket_quantity)\n" +
+    int getSpotsLeft(int eventId) {
+        return db.execute("SELECT (capacity - (SELECT COALESCE(SUM(ticket_quantity), 0)\n" +
                 "        FROM event_registrations\n" +
                 "        WHERE event_id = " + eventId + ")) as remainingCapacity\n" +
                 "    FROM events\n" +
