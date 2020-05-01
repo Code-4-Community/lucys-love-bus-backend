@@ -174,7 +174,7 @@ public class AnnouncementsProcessorImplTest {
         when(myUserData.getPrivilegeLevel()).thenReturn(PrivilegeLevel.GP);
 
         try {
-            myAnnouncementsProcessorImpl.postAnnouncements(req, myUserData);
+            myAnnouncementsProcessorImpl.postAnnouncement(req, myUserData);
             fail();
         } catch (AdminOnlyRouteException e) {
             // we're good
@@ -202,11 +202,35 @@ public class AnnouncementsProcessorImplTest {
         JWTData myUserData = mock(JWTData.class);
         when(myUserData.getPrivilegeLevel()).thenReturn(PrivilegeLevel.ADMIN);
 
-        PostAnnouncementResponse res = myAnnouncementsProcessorImpl.postAnnouncements(req, myUserData);
+        PostAnnouncementResponse res = myAnnouncementsProcessorImpl.postAnnouncement(req, myUserData);
 
         assertEquals(res.getAnnouncement().getDescription(), "sample description");
         assertEquals(res.getAnnouncement().getTitle(), "sample title");
         assertEquals(res.getAnnouncement().getId(), 0);
         assertEquals(res.getAnnouncement().getCreated(), new Timestamp(START_TIMESTAMP_TEST));
+    }
+
+    // TODO
+    @Test
+    public void testPostEventSpecificAnnouncement1() {
+        fail();
+    }
+
+    // TODO
+    @Test
+    public void testPostEventSpecificAnnouncement2() {
+        fail();
+    }
+
+    // TODO
+    @Test
+    public void testGetEventSpecificAnnouncements1() {
+        fail();
+    }
+
+    // TODO
+    @Test
+    public void testGetEventSpecificAnnouncements2() {
+        fail();
     }
 }

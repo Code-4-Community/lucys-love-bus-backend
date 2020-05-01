@@ -29,7 +29,7 @@ import com.codeforcommunity.exceptions.*;
 // Contains tests for RequestsProcessorImpl.java in main
 public class RequestsProcessorImplTest {
   JooqMock myJooqMock;
-  RequestsProcessorImpl myRequestsProcessorImpl = Mockito.mock(RequestsProcessorImpl.class);
+  RequestsProcessorImpl myRequestsProcessorImpl;
 
   // set up all the mocks
   @Before
@@ -139,25 +139,29 @@ public class RequestsProcessorImplTest {
     // mock the DB for PF requests
     PfRequestsRecord myPFReqRecord = myJooqMock.getContext().newRecord(Tables.PF_REQUESTS);
     myPFReqRecord.setId(0);
-    myPFReqRecord.setUserId(0);
+    // getDescription() corresponds to user id, for some awkward reason
+    myPFReqRecord.setUserId(2);
+    // and getUserEmail() corresponds to this description
     myPFReqRecord.setDescription("sample description");
     myPFReqRecord.setStatus(RequestStatus.PENDING);
-    // myJooqMock.addReturn("SELECT", myPFReqRecord);
-    myJooqMock.addReturn("INSERT", myPFReqRecord);
+    myJooqMock.addReturn("SELECT", myPFReqRecord);
 
     Record3<Integer, String, String> recordImpl = mock(Record3.class);
     when(recordImpl.component1()).thenReturn(myPFReqRecord.getId());
     when(recordImpl.component2()).thenReturn(myPFReqRecord.getDescription());
     when(recordImpl.component3()).thenReturn("brandon@example.com");
-    // myJooqMock.addReturn("SELECT", recordImpl);
+    myJooqMock.addReturn("SELECT", recordImpl);
 
     List<RequestData> reqs = myRequestsProcessorImpl.getRequests(myUserData);
 
     // TODO: make these work
     assertEquals(reqs.size(), 1);
     assertEquals(reqs.get(0).getId(), 0);
-    assertEquals(reqs.get(0).getDescription(), "sample description");
-    assertEquals(reqs.get(0).getUserEmail(), "brandon@example.com");
+    fail("Reminder to fix this test!");
+    // assertEquals(reqs.get(0).getDescription(), "sample description");
+    // returns "2"
+    // assertEquals(reqs.get(0).getUserEmail(), "brandon@example.com");
+    // returns "sample description"
   }
 
   // test for list of requests with multiple elements
@@ -189,6 +193,7 @@ public class RequestsProcessorImplTest {
     List<RequestData> reqs = myRequestsProcessorImpl.getRequests(myUserData);
 
     assertEquals(reqs.size(), 2);
+    fail("Reminder to fix this test!");
     // TODO: add assertEquals for more of the properties like the method above
   }
 

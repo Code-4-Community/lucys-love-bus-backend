@@ -76,12 +76,16 @@ public class EventsProcessorImplTest {
 
     EventsRecord record = myJooqMock.getContext().newRecord(Tables.EVENTS);
     record.setId(0);
+    record.setCapacity(myEventRequest.getSpotsAvailable());
     myJooqMock.addReturn("INSERT", record);
+    myJooqMock.addReturn("SELECT", record);
 
     SingleEventResponse res = myEventsProcessorImpl.createEvent(myEventRequest, goodUser);
     assertEquals(res.getId(), 0);
     assertEquals(res.getTitle(), "sample");
-    assertEquals(res.getSpotsAvailable(), 5);
+    fail("Reminder to fix this bug");
+    // this is also probably a bug
+    // assertEquals(res.getSpotsAvailable(), 5);
     assertEquals(res.getThumbnail(), "sample thumbnail");
     assertEquals(res.getDetails().getDescription(), myEventDetails.getDescription());
     assertEquals(res.getDetails().getLocation(), myEventDetails.getLocation());
@@ -136,5 +140,23 @@ public class EventsProcessorImplTest {
     assertEquals(res.getSpotsAvailable(), myEventRequest.getSpotsAvailable());
     assertEquals(res.getThumbnail(), myEventRequest.getThumbnail());
     assertEquals(res.getTitle(), myEventRequest.getTitle());
+  }
+
+  // TODO
+  @Test
+  public void testGetEvents() {
+    fail();
+  }
+
+  // TODO
+  @Test
+  public void testGetEventsSignedUp() {
+    fail();
+  }
+
+  // TODO
+  @Test
+  public void testGetEventsQualified() {
+    fail();
   }
 }
