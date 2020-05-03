@@ -178,7 +178,6 @@ public class EventsProcessorImpl implements IEventsProcessor {
 
   /**
    * Turns a list of jOOq Events DTO into one of our Event DTO.
-   *
    * @param events jOOq data objects.
    * @return List of our Event data object.
    */
@@ -186,9 +185,9 @@ public class EventsProcessorImpl implements IEventsProcessor {
 
     return events.stream().map(event -> {
       EventDetails details = new EventDetails(event.getDescription(), event.getLocation(), event.getStartTime(),
-          event.getEndTime());
+              event.getEndTime());
       Event e = new Event(event.getId(), event.getTitle(), getSpotsLeft(event.getId()), event.getThumbnail(),
-          details);
+              details);
       return e;
     }).collect(Collectors.toList());
 
@@ -196,20 +195,19 @@ public class EventsProcessorImpl implements IEventsProcessor {
 
   /**
    * Queries the database to find the number of spots left for a given event by id.
-   *
    * @param eventId
    * @return
    */
   private int getSpotsLeft(int eventId) {
     Integer sumRegistrations =
-        db.select(sum(EVENT_REGISTRATIONS.TICKET_QUANTITY))
+        Optional.ofNullable(db.select(sum(EVENT_REGISTRATIONS.TICKET_QUANTITY))
+            .from(EVENT_REGISTRATIONS)
             .where(EVENT_REGISTRATIONS.EVENT_ID.eq(eventId))
-            .fetchOneInto(Integer.class);
+            .fetchOneInto(Integer.class)).orElse(0);
+    Integer capacity = Optional.ofNullable(db.select(EVENTS.CAPACITY).where(EVENTS.ID.eq(eventId))
+        .fetchOneInto(Integer.class)).orElse(0);
 
-    return db.select(EVENTS.CAPACITY.minus(sumRegistrations))
-        .from(EVENTS)
-        .where(EVENTS.ID.eq(eventId))
-        .fetchOneInto(Integer.class);
+    return capacity - sumRegistrations;
   }
 
   /**
