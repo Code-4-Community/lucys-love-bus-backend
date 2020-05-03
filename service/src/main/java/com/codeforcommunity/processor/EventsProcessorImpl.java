@@ -4,6 +4,7 @@ import com.codeforcommunity.api.IEventsProcessor;
 import com.codeforcommunity.auth.JWTData;
 import com.codeforcommunity.dataaccess.EventDatabaseOperations;
 import com.codeforcommunity.dto.userEvents.requests.CreateEventRequest;
+import com.codeforcommunity.dto.userEvents.requests.ModifyEventRequest;
 import com.codeforcommunity.dto.userEvents.responses.EventIdResponse;
 import com.codeforcommunity.dto.userEvents.responses.SingleEventResponse;
 import com.codeforcommunity.dto.userEvents.components.Event;
@@ -12,6 +13,12 @@ import com.codeforcommunity.dto.userEvents.requests.GetUserEventsRequest;
 import com.codeforcommunity.dto.userEvents.responses.GetEventsResponse;
 import com.codeforcommunity.enums.PrivilegeLevel;
 import com.codeforcommunity.exceptions.AdminOnlyRouteException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Optional;
+import java.util.function.Supplier;
 import org.jooq.*;
 import org.jooq.DSLContext;
 import org.jooq.generated.tables.pojos.Events;
@@ -119,14 +126,59 @@ public class EventsProcessorImpl implements IEventsProcessor {
     return new GetEventsResponse(res, res.size());
   }
 
+  private <T extends Record> UpdateSetStep<T> setFieldInDb(
+      UpdateSetStep<T> query,
+      Entry<Supplier<Optional<T>>, TableField<EventsRecord, T>> entry) {
+    return query.set(entry.getValue(), entry.getKey().get());
+  }
+
   @Override
-  public SingleEventResponse modifyEvent(int eventId, CreateEventRequest request,
+  public SingleEventResponse modifyEvent(int eventId, ModifyEventRequest request,
       JWTData userData) {
+    if (userData.getPrivilegeLevel() != PrivilegeLevel.ADMIN) {
+      throw new AdminOnlyRouteException();
+    }
+    Map<Supplier<Optional<?>>, Field<?>> topLevelFields = new HashMap<>();
+    topLevelFields.put(request::getTitle, EVENTS.TITLE);
+    topLevelFields.put(request::getSpotsAvailable, EVENTS.CAPACITY);
+    topLevelFields.put(request::getThumbnail, EVENTS.THUMBNAIL);
+    topLevelFields.put(request::getSpotsAvailable, EVENTS.CAPACITY);
+
+    // UpdateSetStep<R>
+    // TableField<EventsRecord, String>
+    UpdateSetStep<?> updatedQuery = topLevelFields.entrySet().stream().reduce(db.update(EVENTS),
+        (UpdateSetStep<? extends Record> query, Entry<Supplier<Optional<String>>, Field<? extends String>> mapEntry) -> {
+      if (mapEntry.getKey().get().isPresent()) {
+        return query.set(mapEntry.getValue(), mapEntry.getKey().get().get());
+      }
+
+    }, null);
+
+    SingleEventResponse event = getSingleEvent(eventId);
+
+    if (request.getTitle().isPresent()) {
+      db.update(EVENTS)
+          .set(EVENTS.TITLE, request.getTitle().get())
+          .where(EVENTS.ID.eq(eventId))
+          .execute();
+    }
+    if (request.getSpotsAvailable().isPresent()) {
+      db.update(EVENTS)
+          .set(EVENTS.CAPACITY, request.getSpotsAvailable().get())
+          .where(EVENTS.ID.eq(eventId))
+          .execute();
+    }
+//    newEventRecord.store();
+//    return eventPojoToResponse(newEventRecord.into(Events.class));
     return null;
   }
 
   @Override
   public EventIdResponse deleteEvent(int eventId, JWTData userData) {
+    if (userData.getPrivilegeLevel() != PrivilegeLevel.ADMIN) {
+      throw new AdminOnlyRouteException();
+    }
+
     return null;
   }
 
