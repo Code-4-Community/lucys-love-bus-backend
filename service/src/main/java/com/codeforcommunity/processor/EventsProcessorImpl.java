@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import org.jooq.*;
 import org.jooq.DSLContext;
@@ -129,12 +130,10 @@ public class EventsProcessorImpl implements IEventsProcessor {
   private static class FieldEntry<T> {
     private Supplier<Optional<T>> supplier;
     private Field<T> field;
-    private Class<T> clazz;
 
-    public FieldEntry(Supplier<Optional<T>> supplier, Field<T> field, Class<T> clazz) {
+    public FieldEntry(Supplier<Optional<T>> supplier, Field<T> field) {
       this.supplier = supplier;
       this.field = field;
-      this.clazz = clazz;
     }
 
     public Supplier<Optional<T>> getSupplier() {
@@ -143,10 +142,6 @@ public class EventsProcessorImpl implements IEventsProcessor {
 
     public Field<T> getField() {
       return field;
-    }
-
-    public Class<T> getClazz() {
-      return clazz;
     }
   }
 
@@ -159,6 +154,16 @@ public class EventsProcessorImpl implements IEventsProcessor {
     return query;
   }
 
+  private <T> Supplier<Optional<T>> getEventDetailsFieldSupplier(
+      Function<EventDetails, T> function, ModifyEventRequest request) {
+    return () -> {
+      if (request.getDetails().isPresent()) {
+        return Optional.of(function.apply(request.getDetails().get()));
+      }
+      return Optional.empty();
+    };
+  }
+
   @Override
   public SingleEventResponse modifyEvent(int eventId, ModifyEventRequest request,
       JWTData userData) {
@@ -166,31 +171,22 @@ public class EventsProcessorImpl implements IEventsProcessor {
       throw new AdminOnlyRouteException();
     }
     List<FieldEntry<?>> topLevelFields = new ArrayList<>();
-    topLevelFields.add(new FieldEntry<>(request::getTitle, EVENTS.TITLE, String.class));
-    topLevelFields.add(new FieldEntry<>(request::getSpotsAvailable, EVENTS.CAPACITY, int.class));
-    topLevelFields.add(new FieldEntry<>(request::getThumbnail, EVENTS.THUMBNAIL, String.class));
+    topLevelFields.add(new FieldEntry<>(request::getTitle, EVENTS.TITLE));
+    topLevelFields.add(new FieldEntry<>(request::getSpotsAvailable, EVENTS.CAPACITY));
+    topLevelFields.add(new FieldEntry<>(request::getThumbnail, EVENTS.THUMBNAIL));
+    topLevelFields.add(new FieldEntry<>(getEventDetailsFieldSupplier(EventDetails::getDescription, request), EVENTS.DESCRIPTION));
+    topLevelFields.add(new FieldEntry<>(getEventDetailsFieldSupplier(EventDetails::getLocation, request), EVENTS.LOCATION));
+    topLevelFields.add(new FieldEntry<>(getEventDetailsFieldSupplier(EventDetails::getStart, request), EVENTS.START_TIME));
+    topLevelFields.add(new FieldEntry<>(getEventDetailsFieldSupplier(EventDetails::getEnd, request), EVENTS.END_TIME));
 
-    // UpdateSetStep<R>
-    // TableField<EventsRecord, String>
-    UpdateSetStep<EventsRecord> myQuery = db.update(EVENTS);
+    UpdateSetStep<EventsRecord> query = db.update(EVENTS);
     for (FieldEntry<?> fieldEntry : topLevelFields) {
-      myQuery = setFieldInDb(myQuery, fieldEntry);
+      query = setFieldInDb(query, fieldEntry);
     }
+    UpdateSetMoreStep<EventsRecord> moreQuery = (UpdateSetMoreStep<EventsRecord>) query;
+    moreQuery.where(EVENTS.ID.eq(eventId)).execute();
 
     SingleEventResponse event = getSingleEvent(eventId);
-
-    if (request.getTitle().isPresent()) {
-      db.update(EVENTS)
-          .set(EVENTS.TITLE, request.getTitle().get())
-          .where(EVENTS.ID.eq(eventId))
-          .execute();
-    }
-    if (request.getSpotsAvailable().isPresent()) {
-      db.update(EVENTS)
-          .set(EVENTS.CAPACITY, request.getSpotsAvailable().get())
-          .where(EVENTS.ID.eq(eventId))
-          .execute();
-    }
 //    newEventRecord.store();
 //    return eventPojoToResponse(newEventRecord.into(Events.class));
     return null;
