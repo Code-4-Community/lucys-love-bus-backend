@@ -8,12 +8,6 @@ public class NewUserAsPFRequest {
 	private NewUserRequest newUserRequest;
 	private CreateRequest createRequest;
 
-	public NewUserAsPFRequest(NewUserRequest newUserRequest, CreateRequest createRequest) {
-
-		this.newUserRequest = newUserRequest;
-		this.createRequest = createRequest;
-	}
-
 	public void setNewUserRequest(NewUserRequest newUserRequest) {
 		this.newUserRequest = newUserRequest;
 	}
@@ -29,7 +23,6 @@ public class NewUserAsPFRequest {
 	public CreateRequest getCreateRequest() {
 		return this.createRequest;
 	}
-
 
 }
 

@@ -4,14 +4,20 @@ import com.codeforcommunity.api.IAuthProcessor;
 import com.codeforcommunity.auth.JWTCreator;
 import com.codeforcommunity.auth.JWTData;
 import com.codeforcommunity.dataaccess.AuthDatabaseOperations;
-
+import com.codeforcommunity.api.IPfOperationsProcessor;
+import com.codeforcommunity.api.IRequestsProcessor;
+import com.codeforcommunity.dto.auth.NewUserAsPFRequest;
+import com.codeforcommunity.dto.pfrequests.CreateRequest;
+import com.codeforcommunity.dto.auth.NewUserRequest;
+import com.codeforcommunity.dto.auth.SessionResponse;
+	
 public class PfOperationsProcessorImpl implements IPfOperationsProcessor {
 
 	private final IAuthProcessor authProcessor;
-	private final IRequestProcessor requestProcessor;
+	private final IRequestsProcessor requestProcessor;
 	private final AuthDatabaseOperations authDatabaseOperations;
 
-	public PfOperationsProcessorImpl(IAuthProcessor authProcessor, IRequestProcessor requestProcessor,
+	public PfOperationsProcessorImpl(IAuthProcessor authProcessor, IRequestsProcessor requestProcessor,
 		AuthDatabaseOperations authDatabaseOperations) {
 
 		this.authProcessor = authProcessor;
@@ -22,7 +28,7 @@ public class PfOperationsProcessorImpl implements IPfOperationsProcessor {
 	//a sign up as pf request (as it stands now) is the union of signing up as a GP 
 	//and making a request to be upgraded to PF
 	@Override
-	public SessionResponse signUpPF(NewUserAsPFRequest newUserAsPFRequest) {
+	public SessionResponse signUpPF(NewUserAsPFRequest newUserPFRequest) {
 
 		//signs user up as normal GP
 		NewUserRequest gpUserRequest = newUserPFRequest.getNewUserRequest();
@@ -32,9 +38,12 @@ public class PfOperationsProcessorImpl implements IPfOperationsProcessor {
 		//normal gp session response. GP account has been created
 		SessionResponse gpSessionResponse = authProcessor.signUp(newUserPFRequest.getNewUserRequest());
 
-		JWTData jwtData = authDatabaseOperations.getUsersJWTData(gpUserRequest.getEmail());
+		JWTData jwtData = authDatabaseOperations.getUserJWTData(gpUserRequest.getEmail());
 
 		//make request to be upgraded
 		requestProcessor.createRequest(gpToPFRequest, jwtData);
+
+		return gpSessionResponse;
+	}
 
 }

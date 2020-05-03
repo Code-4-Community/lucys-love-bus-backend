@@ -107,7 +107,7 @@ public class PfRequestRouter implements IRouter {
     int requestId = RestFunctions.getRequestParameterAsInt(ctx.request(), "request_id");
     JWTData userData = ctx.get("jwt_data");
 
-    RequestStatus requestStatus = requestsProcessor.geRequestStatus(requestId, userData);
+    RequestStatus requestStatus = requestsProcessor.getRequestStatus(requestId, userData);
     RequestStatusResponse response = new RequestStatusResponse(requestStatus);
 
     end(ctx.response(), 200, JsonObject.mapFrom(response).encode());
