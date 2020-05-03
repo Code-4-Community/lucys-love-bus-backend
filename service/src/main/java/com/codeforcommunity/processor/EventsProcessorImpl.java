@@ -197,9 +197,8 @@ public class EventsProcessorImpl implements IEventsProcessor {
     if (userData.getPrivilegeLevel() != PrivilegeLevel.ADMIN) {
       throw new AdminOnlyRouteException();
     }
-
-
-    return null;
+    db.delete(EVENTS).where(EVENTS.ID.eq(eventId)).execute();
+    return new EventIdResponse(eventId);
   }
 
   /**
