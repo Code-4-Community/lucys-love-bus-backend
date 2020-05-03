@@ -153,6 +153,13 @@ public class EventsProcessorImpl implements IEventsProcessor {
     Integer capacity = db.select(EVENTS.CAPACITY).where(EVENTS.ID.eq(eventId))
         .fetchOneInto(Integer.class);
 
+    if (sumRegistrations == null) {
+      sumRegistrations = 0;
+    }
+    if (capacity == null) {
+      capacity = 0;
+    }
+
     return capacity - sumRegistrations;
   }
 
