@@ -64,11 +64,14 @@ public class ServiceMain {
     JWTAuthorizer jwtAuthorizer = new JWTAuthorizer(jwtHandler);
     JWTCreator jwtCreator = new JWTCreator(jwtHandler);
 
-    IAuthProcessor authProcessor = new AuthProcessorImpl(this.db, jwtCreator);
+    AuthDatabaseOperations authDatabaseOperations = new AuthDatabaseOperations(this.db);
+
+    IAuthProcessor authProcessor = new AuthProcessorImpl(this.db, jwtCreator, authDatabaseOperations);
     IRequestsProcessor requestsProcessor = new RequestsProcessorImpl(this.db);
     IEventsProcessor eventsProcessor = new EventsProcessorImpl(this.db);
+    IPfOperationsProcessor pfOperationsProcessor = new PfOperationsProcessorImpl(authProcessor, requestsProcessor, authDatabaseOperations)
     IAnnouncementsProcessor announcementEventsProcessor = new AnnouncementsProcessorImpl(this.db);
-    ApiRouter router = new ApiRouter(authProcessor, requestsProcessor, eventsProcessor, announcementEventsProcessor, jwtAuthorizer);
+    ApiRouter router = new ApiRouter(authProcessor, requestsProcessor, eventsProcessor, announcementEventsProcessor, jwtAuthorizer); //TODO add here and to const
     startApiServer(router);
   }
 

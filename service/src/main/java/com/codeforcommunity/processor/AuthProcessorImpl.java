@@ -20,8 +20,8 @@ public class AuthProcessorImpl implements IAuthProcessor {
     private final AuthDatabaseOperations authDatabaseOperations;
     private final JWTCreator jwtCreator;
 
-    public AuthProcessorImpl(DSLContext db, JWTCreator jwtCreator) {
-        this.authDatabaseOperations = new AuthDatabaseOperations(db);
+    public AuthProcessorImpl(DSLContext db, JWTCreator jwtCreator, AuthDatabaseOperations authDatabaseOperations) {
+        this.authDatabaseOperations = authDatabaseOperations;
         this.jwtCreator = jwtCreator;
     }
 

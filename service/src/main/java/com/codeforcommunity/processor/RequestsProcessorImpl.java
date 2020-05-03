@@ -116,7 +116,7 @@ public class RequestsProcessorImpl implements IRequestsProcessor {
   }
 
   @Override
-  public RequestStatus geRequestStatus(int requestId, JWTData userData) {
+  public RequestStatus getRequestStatus(int requestId, JWTData userData) {
     // Get requests user id
     // Check that this user is an Admin or the same user
 

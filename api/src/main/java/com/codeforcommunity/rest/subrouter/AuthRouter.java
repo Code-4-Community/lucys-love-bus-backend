@@ -6,6 +6,7 @@ import com.codeforcommunity.dto.auth.NewUserRequest;
 import com.codeforcommunity.dto.auth.RefreshSessionRequest;
 import com.codeforcommunity.dto.auth.RefreshSessionResponse;
 import com.codeforcommunity.dto.auth.SessionResponse;
+import com.codeforcommunity.dto.auth.NewUserAsPFRequest;
 import com.codeforcommunity.rest.IRouter;
 import com.codeforcommunity.rest.RestFunctions;
 
@@ -37,7 +38,6 @@ public class AuthRouter implements IRouter {
     return router;
   }
 
-
   private void registerLoginUser(Router router) {
     Route loginUserRoute = router.post("/login");
     loginUserRoute.handler(this::handlePostUserLoginRoute);
@@ -66,7 +66,6 @@ public class AuthRouter implements IRouter {
     Route verifySecretKeyRoute = router.get("/verify/:secret_key");
     verifySecretKeyRoute.handler(this::handleVerifySecretKey);
   }
-
 
   private void handlePostUserLoginRoute(RoutingContext ctx) {
     LoginRequest userRequest = RestFunctions.getJsonBodyAsClass(ctx, LoginRequest.class);
