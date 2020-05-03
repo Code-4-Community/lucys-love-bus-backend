@@ -1,12 +1,10 @@
 package com.codeforcommunity.rest.subrouter;
 
-import com.codeforcommunity.exceptions.AdminOnlyRouteException;
 import com.codeforcommunity.exceptions.EmailAlreadyInUseException;
 import com.codeforcommunity.exceptions.HandledException;
 import com.codeforcommunity.exceptions.MalformedParameterException;
 import com.codeforcommunity.exceptions.MissingHeaderException;
 import com.codeforcommunity.exceptions.MissingParameterException;
-
 import com.codeforcommunity.exceptions.ResourceNotOwnedException;
 import com.codeforcommunity.exceptions.UserDoesNotExistException;
 import com.codeforcommunity.exceptions.WrongPrivilegeException;
@@ -99,6 +97,10 @@ public class FailureHandler {
      end(ctx, message, 401);
   }
 
+  public void handleBadRequest(RoutingContext ctx) {
+    String message = "Bad request";
+    end(ctx, message, 400);
+  }
 
   private void handleUncaughtError(RoutingContext ctx, Throwable throwable){
     String message = String.format("Internal server error caused by: %s", throwable.getMessage());

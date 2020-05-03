@@ -6,6 +6,7 @@ import com.codeforcommunity.dto.userEvents.requests.CreateEventRequest;
 import com.codeforcommunity.dto.userEvents.responses.SingleEventResponse;
 import com.codeforcommunity.dto.userEvents.requests.GetUserEventsRequest;
 import com.codeforcommunity.dto.userEvents.responses.GetEventsResponse;
+import com.codeforcommunity.exceptions.BadRequestException;
 import com.codeforcommunity.rest.IRouter;
 
 import io.vertx.core.Vertx;
@@ -14,6 +15,7 @@ import io.vertx.ext.web.Route;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 
+import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
@@ -104,9 +106,14 @@ public class EventsRouter implements IRouter {
     CreateEventRequest requestData = getJsonBodyAsClass(ctx, CreateEventRequest.class);
     JWTData userData = ctx.get("jwt_data");
 
-    SingleEventResponse response = processor.createEvent(requestData, userData);
-
-    end(ctx.response(), 200, JsonObject.mapFrom(response).encode());
+    try {
+      SingleEventResponse response = processor.createEvent(requestData, userData);
+      end(ctx.response(), 200, JsonObject.mapFrom(response).encode());
+    } catch (IOException ioException) {
+      end(ctx.response(), 500);
+    } catch (BadRequestException badRequestException) {
+      end(ctx.response(), 400);
+    }
   }
 
   private void handleGetSingleEventRoute(RoutingContext ctx) {

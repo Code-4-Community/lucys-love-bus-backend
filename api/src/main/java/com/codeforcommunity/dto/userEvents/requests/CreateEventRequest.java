@@ -17,6 +17,10 @@ public class CreateEventRequest {
 
   private CreateEventRequest() {}
 
+  public void setThumbnail(String thumbnail) {
+    this.thumbnail = thumbnail;
+  }
+
   public String getTitle() {
     return title;
   }
