@@ -129,15 +129,15 @@ public class EventsProcessorImpl implements IEventsProcessor {
   }
 
   private static class FieldEntry<T> {
-    private Supplier<Optional<T>> supplier;
+    private Supplier<T> supplier;
     private Field<T> field;
 
-    public FieldEntry(Supplier<Optional<T>> supplier, Field<T> field) {
+    public FieldEntry(Supplier<T> supplier, Field<T> field) {
       this.supplier = supplier;
       this.field = field;
     }
 
-    public Supplier<Optional<T>> getSupplier() {
+    public Supplier<T> getSupplier() {
       return supplier;
     }
 
@@ -149,19 +149,19 @@ public class EventsProcessorImpl implements IEventsProcessor {
   private <T extends Record, R> UpdateSetStep<T> setFieldInDb(
       UpdateSetStep<T> query,
       FieldEntry<R> entry) {
-    if (entry.getSupplier().get().isPresent()) {
-      return query.set(entry.getField(), entry.getSupplier().get().get());
+    if (entry.getSupplier().get() != null) {
+      return query.set(entry.getField(), entry.getSupplier().get());
     }
     return query;
   }
 
-  private <T> Supplier<Optional<T>> getEventDetailsFieldSupplier(
+  private <T> Supplier<T> getEventDetailsFieldSupplier(
       Function<EventDetails, T> function, ModifyEventRequest request) {
     return () -> {
-      if (request.getDetails().isPresent()) {
-        return Optional.of(function.apply(request.getDetails().get()));
+      if (request.getDetails() != null) {
+        return function.apply(request.getDetails());
       }
-      return Optional.empty();
+      return null;
     };
   }
 

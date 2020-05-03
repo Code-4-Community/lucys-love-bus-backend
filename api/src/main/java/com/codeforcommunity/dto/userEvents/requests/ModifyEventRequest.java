@@ -4,33 +4,34 @@ import com.codeforcommunity.dto.userEvents.components.EventDetails;
 import java.util.Optional;
 
 public class ModifyEventRequest {
-  private Optional<String> title;
-  private Optional<Integer> spotsAvailable;
-  private Optional<String> thumbnail;
-  private Optional<EventDetails> details;
+  private String title;
+  private Integer spotsAvailable;
+  private String thumbnail;
+  private EventDetails details;
 
-  public ModifyEventRequest(Optional<String> title,
-      Optional<Integer> spotsAvailable, Optional<String> thumbnail,
-      Optional<EventDetails> details) {
+  private ModifyEventRequest() {}
+
+  public ModifyEventRequest(String title, Integer spotsAvailable, String thumbnail,
+      EventDetails details) {
     this.title = title;
     this.spotsAvailable = spotsAvailable;
     this.thumbnail = thumbnail;
     this.details = details;
   }
 
-  public Optional<String> getTitle() {
+  public String getTitle() {
     return title;
   }
 
-  public Optional<Integer> getSpotsAvailable() {
+  public Integer getSpotsAvailable() {
     return spotsAvailable;
   }
 
-  public Optional<String> getThumbnail() {
+  public String getThumbnail() {
     return thumbnail;
   }
 
-  public Optional<EventDetails> getDetails() {
+  public EventDetails getDetails() {
     return details;
   }
 }
