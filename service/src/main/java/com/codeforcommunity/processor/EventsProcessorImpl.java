@@ -147,13 +147,13 @@ public class EventsProcessorImpl implements IEventsProcessor {
   private int getSpotsLeft(int eventId) {
     Integer sumRegistrations =
             db.select(sum(EVENT_REGISTRATIONS.TICKET_QUANTITY))
-                    .where(EVENT_REGISTRATIONS.EVENT_ID.eq(eventId))
+                .from(EVENT_REGISTRATIONS)
+                .where(EVENT_REGISTRATIONS.EVENT_ID.eq(eventId))
             .fetchOneInto(Integer.class);
-
-    return db.select(EVENTS.CAPACITY.minus(sumRegistrations))
-        .from(EVENTS)
-        .where(EVENTS.ID.eq(eventId))
+    Integer capacity = db.select(EVENTS.CAPACITY).where(EVENTS.ID.eq(eventId))
         .fetchOneInto(Integer.class);
+
+    return capacity - sumRegistrations;
   }
 
   /**
