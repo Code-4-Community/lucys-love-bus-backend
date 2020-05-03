@@ -126,10 +126,37 @@ public class EventsProcessorImpl implements IEventsProcessor {
     return new GetEventsResponse(res, res.size());
   }
 
-  private <T extends Record> UpdateSetStep<T> setFieldInDb(
+  private static class FieldEntry<T> {
+    private Supplier<Optional<T>> supplier;
+    private Field<T> field;
+    private Class<T> clazz;
+
+    public FieldEntry(Supplier<Optional<T>> supplier, Field<T> field, Class<T> clazz) {
+      this.supplier = supplier;
+      this.field = field;
+      this.clazz = clazz;
+    }
+
+    public Supplier<Optional<T>> getSupplier() {
+      return supplier;
+    }
+
+    public Field<T> getField() {
+      return field;
+    }
+
+    public Class<T> getClazz() {
+      return clazz;
+    }
+  }
+
+  private <T extends Record, R> UpdateSetStep<T> setFieldInDb(
       UpdateSetStep<T> query,
-      Entry<Supplier<Optional<T>>, TableField<EventsRecord, T>> entry) {
-    return query.set(entry.getValue(), entry.getKey().get());
+      FieldEntry<R> entry) {
+    if (entry.getSupplier().get().isPresent()) {
+      return query.set(entry.getField(), entry.getSupplier().get().get());
+    }
+    return query;
   }
 
   @Override
@@ -138,21 +165,17 @@ public class EventsProcessorImpl implements IEventsProcessor {
     if (userData.getPrivilegeLevel() != PrivilegeLevel.ADMIN) {
       throw new AdminOnlyRouteException();
     }
-    Map<Supplier<Optional<?>>, Field<?>> topLevelFields = new HashMap<>();
-    topLevelFields.put(request::getTitle, EVENTS.TITLE);
-    topLevelFields.put(request::getSpotsAvailable, EVENTS.CAPACITY);
-    topLevelFields.put(request::getThumbnail, EVENTS.THUMBNAIL);
-    topLevelFields.put(request::getSpotsAvailable, EVENTS.CAPACITY);
+    List<FieldEntry<?>> topLevelFields = new ArrayList<>();
+    topLevelFields.add(new FieldEntry<>(request::getTitle, EVENTS.TITLE, String.class));
+    topLevelFields.add(new FieldEntry<>(request::getSpotsAvailable, EVENTS.CAPACITY, int.class));
+    topLevelFields.add(new FieldEntry<>(request::getThumbnail, EVENTS.THUMBNAIL, String.class));
 
     // UpdateSetStep<R>
     // TableField<EventsRecord, String>
-    UpdateSetStep<?> updatedQuery = topLevelFields.entrySet().stream().reduce(db.update(EVENTS),
-        (UpdateSetStep<? extends Record> query, Entry<Supplier<Optional<String>>, Field<? extends String>> mapEntry) -> {
-      if (mapEntry.getKey().get().isPresent()) {
-        return query.set(mapEntry.getValue(), mapEntry.getKey().get().get());
-      }
-
-    }, null);
+    UpdateSetStep<EventsRecord> myQuery = db.update(EVENTS);
+    for (FieldEntry<?> fieldEntry : topLevelFields) {
+      myQuery = setFieldInDb(myQuery, fieldEntry);
+    }
 
     SingleEventResponse event = getSingleEvent(eventId);
 
