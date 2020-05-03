@@ -6,7 +6,6 @@ import com.codeforcommunity.dto.auth.NewUserRequest;
 import com.codeforcommunity.dto.auth.RefreshSessionRequest;
 import com.codeforcommunity.dto.auth.RefreshSessionResponse;
 import com.codeforcommunity.dto.auth.SessionResponse;
-import com.codeforcommunity.dto.auth.NewUserAsPFRequest;
 import com.codeforcommunity.rest.IRouter;
 import com.codeforcommunity.rest.RestFunctions;
 
