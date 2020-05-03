@@ -10,6 +10,7 @@ import com.codeforcommunity.dto.userEvents.requests.GetUserEventsRequest;
 import com.codeforcommunity.dto.userEvents.responses.GetEventsResponse;
 import com.codeforcommunity.enums.PrivilegeLevel;
 import com.codeforcommunity.exceptions.AdminOnlyRouteException;
+import java.util.Optional;
 import org.jooq.*;
 import org.jooq.DSLContext;
 import org.jooq.Result;
@@ -146,19 +147,12 @@ public class EventsProcessorImpl implements IEventsProcessor {
    */
   private int getSpotsLeft(int eventId) {
     Integer sumRegistrations =
-            db.select(sum(EVENT_REGISTRATIONS.TICKET_QUANTITY))
+            Optional.ofNullable(db.select(sum(EVENT_REGISTRATIONS.TICKET_QUANTITY))
                 .from(EVENT_REGISTRATIONS)
                 .where(EVENT_REGISTRATIONS.EVENT_ID.eq(eventId))
-            .fetchOneInto(Integer.class);
-    Integer capacity = db.select(EVENTS.CAPACITY).where(EVENTS.ID.eq(eventId))
-        .fetchOneInto(Integer.class);
-
-    if (sumRegistrations == null) {
-      sumRegistrations = 0;
-    }
-    if (capacity == null) {
-      capacity = 0;
-    }
+            .fetchOneInto(Integer.class)).orElse(0);
+    Integer capacity = Optional.ofNullable(db.select(EVENTS.CAPACITY).where(EVENTS.ID.eq(eventId))
+        .fetchOneInto(Integer.class)).orElse(0);
 
     return capacity - sumRegistrations;
   }
