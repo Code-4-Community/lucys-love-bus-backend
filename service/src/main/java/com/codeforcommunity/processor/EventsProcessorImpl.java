@@ -151,7 +151,10 @@ public class EventsProcessorImpl implements IEventsProcessor {
             .from(EVENT_REGISTRATIONS)
             .where(EVENT_REGISTRATIONS.EVENT_ID.eq(eventId))
             .fetchOneInto(Integer.class)).orElse(0);
-    Integer capacity = Optional.ofNullable(db.select(EVENTS.CAPACITY).where(EVENTS.ID.eq(eventId))
+
+    Integer capacity = Optional.ofNullable(db.select(EVENTS.CAPACITY)
+        .from(EVENTS)
+        .where(EVENTS.ID.eq(eventId))
         .fetchOneInto(Integer.class)).orElse(0);
 
     return capacity - sumRegistrations;
