@@ -1,5 +1,6 @@
 package com.codeforcommunity.api;
 
+import com.codeforcommunity.auth.JWTData;
 import com.codeforcommunity.dto.auth.LoginRequest;
 import com.codeforcommunity.dto.auth.NewUserRequest;
 import com.codeforcommunity.dto.auth.RefreshSessionRequest;
@@ -47,4 +48,11 @@ public interface IAuthProcessor {
      * @throws InvalidEmailVerificationTokenException if the token is invalid.
      */
     void validateSecretKey(String secretKey);
+
+    /**
+     * Get's a users privilege level and id as a JWTData object.
+     * @param email address associated with user to retrieve data for.
+     * @return JWTData object containing userId and privilege level.
+     */
+    JWTData getUserJWTData(String email);
 }

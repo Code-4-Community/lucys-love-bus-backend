@@ -2,6 +2,7 @@ package com.codeforcommunity.processor;
 
 import com.codeforcommunity.api.IRequestsProcessor;
 import com.codeforcommunity.auth.JWTData;
+import com.codeforcommunity.dataaccess.AuthDatabaseOperations;
 import com.codeforcommunity.dto.pfrequests.CreateRequest;
 import com.codeforcommunity.dto.pfrequests.RequestData;
 import com.codeforcommunity.enums.PrivilegeLevel;

@@ -69,12 +69,12 @@ public class ServiceMain {
 
     AuthDatabaseOperations authDatabaseOperations = new AuthDatabaseOperations(this.db);
 
-    IAuthProcessor authProcessor = new AuthProcessorImpl(this.db, jwtCreator, authDatabaseOperations);
+    IAuthProcessor authProcessor = new AuthProcessorImpl(this.db, jwtCreator);
     IRequestsProcessor requestsProcessor = new RequestsProcessorImpl(this.db);
     IEventsProcessor eventsProcessor = new EventsProcessorImpl(this.db);
-    IPfOperationsProcessor pfOperationsProcessor = new PfOperationsProcessorImpl(authProcessor, requestsProcessor, authDatabaseOperations);
+    //IPfOperationsProcessor pfOperationsProcessor = new PfOperationsProcessorImpl(authProcessor, requestsProcessor, authDatabaseOperations);
     IAnnouncementsProcessor announcementEventsProcessor = new AnnouncementsProcessorImpl(this.db);
-    ApiRouter router = new ApiRouter(authProcessor, requestsProcessor, eventsProcessor, announcementEventsProcessor, jwtAuthorizer, pfOperationsProcessor); //TODO add here and to const
+    ApiRouter router = new ApiRouter(authProcessor, requestsProcessor, eventsProcessor, announcementEventsProcessor, jwtAuthorizer);
     startApiServer(router);
   }
 

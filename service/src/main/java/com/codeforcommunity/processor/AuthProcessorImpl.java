@@ -20,8 +20,8 @@ public class AuthProcessorImpl implements IAuthProcessor {
     private final AuthDatabaseOperations authDatabaseOperations;
     private final JWTCreator jwtCreator;
 
-    public AuthProcessorImpl(DSLContext db, JWTCreator jwtCreator, AuthDatabaseOperations authDatabaseOperations) {
-        this.authDatabaseOperations = authDatabaseOperations;
+    public AuthProcessorImpl(DSLContext db, JWTCreator jwtCreator) {
+        this.authDatabaseOperations = new AuthDatabaseOperations(db);
         this.jwtCreator = jwtCreator;
     }
 
@@ -136,4 +136,15 @@ public class AuthProcessorImpl implements IAuthProcessor {
     private String getSignature(String token) {
         return token.split("\\.")[2];
     }
+
+    /**
+     * Get's a users privilege level and id as a JWTData object.
+     * @param email address associated with user to retrieve data for.
+     * @return JWTData object containing userId and privilege level.
+     */
+    public JWTData getUserJWTData(String email) {
+        return authDatabaseOperations.getUserJWTData(email);
+    }
+
+
 }

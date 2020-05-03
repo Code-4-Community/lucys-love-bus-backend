@@ -45,5 +45,4 @@ public class PfOperationsRouter implements IRouter {
 		SessionResponse sessionResponse = pfOperationsProcessor.signUpPF(newUserAsPFRequest);
 		end(ctx.response(), 201, JsonObject.mapFrom(sessionResponse).toString());
 	}
-
 }

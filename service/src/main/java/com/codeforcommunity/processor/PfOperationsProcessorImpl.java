@@ -30,9 +30,9 @@ public class PfOperationsProcessorImpl implements IPfOperationsProcessor {
 	@Override
 	public SessionResponse signUpPF(NewUserAsPFRequest newUserPFRequest) {
 
-		//signs user up as normal GP
+
 		NewUserRequest gpUserRequest = newUserPFRequest.getNewUserRequest();
-		//gets description body from PF request
+
 		CreateRequest gpToPFRequest = newUserPFRequest.getCreateRequest();
 
 		//normal gp session response. GP account has been created

@@ -25,17 +25,17 @@ public class ApiRouter implements IRouter {
     private final PfRequestRouter requestRouter;
     private final EventsRouter eventsRouter;
     private final AnnouncementsRouter announcementsRouter;
-    private final PfOperationsRouter pfOperationsRouter;
+    //private final PfOperationsRouter pfOperationsRouter;
 
     public ApiRouter(IAuthProcessor authProcessor, IRequestsProcessor requestsProcessor,
         IEventsProcessor eventsProcessor, IAnnouncementsProcessor announcementEventsProcessor,
-        JWTAuthorizer jwtAuthorizer, IPfOperationsProcessor pfOperationsProcessor) {
+        JWTAuthorizer jwtAuthorizer) {
         this.commonRouter = new CommonRouter(jwtAuthorizer);
-        this.authRouter = new AuthRouter(authProcessor);
+        this.authRouter = new AuthRouter(authProcessor, requestsProcessor);
         this.requestRouter = new PfRequestRouter(requestsProcessor);
         this.eventsRouter = new EventsRouter(eventsProcessor);
         this.announcementsRouter = new AnnouncementsRouter(announcementEventsProcessor);
-        this.pfOperationsRouter = new PfOperationsRouter(pfOperationsProcessor);
+        //this.pfOperationsRouter = new PfOperationsRouter(pfOperationsProcessor); //TODO
     }
 
     /**
@@ -46,7 +46,7 @@ public class ApiRouter implements IRouter {
 
         router.mountSubRouter("/user", authRouter.initializeRouter(vertx));
         router.mountSubRouter("/protected", defineProtectedRoutes(vertx));
-        router.mountSubRouter("/pf", pfOperationsRouter.initializeRouter(vertx));
+        //router.mountSubRouter("/pf", pfOperationsRouter.initializeRouter(vertx));
 
         return router;
     }

@@ -1,7 +1,10 @@
 package com.codeforcommunity.rest.subrouter;
 
 import com.codeforcommunity.api.IAuthProcessor;
+import com.codeforcommunity.api.IRequestsProcessor;
+import com.codeforcommunity.auth.JWTData;
 import com.codeforcommunity.dto.auth.LoginRequest;
+import com.codeforcommunity.dto.auth.NewUserAsPFRequest;
 import com.codeforcommunity.dto.auth.NewUserRequest;
 import com.codeforcommunity.dto.auth.RefreshSessionRequest;
 import com.codeforcommunity.dto.auth.RefreshSessionResponse;
@@ -16,12 +19,15 @@ import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 
 import static com.codeforcommunity.rest.ApiRouter.end;
+import static com.codeforcommunity.rest.RestFunctions.getJsonBodyAsClass;
 
 public class AuthRouter implements IRouter {
   private final IAuthProcessor authProcessor;
+  private final IRequestsProcessor requestsProcessor;
 
-  public AuthRouter(IAuthProcessor authProcessor) {
+  public AuthRouter(IAuthProcessor authProcessor, IRequestsProcessor requestsProcessor) {
     this.authProcessor = authProcessor;
+    this.requestsProcessor = requestsProcessor;
   }
 
   @Override
@@ -33,6 +39,7 @@ public class AuthRouter implements IRouter {
     registerNewUser(router);
     registerLogoutUser(router);
     registerVerifySecretKey(router);
+    registerSignUpPF(router);
 
     return router;
   }
@@ -64,6 +71,21 @@ public class AuthRouter implements IRouter {
   private void registerVerifySecretKey(Router router) {
     Route verifySecretKeyRoute = router.get("/verify/:secret_key");
     verifySecretKeyRoute.handler(this::handleVerifySecretKey);
+  }
+
+  private void registerSignUpPF(Router router) {
+    Route signUpPfRoute = router.post("/signup/pf");
+    signUpPfRoute.handler(this::handleSignUpPF);
+  }
+
+  private void handleSignUpPF(RoutingContext ctx) {
+    NewUserAsPFRequest newUserPFRequest = getJsonBodyAsClass(ctx, NewUserAsPFRequest.class);
+    SessionResponse sessionResponse = authProcessor.signUp(newUserPFRequest.getNewUserRequest());
+    JWTData userData = authProcessor.getUserJWTData(newUserPFRequest.getNewUserRequest().getEmail());
+
+    requestsProcessor.createRequest(newUserPFRequest.getCreateRequest(), userData);
+
+    end(ctx.response(), 201, JsonObject.mapFrom(sessionResponse).toString());
   }
 
   private void handlePostUserLoginRoute(RoutingContext ctx) {
