@@ -32,6 +32,7 @@ import java.time.Instant;
 import java.time.Period;
 import java.util.Base64;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.jooq.generated.Tables.EVENTS;
@@ -97,7 +98,7 @@ public class EventsProcessorImpl implements IEventsProcessor {
     s3Client.putObject(awsRequest);
     tempFile.delete();
 
-    String thumbnailUrl = "https:lucys-love-bus-public.s3.us-east-2.amazonaws.com/events/" + fileName;
+    String thumbnailUrl = "https://lucys-love-bus-public.s3.us-east-2.amazonaws.com/events/" + fileName;
     request.setThumbnail(thumbnailUrl);
 
     EventsRecord newEventRecord = eventRequestToRecord(request);
