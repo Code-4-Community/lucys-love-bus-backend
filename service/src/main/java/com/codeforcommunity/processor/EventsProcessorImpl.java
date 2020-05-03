@@ -14,6 +14,7 @@ import com.codeforcommunity.dto.userEvents.responses.GetEventsResponse;
 import com.codeforcommunity.enums.PrivilegeLevel;
 import com.codeforcommunity.exceptions.AdminOnlyRouteException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -170,26 +171,25 @@ public class EventsProcessorImpl implements IEventsProcessor {
     if (userData.getPrivilegeLevel() != PrivilegeLevel.ADMIN) {
       throw new AdminOnlyRouteException();
     }
-    List<FieldEntry<?>> topLevelFields = new ArrayList<>();
-    topLevelFields.add(new FieldEntry<>(request::getTitle, EVENTS.TITLE));
-    topLevelFields.add(new FieldEntry<>(request::getSpotsAvailable, EVENTS.CAPACITY));
-    topLevelFields.add(new FieldEntry<>(request::getThumbnail, EVENTS.THUMBNAIL));
-    topLevelFields.add(new FieldEntry<>(getEventDetailsFieldSupplier(EventDetails::getDescription, request), EVENTS.DESCRIPTION));
-    topLevelFields.add(new FieldEntry<>(getEventDetailsFieldSupplier(EventDetails::getLocation, request), EVENTS.LOCATION));
-    topLevelFields.add(new FieldEntry<>(getEventDetailsFieldSupplier(EventDetails::getStart, request), EVENTS.START_TIME));
-    topLevelFields.add(new FieldEntry<>(getEventDetailsFieldSupplier(EventDetails::getEnd, request), EVENTS.END_TIME));
+
+    List<FieldEntry<?>> eventFields = Arrays.asList(
+        new FieldEntry<>(request::getTitle, EVENTS.TITLE),
+        new FieldEntry<>(request::getSpotsAvailable, EVENTS.CAPACITY),
+        new FieldEntry<>(request::getThumbnail, EVENTS.THUMBNAIL),
+        new FieldEntry<>(getEventDetailsFieldSupplier(EventDetails::getDescription, request), EVENTS.DESCRIPTION),
+        new FieldEntry<>(getEventDetailsFieldSupplier(EventDetails::getLocation, request), EVENTS.LOCATION),
+        new FieldEntry<>(getEventDetailsFieldSupplier(EventDetails::getStart, request), EVENTS.START_TIME),
+        new FieldEntry<>(getEventDetailsFieldSupplier(EventDetails::getEnd, request), EVENTS.END_TIME)
+    );
 
     UpdateSetStep<EventsRecord> query = db.update(EVENTS);
-    for (FieldEntry<?> fieldEntry : topLevelFields) {
+    for (FieldEntry<?> fieldEntry : eventFields) {
       query = setFieldInDb(query, fieldEntry);
     }
     UpdateSetMoreStep<EventsRecord> moreQuery = (UpdateSetMoreStep<EventsRecord>) query;
     moreQuery.where(EVENTS.ID.eq(eventId)).execute();
 
-    SingleEventResponse event = getSingleEvent(eventId);
-//    newEventRecord.store();
-//    return eventPojoToResponse(newEventRecord.into(Events.class));
-    return null;
+    return getSingleEvent(eventId);
   }
 
   @Override
@@ -197,6 +197,7 @@ public class EventsProcessorImpl implements IEventsProcessor {
     if (userData.getPrivilegeLevel() != PrivilegeLevel.ADMIN) {
       throw new AdminOnlyRouteException();
     }
+
 
     return null;
   }
