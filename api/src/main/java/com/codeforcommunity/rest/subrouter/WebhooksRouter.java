@@ -43,6 +43,6 @@ public class WebhooksRouter implements IRouter {
 
         this.checkoutProcessor.handleStripeCheckoutEventComplete(payload, sigHeader);
 
-        end(ctx.response(), 200, "Nothing failed, but you weren't actually marked as having paid");
+        end(ctx.response(), 200);
     }
 }

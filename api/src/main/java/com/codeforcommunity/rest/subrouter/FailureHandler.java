@@ -1,7 +1,7 @@
 package com.codeforcommunity.rest.subrouter;
 
 import com.codeforcommunity.exceptions.EmailAlreadyInUseException;
-import com.codeforcommunity.exceptions.EventRegistrationException;
+import com.codeforcommunity.exceptions.InsufficientEventCapacityException;
 import com.codeforcommunity.exceptions.HandledException;
 import com.codeforcommunity.exceptions.MalformedParameterException;
 import com.codeforcommunity.exceptions.MissingHeaderException;
@@ -99,8 +99,8 @@ public class FailureHandler {
      end(ctx, message, 401);
   }
 
-  public void handleEventRegistrationException(RoutingContext ctx, EventRegistrationException exception) {
-       String message = "Error registering for event: " + exception.getMessage();
+  public void handleInsufficientEventCapacityException(RoutingContext ctx, InsufficientEventCapacityException exception) {
+       String message = "The user requested more tickets than are available for the event: " + exception.getMessage();
        end(ctx, message, 400);
   }
 
