@@ -4,7 +4,6 @@ import com.codeforcommunity.api.IAnnouncementsProcessor;
 import com.codeforcommunity.api.IAuthProcessor;
 import com.codeforcommunity.api.IEventsProcessor;
 import com.codeforcommunity.api.IRequestsProcessor;
-import com.codeforcommunity.api.IPfOperationsProcessor;
 import com.codeforcommunity.auth.JWTAuthorizer;
 
 import com.codeforcommunity.rest.subrouter.AnnouncementsRouter;
@@ -25,7 +24,7 @@ public class ApiRouter implements IRouter {
     private final PfRequestRouter requestRouter;
     private final EventsRouter eventsRouter;
     private final AnnouncementsRouter announcementsRouter;
-    //private final PfOperationsRouter pfOperationsRouter;
+    private final PfOperationsRouter pfOperationsRouter;
 
     public ApiRouter(IAuthProcessor authProcessor, IRequestsProcessor requestsProcessor,
         IEventsProcessor eventsProcessor, IAnnouncementsProcessor announcementEventsProcessor,
@@ -35,7 +34,7 @@ public class ApiRouter implements IRouter {
         this.requestRouter = new PfRequestRouter(requestsProcessor);
         this.eventsRouter = new EventsRouter(eventsProcessor);
         this.announcementsRouter = new AnnouncementsRouter(announcementEventsProcessor);
-        //this.pfOperationsRouter = new PfOperationsRouter(pfOperationsProcessor); //TODO
+        this.pfOperationsRouter = new PfOperationsRouter(authProcessor, requestsProcessor);
     }
 
     /**
@@ -46,7 +45,7 @@ public class ApiRouter implements IRouter {
 
         router.mountSubRouter("/user", authRouter.initializeRouter(vertx));
         router.mountSubRouter("/protected", defineProtectedRoutes(vertx));
-        //router.mountSubRouter("/pf", pfOperationsRouter.initializeRouter(vertx));
+        router.mountSubRouter("/pf", pfOperationsRouter.initializeRouter(vertx));
 
         return router;
     }

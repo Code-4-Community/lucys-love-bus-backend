@@ -1,6 +1,8 @@
 package com.codeforcommunity.rest.subrouter;
 
-import com.codeforcommunity.api.IPfOperationsProcessor;
+import com.codeforcommunity.api.IAuthProcessor;
+import com.codeforcommunity.api.IRequestsProcessor;
+import com.codeforcommunity.auth.JWTData;
 import com.codeforcommunity.dto.auth.NewUserAsPFRequest;
 import com.codeforcommunity.dto.auth.SessionResponse;
 import com.codeforcommunity.rest.IRouter;
@@ -15,12 +17,12 @@ import static com.codeforcommunity.rest.ApiRouter.end;
 
 public class PfOperationsRouter implements IRouter {
 
-	private final IPfOperationsProcessor pfOperationsProcessor;
+	private final IAuthProcessor authProcessor;
+	private final IRequestsProcessor requestsProcessor;
 
-	public PfOperationsRouter(IPfOperationsProcessor pfOperationsProcessor) {
-
-		this.pfOperationsProcessor = pfOperationsProcessor;
-
+	public PfOperationsRouter(IAuthProcessor authProcessor, IRequestsProcessor requestsProcessor) {
+		this.authProcessor = authProcessor;
+		this.requestsProcessor = requestsProcessor;
 	}
 
 	@Override
@@ -35,14 +37,17 @@ public class PfOperationsRouter implements IRouter {
 	}
 
 	private void registerSignUpPF(Router router) {
-		Route signUpPfRoute = router.post("/signup"); 
+		Route signUpPfRoute = router.post("/signup");
 		signUpPfRoute.handler(this::handleSignUpPF);
 	}
 
-
 	private void handleSignUpPF(RoutingContext ctx) {
-		NewUserAsPFRequest newUserAsPFRequest = getJsonBodyAsClass(ctx, NewUserAsPFRequest.class);
-		SessionResponse sessionResponse = pfOperationsProcessor.signUpPF(newUserAsPFRequest);
+		NewUserAsPFRequest newUserPFRequest = getJsonBodyAsClass(ctx, NewUserAsPFRequest.class);
+		SessionResponse sessionResponse = authProcessor.signUp(newUserPFRequest.getNewUserRequest());
+		JWTData userData = authProcessor.getUserJWTData(newUserPFRequest.getNewUserRequest().getEmail());
+
+		requestsProcessor.createRequest(newUserPFRequest.getCreateRequest(), userData);
+
 		end(ctx.response(), 201, JsonObject.mapFrom(sessionResponse).toString());
 	}
 }
