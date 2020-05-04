@@ -13,7 +13,6 @@ import com.codeforcommunity.processor.EventsProcessorImpl;
 import com.codeforcommunity.processor.RequestsProcessorImpl;
 import com.codeforcommunity.propertiesLoader.PropertiesLoader;
 import com.codeforcommunity.rest.ApiRouter;
-import com.codeforcommunity.dataaccess.AuthDatabaseOperations;
 
 import org.jooq.DSLContext;
 import org.jooq.impl.DSL;
@@ -64,8 +63,6 @@ public class ServiceMain {
     JWTHandler jwtHandler = new JWTHandler(PropertiesLoader.getJwtProperties().getProperty("secret_key"));
     JWTAuthorizer jwtAuthorizer = new JWTAuthorizer(jwtHandler);
     JWTCreator jwtCreator = new JWTCreator(jwtHandler);
-
-    AuthDatabaseOperations authDatabaseOperations = new AuthDatabaseOperations(this.db);
 
     IAuthProcessor authProcessor = new AuthProcessorImpl(this.db, jwtCreator);
     IRequestsProcessor requestsProcessor = new RequestsProcessorImpl(this.db);
