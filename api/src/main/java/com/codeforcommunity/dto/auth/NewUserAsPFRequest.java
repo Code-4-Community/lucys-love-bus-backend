@@ -1,6 +1,5 @@
 package com.codeforcommunity.dto.auth;
 
-import com.codeforcommunity.dto.auth.NewUserRequest;
 import com.codeforcommunity.dto.pfrequests.CreateRequest;
 
 public class NewUserAsPFRequest {

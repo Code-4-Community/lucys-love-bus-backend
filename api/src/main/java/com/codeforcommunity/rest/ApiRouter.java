@@ -30,7 +30,7 @@ public class ApiRouter implements IRouter {
         IEventsProcessor eventsProcessor, IAnnouncementsProcessor announcementEventsProcessor,
         JWTAuthorizer jwtAuthorizer) {
         this.commonRouter = new CommonRouter(jwtAuthorizer);
-        this.authRouter = new AuthRouter(authProcessor, requestsProcessor);
+        this.authRouter = new AuthRouter(authProcessor);
         this.requestRouter = new PfRequestRouter(requestsProcessor);
         this.eventsRouter = new EventsRouter(eventsProcessor);
         this.announcementsRouter = new AnnouncementsRouter(announcementEventsProcessor);
