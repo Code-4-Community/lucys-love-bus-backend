@@ -4,11 +4,9 @@ import com.codeforcommunity.rest.subrouter.FailureHandler;
 import io.vertx.ext.web.RoutingContext;
 
 public class InsufficientEventCapacityException extends RuntimeException implements HandledException {
-    private String message;
+    private String eventTitle;
 
-    public InsufficientEventCapacityException(String message) {
-        this.message = message;
-    }
+    public InsufficientEventCapacityException(String eventTitle) { this.eventTitle = eventTitle; }
 
     @Override
     public void callHandler(FailureHandler handler, RoutingContext ctx) {
@@ -16,6 +14,6 @@ public class InsufficientEventCapacityException extends RuntimeException impleme
     }
 
     public String getMessage() {
-        return this.message;
+        return this.eventTitle;
     }
 }

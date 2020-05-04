@@ -44,6 +44,7 @@ public class CheckoutProcessorImpl implements ICheckoutProcessor {
         
     }
 
+    @Override
     public String createCheckoutSessionAndEventRegistration(PostCreateCheckoutSession request, JWTData user)
             throws StripeExternalException {
 
@@ -70,10 +71,12 @@ public class CheckoutProcessorImpl implements ICheckoutProcessor {
         }
     }
 
+    @Override
     public void createEventRegistration(PostCreateEventRegistrations request, JWTData user) {
         this.createEventRegistrationUtil(request.getLineItems(), user, null);
     }
 
+    @Override
     public void handleStripeCheckoutEventComplete(String payload, String sigHeader) {
         try {
             Event event = Webhook.constructEvent(

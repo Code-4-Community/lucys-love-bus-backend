@@ -2,9 +2,10 @@ package com.codeforcommunity.dataaccess;
 
 import org.jooq.DSLContext;
 
+import java.util.Optional;
+
 import static org.jooq.generated.Tables.EVENTS;
 import static org.jooq.generated.Tables.EVENT_REGISTRATIONS;
-import static org.jooq.impl.DSL.coalesce;
 import static org.jooq.impl.DSL.sum;
 
 public class EventDatabaseOperations {
@@ -21,17 +22,15 @@ public class EventDatabaseOperations {
      * @return int the number of remaining spots for this event
      */
     public int getSpotsLeft(int eventId) {
-
-        int sumRegistrations = db.select(coalesce(sum(EVENT_REGISTRATIONS.TICKET_QUANTITY), 0))
-                .from(EVENT_REGISTRATIONS)
-                .where(EVENT_REGISTRATIONS.EVENT_ID.eq(eventId))
-                .fetchOneInto(Integer.class);
-
-        int capacity = db.select(EVENTS.CAPACITY)
+        Integer sumRegistrations =
+                Optional.ofNullable(db.select(sum(EVENT_REGISTRATIONS.TICKET_QUANTITY))
+                        .from(EVENT_REGISTRATIONS)
+                        .where(EVENT_REGISTRATIONS.EVENT_ID.eq(eventId))
+                        .fetchOneInto(Integer.class)).orElse(0);
+        Integer capacity = Optional.ofNullable(db.select(EVENTS.CAPACITY)
                 .from(EVENTS)
                 .where(EVENTS.ID.eq(eventId))
-                .fetchOneInto(Integer.class);
-
+                .fetchOneInto(Integer.class)).orElse(0);
         return capacity - sumRegistrations;
     }
 
