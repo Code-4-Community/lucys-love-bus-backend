@@ -4,12 +4,15 @@ import com.codeforcommunity.JooqMock;
 import com.codeforcommunity.auth.JWTData;
 import com.codeforcommunity.dto.announcements.GetAnnouncementsRequest;
 import com.codeforcommunity.dto.announcements.GetAnnouncementsResponse;
+import com.codeforcommunity.dto.announcements.GetEventSpecificAnnouncementsRequest;
 import com.codeforcommunity.dto.announcements.PostAnnouncementRequest;
 import com.codeforcommunity.dto.announcements.PostAnnouncementResponse;
 import com.codeforcommunity.enums.PrivilegeLevel;
 import com.codeforcommunity.exceptions.AdminOnlyRouteException;
 import com.codeforcommunity.exceptions.MalformedParameterException;
+import org.jooq.generated.tables.pojos.Announcements;
 import org.jooq.generated.tables.records.AnnouncementsRecord;
+import org.jooq.generated.tables.records.EventsRecord;
 import org.jooq.impl.UpdatableRecordImpl;
 import org.junit.Before;
 import org.junit.Test;
@@ -210,27 +213,213 @@ public class AnnouncementsProcessorImplTest {
         assertEquals(res.getAnnouncement().getCreated(), new Timestamp(START_TIMESTAMP_TEST));
     }
 
-    // TODO
+    // posting an event specific announcement fails if user isn't an admin
     @Test
     public void testPostEventSpecificAnnouncement1() {
-        fail();
+        PostAnnouncementRequest req = new PostAnnouncementRequest("c4c", "code for community");
+
+        // mock the user
+        JWTData myUserData = mock(JWTData.class);
+        when(myUserData.getPrivilegeLevel()).thenReturn(PrivilegeLevel.GP);
+
+        try {
+            myAnnouncementsProcessorImpl.postEventSpecificAnnouncement(req, myUserData, 1);
+            fail();
+        } catch (AdminOnlyRouteException e) {
+            // we're good
+        }
     }
 
-    // TODO
+    // posting an event specific announcement fails if no matching events
     @Test
     public void testPostEventSpecificAnnouncement2() {
-        fail();
+        PostAnnouncementRequest req = new PostAnnouncementRequest("c4c", "code for community");
+
+        // mock the user
+        JWTData myUserData = mock(JWTData.class);
+        when(myUserData.getPrivilegeLevel()).thenReturn(PrivilegeLevel.ADMIN);
+
+        // return no events
+        myJooqMock.addReturn("SELECT", new ArrayList<EventsRecord>());
+
+        try {
+            myAnnouncementsProcessorImpl.postEventSpecificAnnouncement(req, myUserData, -1);
+            fail();
+        } catch (MalformedParameterException e) {
+            assertEquals(e.getParameterName(), "event_id");
+        }
     }
 
-    // TODO
+    // posting an event specific announcement succeeds with event with no announcements yet
+    @Test
+    public void testPostEventSpecificAnnouncement3() {
+        PostAnnouncementRequest req = new PostAnnouncementRequest("c4c", "code for community");
+
+        // mock the user
+        JWTData myUserData = mock(JWTData.class);
+        when(myUserData.getPrivilegeLevel()).thenReturn(PrivilegeLevel.ADMIN);
+
+        // mock the specific event inside the DB
+        EventsRecord event = myJooqMock.getContext().newRecord(Tables.EVENTS);
+        event.setId(1);
+        myJooqMock.addReturn("SELECT", event);
+
+        // mock the announcement inside the DB
+        AnnouncementsRecord announcement = new AnnouncementsRecord();
+        announcement.setId(1);
+        announcement.setEventId(1);
+        announcement.setTitle("c4c");
+        announcement.setDescription("code for community");
+        myJooqMock.addReturn("SELECT", announcement);
+        myJooqMock.addReturn("INSERT", announcement);
+
+        PostAnnouncementResponse res = myAnnouncementsProcessorImpl.postEventSpecificAnnouncement(req, myUserData, 1);
+        assertEquals(res.getAnnouncement().getEventId(), announcement.getEventId());
+        assertEquals((Integer) res.getAnnouncement().getId(), announcement.getId());
+        assertEquals(res.getAnnouncement().getTitle(), req.getTitle());
+        assertEquals(res.getAnnouncement().getDescription(), req.getDescription());
+    }
+
+    // posting an event specific announcement succeeds with event with one announcement already
+    @Test
+    public void testPostEventSpecificAnnouncement4() {
+        PostAnnouncementRequest req = new PostAnnouncementRequest("LLB", "Lucy's Love Bus");
+
+        // mock the user
+        JWTData myUserData = mock(JWTData.class);
+        when(myUserData.getPrivilegeLevel()).thenReturn(PrivilegeLevel.ADMIN);
+
+        // mock the specific event inside the DB
+        EventsRecord event = myJooqMock.getContext().newRecord(Tables.EVENTS);
+        event.setId(1);
+        myJooqMock.addReturn("SELECT", event);
+
+        // mock the announcements inside the DB
+        AnnouncementsRecord announcement1 = new AnnouncementsRecord();
+        announcement1.setId(1);
+        announcement1.setEventId(1);
+        announcement1.setTitle("c4c");
+        announcement1.setDescription("code for community");
+
+        AnnouncementsRecord announcement2 = new AnnouncementsRecord();
+        announcement2.setId(2);
+        announcement2.setEventId(1);
+        announcement2.setTitle("LLB");
+        announcement2.setDescription("Lucy's Love Bus");
+
+        List<AnnouncementsRecord> announcements = new ArrayList<>();
+        announcements.add(announcement1);
+        announcements.add(announcement2);
+        myJooqMock.addReturn("SELECT", announcements);
+        myJooqMock.addReturn("INSERT", announcements);
+
+        // TODO: To the dev team, please review this
+        // Is it supposed to just return the 1st announcement associated with the given event id?
+        // Because I thought it is supposed to work for announcement2, not announcement1
+        PostAnnouncementResponse res = myAnnouncementsProcessorImpl.postEventSpecificAnnouncement(req, myUserData, 1);
+        assertEquals(res.getAnnouncement().getEventId(), announcement1.getEventId());
+        assertEquals((Integer) res.getAnnouncement().getId(), announcement1.getId());
+        assertEquals(res.getAnnouncement().getTitle(), announcement1.getTitle());
+        assertEquals(res.getAnnouncement().getDescription(), announcement1.getDescription());
+    }
+
+    // getting an event specific announcement fails if event id is non-positive
     @Test
     public void testGetEventSpecificAnnouncements1() {
-        fail();
+        GetEventSpecificAnnouncementsRequest req = new GetEventSpecificAnnouncementsRequest(0);
+
+        try {
+            myAnnouncementsProcessorImpl.getEventSpecificAnnouncements(req);
+            fail();
+        } catch (MalformedParameterException e) {
+            assertEquals(e.getParameterName(), "event_id");
+        }
     }
 
-    // TODO
+    // getting an event specific announcement fails with no matching event ids
     @Test
     public void testGetEventSpecificAnnouncements2() {
-        fail();
+        GetEventSpecificAnnouncementsRequest req = new GetEventSpecificAnnouncementsRequest(3);
+
+        try {
+            myAnnouncementsProcessorImpl.getEventSpecificAnnouncements(req);
+            fail();
+        } catch (MalformedParameterException e) {
+            assertEquals(e.getParameterName(), "event_id");
+        }
+    }
+
+    // getting an event specific announcement succeeds with event with one announcement in database
+    @Test
+    public void testGetEventSpecificAnnouncements3() {
+        GetEventSpecificAnnouncementsRequest req = new GetEventSpecificAnnouncementsRequest(1);
+
+        // mock the specific event inside the DB
+        EventsRecord event = myJooqMock.getContext().newRecord(Tables.EVENTS);
+        event.setId(1);
+        myJooqMock.addReturn("SELECT", event);
+
+        // mock the announcement inside the DB
+        AnnouncementsRecord announcement = myJooqMock.getContext().newRecord(Tables.ANNOUNCEMENTS);
+        announcement.setEventId(1);
+        announcement.setId(1);
+        announcement.setTitle("sample title");
+        announcement.setCreated(new Timestamp(START_TIMESTAMP_TEST));
+        announcement.setDescription("sample description");
+        myJooqMock.addReturn("SELECT", announcement);
+
+        GetAnnouncementsResponse res = myAnnouncementsProcessorImpl.getEventSpecificAnnouncements(req);
+
+        assertEquals(res.getTotalCount(), 1);
+        assertEquals(res.getAnnouncements().get(0).getEventId(), (Integer) 1);
+        assertEquals(res.getAnnouncements().get(0).getId(), 1);
+        assertEquals(res.getAnnouncements().get(0).getTitle(), "sample title");
+        assertEquals(res.getAnnouncements().get(0).getCreated(), new Timestamp(START_TIMESTAMP_TEST));
+        assertEquals(res.getAnnouncements().get(0).getDescription(), "sample description");
+    }
+
+    // getting an event specific announcement succeeds with event with multiple announcements in database
+    @Test
+    public void testGetEventSpecificAnnouncements4() {
+        GetEventSpecificAnnouncementsRequest req = new GetEventSpecificAnnouncementsRequest(1);
+
+        // mock the specific event inside the DB
+        EventsRecord event = myJooqMock.getContext().newRecord(Tables.EVENTS);
+        event.setId(1);
+        myJooqMock.addReturn("SELECT", event);
+
+        // mock the announcements inside the DB
+        AnnouncementsRecord announcement1 = myJooqMock.getContext().newRecord(Tables.ANNOUNCEMENTS);
+        announcement1.setEventId(1);
+        announcement1.setId(1);
+        announcement1.setTitle("sample title");
+        announcement1.setCreated(new Timestamp(START_TIMESTAMP_TEST));
+        announcement1.setDescription("sample description");
+
+        AnnouncementsRecord announcement2 = myJooqMock.getContext().newRecord(Tables.ANNOUNCEMENTS);
+        announcement2.setEventId(1);
+        announcement2.setId(2);
+        announcement2.setTitle("lucy's love bus");
+        announcement2.setCreated(new Timestamp(START_TIMESTAMP_TEST2));
+        announcement2.setDescription("code for community");
+
+        List<AnnouncementsRecord> announcements = new ArrayList<>();
+        announcements.add(announcement1);
+        announcements.add(announcement2);
+        myJooqMock.addReturn("SELECT", announcements);
+
+        GetAnnouncementsResponse res = myAnnouncementsProcessorImpl.getEventSpecificAnnouncements(req);
+
+        assertEquals(res.getTotalCount(), 2);
+        assertEquals(res.getAnnouncements().get(0).getEventId(), (Integer) 1);
+        assertEquals(res.getAnnouncements().get(0).getId(), 1);
+        assertEquals(res.getAnnouncements().get(0).getTitle(), "sample title");
+        assertEquals(res.getAnnouncements().get(0).getCreated(), new Timestamp(START_TIMESTAMP_TEST));
+        assertEquals(res.getAnnouncements().get(0).getDescription(), "sample description");
+        assertEquals(res.getAnnouncements().get(1).getEventId(), (Integer) 1);
+        assertEquals(res.getAnnouncements().get(1).getId(), 2);
+        assertEquals(res.getAnnouncements().get(1).getTitle(), "lucy's love bus");
+        assertEquals(res.getAnnouncements().get(1).getCreated(), new Timestamp(START_TIMESTAMP_TEST2));
+        assertEquals(res.getAnnouncements().get(1).getDescription(), "code for community");
     }
 }

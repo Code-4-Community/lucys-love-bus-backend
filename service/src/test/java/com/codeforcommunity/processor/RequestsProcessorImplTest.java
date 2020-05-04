@@ -137,31 +137,16 @@ public class RequestsProcessorImplTest {
     when(myUserData.getPrivilegeLevel()).thenReturn(PrivilegeLevel.ADMIN);
 
     // mock the DB for PF requests
-    PfRequestsRecord myPFReqRecord = myJooqMock.getContext().newRecord(Tables.PF_REQUESTS);
-    myPFReqRecord.setId(0);
-    // getDescription() corresponds to user id, for some awkward reason
-    myPFReqRecord.setUserId(2);
-    // and getUserEmail() corresponds to this description
-    myPFReqRecord.setDescription("sample description");
-    myPFReqRecord.setStatus(RequestStatus.PENDING);
-    myJooqMock.addReturn("SELECT", myPFReqRecord);
-
-    Record3<Integer, String, String> recordImpl = mock(Record3.class);
-    when(recordImpl.component1()).thenReturn(myPFReqRecord.getId());
-    when(recordImpl.component2()).thenReturn(myPFReqRecord.getDescription());
-    when(recordImpl.component3()).thenReturn("brandon@example.com");
-    myJooqMock.addReturn("SELECT", recordImpl);
+    Record3<Integer, String, String> record = myJooqMock.getContext().newRecord(Tables.PF_REQUESTS.ID, Tables.PF_REQUESTS.DESCRIPTION, Tables.USERS.EMAIL);
+    record.values(0, "sample description", "brandon@example.com");
+    myJooqMock.addReturn("SELECT", record);
 
     List<RequestData> reqs = myRequestsProcessorImpl.getRequests(myUserData);
 
-    // TODO: make these work
     assertEquals(reqs.size(), 1);
     assertEquals(reqs.get(0).getId(), 0);
-    fail("Reminder to fix this test!");
-    // assertEquals(reqs.get(0).getDescription(), "sample description");
-    // returns "2"
-    // assertEquals(reqs.get(0).getUserEmail(), "brandon@example.com");
-    // returns "sample description"
+    assertEquals(reqs.get(0).getDescription(), "sample description");
+    assertEquals(reqs.get(0).getUserEmail(), "brandon@example.com");
   }
 
   // test for list of requests with multiple elements
@@ -172,29 +157,25 @@ public class RequestsProcessorImplTest {
     when(myUserData.getPrivilegeLevel()).thenReturn(PrivilegeLevel.ADMIN);
 
     // mock the DB for PF requests
-    PfRequestsRecord myPFReqRecord = myJooqMock.getContext().newRecord(Tables.PF_REQUESTS);
-    myPFReqRecord.setId(0);
-    myPFReqRecord.setUserId(0);
-    myPFReqRecord.setDescription("sample description 1");
-    myPFReqRecord.setStatus(RequestStatus.PENDING);
+    Record3<Integer, String, String> record1 = myJooqMock.getContext().newRecord(Tables.PF_REQUESTS.ID, Tables.PF_REQUESTS.DESCRIPTION, Tables.USERS.EMAIL);
+    record1.values(0, "sample description", "brandon@example.com");
+    Record3<Integer, String, String> record2 = myJooqMock.getContext().newRecord(Tables.PF_REQUESTS.ID, Tables.PF_REQUESTS.DESCRIPTION, Tables.USERS.EMAIL);
+    record2.values(1, "code for community", "conner@example.com");
 
-    PfRequestsRecord myPFReqRecord2 = myJooqMock.getContext().newRecord(Tables.PF_REQUESTS);
-    myPFReqRecord2.setId(1);
-    myPFReqRecord2.setUserId(1);
-    myPFReqRecord2.setDescription("sample description 2");
-    myPFReqRecord2.setStatus(RequestStatus.PENDING);
-
-    List<UpdatableRecordImpl> records = new ArrayList<UpdatableRecordImpl>();
-    records.add(myPFReqRecord);
-    records.add(myPFReqRecord2);
+    List<Record3> records = new ArrayList<Record3>();
+    records.add(record1);
+    records.add(record2);
     myJooqMock.addReturn("SELECT", records);
-    myJooqMock.addReturn("INSERT", records);
 
     List<RequestData> reqs = myRequestsProcessorImpl.getRequests(myUserData);
 
     assertEquals(reqs.size(), 2);
-    fail("Reminder to fix this test!");
-    // TODO: add assertEquals for more of the properties like the method above
+    assertEquals(reqs.get(0).getId(), 0);
+    assertEquals(reqs.get(0).getDescription(), "sample description");
+    assertEquals(reqs.get(0).getUserEmail(), "brandon@example.com");
+    assertEquals(reqs.get(1).getId(), 1);
+    assertEquals(reqs.get(1).getDescription(), "code for community");
+    assertEquals(reqs.get(1).getUserEmail(), "conner@example.com");
   }
 
   // general users can't approve requests
