@@ -1,13 +1,13 @@
 package com.codeforcommunity.rest.subrouter;
 
-import com.codeforcommunity.exceptions.AdminOnlyRouteException;
 import com.codeforcommunity.exceptions.EmailAlreadyInUseException;
+import com.codeforcommunity.exceptions.InsufficientEventCapacityException;
 import com.codeforcommunity.exceptions.HandledException;
 import com.codeforcommunity.exceptions.MalformedParameterException;
 import com.codeforcommunity.exceptions.MissingHeaderException;
 import com.codeforcommunity.exceptions.MissingParameterException;
-
 import com.codeforcommunity.exceptions.ResourceNotOwnedException;
+import com.codeforcommunity.exceptions.StripeExternalException;
 import com.codeforcommunity.exceptions.UserDoesNotExistException;
 import com.codeforcommunity.exceptions.WrongPrivilegeException;
 import io.vertx.ext.web.RoutingContext;
@@ -99,6 +99,15 @@ public class FailureHandler {
      end(ctx, message, 401);
   }
 
+  public void handleInsufficientEventCapacityException(RoutingContext ctx, InsufficientEventCapacityException exception) {
+       String message = "The user requested more tickets than are available for the event: " + exception.getEventTitle();
+       end(ctx, message, 400);
+  }
+
+  public void handleStripeExternalException(RoutingContext ctx, StripeExternalException exception) {
+       String message = "A call to Stripe's API returned an internal server error: " + exception.getMessage();
+       end(ctx, message, 502);
+  }
 
   private void handleUncaughtError(RoutingContext ctx, Throwable throwable){
     String message = String.format("Internal server error caused by: %s", throwable.getMessage());
