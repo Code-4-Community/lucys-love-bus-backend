@@ -12,6 +12,7 @@ import com.codeforcommunity.processor.AuthProcessorImpl;
 import com.codeforcommunity.processor.EventsProcessorImpl;
 import com.codeforcommunity.processor.RequestsProcessorImpl;
 import com.codeforcommunity.propertiesLoader.PropertiesLoader;
+import com.codeforcommunity.requester.Emailer;
 import com.codeforcommunity.rest.ApiRouter;
 
 import org.jooq.DSLContext;
@@ -63,6 +64,8 @@ public class ServiceMain {
     JWTHandler jwtHandler = new JWTHandler(PropertiesLoader.getJwtProperties().getProperty("secret_key"));
     JWTAuthorizer jwtAuthorizer = new JWTAuthorizer(jwtHandler);
     JWTCreator jwtCreator = new JWTCreator(jwtHandler);
+
+    Emailer emailer = new Emailer(); // TODO: Utilize this
 
     IAuthProcessor authProcessor = new AuthProcessorImpl(this.db, jwtCreator);
     IRequestsProcessor requestsProcessor = new RequestsProcessorImpl(this.db);
