@@ -13,7 +13,7 @@ public class InsufficientEventCapacityException extends RuntimeException impleme
         handler.handleInsufficientEventCapacityException(ctx, this);
     }
 
-    public String getMessage() {
+    public String getEventTitle() {
         return this.eventTitle;
     }
 }

@@ -100,7 +100,7 @@ public class FailureHandler {
   }
 
   public void handleInsufficientEventCapacityException(RoutingContext ctx, InsufficientEventCapacityException exception) {
-       String message = "The user requested more tickets than are available for the event: " + exception.getMessage();
+       String message = "The user requested more tickets than are available for the event: " + exception.getEventTitle();
        end(ctx, message, 400);
   }
 
