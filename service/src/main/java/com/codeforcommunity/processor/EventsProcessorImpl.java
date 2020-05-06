@@ -186,12 +186,11 @@ public class EventsProcessorImpl implements IEventsProcessor {
   }
 
   @Override
-  public EventIdResponse deleteEvent(int eventId, JWTData userData) {
+  public void deleteEvent(int eventId, JWTData userData) {
     if (userData.getPrivilegeLevel() != PrivilegeLevel.ADMIN) {
       throw new AdminOnlyRouteException();
     }
     db.delete(EVENTS).where(EVENTS.ID.eq(eventId)).execute();
-    return new EventIdResponse(eventId);
   }
 
   /**

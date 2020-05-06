@@ -24,5 +24,5 @@ public interface IEventsProcessor {
 
   SingleEventResponse modifyEvent(int eventId, ModifyEventRequest request, JWTData userData);
 
-  EventIdResponse deleteEvent(int eventId, JWTData userData);
+  void deleteEvent(int eventId, JWTData userData);
 }
