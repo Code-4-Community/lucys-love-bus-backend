@@ -13,12 +13,8 @@ import com.codeforcommunity.dto.userEvents.requests.GetUserEventsRequest;
 import com.codeforcommunity.dto.userEvents.responses.GetEventsResponse;
 import com.codeforcommunity.enums.PrivilegeLevel;
 import com.codeforcommunity.exceptions.AdminOnlyRouteException;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import org.jooq.*;
@@ -130,29 +126,27 @@ public class EventsProcessorImpl implements IEventsProcessor {
 
   private static class FieldEntry<T> {
     private Supplier<T> supplier;
-    private Field<T> field;
+    private Function<EventsRecord, Consumer<T>> curriedConsumer;
 
-    public FieldEntry(Supplier<T> supplier, Field<T> field) {
+    public FieldEntry(Supplier<T> supplier,
+        Function<EventsRecord, Consumer<T>> curriedConsumer) {
       this.supplier = supplier;
-      this.field = field;
+      this.curriedConsumer = curriedConsumer;
     }
 
     public Supplier<T> getSupplier() {
       return supplier;
     }
 
-    public Field<T> getField() {
-      return field;
+    public Function<EventsRecord, Consumer<T>> getCurriedConsumer() {
+      return curriedConsumer;
     }
   }
 
-  private <T extends Record, R> UpdateSetStep<T> setFieldInDb(
-      UpdateSetStep<T> query,
-      FieldEntry<R> entry) {
+  private <T> void setFieldInDb(EventsRecord record, FieldEntry<T> entry) {
     if (entry.getSupplier().get() != null) {
-      return query.set(entry.getField(), entry.getSupplier().get());
+      entry.getCurriedConsumer().apply(record).accept(entry.getSupplier().get());
     }
-    return query;
   }
 
   private <T> Supplier<T> getEventDetailsFieldSupplier(
@@ -173,21 +167,20 @@ public class EventsProcessorImpl implements IEventsProcessor {
     }
 
     List<FieldEntry<?>> eventFields = Arrays.asList(
-        new FieldEntry<>(request::getTitle, EVENTS.TITLE),
-        new FieldEntry<>(request::getSpotsAvailable, EVENTS.CAPACITY),
-        new FieldEntry<>(request::getThumbnail, EVENTS.THUMBNAIL),
-        new FieldEntry<>(getEventDetailsFieldSupplier(EventDetails::getDescription, request), EVENTS.DESCRIPTION),
-        new FieldEntry<>(getEventDetailsFieldSupplier(EventDetails::getLocation, request), EVENTS.LOCATION),
-        new FieldEntry<>(getEventDetailsFieldSupplier(EventDetails::getStart, request), EVENTS.START_TIME),
-        new FieldEntry<>(getEventDetailsFieldSupplier(EventDetails::getEnd, request), EVENTS.END_TIME)
+        new FieldEntry<>(request::getTitle, record -> (record::setTitle)),
+        new FieldEntry<>(request::getSpotsAvailable, record -> (record::setCapacity)),
+        new FieldEntry<>(request::getThumbnail, record -> (record::setThumbnail)),
+        new FieldEntry<>(getEventDetailsFieldSupplier(EventDetails::getDescription, request), record -> (record::setDescription)),
+        new FieldEntry<>(getEventDetailsFieldSupplier(EventDetails::getLocation, request), record -> (record::setLocation)),
+        new FieldEntry<>(getEventDetailsFieldSupplier(EventDetails::getStart, request), record -> (record::setStartTime)),
+        new FieldEntry<>(getEventDetailsFieldSupplier(EventDetails::getEnd, request), record -> (record::setEndTime))
     );
 
-    UpdateSetStep<EventsRecord> query = db.update(EVENTS);
+    EventsRecord record = db.fetchOne(EVENTS, EVENTS.ID.eq(eventId));
     for (FieldEntry<?> fieldEntry : eventFields) {
-      query = setFieldInDb(query, fieldEntry);
+      setFieldInDb(record, fieldEntry);
     }
-    UpdateSetMoreStep<EventsRecord> moreQuery = (UpdateSetMoreStep<EventsRecord>) query;
-    moreQuery.where(EVENTS.ID.eq(eventId)).execute();
+    record.store();
 
     return getSingleEvent(eventId);
   }
