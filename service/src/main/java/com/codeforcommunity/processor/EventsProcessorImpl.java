@@ -26,6 +26,7 @@ import static org.jooq.generated.Tables.EVENTS;
 import static org.jooq.generated.Tables.EVENT_REGISTRATIONS;
 import static org.jooq.generated.Tables.USERS;
 
+
 public class EventsProcessorImpl implements IEventsProcessor {
 
   private final DSLContext db;
