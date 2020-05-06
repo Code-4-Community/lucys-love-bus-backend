@@ -124,61 +124,36 @@ public class EventsProcessorImpl implements IEventsProcessor {
     return new GetEventsResponse(res, res.size());
   }
 
-  private static class FieldEntry<T> {
-    private Supplier<T> supplier;
-    private Function<EventsRecord, Consumer<T>> curriedConsumer;
-
-    public FieldEntry(Supplier<T> supplier,
-        Function<EventsRecord, Consumer<T>> curriedConsumer) {
-      this.supplier = supplier;
-      this.curriedConsumer = curriedConsumer;
-    }
-
-    public Supplier<T> getSupplier() {
-      return supplier;
-    }
-
-    public Function<EventsRecord, Consumer<T>> getCurriedConsumer() {
-      return curriedConsumer;
-    }
-  }
-
-  private <T> void setFieldInDb(EventsRecord record, FieldEntry<T> entry) {
-    if (entry.getSupplier().get() != null) {
-      entry.getCurriedConsumer().apply(record).accept(entry.getSupplier().get());
-    }
-  }
-
-  private <T> Supplier<T> getEventDetailsFieldSupplier(
-      Function<EventDetails, T> function, ModifyEventRequest request) {
-    return () -> {
-      if (request.getDetails() != null) {
-        return function.apply(request.getDetails());
-      }
-      return null;
-    };
-  }
-
   @Override
   public SingleEventResponse modifyEvent(int eventId, ModifyEventRequest request,
       JWTData userData) {
     if (userData.getPrivilegeLevel() != PrivilegeLevel.ADMIN) {
       throw new AdminOnlyRouteException();
     }
-
-    List<FieldEntry<?>> eventFields = Arrays.asList(
-        new FieldEntry<>(request::getTitle, record -> (record::setTitle)),
-        new FieldEntry<>(request::getSpotsAvailable, record -> (record::setCapacity)),
-        new FieldEntry<>(request::getThumbnail, record -> (record::setThumbnail)),
-        new FieldEntry<>(getEventDetailsFieldSupplier(EventDetails::getDescription, request), record -> (record::setDescription)),
-        new FieldEntry<>(getEventDetailsFieldSupplier(EventDetails::getLocation, request), record -> (record::setLocation)),
-        new FieldEntry<>(getEventDetailsFieldSupplier(EventDetails::getStart, request), record -> (record::setStartTime)),
-        new FieldEntry<>(getEventDetailsFieldSupplier(EventDetails::getEnd, request), record -> (record::setEndTime))
-    );
-
     EventsRecord record = db.fetchOne(EVENTS, EVENTS.ID.eq(eventId));
-    for (FieldEntry<?> fieldEntry : eventFields) {
-      setFieldInDb(record, fieldEntry);
+    if (request.getTitle() != null) {
+      record.setTitle(request.getTitle());
+    }
+    if (request.getSpotsAvailable() != null) {
+      record.setCapacity(request.getSpotsAvailable());
+    }
+    if (request.getThumbnail() != null) {
+      record.setThumbnail(request.getThumbnail());
+    }
+    if (request.getDetails() != null) {
+      EventDetails details = request.getDetails();
+      if (details.getDescription() != null) {
+        record.setDescription(details.getDescription());
+      }
+      if (details.getLocation() != null) {
+        record.setLocation(details.getLocation());
+      }
+      if (details.getStart() != null) {
+        record.setStartTime(details.getStart());
+      }
+      if (details.getEnd() != null) {
+        record.setEndTime(details.getEnd());
+      }
     }
     record.store();
 
