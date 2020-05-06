@@ -13,19 +13,8 @@ import com.codeforcommunity.enums.PrivilegeLevel;
 import com.codeforcommunity.exceptions.AdminOnlyRouteException;
 import org.jooq.*;
 import org.jooq.DSLContext;
-import org.jooq.Result;
 import org.jooq.generated.tables.pojos.Events;
 import org.jooq.generated.tables.records.EventsRecord;
-import org.jooq.generated.tables.records.UserEventsRecord;
-
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.sql.Timestamp;
-import java.time.Instant;
-import java.time.Period;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 import java.sql.Timestamp;
 import java.time.Instant;
