@@ -118,6 +118,7 @@ public class EventsRouter implements IRouter {
     JWTData userData = ctx.get("jwt_data");
 
     SingleEventResponse response = processor.createEvent(requestData, userData);
+
     end(ctx.response(), 200, JsonObject.mapFrom(response).encode());
   }
 
@@ -142,8 +143,6 @@ public class EventsRouter implements IRouter {
     int eventId = getRequestParameterAsInt(ctx.request(), "event_id");
     JWTData userData = ctx.get("jwt_data");
 
-//    EventIdResponse response = processor.deleteEvent(eventId, userData);
-//    end(ctx.response(), 200, JsonObject.mapFrom(response).encode());
     processor.deleteEvent(eventId, userData);
     end(ctx.response(), 200);
   }
