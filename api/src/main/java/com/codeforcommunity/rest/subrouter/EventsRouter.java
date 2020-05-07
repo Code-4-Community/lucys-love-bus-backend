@@ -1,5 +1,6 @@
 package com.codeforcommunity.rest.subrouter;
 
+import com.amazonaws.AmazonServiceException;
 import com.codeforcommunity.api.IEventsProcessor;
 import com.codeforcommunity.auth.JWTData;
 import com.codeforcommunity.dto.userEvents.requests.CreateEventRequest;
@@ -109,10 +110,10 @@ public class EventsRouter implements IRouter {
     try {
       SingleEventResponse response = processor.createEvent(requestData, userData);
       end(ctx.response(), 200, JsonObject.mapFrom(response).encode());
-    } catch (IOException ioException) {
-      end(ctx.response(), 500);
-    } catch (BadRequestException badRequestException) {
+    } catch (BadRequestException e) {
       end(ctx.response(), 400);
+    } catch (IOException | AmazonServiceException e) {
+      end(ctx.response(), 500);
     }
   }
 

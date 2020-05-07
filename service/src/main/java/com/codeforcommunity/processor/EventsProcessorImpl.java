@@ -1,16 +1,10 @@
 package com.codeforcommunity.processor;
 
-import com.amazonaws.regions.Regions;
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3ClientBuilder;
-import com.amazonaws.services.s3.model.CannedAccessControlList;
-import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.amazonaws.AmazonServiceException;
 import com.codeforcommunity.api.IEventsProcessor;
 import com.codeforcommunity.auth.JWTData;
+import com.codeforcommunity.aws.AWSUtils;
 import com.codeforcommunity.dataaccess.EventDatabaseOperations;
-import com.codeforcommunity.dto.userEvents.requests.CreateEventRequest;
-import com.codeforcommunity.dto.userEvents.responses.SingleEventResponse;
 import com.codeforcommunity.dto.userEvents.components.Event;
 import com.codeforcommunity.dto.userEvents.components.EventDetails;
 import com.codeforcommunity.dto.userEvents.requests.CreateEventRequest;
@@ -19,7 +13,6 @@ import com.codeforcommunity.dto.userEvents.responses.GetEventsResponse;
 import com.codeforcommunity.dto.userEvents.responses.SingleEventResponse;
 import com.codeforcommunity.enums.PrivilegeLevel;
 import com.codeforcommunity.exceptions.AdminOnlyRouteException;
-import org.jooq.*;
 import com.codeforcommunity.exceptions.BadRequestException;
 import org.jooq.DSLContext;
 import org.jooq.SelectConditionStep;
@@ -28,21 +21,16 @@ import org.jooq.SelectWhereStep;
 import org.jooq.generated.tables.pojos.Events;
 import org.jooq.generated.tables.records.EventsRecord;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.Period;
-import java.util.Base64;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.jooq.generated.Tables.EVENTS;
 import static org.jooq.generated.Tables.EVENT_REGISTRATIONS;
 import static org.jooq.generated.Tables.USERS;
-import static org.jooq.impl.DSL.sum;
 
 public class EventsProcessorImpl implements IEventsProcessor {
 
@@ -55,57 +43,23 @@ public class EventsProcessorImpl implements IEventsProcessor {
   }
 
   @Override
-  public SingleEventResponse createEvent(CreateEventRequest request, JWTData userData) throws BadRequestException, IOException {
+  public SingleEventResponse createEvent(CreateEventRequest request, JWTData userData) throws BadRequestException, IOException, AmazonServiceException {
     if (userData.getPrivilegeLevel() != PrivilegeLevel.ADMIN) {
       throw new AdminOnlyRouteException();
     }
 
-    String[] thumbSplit = request.getThumbnail().split(",", 2);
-    if (thumbSplit.length < 2) {
+    String title = request.getTitle().replaceAll("[!@#$%^&*()=+./\\\\|<>`~\\[\\]{}?]", "");  // Remove special characters
+    String fileName = title.replace(" ", "_").toLowerCase() + "_thumbnail";  // The desired name of the file in S3
+
+    String base64Encoding = request.getThumbnail();  // Expected that the thumbnail field is the base64 encoding of the image
+
+    String publicImageUrl = AWSUtils.validateBase64ImageAndUploadToS3(fileName, AWSUtils.DIR_LLB_PUBLIC_EVENTS, base64Encoding);
+    if (publicImageUrl == null) {
+      // Null only when the image encoding failed to validate
       throw new BadRequestException();
     }
 
-    String meta = thumbSplit[0];
-    String[] metaSplit = meta.split(";", 2);
-    if (metaSplit.length < 2 || !metaSplit[1].equals("base64")) {
-      throw new BadRequestException();
-    }
-
-    String[] dataSplit = metaSplit[0].split(":", 2);
-    if (dataSplit.length < 2) {
-      throw new BadRequestException();
-    }
-
-    String[] data = dataSplit[1].split("/", 2);
-    if (data.length < 2 || !data[0].equals("image")) {
-      throw new BadRequestException();
-    }
-
-    String fileExtension = data[1];
-    String encoding = thumbSplit[1];
-
-    AmazonS3 s3Client = AmazonS3ClientBuilder.standard().withRegion(Regions.US_EAST_2).build();
-    String fileName = request.getTitle().replace(" ", "_").toLowerCase() + "_thumbnail." + fileExtension;
-
-    byte[] imageData = Base64.getDecoder().decode(encoding);
-    File tempFile = File.createTempFile(fileName, null, null);
-    FileOutputStream fos = new FileOutputStream(tempFile);
-    fos.write(imageData);
-    fos.flush();
-    fos.close();
-
-    PutObjectRequest awsRequest = new PutObjectRequest("lucys-love-bus-public", "events/" + fileName, tempFile);
-    awsRequest.setCannedAcl(CannedAccessControlList.PublicRead);
-
-    ObjectMetadata awsObjectMetadata = new ObjectMetadata();
-    awsObjectMetadata.setContentType("image/" + fileExtension);
-    awsRequest.setMetadata(awsObjectMetadata);
-
-    s3Client.putObject(awsRequest);
-    tempFile.delete();
-
-    String thumbnailUrl = "https://lucys-love-bus-public.s3.us-east-2.amazonaws.com/events/" + fileName;
-    request.setThumbnail(thumbnailUrl);
+    request.setThumbnail(publicImageUrl);  // Update the request to contain the URL for the DB and JSON response
 
     EventsRecord newEventRecord = eventRequestToRecord(request);
     newEventRecord.store();
@@ -185,6 +139,7 @@ public class EventsProcessorImpl implements IEventsProcessor {
 
   /**
    * Turns a list of jOOq Events DTO into one of our Event DTO.
+   *
    * @param events jOOq data objects.
    * @return List of our Event data object.
    */
@@ -192,10 +147,10 @@ public class EventsProcessorImpl implements IEventsProcessor {
 
     return events.stream().map(event -> {
       EventDetails details = new EventDetails(event.getDescription(), event.getLocation(), event.getStartTime(),
-              event.getEndTime());
+          event.getEndTime());
       Event e = new Event(event.getId(), event.getTitle(),
-              eventDatabaseOperations.getSpotsLeft(event.getId()), event.getThumbnail(),
-              details);
+          eventDatabaseOperations.getSpotsLeft(event.getId()), event.getThumbnail(),
+          details);
       return e;
     }).collect(Collectors.toList());
 
