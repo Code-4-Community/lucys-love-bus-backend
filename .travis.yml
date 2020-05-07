@@ -1,1 +1,8 @@
 language: java
+
+before_install:
+  - mv common/src/main/resources/db.properties.example common/src/main/resources/db.properties
+  - mv common/src/main/resources/emailer.properties.example common/src/main/resources/emailer.properties
+  - mv common/src/main/resources/expiration.properties.example common/src/main/resources/expiration.properties
+  - mv common/src/main/resources/jwt.properties.example common/src/main/resources/jwt.properties
+  - mv common/src/main/resources/stripe.properties.example common/src/main/resources/stripe.properties
