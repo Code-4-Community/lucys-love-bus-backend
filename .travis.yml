@@ -4,7 +4,7 @@ services:
   - postgresql
 
 before_install:
-  - psql -c 'create database lucys-love-bus;' -U postgres
+  - psql -c "create database 'lucys-love-bus';" -U postgres
   - mv common/src/main/resources/db.properties.example common/src/main/resources/db.properties
   - mv common/src/main/resources/emailer.properties.example common/src/main/resources/emailer.properties
   - mv common/src/main/resources/expiration.properties.example common/src/main/resources/expiration.properties
