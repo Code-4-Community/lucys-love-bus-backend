@@ -119,6 +119,13 @@
         <version>3.8.5</version>
         <scope>test</scope>
       </dependency>
+
+      <!-- Stripe - https://github.com/stripe/stripe-java -->
+      <dependency>
+        <groupId>com.stripe</groupId>
+        <artifactId>stripe-java</artifactId>
+        <version>19.5.0</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 
