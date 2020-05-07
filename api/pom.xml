@@ -34,11 +34,6 @@
             <artifactId>stripe-java</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>com.amazonaws</groupId>
-            <artifactId>aws-java-sdk-s3</artifactId>
-        </dependency>
-
     </dependencies>
 
 </project>
