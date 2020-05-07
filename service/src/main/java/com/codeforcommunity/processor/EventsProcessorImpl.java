@@ -6,6 +6,10 @@ import com.codeforcommunity.auth.JWTData;
 import com.codeforcommunity.exceptions.S3FailedUploadException;
 import com.codeforcommunity.requester.S3Requester;
 import com.codeforcommunity.dataaccess.EventDatabaseOperations;
+import com.codeforcommunity.dto.userEvents.requests.CreateEventRequest;
+import com.codeforcommunity.dto.userEvents.requests.ModifyEventRequest;
+import com.codeforcommunity.dto.userEvents.responses.EventIdResponse;
+import com.codeforcommunity.dto.userEvents.responses.SingleEventResponse;
 import com.codeforcommunity.dto.userEvents.components.Event;
 import com.codeforcommunity.dto.userEvents.components.EventDetails;
 import com.codeforcommunity.dto.userEvents.requests.CreateEventRequest;
@@ -15,6 +19,11 @@ import com.codeforcommunity.dto.userEvents.responses.SingleEventResponse;
 import com.codeforcommunity.enums.PrivilegeLevel;
 import com.codeforcommunity.exceptions.AdminOnlyRouteException;
 import com.codeforcommunity.exceptions.BadRequestImageException;
+import java.util.Arrays;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import org.jooq.*;
 import org.jooq.DSLContext;
 import org.jooq.SelectConditionStep;
 import org.jooq.SelectSeekStep1;
@@ -32,6 +41,7 @@ import java.util.stream.Collectors;
 import static org.jooq.generated.Tables.EVENTS;
 import static org.jooq.generated.Tables.EVENT_REGISTRATIONS;
 import static org.jooq.generated.Tables.USERS;
+
 
 public class EventsProcessorImpl implements IEventsProcessor {
 
@@ -141,6 +151,50 @@ public class EventsProcessorImpl implements IEventsProcessor {
     List<Event> res = listOfEventsToListOfEvent(afterDateFilter.fetchInto(Events.class));
 
     return new GetEventsResponse(res, res.size());
+  }
+
+  @Override
+  public SingleEventResponse modifyEvent(int eventId, ModifyEventRequest request,
+      JWTData userData) {
+    if (userData.getPrivilegeLevel() != PrivilegeLevel.ADMIN) {
+      throw new AdminOnlyRouteException();
+    }
+    EventsRecord record = db.fetchOne(EVENTS, EVENTS.ID.eq(eventId));
+    if (request.getTitle() != null) {
+      record.setTitle(request.getTitle());
+    }
+    if (request.getSpotsAvailable() != null) {
+      record.setCapacity(request.getSpotsAvailable());
+    }
+    if (request.getThumbnail() != null) {
+      record.setThumbnail(request.getThumbnail());
+    }
+    if (request.getDetails() != null) {
+      EventDetails details = request.getDetails();
+      if (details.getDescription() != null) {
+        record.setDescription(details.getDescription());
+      }
+      if (details.getLocation() != null) {
+        record.setLocation(details.getLocation());
+      }
+      if (details.getStart() != null) {
+        record.setStartTime(details.getStart());
+      }
+      if (details.getEnd() != null) {
+        record.setEndTime(details.getEnd());
+      }
+    }
+    record.store();
+
+    return getSingleEvent(eventId);
+  }
+
+  @Override
+  public void deleteEvent(int eventId, JWTData userData) {
+    if (userData.getPrivilegeLevel() != PrivilegeLevel.ADMIN) {
+      throw new AdminOnlyRouteException();
+    }
+    db.delete(EVENTS).where(EVENTS.ID.eq(eventId)).execute();
   }
 
   /**
