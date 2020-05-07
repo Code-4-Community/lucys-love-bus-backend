@@ -7,7 +7,7 @@ import com.codeforcommunity.dto.userEvents.requests.CreateEventRequest;
 import com.codeforcommunity.dto.userEvents.responses.SingleEventResponse;
 import com.codeforcommunity.dto.userEvents.requests.GetUserEventsRequest;
 import com.codeforcommunity.dto.userEvents.responses.GetEventsResponse;
-import com.codeforcommunity.exceptions.BadRequestException;
+import com.codeforcommunity.exceptions.BadRequestImageException;
 import com.codeforcommunity.rest.IRouter;
 
 import io.vertx.core.Vertx;
@@ -107,14 +107,8 @@ public class EventsRouter implements IRouter {
     CreateEventRequest requestData = getJsonBodyAsClass(ctx, CreateEventRequest.class);
     JWTData userData = ctx.get("jwt_data");
 
-    try {
-      SingleEventResponse response = processor.createEvent(requestData, userData);
-      end(ctx.response(), 200, JsonObject.mapFrom(response).encode());
-    } catch (BadRequestException e) {
-      end(ctx.response(), 400);
-    } catch (IOException | AmazonServiceException e) {
-      end(ctx.response(), 500);
-    }
+    SingleEventResponse response = processor.createEvent(requestData, userData);
+    end(ctx.response(), 200, JsonObject.mapFrom(response).encode());
   }
 
   private void handleGetSingleEventRoute(RoutingContext ctx) {

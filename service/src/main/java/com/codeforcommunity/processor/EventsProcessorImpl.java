@@ -3,7 +3,8 @@ package com.codeforcommunity.processor;
 import com.amazonaws.AmazonServiceException;
 import com.codeforcommunity.api.IEventsProcessor;
 import com.codeforcommunity.auth.JWTData;
-import com.codeforcommunity.aws.AWSUtils;
+import com.codeforcommunity.exceptions.S3FailedUploadException;
+import com.codeforcommunity.requester.S3Requester;
 import com.codeforcommunity.dataaccess.EventDatabaseOperations;
 import com.codeforcommunity.dto.userEvents.components.Event;
 import com.codeforcommunity.dto.userEvents.components.EventDetails;
@@ -13,7 +14,7 @@ import com.codeforcommunity.dto.userEvents.responses.GetEventsResponse;
 import com.codeforcommunity.dto.userEvents.responses.SingleEventResponse;
 import com.codeforcommunity.enums.PrivilegeLevel;
 import com.codeforcommunity.exceptions.AdminOnlyRouteException;
-import com.codeforcommunity.exceptions.BadRequestException;
+import com.codeforcommunity.exceptions.BadRequestImageException;
 import org.jooq.DSLContext;
 import org.jooq.SelectConditionStep;
 import org.jooq.SelectSeekStep1;
@@ -43,7 +44,7 @@ public class EventsProcessorImpl implements IEventsProcessor {
   }
 
   @Override
-  public SingleEventResponse createEvent(CreateEventRequest request, JWTData userData) throws BadRequestException, IOException, AmazonServiceException {
+  public SingleEventResponse createEvent(CreateEventRequest request, JWTData userData) throws BadRequestImageException {
     if (userData.getPrivilegeLevel() != PrivilegeLevel.ADMIN) {
       throw new AdminOnlyRouteException();
     }
@@ -53,17 +54,22 @@ public class EventsProcessorImpl implements IEventsProcessor {
 
     String base64Encoding = request.getThumbnail();  // Expected that the thumbnail field is the base64 encoding of the image
 
-    String publicImageUrl = AWSUtils.validateBase64ImageAndUploadToS3(fileName, AWSUtils.DIR_LLB_PUBLIC_EVENTS, base64Encoding);
-    if (publicImageUrl == null) {
-      // Null only when the image encoding failed to validate
-      throw new BadRequestException();
+    try {
+      String publicImageUrl = S3Requester.validateBase64ImageAndUploadToS3(fileName, S3Requester.DIR_LLB_PUBLIC_EVENTS, base64Encoding);
+      if (publicImageUrl == null) {
+        throw new BadRequestImageException();  // Null only when the image encoding failed to validate
+      }
+
+      request.setThumbnail(publicImageUrl);  // Update the request to contain the URL for the DB and JSON response
+
+      EventsRecord newEventRecord = eventRequestToRecord(request);
+      newEventRecord.store();
+      return eventPojoToResponse(newEventRecord.into(Events.class));
+    } catch (IOException e) {
+      throw new BadRequestImageException();  // Image failed to decode
+    } catch (AmazonServiceException e) {
+      throw new S3FailedUploadException(e.getMessage());  // S3 upload failed
     }
-
-    request.setThumbnail(publicImageUrl);  // Update the request to contain the URL for the DB and JSON response
-
-    EventsRecord newEventRecord = eventRequestToRecord(request);
-    newEventRecord.store();
-    return eventPojoToResponse(newEventRecord.into(Events.class));
   }
 
   @Override

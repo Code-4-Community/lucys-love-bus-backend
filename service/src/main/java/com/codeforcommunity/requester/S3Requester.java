@@ -1,4 +1,4 @@
-package com.codeforcommunity.aws;
+package com.codeforcommunity.requester;
 
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.regions.Regions;
@@ -7,13 +7,14 @@ import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.codeforcommunity.aws.EncodedImage;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Base64;
 
-public class AWSUtils {
+public class S3Requester {
 
   public static final String BUCKET_LLB_PUBLIC_URL = "https://lucys-love-bus-public.s3.us-east-2.amazonaws.com";
   public static final String BUCKET_LLB_PUBLIC = "lucys-love-bus-public";

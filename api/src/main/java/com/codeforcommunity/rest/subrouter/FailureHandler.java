@@ -109,9 +109,14 @@ public class FailureHandler {
        end(ctx, message, 502);
   }
 
-  public void handleBadRequest(RoutingContext ctx) {
-    String message = "Bad request";
+  public void handleBadImageRequest(RoutingContext ctx) {
+    String message = "The uploaded file could not be processed as an image";
     end(ctx, message, 400);
+  }
+
+  public void handleS3FailedUpload(RoutingContext ctx, String exceptionMessage) {
+    String message = "The given file could not be uploaded to AWS S3: " + exceptionMessage;
+    end(ctx, message, 502);
   }
 
   private void handleUncaughtError(RoutingContext ctx, Throwable throwable){
