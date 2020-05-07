@@ -42,6 +42,7 @@ rm input.properties
 mv emailer.properties.example emailer.properties
 mv expiration.properties.example expiration.properties
 mv jwt.properties.example jwt.properties
+mv stripe.properties.example stripe.properties
 
 echo "SUCCESS: updated database credentials"
 
