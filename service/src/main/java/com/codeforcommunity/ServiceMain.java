@@ -4,6 +4,7 @@ import com.codeforcommunity.api.IAnnouncementsProcessor;
 import com.codeforcommunity.api.IAuthProcessor;
 import com.codeforcommunity.api.ICheckoutProcessor;
 import com.codeforcommunity.api.IEventsProcessor;
+import com.codeforcommunity.api.IProtectedUserProcessor;
 import com.codeforcommunity.api.IRequestsProcessor;
 import com.codeforcommunity.auth.JWTAuthorizer;
 import com.codeforcommunity.auth.JWTCreator;
@@ -12,6 +13,7 @@ import com.codeforcommunity.processor.AnnouncementsProcessorImpl;
 import com.codeforcommunity.processor.AuthProcessorImpl;
 import com.codeforcommunity.processor.CheckoutProcessorImpl;
 import com.codeforcommunity.processor.EventsProcessorImpl;
+import com.codeforcommunity.processor.ProtectedUserProcessorImpl;
 import com.codeforcommunity.processor.RequestsProcessorImpl;
 import com.codeforcommunity.propertiesLoader.PropertiesLoader;
 import com.codeforcommunity.requester.Emailer;
@@ -70,12 +72,20 @@ public class ServiceMain {
     Emailer emailer = new Emailer(); // TODO: Utilize this
 
     IAuthProcessor authProcessor = new AuthProcessorImpl(this.db, jwtCreator);
+    IProtectedUserProcessor protectedUserProcessor = new ProtectedUserProcessorImpl(this.db);
     IRequestsProcessor requestsProcessor = new RequestsProcessorImpl(this.db);
     IEventsProcessor eventsProcessor = new EventsProcessorImpl(this.db);
     IAnnouncementsProcessor announcementEventsProcessor = new AnnouncementsProcessorImpl(this.db);
     ICheckoutProcessor checkoutProcessor = new CheckoutProcessorImpl(this.db);
-    ApiRouter router = new ApiRouter(authProcessor, requestsProcessor, eventsProcessor,
-            announcementEventsProcessor, checkoutProcessor, jwtAuthorizer);
+
+    ApiRouter router = new ApiRouter(authProcessor,
+        protectedUserProcessor,
+        requestsProcessor,
+        eventsProcessor,
+        announcementEventsProcessor,
+        checkoutProcessor,
+        jwtAuthorizer);
+
     startApiServer(router);
   }
 
