@@ -1,7 +1,7 @@
 #!/bin/bash
 
 DIR_WORK=/lucys-love-bus-backend
-DIR_PERSIST=${DIR_WORK}/common/src/main/resources
+DIR_PERSIST=${DIR_WORK}/common/src/main/resources/properties
 DIR_JAR=${DIR_WORK}/service/target
 
 # Check for updated database username
@@ -49,7 +49,6 @@ echo "SUCCESS: updated database credentials"
 # Perform maven install/package
 cd ${DIR_WORK} || exit 1
 mvn -T 2C install
-mvn -T 2C package
 
 # Execute the jar file
 java -jar ${DIR_JAR}/service-1.0-SNAPSHOT-jar-with-dependencies.jar

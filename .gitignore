@@ -2,6 +2,7 @@
 */target/
 *.iml
 *.properties
+*.log
 .classpath
 .project
 .settings
