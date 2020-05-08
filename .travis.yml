@@ -8,6 +8,13 @@ before_install:
 - mv common/src/main/resources/properties/expiration.properties.example common/src/main/resources/properties/expiration.properties
 - mv common/src/main/resources/properties/jwt.properties.example common/src/main/resources/properties/jwt.properties
 - mv common/src/main/resources/properties/stripe.properties.example common/src/main/resources/properties/stripe.properties
+before_deploy:
+  - awk -F" = " -v updatedVal="= $DB_DOMAIN" '/database.username =/{$2=updatedVal}1' input.properties > user.properties
+  - awk -F" = " -v updatedVal="= $DB_USERNAME" '/database.password =/{$2=updatedVal}1' user.properties > pass.properties
+  - awk -F" = " -v updatedVal="= $DB_PASSWORD" '/database.url =/{$2=updatedVal}1' pass.properties > properties/db.properties
+  - rm user.properties
+  - rm pass.properties
+  - rm input.properties
 deploy:
   provider: elasticbeanstalk
   access_key_id: AKIAXEDZZITUSILI6QM3
@@ -16,8 +23,15 @@ deploy:
   region: us-east-2
   app: c4c-travis-ci
   env: llb-travis-env
-  file: "service/target/service-1.0-SNAPSHOT-jar-with-dependencies.jar"
+  file: service/target/service-1.0-SNAPSHOT-jar-with-dependencies.jar
   on:
     repo: Code-4-Community/lucys-love-bus-backend
-    branch: master
-  skip_cleanup: 'true'
+    branch: travis_elastic_beanstalk_deploy
+global:
+  env:
+    db_url:
+      secure: IpUAXn8jFENhaKl9fw2raWFWlqJc6NfOE10DEEhe6cceTPcVvQGBW6/qMdKoMvpzp4KXgCw0ha/Y1G75qfycE+yUPyd1+ge54YKRldoHDDovbaevWGqrwjSNvrIGDNydgo1WzP81ACFf+Ns5bNLXTvTIAVghE8bGQmQ89AtJdnJiaKn6fIwh/S9YOlGhESt6QeBDdWnk4OWoRezLuT6gSWFeaXyHeNhJ1ZKk1B4d/m1Jl4gpYaVCWhb6ZV6QslrdBodztLaX7lfX1nJDVi5M/S58PdcDEihZo0Q7PWC/2gVfjsedPARtJaZrYIhx0KGoht9oKqmEHZiAkzEP/oDPZAo26oRZ9h+qXUOCm3x/4FWYzZd7kvQmuVXKztwi5HgvvdJa6Bo5VSWwF2xVFU+K8Ij1MB9oH4XNZ/KiQnTXFElIGsKAmS7STXqtOI64O1Dx7J+MV54M6V1oVKqtUyrNg63td1Df1pLRWjEqoLi6OUcn+T2DmMrY86+7ZTSJ64kvIG4eq0njXEuzZPs1nx96UODnKIDXaRdqC3BFXKLW9q6Lnp/2JRAiMJklKJp7uhgZMFkLmbpJwD+QBDlFnBiu5BtZgXdY+evnc9sDRWjnIWCKTEvbMH0EvGWNUuKgqfwipPpUWmQP663HCmsoqIdfuxb4g26rqxuXG69O5uNM2bc=
+    db_username:
+      secure: b01MvVymD5+bsdfv4J/qRYDmyF4X8j9EzyJ3vrkoyxJkJwBW04vIBs6Qv5dY2/4aykj4sXDwFVv3Fp6JEbgZwMWaZIOEf9goufWOpxfxRtq5+kn2uzaVEna0ikF7CiBleSmBq+Uk0ErI8dVjG58idb0Qg33hRxbzm4M1BvW2zSGQBkCMSVWQfd7x2n38TSgYn6GDmSJBjaVMsHUVdhNn4NvSoFB3wxpLj9H3xFO90VH0GgaZzr4BCA2rTPMMr61KqV0xPjNvIKO+GCuySUQ18lgvQikLmTcg6XPH2tJdKnuxPF5fTkjR9ww8yRb27F3rxICRfgeV9b2AK7G69pGCBmpeCPcH7FDQb+ixhYmc/sGs+dk1Vqy+5CLtk9MNJyH8L7sO8mQCkTPuagVk3lpTw5Jaoh8+vLPGzMxn+58Qau1y95ybDSCNhuqLvinoALVaxdbuAv9zm/UQeV861FUCZYW/p5QTjVKgiBxeyLu+qzlYmGYqOY1VHmlZkXbchdDD/qSPCSyjxNUXzyabCXN4msX9QVqlxdxax1McUQa+fJEpDhy7OI4V+CyK6h9jZvsC1VESyfvfe6knXN9bW/fHVxX2L0vHswdJwwUAAtUnv3FSwu/ngKdLLvHAuFTHWLPX3fcSIw4jM2Ng++kxs7Cr3t+7+b1iICEKJxgkJxXRngs=
+    db_password:
+      secure: mnyB2k+SrqCTGwTXGdQog6t3ESq0P0rhuzm9MWzVvLghgs0/bYXB3xLwvqHQh+XSfQ3j3YR+ZsGROIeZ14IhpHB5y3OS8yIyfXgmJj2wDc6Vz1mX/01QNWKYukccvEG4H0Lehw39+J8QPi/YXi0NcBmkTSQhMNusgHiLa3aTn+k131/d4i758h/wmjXFo9YP7JkLr3qMfWQixux87UqdEa3g1GqEUNN0QVVgjM+i3mtYJLqMs9esQEe4nyuyApFRHzGLI78ztfgW/cO7FqAzMSO8raov58+9NEr+xRVd2bcfhyZoV2/EyO1xE1QSxAl59PJdAx2BIB+WZ/k+uY90eXfSABDyNl8ir1Ciav4BIAxTtfKtdfuv02012xqHL7MfkxKjYL78qiXeVwS3us5asM7zyVLObFEKcAH4Pz61lMi2ubGyhUDST9sI9B/naUAPZ8He4LHzIdiYEmgNrQSi9NKeq98EpAvX3opluA70EPp34iAYijLlg0BZqB8h6cyrgAAwvTTAIvCppJOhzV4yr8bEYuZ+JmuLTBD52bWfKDQPQ2+RHBLGooyYwDn/FvLRKiOtZlk20zJptOSyhAPclCQIHZnwhyd1V/WmPBhN3mttucnxaG8JMouO7c6Ru2wqPCiy+hRTuavtXNQUk9I+ZPt3f8eo0Ya2wYpXj8sSzmw=
