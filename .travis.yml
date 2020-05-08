@@ -16,6 +16,7 @@ deploy:
   region: us-east-2
   app: c4c-travis-ci
   env: llb-travis-env
+  file: "service/target/service-1.0-SNAPSHOT-jar-with-dependencies.jar"
   on:
     repo: Code-4-Community/lucys-love-bus-backend
     branch: master
