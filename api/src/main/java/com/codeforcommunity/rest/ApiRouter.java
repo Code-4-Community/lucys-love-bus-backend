@@ -3,6 +3,7 @@ package com.codeforcommunity.rest;
 import com.codeforcommunity.api.IAnnouncementsProcessor;
 import com.codeforcommunity.api.IAuthProcessor;
 import com.codeforcommunity.api.IEventsProcessor;
+import com.codeforcommunity.api.IProtectedUserProcessor;
 import com.codeforcommunity.api.IRequestsProcessor;
 import com.codeforcommunity.api.ICheckoutProcessor;
 import com.codeforcommunity.auth.JWTAuthorizer;
@@ -13,6 +14,7 @@ import com.codeforcommunity.rest.subrouter.CommonRouter;
 import com.codeforcommunity.rest.subrouter.EventsRouter;
 import com.codeforcommunity.rest.subrouter.PfRequestRouter;
 import com.codeforcommunity.rest.subrouter.CheckoutRouter;
+import com.codeforcommunity.rest.subrouter.ProtectedUserRouter;
 import com.codeforcommunity.rest.subrouter.WebhooksRouter;
 import io.vertx.core.Vertx;
 
@@ -23,22 +25,25 @@ import io.vertx.ext.web.Router;
 public class ApiRouter implements IRouter {
     // allows us to test by allowing public access to private fields
     public static class Externals {
-        private CommonRouter commonRouter;
-        private AuthRouter authRouter;
-        private PfRequestRouter requestRouter;
-        private EventsRouter eventsRouter;
-        private AnnouncementsRouter announcementsRouter;
+        private final CommonRouter commonRouter;
+        private final AuthRouter authRouter;
+        private final ProtectedUserRouter protectedUserRouter;
+        private final PfRequestRouter requestRouter;
+        private final EventsRouter eventsRouter;
+        private final AnnouncementsRouter announcementsRouter;
         private final CheckoutRouter checkoutRouter;
         private final WebhooksRouter webhooksRouter;
 
         public Externals(JWTAuthorizer myJWTAuthorizer,
                          IAuthProcessor authProcessor,
+                         IProtectedUserProcessor protectedUserProcessor,
                          IRequestsProcessor requestsProcessor,
                          IEventsProcessor eventsProcessor,
                          IAnnouncementsProcessor announcementEventsProcessor,
                          ICheckoutProcessor checkoutProcessor) {
             this.commonRouter = new CommonRouter(myJWTAuthorizer);
             this.authRouter = new AuthRouter(authProcessor);
+            this.protectedUserRouter = new ProtectedUserRouter(protectedUserProcessor);
             this.requestRouter = new PfRequestRouter(requestsProcessor);
             this.eventsRouter = new EventsRouter(eventsProcessor);
             this.announcementsRouter = new AnnouncementsRouter(announcementEventsProcessor);
@@ -54,6 +59,10 @@ public class ApiRouter implements IRouter {
             return this.authRouter;
         }
 
+        public ProtectedUserRouter getProtectedUserRouter() {
+            return this.protectedUserRouter;
+        }
+
         public PfRequestRouter getRequestRouter() {
             return this.requestRouter;
         }
@@ -66,9 +75,13 @@ public class ApiRouter implements IRouter {
             return this.announcementsRouter;
         }
 
-        public CheckoutRouter getCheckoutRouter() { return this.checkoutRouter; }
+        public CheckoutRouter getCheckoutRouter() { 
+            return this.checkoutRouter; 
+        }
 
-        public WebhooksRouter getWebhooksRouter() { return this.webhooksRouter; }
+        public WebhooksRouter getWebhooksRouter() { 
+            return this.webhooksRouter; 
+        }
 
         public Router getRouter(Vertx vertx) {
             return Router.router(vertx);
@@ -77,11 +90,15 @@ public class ApiRouter implements IRouter {
 
     private final Externals externs;
 
-    public ApiRouter(IAuthProcessor authProcessor, IRequestsProcessor requestsProcessor,
-        IEventsProcessor eventsProcessor, IAnnouncementsProcessor announcementEventsProcessor,
-        ICheckoutProcessor checkoutProcessor, JWTAuthorizer jwtAuthorizer) {
-        this.externs = new Externals(jwtAuthorizer, authProcessor, requestsProcessor, eventsProcessor,
-            announcementEventsProcessor, checkoutProcessor);
+    public ApiRouter(IAuthProcessor authProcessor,
+                     IProtectedUserProcessor protectedUserProcessor, 
+                     IRequestsProcessor requestsProcessor,
+                     IEventsProcessor eventsProcessor, 
+                     IAnnouncementsProcessor announcementEventsProcessor,
+                     ICheckoutProcessor checkoutProcessor, 
+                     JWTAuthorizer jwtAuthorizer) {
+        this.externs = new Externals(jwtAuthorizer, authProcessor, protectedUserProcessor,
+        requestsProcessor, eventsProcessor, announcementEventsProcessor, checkoutProcessor);
     }
 
     public ApiRouter(Externals externs) {
@@ -107,7 +124,8 @@ public class ApiRouter implements IRouter {
      */
     private Router defineProtectedRoutes(Vertx vertx) {
         Router router = externs.getRouter(vertx);
-
+        
+        router.mountSubRouter("/user", externs.getProtectedUserRouter().initializeRouter(vertx));
         router.mountSubRouter("/requests", externs.getRequestRouter().initializeRouter(vertx));
         router.mountSubRouter("/events", externs.getEventsRouter().initializeRouter(vertx));
         router.mountSubRouter("/announcements", externs.getAnnouncementsRouter().initializeRouter(vertx));
