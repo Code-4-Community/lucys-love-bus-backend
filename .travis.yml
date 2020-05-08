@@ -17,6 +17,7 @@ before_install:
   - rm user.properties
   - rm pass.properties
   - rm input.properties
+  - cd /
 deploy:
   provider: elasticbeanstalk
   access_key_id: AKIAXEDZZITUSILI6QM3
