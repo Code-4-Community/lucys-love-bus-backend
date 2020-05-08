@@ -17,6 +17,7 @@ before_install:
   - rm user.properties
   - rm pass.properties
   - rm input.properties
+  - pwd
   - cd /
   - pwd
 deploy:
