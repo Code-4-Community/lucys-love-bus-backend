@@ -30,5 +30,5 @@ public class PropertiesLoader {
   public static Properties getJwtProperties() {
     return getProperties("properties/jwt.properties");
   }
-  public static Properties getStripeProperties() { return getProperties("stripe.properties"); }
+  public static Properties getStripeProperties() { return getProperties("properties/stripe.properties"); }
 }
