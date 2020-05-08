@@ -18,7 +18,7 @@ before_install:
   - rm pass.properties
   - rm input.properties
   - pwd
-  - cd /
+  - cd /home/travis/build/Code-4-Community/lucys-love-bus-backend/
   - pwd
 deploy:
   provider: elasticbeanstalk
