@@ -1,16 +1,14 @@
 language: java
 services:
 - postgresql
+#before_install:
+#- psql -c 'create database "lucys-love-bus";' -U postgres
 before_install:
-- psql -c 'create database "lucys-love-bus";' -U postgres
-- echo $DB_DOMAIN
-- echo db_url
-- mv common/src/main/resources/properties/db.properties.example common/src/main/resources/properties/db.properties
-- mv common/src/main/resources/properties/emailer.properties.example common/src/main/resources/properties/emailer.properties
-- mv common/src/main/resources/properties/expiration.properties.example common/src/main/resources/properties/expiration.properties
-- mv common/src/main/resources/properties/jwt.properties.example common/src/main/resources/properties/jwt.properties
-- mv common/src/main/resources/properties/stripe.properties.example common/src/main/resources/properties/stripe.properties
-before_deploy:
+  - mv common/src/main/resources/properties/db.properties.example common/src/main/resources/properties/db.properties
+  - mv common/src/main/resources/properties/emailer.properties.example common/src/main/resources/properties/emailer.properties
+  - mv common/src/main/resources/properties/expiration.properties.example common/src/main/resources/properties/expiration.properties
+  - mv common/src/main/resources/properties/jwt.properties.example common/src/main/resources/properties/jwt.properties
+  - mv common/src/main/resources/properties/stripe.properties.example common/src/main/resources/properties/stripe.properties
   - awk -F" = " -v updatedVal="= $DB_DOMAIN" '/database.username =/{$2=updatedVal}1' input.properties > user.properties
   - awk -F" = " -v updatedVal="= $DB_USERNAME" '/database.password =/{$2=updatedVal}1' user.properties > pass.properties
   - awk -F" = " -v updatedVal="= $DB_PASSWORD" '/database.url =/{$2=updatedVal}1' pass.properties > properties/db.properties
