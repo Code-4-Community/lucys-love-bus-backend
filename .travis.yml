@@ -3,6 +3,8 @@ services:
 - postgresql
 before_install:
 - psql -c 'create database "lucys-love-bus";' -U postgres
+- echo $DB_DOMAIN
+- echo db_url
 - mv common/src/main/resources/properties/db.properties.example common/src/main/resources/properties/db.properties
 - mv common/src/main/resources/properties/emailer.properties.example common/src/main/resources/properties/emailer.properties
 - mv common/src/main/resources/properties/expiration.properties.example common/src/main/resources/properties/expiration.properties
