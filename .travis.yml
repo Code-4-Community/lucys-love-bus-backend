@@ -11,6 +11,7 @@ before_install:
   - mv expiration.properties.example expiration.properties
   - mv jwt.properties.example jwt.properties
   - mv stripe.properties.example stripe.properties
+  - env
   - awk -F" = " -v updatedVal="= $DB_DOMAIN" '/database.username =/{$2=updatedVal}1' input.properties > user.properties
   - awk -F" = " -v updatedVal="= $DB_USERNAME" '/database.password =/{$2=updatedVal}1' user.properties > pass.properties
   - awk -F" = " -v updatedVal="= $DB_PASSWORD" '/database.url =/{$2=updatedVal}1' pass.properties > db.properties
