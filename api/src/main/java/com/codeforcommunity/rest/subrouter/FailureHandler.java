@@ -33,6 +33,11 @@ public class FailureHandler {
      end(ctx, message, 401);
   }
 
+  public void handleWrongPassword(RoutingContext ctx) {
+    String message = "Given password is not correct";
+    end(ctx, message, 401);
+  }
+
   public void handleMissingParameter(RoutingContext ctx, MissingParameterException e) {
     String message = String.format("Missing required path parameter: %s", e.getMissingParameterName());
     end(ctx, message, 400);
