@@ -12,9 +12,9 @@ before_install:
   - mv jwt.properties.example jwt.properties
   - mv stripe.properties.example stripe.properties
   - echo $DB_DOMAIN
-  - awk -F" = " -v updatedVal="= $DB_DOMAIN" '/database.username =/{$2=updatedVal}1' input.properties > user.properties
-  - awk -F" = " -v updatedVal="= $DB_USERNAME" '/database.password =/{$2=updatedVal}1' user.properties > pass.properties
-  - awk -F" = " -v updatedVal="= $DB_PASSWORD" '/database.url =/{$2=updatedVal}1' pass.properties > db.properties
+  - awk -F" = " -v updatedVal="= $DB_USERNAME" '/database.username =/{$2=updatedVal}1' input.properties > user.properties
+  - awk -F" = " -v updatedVal="= $DB_PASSWORD" '/database.password =/{$2=updatedVal}1' user.properties > pass.properties
+  - awk -F" = " -v updatedVal="= $DB_DOMAIN" '/database.url =/{$2=updatedVal}1' pass.properties > db.properties
   - cat db.properties
   - rm user.properties
   - rm pass.properties
