@@ -20,7 +20,7 @@ public class S3Requester {
   private static final String BUCKET_LLB_PUBLIC = "lucys-love-bus-public";
   private static final String DIR_LLB_PUBLIC_EVENTS = "events";
 
-  public static AmazonS3 s3Client;
+  private static AmazonS3 s3Client;
 
   static {
     s3Client = AmazonS3ClientBuilder.standard().withRegion(Regions.US_EAST_2).build();
