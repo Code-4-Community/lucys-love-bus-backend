@@ -1,6 +1,6 @@
 package com.codeforcommunity.requester;
 
-import com.amazonaws.AmazonServiceException;
+import com.amazonaws.SdkClientException;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
@@ -8,6 +8,8 @@ import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.codeforcommunity.aws.EncodedImage;
+import com.codeforcommunity.exceptions.BadRequestImageException;
+import com.codeforcommunity.exceptions.S3FailedUploadException;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -34,10 +36,9 @@ public class S3Requester {
    * @return null if the String is not an encoded base64 image, otherwise an {@link EncodedImage}.
    */
   private static EncodedImage validateBase64Image(String base64Image) {
+    // Expected Base64 format: "data:image/{extension};base64,{imageData}"
 
-    // Expected Base64 format: data:image/{extension};base64,{imageData}
-
-    if (base64Image == null || base64Image.length() < 5) {
+    if (base64Image == null || base64Image.length() < 10) {
       return null;
     }
 
@@ -78,24 +79,36 @@ public class S3Requester {
    * @param directoryName  the desired directory of the file in S3 (without leading or trailing '/').
    * @param base64Encoding the base64 encoding of the image to upload.
    * @return null if the encoding fails validation and image URL if the upload was successful.
-   * @throws IOException            if the base64 decoding failed.
-   * @throws AmazonServiceException if the upload to S3 failed.
+   * @throws BadRequestImageException if the base64 image validation or image decoding failed.
+   * @throws S3FailedUploadException  if the upload to S3 failed.
    */
-  private static String validateBase64ImageAndUploadToS3(String fileName, String directoryName, String base64Encoding) throws IOException, AmazonServiceException {
+  private static String validateBase64ImageAndUploadToS3(String fileName, String directoryName, String base64Encoding) throws BadRequestImageException, S3FailedUploadException {
+    if (base64Encoding == null) {
+      // No validation/uploading required if given no data
+      return null;
+    }
+
     EncodedImage encodedImage = validateBase64Image(base64Encoding);
     if (encodedImage == null) {
-      return null;  // Image failed to validate
+      // Image failed to validate
+      throw new BadRequestImageException();
     }
 
     String fullFileName = String.format("%s.%s", fileName, encodedImage.getFileExtension());
+    File tempFile;
 
-    // Temporarily writes the image to disk to decode
-    byte[] imageData = Base64.getDecoder().decode(encodedImage.getBase64ImageEncoding());
-    File tempFile = File.createTempFile(fullFileName, null, null);
-    FileOutputStream fos = new FileOutputStream(tempFile);
-    fos.write(imageData);
-    fos.flush();
-    fos.close();
+    try {
+      // Temporarily writes the image to disk to decode
+      byte[] imageData = Base64.getDecoder().decode(encodedImage.getBase64ImageEncoding());
+      tempFile = File.createTempFile(fullFileName, null, null);
+      FileOutputStream fos = new FileOutputStream(tempFile);
+      fos.write(imageData);
+      fos.flush();
+      fos.close();
+    } catch (IllegalArgumentException | IOException e) {
+      // The image failed to decode
+      throw new BadRequestImageException();
+    }
 
     // Create the request to upload the image
     PutObjectRequest awsRequest = new PutObjectRequest(BUCKET_LLB_PUBLIC, directoryName + "/" + fullFileName, tempFile);
@@ -106,8 +119,13 @@ public class S3Requester {
     awsObjectMetadata.setContentType(encodedImage.getFileType() + encodedImage.getFileExtension());  // Set file type to be an image
     awsRequest.setMetadata(awsObjectMetadata);
 
-    // Perform the upload, throws AmazonServiceException if something goes wrong
-    s3Client.putObject(awsRequest);
+    try {
+      // Perform the upload to S3
+      s3Client.putObject(awsRequest);
+    } catch (SdkClientException e) {
+      // The AWS S3 upload failed
+      throw new S3FailedUploadException(e.getMessage());
+    }
 
     // Delete the temporary file that was written to disk
     tempFile.delete();
@@ -120,17 +138,17 @@ public class S3Requester {
    *
    * @param eventTitle     the title of the Event.
    * @param base64Encoding the encoded image to upload.
-   * @return null if the encoding fails validation and image URL if the upload was successful.
-   * @throws IOException            if the base64 decoding failed.
-   * @throws AmazonServiceException if the upload to S3 failed.
+   * @return null if the initial base64Encoding was null, or the image URL if the upload was successful.
+   * @throws BadRequestImageException if the base64 decoding failed.
+   * @throws S3FailedUploadException  if the upload to S3 failed.
    */
-  public static String validateUploadImageToS3LucyEvents(String eventTitle, String base64Encoding) throws IOException, AmazonServiceException {
+  public static String validateUploadImageToS3LucyEvents(String eventTitle, String base64Encoding) throws BadRequestImageException, S3FailedUploadException {
     String fileName = getImageFileNameWithoutExtension(eventTitle);
     return validateBase64ImageAndUploadToS3(fileName, DIR_LLB_PUBLIC_EVENTS, base64Encoding);
   }
 
   /**
-   * Removes special characters, replaces spaces, and appens "_thumbnail".
+   * Removes special characters, replaces spaces, and appends "_thumbnail".
    *
    * @param eventTitle the title of the event.
    * @return the String for the image file name (without the file extension).

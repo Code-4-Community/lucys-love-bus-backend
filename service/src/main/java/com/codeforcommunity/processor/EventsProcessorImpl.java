@@ -51,26 +51,8 @@ public class EventsProcessorImpl implements IEventsProcessor {
       throw new AdminOnlyRouteException();
     }
 
-    String eventTitle = request.getTitle();
-    String base64Encoding = request.getThumbnail();
-
-    if (base64Encoding != null) {
-      try {
-        String publicImageUrl = S3Requester.validateUploadImageToS3LucyEvents(eventTitle, base64Encoding);
-        if (publicImageUrl == null) {
-          // Null only when the image encoding failed to validate
-          throw new BadRequestImageException();
-        }
-
-        request.setThumbnail(publicImageUrl);  // Update the request to contain the URL for the DB and JSON response
-      } catch (IOException e) {
-        // The image failed to decode
-        throw new BadRequestImageException();
-      } catch (AmazonServiceException e) {
-        // The AWS S3 upload failed
-        throw new S3FailedUploadException(e.getMessage());
-      }
-    }
+    String publicImageUrl = S3Requester.validateUploadImageToS3LucyEvents(request.getTitle(), request.getThumbnail());
+    request.setThumbnail(publicImageUrl);  // Update the request to contain the URL for the DB and JSON response OR null if no image given
 
     EventsRecord newEventRecord = eventRequestToRecord(request);
     newEventRecord.store();
