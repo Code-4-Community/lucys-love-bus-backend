@@ -14,7 +14,9 @@ before_install:
   - cd /home/travis/build/Code-4-Community/lucys-love-bus-backend/
   - psql -c 'create database "lucys-love-bus";' -U postgres
 before_deploy:
+  - ls
   - cd common/src/main/resources/properties/
+  - ls
   - cp db.properties.example input.properties
   - mv db.properties.example db.properties
   - mv emailer.properties.example emailer.properties
