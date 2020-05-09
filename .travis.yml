@@ -24,6 +24,8 @@ before_deploy:
   - rm input.properties
   - cd /home/travis/build/Code-4-Community/lucys-love-bus-backend/
   - mvn clean install
+  - ls
+  - ls service/target/
 deploy:
   provider: elasticbeanstalk
   access_key_id: AKIAXEDZZITUSILI6QM3
