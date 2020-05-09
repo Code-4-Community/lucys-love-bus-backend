@@ -2,7 +2,6 @@ language: java
 services:
 - postgresql
 #before_install:
-#- psql -c 'create database "lucys-love-bus";' -U postgres
 before_install:
   - cd common/src/main/resources/properties/
   - cp db.properties.example input.properties
@@ -11,13 +10,13 @@ before_install:
   - mv expiration.properties.example expiration.properties
   - mv jwt.properties.example jwt.properties
   - mv stripe.properties.example stripe.properties
-  - awk -F" = " -v updatedVal="= $DB_USERNAME" '/database.username =/{$2=updatedVal}1' input.properties > user.properties
-  - awk -F" = " -v updatedVal="= $DB_PASSWORD" '/database.password =/{$2=updatedVal}1' user.properties > pass.properties
-  - awk -F" = " -v updatedVal="= $DB_DOMAIN" '/database.url =/{$2=updatedVal}1' pass.properties > db.properties
+  - awk -F" = " -v updatedVal="= " '/database.password =/{$2=updatedVal}1' input.properties > db.properties
+  - cat db.properties
   - rm user.properties
   - rm pass.properties
   - rm input.properties
   - cd /home/travis/build/Code-4-Community/lucys-love-bus-backend/
+  - psql -c 'create database "lucys-love-bus";' -U postgres
 before_deploy:
   - cd common/src/main/resources/properties/
   - cp db.properties.example input.properties
