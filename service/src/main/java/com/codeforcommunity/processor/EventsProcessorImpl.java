@@ -51,27 +51,30 @@ public class EventsProcessorImpl implements IEventsProcessor {
       throw new AdminOnlyRouteException();
     }
 
-    String title = request.getTitle().replaceAll("[!@#$%^&*()=+./\\\\|<>`~\\[\\]{}?]", "");  // Remove special characters
-    String fileName = title.replace(" ", "_").toLowerCase() + "_thumbnail";  // The desired name of the file in S3
+    String eventTitle = request.getTitle();
+    String base64Encoding = request.getThumbnail();
 
-    String base64Encoding = request.getThumbnail();  // Expected that the thumbnail field is the base64 encoding of the image
+    if (base64Encoding != null) {
+      try {
+        String publicImageUrl = S3Requester.validateUploadImageToS3LucyEvents(eventTitle, base64Encoding);
+        if (publicImageUrl == null) {
+          // Null only when the image encoding failed to validate
+          throw new BadRequestImageException();
+        }
 
-    try {
-      String publicImageUrl = S3Requester.validateBase64ImageAndUploadToS3(fileName, S3Requester.DIR_LLB_PUBLIC_EVENTS, base64Encoding);
-      if (publicImageUrl == null) {
-        throw new BadRequestImageException();  // Null only when the image encoding failed to validate
+        request.setThumbnail(publicImageUrl);  // Update the request to contain the URL for the DB and JSON response
+      } catch (IOException e) {
+        // The image failed to decode
+        throw new BadRequestImageException();
+      } catch (AmazonServiceException e) {
+        // The AWS S3 upload failed
+        throw new S3FailedUploadException(e.getMessage());
       }
-
-      request.setThumbnail(publicImageUrl);  // Update the request to contain the URL for the DB and JSON response
-
-      EventsRecord newEventRecord = eventRequestToRecord(request);
-      newEventRecord.store();
-      return eventPojoToResponse(newEventRecord.into(Events.class));
-    } catch (IOException e) {
-      throw new BadRequestImageException();  // Image failed to decode
-    } catch (AmazonServiceException e) {
-      throw new S3FailedUploadException(e.getMessage());  // S3 upload failed
     }
+
+    EventsRecord newEventRecord = eventRequestToRecord(request);
+    newEventRecord.store();
+    return eventPojoToResponse(newEventRecord.into(Events.class));
   }
 
   @Override
@@ -147,7 +150,7 @@ public class EventsProcessorImpl implements IEventsProcessor {
 
   @Override
   public SingleEventResponse modifyEvent(int eventId, ModifyEventRequest request,
-      JWTData userData) {
+                                         JWTData userData) {
     if (userData.getPrivilegeLevel() != PrivilegeLevel.ADMIN) {
       throw new AdminOnlyRouteException();
     }

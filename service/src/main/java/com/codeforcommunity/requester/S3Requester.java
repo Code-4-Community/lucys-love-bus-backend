@@ -16,9 +16,9 @@ import java.util.Base64;
 
 public class S3Requester {
 
-  public static final String BUCKET_LLB_PUBLIC_URL = "https://lucys-love-bus-public.s3.us-east-2.amazonaws.com";
-  public static final String BUCKET_LLB_PUBLIC = "lucys-love-bus-public";
-  public static final String DIR_LLB_PUBLIC_EVENTS = "events";
+  private static final String BUCKET_LLB_PUBLIC_URL = "https://lucys-love-bus-public.s3.us-east-2.amazonaws.com";
+  private static final String BUCKET_LLB_PUBLIC = "lucys-love-bus-public";
+  private static final String DIR_LLB_PUBLIC_EVENTS = "events";
 
   public static AmazonS3 s3Client;
 
@@ -33,30 +33,34 @@ public class S3Requester {
    * @param base64Image the potential encoding of the image.
    * @return null if the String is not an encoded base64 image, otherwise an {@link EncodedImage}.
    */
-  public static EncodedImage validateBase64Image(String base64Image) {
+  private static EncodedImage validateBase64Image(String base64Image) {
 
     // Expected Base64 format: data:image/{extension};base64,{imageData}
 
+    if (base64Image == null || base64Image.length() < 5) {
+      return null;
+    }
+
     String[] base64ImageSplit = base64Image.split(",", 2); // Split the metadata from the image data
-    if (base64ImageSplit.length < 2) {
+    if (base64ImageSplit.length != 2) {
       return null;
     }
 
     String meta = base64ImageSplit[0];  // The image metadata (e.g. "data:image/png;base64")
     String[] metaSplit = meta.split(";", 2);  // Split the metadata into data type and encoding type
 
-    if (metaSplit.length < 2 || !metaSplit[1].equals("base64")) {
+    if (metaSplit.length != 2 || !metaSplit[1].equals("base64")) {
       // Ensure the encoding type is base64
       return null;
     }
 
     String[] dataSplit = metaSplit[0].split(":", 2);  // Split the data type
-    if (dataSplit.length < 2) {
+    if (dataSplit.length != 2) {
       return null;
     }
 
     String[] data = dataSplit[1].split("/", 2);   // Split the image type here (e.g. "image/png")
-    if (data.length < 2 || !data[0].equals("image")) {
+    if (data.length != 2 || !data[0].equals("image")) {
       // Ensure the encoded data is an image
       return null;
     }
@@ -77,7 +81,7 @@ public class S3Requester {
    * @throws IOException            if the base64 decoding failed.
    * @throws AmazonServiceException if the upload to S3 failed.
    */
-  public static String validateBase64ImageAndUploadToS3(String fileName, String directoryName, String base64Encoding) throws IOException, AmazonServiceException {
+  private static String validateBase64ImageAndUploadToS3(String fileName, String directoryName, String base64Encoding) throws IOException, AmazonServiceException {
     EncodedImage encodedImage = validateBase64Image(base64Encoding);
     if (encodedImage == null) {
       return null;  // Image failed to validate
@@ -111,4 +115,28 @@ public class S3Requester {
     return String.format("%s/%s/%s", BUCKET_LLB_PUBLIC_URL, directoryName, fullFileName);
   }
 
+  /**
+   * Validate the given base64 encoding of an image and upload it to the LLB public S3 bucket for Events.
+   *
+   * @param eventTitle     the title of the Event.
+   * @param base64Encoding the encoded image to upload.
+   * @return null if the encoding fails validation and image URL if the upload was successful.
+   * @throws IOException            if the base64 decoding failed.
+   * @throws AmazonServiceException if the upload to S3 failed.
+   */
+  public static String validateUploadImageToS3LucyEvents(String eventTitle, String base64Encoding) throws IOException, AmazonServiceException {
+    String fileName = getImageFileNameWithoutExtension(eventTitle);
+    return validateBase64ImageAndUploadToS3(fileName, DIR_LLB_PUBLIC_EVENTS, base64Encoding);
+  }
+
+  /**
+   * Removes special characters, replaces spaces, and appens "_thumbnail".
+   *
+   * @param eventTitle the title of the event.
+   * @return the String for the image file name (without the file extension).
+   */
+  public static String getImageFileNameWithoutExtension(String eventTitle) {
+    String title = eventTitle.replaceAll("[!@#$%^&*()=+./\\\\|<>`~\\[\\]{}?]", "");  // Remove special characters
+    return title.replace(" ", "_").toLowerCase() + "_thumbnail";  // The desired name of the file in S3
+  }
 }
