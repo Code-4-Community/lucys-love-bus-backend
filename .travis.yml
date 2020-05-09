@@ -1,7 +1,6 @@
 language: java
 services:
 - postgresql
-#before_install:
 before_install:
   - cd common/src/main/resources/properties/
   - cp db.properties.example input.properties
@@ -11,9 +10,6 @@ before_install:
   - mv jwt.properties.example jwt.properties
   - mv stripe.properties.example stripe.properties
   - awk -F" = " -v updatedVal="= " '/database.password =/{$2=updatedVal}1' input.properties > db.properties
-  - cat db.properties
-  - rm user.properties
-  - rm pass.properties
   - rm input.properties
   - cd /home/travis/build/Code-4-Community/lucys-love-bus-backend/
   - psql -c 'create database "lucys-love-bus";' -U postgres
