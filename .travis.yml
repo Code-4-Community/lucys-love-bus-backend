@@ -14,15 +14,8 @@ before_install:
   - cd /home/travis/build/Code-4-Community/lucys-love-bus-backend/
   - psql -c 'create database "lucys-love-bus";' -U postgres
 before_deploy:
-  - ls
   - cd common/src/main/resources/properties/
-  - ls
-  - cp db.properties.example input.properties
-  - mv db.properties.example db.properties
-  - mv emailer.properties.example emailer.properties
-  - mv expiration.properties.example expiration.properties
-  - mv jwt.properties.example jwt.properties
-  - mv stripe.properties.example stripe.properties
+  - cp db.properties input.properties
   - awk -F" = " -v updatedVal="= $DB_USERNAME" '/database.username =/{$2=updatedVal}1' input.properties > user.properties
   - awk -F" = " -v updatedVal="= $DB_PASSWORD" '/database.password =/{$2=updatedVal}1' user.properties > pass.properties
   - awk -F" = " -v updatedVal="= $DB_DOMAIN" '/database.url =/{$2=updatedVal}1' pass.properties > db.properties
