@@ -8,6 +8,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+// Tests for Passwords class in com.codeforcommunity.auth package
+// From Brandon: tests look good so I'm leaving alone for now
 class PasswordsTest {
   private String pass = "Password";
 
