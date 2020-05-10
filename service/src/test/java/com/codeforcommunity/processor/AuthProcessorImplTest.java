@@ -5,10 +5,12 @@ import com.codeforcommunity.auth.*;
 import com.codeforcommunity.enums.PrivilegeLevel;
 
 import java.util.*;
+import java.sql.Timestamp;
 
 import org.jooq.generated.Tables;
 import org.jooq.generated.tables.records.BlacklistedRefreshesRecord;
 import org.jooq.generated.tables.records.UsersRecord;
+import org.jooq.generated.tables.records.VerificationKeysRecord;
 import org.jooq.impl.UpdatableRecordImpl;
 import org.junit.Before;
 import org.mockito.Mockito;
@@ -23,9 +25,9 @@ import com.codeforcommunity.exceptions.*;
 
 // Contains tests for AuthProcessorImpl.java in main
 public class AuthProcessorImplTest {
-    JooqMock myJooqMock;
-    JWTCreator mockJWTCreator;
-    AuthProcessorImpl myAuthProcessorImpl;
+    private JooqMock myJooqMock;
+    private JWTCreator mockJWTCreator;
+    private AuthProcessorImpl myAuthProcessorImpl;
 
     // set up all the mocks
     @Before
@@ -290,17 +292,34 @@ public class AuthProcessorImplTest {
         }
     }
 
-    // test logout
+    // test that logout adds token to blacklist correctly
     @Test
     public void testLogout() {
-        // mock an empty DB with blacklisted record
-        fail("reminder to go over testing logout in AuthProcessorImplTest.java tmrw");
+        // mock the blacklisted refresh token table
+        myJooqMock.addReturn("INSERT", new ArrayList<BlacklistedRefreshesRecord>());
+        myAuthProcessorImpl.logout("sample.refresh.token");
+
+        // is the binding correct
+        assertEquals("token", myJooqMock.getSqlBindings().get("INSERT").get(0)[0]);
     }
 
-    // test validateSecretKey
+    // test if validateSecretKey constructs the correct SQL bindings
     @Test
     public void testValidateSecretKey() {
+        // mock the verification keys table
+        VerificationKeysRecord myVerificationKey = new VerificationKeysRecord();
 
-        fail("reminder to go over testing validateSecretKey in AuthProcessorImplTest.java tmrw");
+        // 10 seconds should be far enough in the future not to expire
+        Timestamp future = new Timestamp(new Date().getTime() + 10000);
+        myVerificationKey.setCreated(future);
+        myVerificationKey.setUserId(0);
+        myJooqMock.addReturn("SELECT", myVerificationKey);
+        myJooqMock.addReturn("INSERT", myVerificationKey);
+
+        myAuthProcessorImpl.validateSecretKey("secret key");
+
+        // is the binding correct for secret key
+        // TODO: dev team should review, not sure if this is what I really need to test
+        assertEquals("secret key", myJooqMock.getSqlBindings().get("SELECT").get(0)[0]);
     }
 }
