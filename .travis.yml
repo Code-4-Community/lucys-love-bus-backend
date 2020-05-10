@@ -24,7 +24,7 @@ before_deploy:
   - rm input.properties
   - cd /home/travis/build/Code-4-Community/lucys-love-bus-backend/
   - mvn clean install
-  - zip build.zip Dockerfile service/target/service-1.0-SNAPSHOT-jar-with-dependencies.jar
+  - zip build.zip Dockerfile service/target/service-1.0-SNAPSHOT-jar-with-dependencies.jar .ebextensions/https-instance-securitygroup.config
 deploy:
   provider: elasticbeanstalk
   access_key_id: AKIAXEDZZITUSILI6QM3
