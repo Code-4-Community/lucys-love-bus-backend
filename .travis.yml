@@ -4,11 +4,11 @@ services:
 before_install:
   - cd common/src/main/resources/properties/
   - cp db.properties.example input.properties
-  - mv db.properties.example db.properties
-  - mv emailer.properties.example emailer.properties
-  - mv expiration.properties.example expiration.properties
-  - mv jwt.properties.example jwt.properties
-  - mv stripe.properties.example stripe.properties
+  - cp db.properties.example db.properties
+  - cp emailer.properties.example emailer.properties
+  - cp expiration.properties.example expiration.properties
+  - cp jwt.properties.example jwt.properties
+  - cp stripe.properties.example stripe.properties
   - awk -F" = " -v updatedVal="= " '/database.password =/{$2=updatedVal}1' input.properties > db.properties
   - rm input.properties
   - cd /home/travis/build/Code-4-Community/lucys-love-bus-backend/
