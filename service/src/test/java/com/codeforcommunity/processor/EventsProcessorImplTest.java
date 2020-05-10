@@ -2,27 +2,27 @@ package com.codeforcommunity.processor;
 
 import com.codeforcommunity.JooqMock;
 import com.codeforcommunity.auth.JWTData;
-import com.codeforcommunity.dto.userEvents.components.*;
-import com.codeforcommunity.dto.userEvents.requests.*;
-import com.codeforcommunity.dto.userEvents.responses.*;
-
+import com.codeforcommunity.dto.userEvents.components.EventDetails;
+import com.codeforcommunity.dto.userEvents.requests.CreateEventRequest;
+import com.codeforcommunity.dto.userEvents.responses.SingleEventResponse;
 import com.codeforcommunity.enums.PrivilegeLevel;
+import com.codeforcommunity.exceptions.AdminOnlyRouteException;
+
 import org.jooq.generated.Tables;
-import org.jooq.generated.tables.records.BlacklistedRefreshesRecord;
 import org.jooq.generated.tables.records.EventsRecord;
 import org.jooq.impl.UpdatableRecordImpl;
-import org.junit.Before;
+
 import org.mockito.Mockito;
 import static org.mockito.Mockito.when;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
+import org.junit.Before;
 import org.junit.Test;
+
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
-
-import com.codeforcommunity.dto.auth.*;
-import com.codeforcommunity.exceptions.*;
 
 // Contains tests for EventsProcessorImplTest.java in main
 public class EventsProcessorImplTest {

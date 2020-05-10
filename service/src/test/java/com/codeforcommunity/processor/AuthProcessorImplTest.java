@@ -1,27 +1,38 @@
 package com.codeforcommunity.processor;
 
 import com.codeforcommunity.JooqMock;
-import com.codeforcommunity.auth.*;
+import com.codeforcommunity.auth.JWTCreator;
+import com.codeforcommunity.auth.JWTData;
+import com.codeforcommunity.auth.Passwords;
+import com.codeforcommunity.dto.auth.LoginRequest;
+import com.codeforcommunity.dto.auth.NewUserRequest;
+import com.codeforcommunity.dto.auth.RefreshSessionRequest;
+import com.codeforcommunity.dto.auth.RefreshSessionResponse;
+import com.codeforcommunity.dto.auth.SessionResponse;
 import com.codeforcommunity.enums.PrivilegeLevel;
+import com.codeforcommunity.exceptions.AuthException;
 
-import java.util.*;
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
 
 import org.jooq.generated.Tables;
 import org.jooq.generated.tables.records.BlacklistedRefreshesRecord;
 import org.jooq.generated.tables.records.UsersRecord;
 import org.jooq.generated.tables.records.VerificationKeysRecord;
 import org.jooq.impl.UpdatableRecordImpl;
-import org.junit.Before;
+
 import org.mockito.Mockito;
-
-import static org.mockito.ArgumentMatchers.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
-import static org.junit.Assert.*;
-import org.junit.Test;
 
-import com.codeforcommunity.dto.auth.*;
-import com.codeforcommunity.exceptions.*;
+import org.junit.Before;
+import org.junit.Test;
 
 // Contains tests for AuthProcessorImpl.java in main
 public class AuthProcessorImplTest {

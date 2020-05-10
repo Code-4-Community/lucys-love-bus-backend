@@ -1,13 +1,21 @@
 package com.codeforcommunity.rest;
 
 import com.codeforcommunity.api.IAnnouncementsProcessor;
-import com.codeforcommunity.rest.subrouter.*;
+import com.codeforcommunity.rest.subrouter.CommonRouter;
+import com.codeforcommunity.rest.subrouter.AuthRouter;
+import com.codeforcommunity.rest.subrouter.PfRequestRouter;
+import com.codeforcommunity.rest.subrouter.EventsRouter;
+import com.codeforcommunity.rest.subrouter.AnnouncementsRouter;
+import com.codeforcommunity.rest.subrouter.WebhooksRouter;
+import com.codeforcommunity.rest.subrouter.CheckoutRouter;
 import io.vertx.core.Vertx;
-import io.vertx.core.http.*;
-import io.vertx.ext.unit.junit.VertxUnitRunner;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import com.codeforcommunity.api.IAuthProcessor;
 import com.codeforcommunity.api.IEventsProcessor;
@@ -17,12 +25,8 @@ import com.codeforcommunity.auth.JWTAuthorizer;
 import io.vertx.ext.web.Router;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.junit.jupiter.api.extension.ExtendWith;
-
-
+// Contains tests for ApiRouter.java in rest package
 public class ApiRouterTest {
     IAuthProcessor myIAuthProcessor;
     IRequestsProcessor myIRequestsProcessor;

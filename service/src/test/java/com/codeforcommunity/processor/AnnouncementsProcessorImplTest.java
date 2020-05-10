@@ -10,18 +10,24 @@ import com.codeforcommunity.dto.announcements.PostAnnouncementResponse;
 import com.codeforcommunity.enums.PrivilegeLevel;
 import com.codeforcommunity.exceptions.AdminOnlyRouteException;
 import com.codeforcommunity.exceptions.MalformedParameterException;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.sql.Timestamp;
+
 import org.jooq.generated.tables.records.AnnouncementsRecord;
 import org.jooq.generated.tables.records.EventsRecord;
 import org.jooq.impl.UpdatableRecordImpl;
+import org.jooq.generated.Tables;
+
 import org.junit.Before;
 import org.junit.Test;
-import static org.junit.Assert.*;
-import org.jooq.generated.Tables;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
-import java.util.*;
-
-import java.sql.Timestamp;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 // Contains tests for AnnouncementsProcessorImpl.java in main
 public class AnnouncementsProcessorImplTest {
@@ -29,10 +35,12 @@ public class AnnouncementsProcessorImplTest {
     AnnouncementsProcessorImpl myAnnouncementsProcessorImpl;
 
     // use UNIX time for ease of testing
+    // 04/16/2020 @ 1:20am (UTC)
     private final int START_TIMESTAMP_TEST = 1587000000;
+    // 04/17/2020 @ 5:06am (UTC)
     private final int END_TIMESTAMP_TEST = 1587100000;
+    // 04/04/2020 @ 11:33am (UTC)
     private final int START_TIMESTAMP_TEST2 = 1586000000;
-    private final int END_TIMESTAMP_TEST2 = 1586100000;
 
     // set up all the mocks
     @Before
@@ -93,7 +101,7 @@ public class AnnouncementsProcessorImplTest {
                 new Timestamp(1000),
                 2);
 
-        myJooqMock.addReturn("SELECT", new ArrayList<UpdatableRecordImpl>());
+        myJooqMock.addEmptyReturn("SELECT");
         GetAnnouncementsResponse res = myAnnouncementsProcessorImpl.getAnnouncements(req);
 
         assertEquals(res.getTotalCount(), 0);

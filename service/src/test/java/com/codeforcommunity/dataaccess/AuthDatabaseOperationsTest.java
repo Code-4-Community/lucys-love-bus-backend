@@ -3,27 +3,21 @@ package com.codeforcommunity.dataaccess;
 import com.codeforcommunity.JooqMock;
 import com.codeforcommunity.auth.JWTData;
 import com.codeforcommunity.auth.Passwords;
-import com.codeforcommunity.dto.userEvents.components.*;
-import com.codeforcommunity.dto.userEvents.requests.*;
-import com.codeforcommunity.dto.userEvents.responses.*;
-
 import com.codeforcommunity.enums.PrivilegeLevel;
 import com.codeforcommunity.exceptions.EmailAlreadyInUseException;
 import com.codeforcommunity.exceptions.UserDoesNotExistException;
+
 import java.util.ArrayList;
+
 import org.jooq.generated.Tables;
-import org.jooq.generated.tables.records.BlacklistedRefreshesRecord;
-import org.jooq.generated.tables.records.EventsRecord;
 import org.jooq.generated.tables.records.UsersRecord;
-import org.jooq.impl.UpdatableRecordImpl;
+
 import org.junit.Before;
-import org.mockito.Mockito;
-
-import static org.mockito.Mockito.when;
-import static org.junit.Assert.*;
-import static org.junit.Assert.fail;
-
 import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 // Contains tests for AuthDatabaseOperations.java
 public class AuthDatabaseOperationsTest {
