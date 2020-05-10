@@ -3,12 +3,14 @@ package com.codeforcommunity.rest.subrouter;
 import com.codeforcommunity.api.IEventsProcessor;
 import com.codeforcommunity.api.IProtectedUserProcessor;
 import com.codeforcommunity.auth.JWTData;
+import com.codeforcommunity.dto.user.ChangePasswordRequest;
 import com.codeforcommunity.dto.userEvents.requests.CreateEventRequest;
 import com.codeforcommunity.dto.userEvents.requests.GetUserEventsRequest;
 import com.codeforcommunity.dto.userEvents.requests.ModifyEventRequest;
 import com.codeforcommunity.dto.userEvents.responses.GetEventsResponse;
 import com.codeforcommunity.dto.userEvents.responses.SingleEventResponse;
 import com.codeforcommunity.rest.IRouter;
+import com.codeforcommunity.rest.RestFunctions;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Route;
@@ -38,6 +40,7 @@ public class ProtectedUserRouter implements IRouter {
     Router router = Router.router(vertx);
 
     registerDeleteUser(router);
+    registerChangePassword(router);
 
     return router;
   }
@@ -47,10 +50,26 @@ public class ProtectedUserRouter implements IRouter {
     deleteUserRoute.handler(this::handleDeleteUser);
   }
 
+  private void registerChangePassword(Router router) {
+    Route changePasswordRoute = router.post("/change_password");
+    changePasswordRoute.handler(this::handleChangePasswordRoute);
+  }
+
+
+
   private void handleDeleteUser(RoutingContext ctx) {
     JWTData userData = ctx.get("jwt_data");
 
     processor.deleteUser(userData);
+
+    end(ctx.response(), 200);
+  }
+
+  private void handleChangePasswordRoute(RoutingContext ctx) {
+    JWTData userData = ctx.get("jwt_data");
+    ChangePasswordRequest changePasswordRequest = RestFunctions.getJsonBodyAsClass(ctx, ChangePasswordRequest.class);
+
+    processor.changePassword(userData, changePasswordRequest);
 
     end(ctx.response(), 200);
   }
