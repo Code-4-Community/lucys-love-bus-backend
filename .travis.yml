@@ -24,6 +24,10 @@ before_deploy:
   - rm input.properties
   - cd /home/travis/build/Code-4-Community/lucys-love-bus-backend/
   - mvn clean install
+  - mkdir buildzip
+  - mv /service/target/service-1.0-SNAPSHOT-jar-with-dependencies.jar buildzip
+  - mv Dockerfile buildzip
+  - zip -r build.zip buildzip
 deploy:
   provider: elasticbeanstalk
   access_key_id: AKIAXEDZZITUSILI6QM3
@@ -33,6 +37,7 @@ deploy:
   app: c4c-travis-ci
   env: llb-travis-env
   bucket: elasticbeanstalk-us-east-2-489881683177
+  zip_file: "build.zip"
   on:
     repo: Code-4-Community/lucys-love-bus-backend
     branch: travis_elastic_beanstalk_deploy
