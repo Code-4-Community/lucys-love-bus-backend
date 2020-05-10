@@ -26,6 +26,8 @@ before_deploy:
   - mvn clean install
   - mkdir buildzip
   - ls
+  - ls /service
+  - ls /service/target
   - mv /service/target/service-1.0-SNAPSHOT-jar-with-dependencies.jar buildzip
   - mv Dockerfile buildzip
   - zip -r build.zip buildzip
