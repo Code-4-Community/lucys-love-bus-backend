@@ -30,7 +30,9 @@ public class EventsProcessorImplTest {
   EventsProcessorImpl myEventsProcessorImpl;
 
   // use UNIX time for ease of testing
+  // 04/16/2020 @ 1:20am (UTC)
   private final int START_TIMESTAMP_TEST = 1587000000;
+  // 04/17/2020 @ 5:06am (UTC)
   private final int END_TIMESTAMP_TEST = 1587100000;
 
   // set up all the mocks

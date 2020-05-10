@@ -28,6 +28,8 @@ public class AuthProcessorImplTest {
     private JooqMock myJooqMock;
     private JWTCreator mockJWTCreator;
     private AuthProcessorImpl myAuthProcessorImpl;
+    private final String REFRESH_TOKEN_EXAMPLE = "sample refresh token";
+    private final String ACCESS_TOKEN_EXAMPLE = "sample access token";
 
     // set up all the mocks
     @Before
@@ -51,9 +53,9 @@ public class AuthProcessorImplTest {
         myJooqMock.addReturn("SELECT", record);
 
         when(mockJWTCreator.createNewRefreshToken(any(JWTData.class)))
-                .thenReturn("sample refresh token");
+                .thenReturn(REFRESH_TOKEN_EXAMPLE);
 
-        Optional<String> accessToken = Optional.of("sample access token");
+        Optional<String> accessToken = Optional.of(ACCESS_TOKEN_EXAMPLE);
 
         when(mockJWTCreator.getNewAccessToken(anyString()))
                 .thenReturn(accessToken);
@@ -82,9 +84,9 @@ public class AuthProcessorImplTest {
         myJooqMock.addReturn("SELECT", record);
 
         when(mockJWTCreator.createNewRefreshToken(any(JWTData.class)))
-                .thenReturn("sample refresh token");
+                .thenReturn(REFRESH_TOKEN_EXAMPLE);
 
-        Optional<String> accessToken = Optional.of("sample access token");
+        Optional<String> accessToken = Optional.of(ACCESS_TOKEN_EXAMPLE);
 
         when(mockJWTCreator.getNewAccessToken(anyString()))
                 .thenReturn(accessToken);
@@ -97,8 +99,8 @@ public class AuthProcessorImplTest {
 
         SessionResponse res = myAuthProcessorImpl.signUp(myNewUserRequest);
 
-        assertEquals(res.getAccessToken(), "sample access token");
-        assertEquals(res.getRefreshToken(), "sample refresh token");
+        assertEquals(res.getAccessToken(), ACCESS_TOKEN_EXAMPLE);
+        assertEquals(res.getRefreshToken(), REFRESH_TOKEN_EXAMPLE);
     }
 
     // test log in where all the fields are null
@@ -148,9 +150,9 @@ public class AuthProcessorImplTest {
         myJooqMock.addReturn("SELECT", record);
 
         when(mockJWTCreator.createNewRefreshToken(any(JWTData.class)))
-                .thenReturn("sample refresh token");
+                .thenReturn(REFRESH_TOKEN_EXAMPLE);
 
-        Optional<String> accessToken = Optional.of("sample access token");
+        Optional<String> accessToken = Optional.of(ACCESS_TOKEN_EXAMPLE);
 
         when(mockJWTCreator.getNewAccessToken(anyString()))
                 .thenReturn(accessToken);
@@ -180,9 +182,9 @@ public class AuthProcessorImplTest {
         myJooqMock.addReturn("SELECT", record);
 
         when(mockJWTCreator.createNewRefreshToken(any(JWTData.class)))
-                .thenReturn("sample refresh token");
+                .thenReturn(REFRESH_TOKEN_EXAMPLE);
 
-        Optional<String> accessToken = Optional.of("sample access token");
+        Optional<String> accessToken = Optional.of(ACCESS_TOKEN_EXAMPLE);
 
         when(mockJWTCreator.getNewAccessToken(anyString()))
                 .thenReturn(accessToken);
@@ -194,8 +196,8 @@ public class AuthProcessorImplTest {
 
         SessionResponse res = myAuthProcessorImpl.login(myLoginRequest);
 
-        assertEquals(res.getAccessToken(), "sample access token");
-        assertEquals(res.getRefreshToken(), "sample refresh token");
+        assertEquals(res.getAccessToken(), ACCESS_TOKEN_EXAMPLE);
+        assertEquals(res.getRefreshToken(), REFRESH_TOKEN_EXAMPLE);
     }
 
     // test log in with correct credentials 2
@@ -210,9 +212,9 @@ public class AuthProcessorImplTest {
         myJooqMock.addReturn("SELECT", recordCopy);
 
         when(mockJWTCreator.createNewRefreshToken(any(JWTData.class)))
-                .thenReturn("sample refresh token");
+                .thenReturn(REFRESH_TOKEN_EXAMPLE);
 
-        Optional<String> accessToken = Optional.of("sample access token");
+        Optional<String> accessToken = Optional.of(ACCESS_TOKEN_EXAMPLE);
 
         when(mockJWTCreator.getNewAccessToken(anyString()))
                 .thenReturn(accessToken);
@@ -224,8 +226,8 @@ public class AuthProcessorImplTest {
 
         SessionResponse res = myAuthProcessorImpl.login(myLoginRequest);
 
-        assertEquals(res.getAccessToken(), "sample access token");
-        assertEquals(res.getRefreshToken(), "sample refresh token");
+        assertEquals(res.getAccessToken(), ACCESS_TOKEN_EXAMPLE);
+        assertEquals(res.getRefreshToken(), REFRESH_TOKEN_EXAMPLE);
     }
 
     // test session refresh with correctly refreshed token
@@ -234,16 +236,16 @@ public class AuthProcessorImplTest {
         List<UpdatableRecordImpl> emptySelectStatement = new ArrayList<UpdatableRecordImpl>();
         myJooqMock.addReturn("SELECT", emptySelectStatement);
 
-        Optional<String> accessToken = Optional.of("sample access token");
+        Optional<String> accessToken = Optional.of(ACCESS_TOKEN_EXAMPLE);
 
         when(mockJWTCreator.getNewAccessToken(anyString()))
                 .thenReturn(accessToken);
 
-        RefreshSessionRequest myRefreshSessionRequest = new RefreshSessionRequest("valid. refresh. request");
+        RefreshSessionRequest myRefreshSessionRequest = new RefreshSessionRequest("valid.refresh.request");
 
         RefreshSessionResponse res = myAuthProcessorImpl.refreshSession(myRefreshSessionRequest);
 
-        assertEquals(res.getFreshAccessToken(), "sample access token");
+        assertEquals(res.getFreshAccessToken(), ACCESS_TOKEN_EXAMPLE);
     }
 
     // test session refresh with invalid refresh token 
@@ -257,7 +259,7 @@ public class AuthProcessorImplTest {
         when(mockJWTCreator.getNewAccessToken(anyString()))
                 .thenReturn(accessToken);
 
-        RefreshSessionRequest invalid = new RefreshSessionRequest("invalid. refresh. request");
+        RefreshSessionRequest invalid = new RefreshSessionRequest("invalid.refresh.request");
 
         try {
             myAuthProcessorImpl.refreshSession(invalid);
@@ -271,18 +273,18 @@ public class AuthProcessorImplTest {
     @Test
     public void testRefreshSession3() {
         BlacklistedRefreshesRecord record = myJooqMock.getContext().newRecord(Tables.BLACKLISTED_REFRESHES);
-        record.setRefreshHash("sample access token");
+        record.setRefreshHash(ACCESS_TOKEN_EXAMPLE);
         myJooqMock.addReturn("SELECT", record);
 
         List<UpdatableRecordImpl> emptySelectStatement = new ArrayList<UpdatableRecordImpl>();
         myJooqMock.addReturn("SELECT", emptySelectStatement);
 
-        Optional<String> accessToken = Optional.of("sample access token");
+        Optional<String> accessToken = Optional.of(ACCESS_TOKEN_EXAMPLE);
 
         when(mockJWTCreator.getNewAccessToken(anyString()))
                 .thenReturn(accessToken);
 
-        RefreshSessionRequest invalid = new RefreshSessionRequest("invalid. refresh. request");
+        RefreshSessionRequest invalid = new RefreshSessionRequest("invalid.refresh.request");
 
         try {
             myAuthProcessorImpl.refreshSession(invalid);

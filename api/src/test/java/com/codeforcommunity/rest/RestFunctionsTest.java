@@ -36,7 +36,7 @@ public class RestFunctionsTest {
     // Test for JSON response for login request
     @Test
     public void testGetJsonBodyAsClass2() {
-        String loginRequestJSONString = "{\"email\":\"testdata\",\"password\":\"testdata\"}";
+        String loginRequestJSONString = "{\"email\":\"testemail\",\"password\":\"testpassword\"}";
         JsonObject loginRequestJSONObject = new JsonObject(loginRequestJSONString);
 
         when(mockRoutingContext.getBodyAsJson())
@@ -44,8 +44,8 @@ public class RestFunctionsTest {
 
         LoginRequest result = RestFunctions.getJsonBodyAsClass(mockRoutingContext, LoginRequest.class);
 
-        String expectedEmail = "testdata";
-        String expectedPassword = "testdata";
+        String expectedEmail = "testemail";
+        String expectedPassword = "testpassword";
 
         assertEquals(result.getEmail(), expectedEmail);
         assertEquals(result.getPassword(), expectedPassword);
