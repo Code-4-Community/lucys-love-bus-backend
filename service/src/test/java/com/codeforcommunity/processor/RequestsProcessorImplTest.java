@@ -2,7 +2,6 @@ package com.codeforcommunity.processor;
 
 import com.codeforcommunity.JooqMock;
 import com.codeforcommunity.enums.PrivilegeLevel;
-import com.codeforcommunity.auth.JWTCreator;
 import com.codeforcommunity.auth.JWTData;
 import com.codeforcommunity.dto.pfrequests.CreateRequest;
 import com.codeforcommunity.dto.pfrequests.RequestData;
@@ -16,14 +15,12 @@ import org.jooq.generated.tables.records.PfRequestsRecord;
 import org.jooq.generated.tables.records.UsersRecord;
 import org.jooq.impl.UpdatableRecordImpl;
 import org.junit.Before;
-import org.mockito.Mockito;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.mock;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import org.junit.Test;
 
-import com.codeforcommunity.dto.auth.*;
 import com.codeforcommunity.exceptions.*;
 
 // Contains tests for RequestsProcessorImpl.java in main

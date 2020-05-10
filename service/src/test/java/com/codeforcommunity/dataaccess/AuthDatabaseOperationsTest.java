@@ -2,73 +2,158 @@ package com.codeforcommunity.dataaccess;
 
 import com.codeforcommunity.JooqMock;
 import com.codeforcommunity.auth.JWTData;
+import com.codeforcommunity.auth.Passwords;
 import com.codeforcommunity.dto.userEvents.components.*;
 import com.codeforcommunity.dto.userEvents.requests.*;
 import com.codeforcommunity.dto.userEvents.responses.*;
 
 import com.codeforcommunity.enums.PrivilegeLevel;
+import com.codeforcommunity.exceptions.EmailAlreadyInUseException;
+import com.codeforcommunity.exceptions.UserDoesNotExistException;
+import java.util.ArrayList;
 import org.jooq.generated.Tables;
 import org.jooq.generated.tables.records.BlacklistedRefreshesRecord;
 import org.jooq.generated.tables.records.EventsRecord;
+import org.jooq.generated.tables.records.UsersRecord;
 import org.jooq.impl.UpdatableRecordImpl;
 import org.junit.Before;
 import org.mockito.Mockito;
+
 import static org.mockito.Mockito.when;
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 import static org.junit.Assert.fail;
+
 import org.junit.Test;
 
 // Contains tests for AuthDatabaseOperations.java
 public class AuthDatabaseOperationsTest {
-  JooqMock myJooqMock;
-  AuthDatabaseOperations myAuthDatabaseOperations;
+    JooqMock myJooqMock;
+    AuthDatabaseOperations myAuthDatabaseOperations;
 
-  // set up all the mocks
-  @Before
-  public void setup() {
-    this.myJooqMock = new JooqMock();
-    this.myAuthDatabaseOperations = new AuthDatabaseOperations(myJooqMock.getContext());
-  }
-
-  // TODO
-  @Test
-    public void testGetUserJWTData() {
-      fail();
+    // set up all the mocks
+    @Before
+    public void setup() {
+        this.myJooqMock = new JooqMock();
+        this.myAuthDatabaseOperations = new AuthDatabaseOperations(myJooqMock.getContext());
     }
 
-    // TODO
+    // proper exception is thrown when user doesn't exist in DB
     @Test
-    public void testIsValidLogin() {
-      fail();
+    public void testGetUserJWTData1() {
+        String myEmail = "brandon@example.com";
+
+        // no users in DB
+        myJooqMock.addReturn("SELECT", new ArrayList<UsersRecord>());
+
+        try {
+            myAuthDatabaseOperations.getUserJWTData(myEmail);
+            fail();
+        } catch (UserDoesNotExistException e) {
+            assertEquals(e.getIdentifierMessage(), "email = " + myEmail);
+        }
     }
 
-    // TODO
+    // works as expected when user does indeed exist
     @Test
-    public void testCreateNewUser() {
-      fail();
+    public void testGetUserJWTData2() {
+        String myEmail = "brandon@example.com";
+
+        // one user in DB
+        UsersRecord myUser = myJooqMock.getContext().newRecord(Tables.USERS);
+        myUser.setEmail(myEmail);
+        myUser.setId(1);
+        myUser.setPrivilegeLevel(PrivilegeLevel.GP);
+        myJooqMock.addReturn("SELECT", myUser);
+
+        JWTData userData = myAuthDatabaseOperations.getUserJWTData(myEmail);
+
+        assertEquals(userData.getUserId(), myUser.getId());
+        assertEquals(userData.getPrivilegeLevel(), myUser.getPrivilegeLevel());
+    }
+
+    // returns false for incorrect login
+    @Test
+    public void testIsValidLogin1() {
+        String myEmail = "brandon@example.com";
+
+        // one user in DB
+        UsersRecord myUser = myJooqMock.getContext().newRecord(Tables.USERS);
+        myUser.setEmail(myEmail);
+        myUser.setPassHash(Passwords.createHash("letmein"));
+        myUser.setId(1);
+        myUser.setPrivilegeLevel(PrivilegeLevel.GP);
+        myJooqMock.addReturn("SELECT", myUser);
+
+        assertFalse(myAuthDatabaseOperations.isValidLogin(myEmail, "letmeout"));
+    }
+
+    // returns true for correct login
+    @Test
+    public void testIsValidLogin2() {
+        String myEmail = "brandon@example.com";
+
+        // one user in DB
+        UsersRecord myUser = myJooqMock.getContext().newRecord(Tables.USERS);
+        myUser.setEmail(myEmail);
+        myUser.setPassHash(Passwords.createHash("letmein"));
+        myUser.setId(1);
+        myUser.setPrivilegeLevel(PrivilegeLevel.GP);
+        myJooqMock.addReturn("SELECT", myUser);
+
+        assertTrue(myAuthDatabaseOperations.isValidLogin(myEmail, "letmein"));
+    }
+
+    // creating a new user fails when the email is already in use
+    @Test
+    public void testCreateNewUser1() {
+        String myEmail = "brandon@example.com";
+
+        // one user in DB
+        UsersRecord myUser = myJooqMock.getContext().newRecord(Tables.USERS);
+        myUser.setEmail(myEmail);
+        myUser.setPassHash(Passwords.createHash("letmein"));
+        myUser.setId(1);
+        myUser.setPrivilegeLevel(PrivilegeLevel.GP);
+        myJooqMock.addReturn("SELECT", myUser);
+
+        try {
+            myAuthDatabaseOperations.createNewUser(myEmail, "letmeout", "Brandon", "Liang");
+            fail();
+        } catch (EmailAlreadyInUseException e) {
+            assertEquals(e.getEmail(), "brandon@example.com");
+        }
+    }
+
+    // creating a new user succeeds when the email isn't already in use
+    @Test
+    public void testCreateNewUser2() {
+        // no users in DB
+        myJooqMock.addReturn("SELECT", new ArrayList<UsersRecord>());
+
+        myAuthDatabaseOperations.createNewUser("conner@example.com", "letmeout", "Conner", "Nilsen");
     }
 
     // TODO
     @Test
     public void testAddToBlackList() {
-      fail();
+        fail();
     }
 
     // TODO
     @Test
     public void testIsOnBlackList() {
-      fail();
+        fail();
     }
 
     // TODO
     @Test
     public void testValidateSecretKey() {
-      fail();
+        fail();
     }
 
     // TODO
     @Test
     public void testCreateSecretKey() {
-      fail();
+        fail();
     }
 }

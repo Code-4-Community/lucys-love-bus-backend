@@ -10,7 +10,6 @@ import com.codeforcommunity.dto.announcements.PostAnnouncementResponse;
 import com.codeforcommunity.enums.PrivilegeLevel;
 import com.codeforcommunity.exceptions.AdminOnlyRouteException;
 import com.codeforcommunity.exceptions.MalformedParameterException;
-import org.jooq.generated.tables.pojos.Announcements;
 import org.jooq.generated.tables.records.AnnouncementsRecord;
 import org.jooq.generated.tables.records.EventsRecord;
 import org.jooq.impl.UpdatableRecordImpl;
