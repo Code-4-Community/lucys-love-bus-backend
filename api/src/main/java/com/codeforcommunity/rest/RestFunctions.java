@@ -31,6 +31,7 @@ public interface RestFunctions {
       try {
         return body.get().mapTo(clazz);
       } catch (IllegalArgumentException e) {
+        e.printStackTrace();
         throw new RequestBodyMappingException();
       }
     } else {

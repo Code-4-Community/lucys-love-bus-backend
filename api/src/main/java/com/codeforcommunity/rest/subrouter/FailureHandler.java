@@ -33,6 +33,11 @@ public class FailureHandler {
      end(ctx, message, 401);
   }
 
+  public void handleWrongPassword(RoutingContext ctx) {
+    String message = "Given password is not correct";
+    end(ctx, message, 401);
+  }
+
   public void handleMissingParameter(RoutingContext ctx, MissingParameterException e) {
     String message = String.format("Missing required path parameter: %s", e.getMissingParameterName());
     end(ctx, message, 400);
@@ -107,6 +112,16 @@ public class FailureHandler {
   public void handleStripeExternalException(RoutingContext ctx, StripeExternalException exception) {
        String message = "A call to Stripe's API returned an internal server error: " + exception.getMessage();
        end(ctx, message, 502);
+  }
+
+  public void handleBadImageRequest(RoutingContext ctx) {
+    String message = "The uploaded file could not be processed as an image";
+    end(ctx, message, 400);
+  }
+
+  public void handleS3FailedUpload(RoutingContext ctx, String exceptionMessage) {
+    String message = "The given file could not be uploaded to AWS S3: " + exceptionMessage;
+    end(ctx, message, 502);
   }
 
   private void handleUncaughtError(RoutingContext ctx, Throwable throwable){

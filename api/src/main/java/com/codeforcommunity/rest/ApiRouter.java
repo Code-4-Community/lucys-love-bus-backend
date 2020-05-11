@@ -3,6 +3,7 @@ package com.codeforcommunity.rest;
 import com.codeforcommunity.api.IAnnouncementsProcessor;
 import com.codeforcommunity.api.IAuthProcessor;
 import com.codeforcommunity.api.IEventsProcessor;
+import com.codeforcommunity.api.IProtectedUserProcessor;
 import com.codeforcommunity.api.IRequestsProcessor;
 import com.codeforcommunity.api.ICheckoutProcessor;
 import com.codeforcommunity.auth.JWTAuthorizer;
@@ -13,6 +14,7 @@ import com.codeforcommunity.rest.subrouter.CommonRouter;
 import com.codeforcommunity.rest.subrouter.EventsRouter;
 import com.codeforcommunity.rest.subrouter.PfRequestRouter;
 import com.codeforcommunity.rest.subrouter.CheckoutRouter;
+import com.codeforcommunity.rest.subrouter.ProtectedUserRouter;
 import com.codeforcommunity.rest.subrouter.WebhooksRouter;
 import io.vertx.core.Vertx;
 
@@ -23,17 +25,24 @@ import io.vertx.ext.web.Router;
 public class ApiRouter implements IRouter {
     private final CommonRouter commonRouter;
     private final AuthRouter authRouter;
+    private final ProtectedUserRouter protectedUserRouter;
     private final PfRequestRouter requestRouter;
     private final EventsRouter eventsRouter;
     private final AnnouncementsRouter announcementsRouter;
     private final CheckoutRouter checkoutRouter;
     private final WebhooksRouter webhooksRouter;
 
-    public ApiRouter(IAuthProcessor authProcessor, IRequestsProcessor requestsProcessor,
-        IEventsProcessor eventsProcessor, IAnnouncementsProcessor announcementEventsProcessor,
-                     ICheckoutProcessor checkoutProcessor, JWTAuthorizer jwtAuthorizer) {
+    public ApiRouter(IAuthProcessor authProcessor,
+                     IProtectedUserProcessor protectedUserProcessor,
+                     IRequestsProcessor requestsProcessor,
+                     IEventsProcessor eventsProcessor,
+                     IAnnouncementsProcessor announcementEventsProcessor,
+                     ICheckoutProcessor checkoutProcessor,
+                     JWTAuthorizer jwtAuthorizer) {
+
         this.commonRouter = new CommonRouter(jwtAuthorizer);
         this.authRouter = new AuthRouter(authProcessor);
+        this.protectedUserRouter = new ProtectedUserRouter(protectedUserProcessor);
         this.requestRouter = new PfRequestRouter(requestsProcessor);
         this.eventsRouter = new EventsRouter(eventsProcessor);
         this.announcementsRouter = new AnnouncementsRouter(announcementEventsProcessor);
@@ -61,6 +70,7 @@ public class ApiRouter implements IRouter {
     private Router defineProtectedRoutes(Vertx vertx) {
         Router router = Router.router(vertx);
 
+        router.mountSubRouter("/user", protectedUserRouter.initializeRouter(vertx));
         router.mountSubRouter("/requests", requestRouter.initializeRouter(vertx));
         router.mountSubRouter("/events", eventsRouter.initializeRouter(vertx));
         router.mountSubRouter("/announcements", announcementsRouter.initializeRouter(vertx));

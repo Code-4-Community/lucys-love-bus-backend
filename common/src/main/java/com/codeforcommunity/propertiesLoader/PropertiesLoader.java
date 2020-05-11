@@ -19,16 +19,16 @@ public class PropertiesLoader {
   }
 
   public static Properties getEmailerProperties() {
-    return getProperties("emailer.properties");
+    return getProperties("properties/emailer.properties");
   }
   public static Properties getDbProperties() {
-    return getProperties("db.properties");
+    return getProperties("properties/db.properties");
   }
   public static Properties getExpirationProperties() {
-    return getProperties("expiration.properties");
+    return getProperties("properties/expiration.properties");
   }
   public static Properties getJwtProperties() {
-    return getProperties("jwt.properties");
+    return getProperties("properties/jwt.properties");
   }
-  public static Properties getStripeProperties() { return getProperties("stripe.properties"); }
+  public static Properties getStripeProperties() { return getProperties("properties/stripe.properties"); }
 }

@@ -1,31 +1,29 @@
 package com.codeforcommunity.dto.userEvents.requests;
 
 import com.codeforcommunity.dto.userEvents.components.EventDetails;
+import java.util.Optional;
 
-public class CreateEventRequest {
+public class ModifyEventRequest {
   private String title;
-  private int spotsAvailable;
+  private Integer spotsAvailable;
   private String thumbnail;
   private EventDetails details;
 
-  public CreateEventRequest(String title, int spotsAvailable, String thumbnail, EventDetails details) {
+  private ModifyEventRequest() {}
+
+  public ModifyEventRequest(String title, Integer spotsAvailable, String thumbnail,
+      EventDetails details) {
     this.title = title;
     this.spotsAvailable = spotsAvailable;
     this.thumbnail = thumbnail;
     this.details = details;
   }
 
-  private CreateEventRequest() {}
-
-  public void setThumbnail(String thumbnail) {
-    this.thumbnail = thumbnail;
-  }
-
   public String getTitle() {
     return title;
   }
 
-  public int getSpotsAvailable() {
+  public Integer getSpotsAvailable() {
     return spotsAvailable;
   }
 
