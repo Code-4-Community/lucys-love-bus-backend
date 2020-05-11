@@ -37,5 +37,5 @@ deploy:
   zip_file: "build.zip"
   on:
     repo: Code-4-Community/lucys-love-bus-backend
-    branch: travis_elastic_beanstalk_deploy
+    branch: master
   skip_cleanup: true
