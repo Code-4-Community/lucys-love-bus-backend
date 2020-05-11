@@ -1,5 +1,5 @@
 # Lucy's Love Bus Backend
-
+ 
 This project is the Java backend api scaffold for lucys-love-bus.
 
 #### Start a local postgres database
