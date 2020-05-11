@@ -1,7 +1,7 @@
 # Lucy's Love Bus Backend
 
 This project is the Java backend api scaffold for lucys-love-bus.
-
+ 
 #### Start a local postgres database
 1. Download postgres with pgAdmin4. https://www.postgresql.org/download/
 2. Start pgAdmin4, the database should start on localhost, port 5432 by default.
