@@ -2,6 +2,8 @@ package com.codeforcommunity.dataaccess;
 
 import com.codeforcommunity.auth.JWTData;
 import com.codeforcommunity.auth.Passwords;
+import com.codeforcommunity.dto.auth.AddressData;
+import com.codeforcommunity.dto.auth.NewUserRequest;
 import com.codeforcommunity.enums.PrivilegeLevel;
 import com.codeforcommunity.exceptions.EmailAlreadyInUseException;
 import com.codeforcommunity.exceptions.ExpiredEmailVerificationTokenException;
@@ -74,12 +76,12 @@ public class AuthDatabaseOperations {
     }
 
     /**
-     * TODO: Refactor this method to take in a DTO / POJO instance
      * Creates a new row in the USER table with the given values.
      *
      * @throws EmailAlreadyInUseException if the given username and email are already used in the USER table.
      */
-    public void createNewUser(String email, String password, String firstName, String lastName) {
+    public void createNewUser(NewUserRequest request) {
+        String email = request.getEmail();
         boolean emailUsed = db.fetchExists(db.selectFrom(USERS).where(USERS.EMAIL.eq(email)));
         if (emailUsed) {
             throw new EmailAlreadyInUseException(email);
@@ -87,9 +89,14 @@ public class AuthDatabaseOperations {
 
         UsersRecord newUser = db.newRecord(USERS);
         newUser.setEmail(email);
-        newUser.setPassHash(Passwords.createHash(password));
-        newUser.setFirstName(firstName);
-        newUser.setLastName(lastName);
+        newUser.setPassHash(Passwords.createHash(request.getPassword()));
+        newUser.setFirstName(request.getFirstName());
+        newUser.setLastName(request.getLastName());
+        newUser.setPhonenumber(request.getPhoneNumber());
+        newUser.setAllergies(request.getAllergies());
+
+        addAddressDataToUserRecord(newUser, request.getLocation());
+
         newUser.setPrivilegeLevel(PrivilegeLevel.GP);
         newUser.store();
 
@@ -169,5 +176,12 @@ public class AuthDatabaseOperations {
     private boolean isTokenDateValid(VerificationKeysRecord tokenResult) {
         Timestamp cutoffDate = Timestamp.from(Instant.now().minusSeconds(SECONDS_VERIFICATION_EMAIL_VALID));
         return tokenResult.getCreated().after(cutoffDate);
+    }
+
+    private void addAddressDataToUserRecord(UsersRecord usersRecord, AddressData addressData) {
+        usersRecord.setAddress(addressData.getAddress());
+        usersRecord.setCity(addressData.getCity());
+        usersRecord.setState(addressData.getState());
+        usersRecord.setZipcode(addressData.getZipCode());
     }
 }

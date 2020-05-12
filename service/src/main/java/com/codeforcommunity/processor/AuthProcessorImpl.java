@@ -37,8 +37,7 @@ public class AuthProcessorImpl implements IAuthProcessor {
      */
     @Override
     public SessionResponse signUp(NewUserRequest request) {
-        authDatabaseOperations.createNewUser(request.getEmail(), request.getPassword(),
-            request.getFirstName(), request.getLastName());
+        authDatabaseOperations.createNewUser(request);
 
         return setupSessionResponse(request.getEmail());
     }

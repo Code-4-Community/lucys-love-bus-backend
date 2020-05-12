@@ -90,6 +90,7 @@ public class AuthRouter implements IRouter {
 
   private void handlePostNewUser(RoutingContext ctx) {
     NewUserRequest request = RestFunctions.getJsonBodyAsClass(ctx, NewUserRequest.class);
+
     SessionResponse response = authProcessor.signUp(request);
 
     end(ctx.response(), 201, JsonObject.mapFrom(response).toString());
