@@ -1,46 +1,58 @@
 package com.codeforcommunity.processor;
 
+import com.amazonaws.AmazonServiceException;
 import com.codeforcommunity.api.IEventsProcessor;
 import com.codeforcommunity.auth.JWTData;
-import com.codeforcommunity.dto.userEvents.requests.CreateEventRequest;
-import com.codeforcommunity.dto.userEvents.responses.SingleEventResponse;
+import com.codeforcommunity.dataaccess.EventDatabaseOperations;
 import com.codeforcommunity.dto.userEvents.components.Event;
 import com.codeforcommunity.dto.userEvents.components.EventDetails;
+import com.codeforcommunity.dto.userEvents.requests.CreateEventRequest;
 import com.codeforcommunity.dto.userEvents.requests.GetUserEventsRequest;
+import com.codeforcommunity.dto.userEvents.requests.ModifyEventRequest;
 import com.codeforcommunity.dto.userEvents.responses.GetEventsResponse;
+import com.codeforcommunity.dto.userEvents.responses.SingleEventResponse;
 import com.codeforcommunity.enums.PrivilegeLevel;
 import com.codeforcommunity.exceptions.AdminOnlyRouteException;
-import org.jooq.*;
+import com.codeforcommunity.exceptions.BadRequestImageException;
+import com.codeforcommunity.exceptions.S3FailedUploadException;
+import com.codeforcommunity.requester.S3Requester;
+import org.jooq.DSLContext;
+import org.jooq.SelectConditionStep;
+import org.jooq.SelectSeekStep1;
+import org.jooq.SelectWhereStep;
 import org.jooq.generated.tables.pojos.Events;
 import org.jooq.generated.tables.records.EventsRecord;
 
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.Period;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static org.jooq.generated.Tables.EVENTS;
-import static org.jooq.generated.Tables.USER_EVENTS;
+import static org.jooq.generated.Tables.EVENT_REGISTRATIONS;
 import static org.jooq.generated.Tables.USERS;
-import static org.jooq.impl.DSL.count;
+
 
 public class EventsProcessorImpl implements IEventsProcessor {
 
   private final DSLContext db;
+  private final EventDatabaseOperations eventDatabaseOperations;
 
   public EventsProcessorImpl(DSLContext db) {
     this.db = db;
+    this.eventDatabaseOperations = new EventDatabaseOperations(db);
   }
 
   @Override
-  public SingleEventResponse createEvent(CreateEventRequest request, JWTData userData) {
+  public SingleEventResponse createEvent(CreateEventRequest request, JWTData userData) throws BadRequestImageException, S3FailedUploadException {
     if (userData.getPrivilegeLevel() != PrivilegeLevel.ADMIN) {
       throw new AdminOnlyRouteException();
     }
+
+    String publicImageUrl = S3Requester.validateUploadImageToS3LucyEvents(request.getTitle(), request.getThumbnail());
+    request.setThumbnail(publicImageUrl);  // Update the request to contain the URL for the DB and JSON response OR null if no image given
 
     EventsRecord newEventRecord = eventRequestToRecord(request);
     newEventRecord.store();
@@ -66,8 +78,8 @@ public class EventsProcessorImpl implements IEventsProcessor {
 
     SelectConditionStep q = db.select(EVENTS.fields())
         .from(USERS
-            .join(USER_EVENTS).onKey()
-            .join(EVENTS).onKey())
+            .join(EVENT_REGISTRATIONS).onKey(EVENT_REGISTRATIONS.USER_ID)
+            .join(EVENTS).onKey(EVENT_REGISTRATIONS.EVENT_ID))
         .where(USERS.ID.eq(userData.getUserId()));
 
     SelectConditionStep afterDateFilter = q;
@@ -118,8 +130,53 @@ public class EventsProcessorImpl implements IEventsProcessor {
     return new GetEventsResponse(res, res.size());
   }
 
+  @Override
+  public SingleEventResponse modifyEvent(int eventId, ModifyEventRequest request,
+                                         JWTData userData) {
+    if (userData.getPrivilegeLevel() != PrivilegeLevel.ADMIN) {
+      throw new AdminOnlyRouteException();
+    }
+    EventsRecord record = db.fetchOne(EVENTS, EVENTS.ID.eq(eventId));
+    if (request.getTitle() != null) {
+      record.setTitle(request.getTitle());
+    }
+    if (request.getSpotsAvailable() != null) {
+      record.setCapacity(request.getSpotsAvailable());
+    }
+    if (request.getThumbnail() != null) {
+      record.setThumbnail(request.getThumbnail());
+    }
+    if (request.getDetails() != null) {
+      EventDetails details = request.getDetails();
+      if (details.getDescription() != null) {
+        record.setDescription(details.getDescription());
+      }
+      if (details.getLocation() != null) {
+        record.setLocation(details.getLocation());
+      }
+      if (details.getStart() != null) {
+        record.setStartTime(details.getStart());
+      }
+      if (details.getEnd() != null) {
+        record.setEndTime(details.getEnd());
+      }
+    }
+    record.store();
+
+    return getSingleEvent(eventId);
+  }
+
+  @Override
+  public void deleteEvent(int eventId, JWTData userData) {
+    if (userData.getPrivilegeLevel() != PrivilegeLevel.ADMIN) {
+      throw new AdminOnlyRouteException();
+    }
+    db.delete(EVENTS).where(EVENTS.ID.eq(eventId)).execute();
+  }
+
   /**
    * Turns a list of jOOq Events DTO into one of our Event DTO.
+   *
    * @param events jOOq data objects.
    * @return List of our Event data object.
    */
@@ -127,24 +184,13 @@ public class EventsProcessorImpl implements IEventsProcessor {
 
     return events.stream().map(event -> {
       EventDetails details = new EventDetails(event.getDescription(), event.getLocation(), event.getStartTime(),
-              event.getEndTime());
-      Event e = new Event(event.getId(), event.getTitle(), getSpotsLeft(event.getId()), event.getThumbnail(),
-              details);
+          event.getEndTime());
+      Event e = new Event(event.getId(), event.getTitle(),
+          eventDatabaseOperations.getSpotsLeft(event.getId()), event.getThumbnail(),
+          details);
       return e;
     }).collect(Collectors.toList());
 
-  }
-
-  /**
-   * Queries the database to find the number of spots left for a given event by id.
-   * @param eventId
-   * @return
-   */
-  private int getSpotsLeft(int eventId) {
-    return db.select(EVENTS.CAPACITY.minus(db.fetchCount(USER_EVENTS.where(USER_EVENTS.EVENT_ID.eq(eventId)))))
-        .from(EVENTS)
-        .where(EVENTS.ID.eq(eventId))
-        .fetchOneInto(Integer.class);
   }
 
   /**
@@ -154,7 +200,7 @@ public class EventsProcessorImpl implements IEventsProcessor {
     EventDetails details = new EventDetails(event.getDescription(), event.getLocation(),
         event.getStartTime(), event.getEndTime());
     return new SingleEventResponse(event.getId(), event.getTitle(),
-        event.getCapacity(), event.getThumbnail(), details);
+        eventDatabaseOperations.getSpotsLeft(event.getId()), event.getCapacity(), event.getThumbnail(), details);
   }
 
   /**
@@ -171,5 +217,4 @@ public class EventsProcessorImpl implements IEventsProcessor {
     newRecord.setEndTime(request.getDetails().getEnd());
     return newRecord;
   }
-
 }

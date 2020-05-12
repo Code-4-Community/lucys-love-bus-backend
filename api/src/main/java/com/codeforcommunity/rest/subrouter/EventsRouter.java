@@ -3,11 +3,11 @@ package com.codeforcommunity.rest.subrouter;
 import com.codeforcommunity.api.IEventsProcessor;
 import com.codeforcommunity.auth.JWTData;
 import com.codeforcommunity.dto.userEvents.requests.CreateEventRequest;
-import com.codeforcommunity.dto.userEvents.responses.SingleEventResponse;
 import com.codeforcommunity.dto.userEvents.requests.GetUserEventsRequest;
+import com.codeforcommunity.dto.userEvents.requests.ModifyEventRequest;
 import com.codeforcommunity.dto.userEvents.responses.GetEventsResponse;
+import com.codeforcommunity.dto.userEvents.responses.SingleEventResponse;
 import com.codeforcommunity.rest.IRouter;
-
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Route;
@@ -41,6 +41,8 @@ public class EventsRouter implements IRouter {
     registerGetUserEventsQualified(router);
     registerGetUserEventsSignedUp(router);
     registerGetSingleEvent(router);
+    registerModifyEvent(router);
+    registerDeleteEvent(router);
 
     return router;
   }
@@ -68,6 +70,16 @@ public class EventsRouter implements IRouter {
   private void registerGetEvents(Router router) {
     Route getEvent = router.get("/");
     getEvent.handler(this::handleGetEvents);
+  }
+
+  private void registerModifyEvent(Router router) {
+    Route modifyEventRoute = router.put("/:event_id");
+    modifyEventRoute.handler(this::handleModifyEventRoute);
+  }
+
+  private void registerDeleteEvent(Router router) {
+    Route deleteEventRoute = router.delete("/:event_id");
+    deleteEventRoute.handler(this::handleDeleteEventRoute);
   }
 
   private void handleGetEvents(RoutingContext ctx) {
@@ -115,6 +127,23 @@ public class EventsRouter implements IRouter {
     SingleEventResponse response = processor.getSingleEvent(eventId);
 
     end(ctx.response(), 200, JsonObject.mapFrom(response).encode());
+  }
+
+  private void handleModifyEventRoute(RoutingContext ctx) {
+    int eventId = getRequestParameterAsInt(ctx.request(), "event_id");
+    ModifyEventRequest requestData = getJsonBodyAsClass(ctx, ModifyEventRequest.class);
+    JWTData userData = ctx.get("jwt_data");
+
+    SingleEventResponse response = processor.modifyEvent(eventId, requestData, userData);
+    end(ctx.response(), 200, JsonObject.mapFrom(response).encode());
+  }
+
+  private void handleDeleteEventRoute(RoutingContext ctx) {
+    int eventId = getRequestParameterAsInt(ctx.request(), "event_id");
+    JWTData userData = ctx.get("jwt_data");
+
+    processor.deleteEvent(eventId, userData);
+    end(ctx.response(), 200);
   }
 
 }

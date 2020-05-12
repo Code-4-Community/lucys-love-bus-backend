@@ -30,7 +30,7 @@
             </goals>
             <configuration>
               <files>
-                <file>../common/src/main/resources/db.properties</file>
+                <file>../common/src/main/resources/properties/db.properties</file>
               </files>
             </configuration>
           </execution>
@@ -116,6 +116,14 @@
                   <enumConverter>true</enumConverter>
 
                   <includeExpression>.*pf_requests\.status</includeExpression>
+                  <includeTypes>.*</includeTypes>
+                  <nullability>NOT_NULL</nullability>
+                </forcedType>
+                <forcedType>
+                  <userType>com.codeforcommunity.enums.EventRegistrationStatus</userType>
+                  <enumConverter>true</enumConverter>
+
+                  <includeExpression>.*event_registrations\.registration_status</includeExpression>
                   <includeTypes>.*</includeTypes>
                   <nullability>NOT_NULL</nullability>
                 </forcedType>
