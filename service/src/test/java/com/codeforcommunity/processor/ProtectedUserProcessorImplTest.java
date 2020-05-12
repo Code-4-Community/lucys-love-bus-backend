@@ -3,10 +3,10 @@ package com.codeforcommunity.processor;
 import static org.junit.Assert.fail;
 import org.junit.Test;
 
-class ProtectedUserProcessorImplTest {
+public class ProtectedUserProcessorImplTest {
 
   @Test
-  void testDeleteUser() {
+  public void testDeleteUser() {
     fail("TODO!!!");
   }
 }

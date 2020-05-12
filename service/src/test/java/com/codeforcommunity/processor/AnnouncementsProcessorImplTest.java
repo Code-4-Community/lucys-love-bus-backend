@@ -326,8 +326,8 @@ public class AnnouncementsProcessorImplTest {
         PostAnnouncementResponse res = myAnnouncementsProcessorImpl.postEventSpecificAnnouncement(req, myUserData, 1);
         assertEquals(res.getAnnouncement().getEventId(), announcement1.getEventId());
         assertEquals((Integer) res.getAnnouncement().getId(), announcement1.getId());
-        assertEquals(res.getAnnouncement().getTitle(), announcement1.getTitle());
-        assertEquals(res.getAnnouncement().getDescription(), announcement1.getDescription());
+        assertEquals(res.getAnnouncement().getTitle(), announcement2.getTitle());
+        assertEquals(res.getAnnouncement().getDescription(), announcement2.getDescription());
     }
 
     // getting an event specific announcement fails if event id is non-positive

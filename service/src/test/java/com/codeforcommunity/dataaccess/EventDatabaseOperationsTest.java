@@ -4,7 +4,7 @@ import static org.junit.Assert.fail;
 import org.junit.Test;
 
 // Contains tests for EventDatabaseOperations.java
-class EventDatabaseOperationsTest {
+public class EventDatabaseOperationsTest {
   @Test
   public void testGetSpotsLeft() {
     fail("TODO!!!");

@@ -1,5 +1,10 @@
 package com.codeforcommunity.requester;
 
-public class EmailerTest {
+import static org.junit.Assert.fail;
 
+import org.junit.Test;
+
+public class EmailerTest {
+  @Test
+  public void testSendWelcomeEmail() { fail("TODO!!!"); }
 }
