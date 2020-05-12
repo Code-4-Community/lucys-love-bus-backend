@@ -3,12 +3,11 @@ package com.codeforcommunity.rest.subrouter;
 import com.codeforcommunity.api.IEventsProcessor;
 import com.codeforcommunity.auth.JWTData;
 import com.codeforcommunity.dto.userEvents.requests.CreateEventRequest;
-import com.codeforcommunity.dto.userEvents.requests.ModifyEventRequest;
-import com.codeforcommunity.dto.userEvents.responses.SingleEventResponse;
 import com.codeforcommunity.dto.userEvents.requests.GetUserEventsRequest;
+import com.codeforcommunity.dto.userEvents.requests.ModifyEventRequest;
 import com.codeforcommunity.dto.userEvents.responses.GetEventsResponse;
+import com.codeforcommunity.dto.userEvents.responses.SingleEventResponse;
 import com.codeforcommunity.rest.IRouter;
-
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Route;

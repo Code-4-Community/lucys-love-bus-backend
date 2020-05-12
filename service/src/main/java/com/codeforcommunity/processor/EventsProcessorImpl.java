@@ -1,22 +1,30 @@
 package com.codeforcommunity.processor;
 
+import com.amazonaws.AmazonServiceException;
 import com.codeforcommunity.api.IEventsProcessor;
 import com.codeforcommunity.auth.JWTData;
 import com.codeforcommunity.dataaccess.EventDatabaseOperations;
-import com.codeforcommunity.dto.userEvents.requests.CreateEventRequest;
-import com.codeforcommunity.dto.userEvents.requests.ModifyEventRequest;
-import com.codeforcommunity.dto.userEvents.responses.SingleEventResponse;
 import com.codeforcommunity.dto.userEvents.components.Event;
 import com.codeforcommunity.dto.userEvents.components.EventDetails;
+import com.codeforcommunity.dto.userEvents.requests.CreateEventRequest;
 import com.codeforcommunity.dto.userEvents.requests.GetUserEventsRequest;
+import com.codeforcommunity.dto.userEvents.requests.ModifyEventRequest;
 import com.codeforcommunity.dto.userEvents.responses.GetEventsResponse;
+import com.codeforcommunity.dto.userEvents.responses.SingleEventResponse;
 import com.codeforcommunity.enums.PrivilegeLevel;
 import com.codeforcommunity.exceptions.AdminOnlyRouteException;
-import org.jooq.*;
+import com.codeforcommunity.exceptions.BadRequestImageException;
+import com.codeforcommunity.exceptions.EventDoesNotExistException;
+import com.codeforcommunity.exceptions.S3FailedUploadException;
+import com.codeforcommunity.requester.S3Requester;
 import org.jooq.DSLContext;
+import org.jooq.SelectConditionStep;
+import org.jooq.SelectSeekStep1;
+import org.jooq.SelectWhereStep;
 import org.jooq.generated.tables.pojos.Events;
 import org.jooq.generated.tables.records.EventsRecord;
 
+import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.Period;
@@ -39,10 +47,13 @@ public class EventsProcessorImpl implements IEventsProcessor {
   }
 
   @Override
-  public SingleEventResponse createEvent(CreateEventRequest request, JWTData userData) {
+  public SingleEventResponse createEvent(CreateEventRequest request, JWTData userData) throws BadRequestImageException, S3FailedUploadException {
     if (userData.getPrivilegeLevel() != PrivilegeLevel.ADMIN) {
       throw new AdminOnlyRouteException();
     }
+
+    String publicImageUrl = S3Requester.validateUploadImageToS3LucyEvents(request.getTitle(), request.getThumbnail());
+    request.setThumbnail(publicImageUrl);  // Update the request to contain the URL for the DB and JSON response OR null if no image given
 
     EventsRecord newEventRecord = eventRequestToRecord(request);
     newEventRecord.store();
@@ -54,6 +65,11 @@ public class EventsProcessorImpl implements IEventsProcessor {
     Events event = db.selectFrom(EVENTS)
         .where(EVENTS.ID.eq(eventId))
         .fetchOneInto(Events.class);
+
+    if (event == null) {
+      throw new EventDoesNotExistException(eventId);
+    }
+
     return eventPojoToResponse(event);
   }
 
@@ -122,7 +138,7 @@ public class EventsProcessorImpl implements IEventsProcessor {
 
   @Override
   public SingleEventResponse modifyEvent(int eventId, ModifyEventRequest request,
-      JWTData userData) {
+                                         JWTData userData) {
     if (userData.getPrivilegeLevel() != PrivilegeLevel.ADMIN) {
       throw new AdminOnlyRouteException();
     }
@@ -166,6 +182,7 @@ public class EventsProcessorImpl implements IEventsProcessor {
 
   /**
    * Turns a list of jOOq Events DTO into one of our Event DTO.
+   *
    * @param events jOOq data objects.
    * @return List of our Event data object.
    */
@@ -173,10 +190,10 @@ public class EventsProcessorImpl implements IEventsProcessor {
 
     return events.stream().map(event -> {
       EventDetails details = new EventDetails(event.getDescription(), event.getLocation(), event.getStartTime(),
-              event.getEndTime());
+          event.getEndTime());
       Event e = new Event(event.getId(), event.getTitle(),
-              eventDatabaseOperations.getSpotsLeft(event.getId()), event.getThumbnail(),
-              details);
+          eventDatabaseOperations.getSpotsLeft(event.getId()), event.getThumbnail(),
+          details);
       return e;
     }).collect(Collectors.toList());
 
