@@ -192,8 +192,9 @@ public class EventsProcessorImpl implements IEventsProcessor {
       throw new AdminOnlyRouteException();
     }
 
-    db.selectFrom(EVENTS).where(EVENTS.ID.eq(eventId)).fetchOptional()
-        .orElseThrow(() -> new EventDoesNotExistException(eventId));
+    if (!db.fetchExists(EVENTS.where(EVENTS.ID.eq(eventId)))) {
+      throw new EventDoesNotExistException(eventId);
+    }
 
     List<Registration> regs =
         db.select(USERS.FIRST_NAME, USERS.LAST_NAME, USERS.EMAIL, EVENT_REGISTRATIONS.TICKET_QUANTITY)
