@@ -14,6 +14,7 @@ import com.codeforcommunity.dto.userEvents.responses.SingleEventResponse;
 import com.codeforcommunity.enums.PrivilegeLevel;
 import com.codeforcommunity.exceptions.AdminOnlyRouteException;
 import com.codeforcommunity.exceptions.BadRequestImageException;
+import com.codeforcommunity.exceptions.EventDoesNotExistException;
 import com.codeforcommunity.exceptions.S3FailedUploadException;
 import com.codeforcommunity.requester.S3Requester;
 import org.jooq.DSLContext;
@@ -64,6 +65,11 @@ public class EventsProcessorImpl implements IEventsProcessor {
     Events event = db.selectFrom(EVENTS)
         .where(EVENTS.ID.eq(eventId))
         .fetchOneInto(Events.class);
+
+    if (event == null) {
+      throw new EventDoesNotExistException(eventId);
+    }
+
     return eventPojoToResponse(event);
   }
 
