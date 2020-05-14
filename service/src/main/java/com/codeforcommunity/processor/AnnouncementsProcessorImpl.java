@@ -91,9 +91,8 @@ public class AnnouncementsProcessorImpl implements IAnnouncementsProcessor {
     AnnouncementsRecord newAnnouncementsRecord = announcementRequestToRecord(request);
     newAnnouncementsRecord.setEventId(eventId);
     newAnnouncementsRecord.store();
-    return announcementPojoToResponse(db.selectFrom(ANNOUNCEMENTS)
-        .where(ANNOUNCEMENTS.ID.eq(newAnnouncementsRecord.getId()))
-        .fetchInto(Announcements.class).get(0));
+
+    return announcementPojoToResponse(newAnnouncementsRecord.into(Announcements.class));
   }
 
   @Override
