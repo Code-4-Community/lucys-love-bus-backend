@@ -44,9 +44,6 @@ public class PfOperationsRouter implements IRouter {
 	private void handleSignUpPF(RoutingContext ctx) {
 		NewUserAsPFRequest newUserPFRequest = getJsonBodyAsClass(ctx, NewUserAsPFRequest.class);
 		SessionResponse sessionResponse = authProcessor.signUp(newUserPFRequest.getNewUserRequest());
-		JWTData userData = authProcessor.getUserJWTData(newUserPFRequest.getNewUserRequest().getEmail());
-
-		requestsProcessor.createRequest(newUserPFRequest.getCreateRequest(), userData);
 
 		end(ctx.response(), 201, JsonObject.mapFrom(sessionResponse).toString());
 	}

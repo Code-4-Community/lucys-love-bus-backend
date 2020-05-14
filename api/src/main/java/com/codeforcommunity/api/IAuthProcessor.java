@@ -1,15 +1,13 @@
 package com.codeforcommunity.api;
 
-import com.codeforcommunity.auth.JWTData;
+import com.codeforcommunity.dto.auth.ForgotPasswordRequest;
 import com.codeforcommunity.dto.auth.LoginRequest;
 import com.codeforcommunity.dto.auth.NewUserRequest;
 import com.codeforcommunity.dto.auth.RefreshSessionRequest;
 import com.codeforcommunity.dto.auth.RefreshSessionResponse;
+import com.codeforcommunity.dto.auth.ResetPasswordRequest;
 import com.codeforcommunity.dto.auth.SessionResponse;
 import com.codeforcommunity.exceptions.AuthException;
-import com.codeforcommunity.exceptions.ExpiredEmailVerificationTokenException;
-import com.codeforcommunity.exceptions.InvalidEmailVerificationTokenException;
-import com.codeforcommunity.exceptions.UserDoesNotExistException;
 
 public interface IAuthProcessor {
 
@@ -42,17 +40,20 @@ public interface IAuthProcessor {
     RefreshSessionResponse refreshSession(RefreshSessionRequest request) throws AuthException;
 
     /**
-     * Allows clients to submit a secret key in order to verify their email.
-     * @param secretKey string of user's verificaiton token.
-     * @throws ExpiredEmailVerificationTokenException if the token is expired.
-     * @throws InvalidEmailVerificationTokenException if the token is invalid.
+     * If the given request corresponds to a real user, send that user an email for them
+     * to reset their password with a secret key.
      */
-    void validateSecretKey(String secretKey);
+    void requestPasswordReset(ForgotPasswordRequest request);
 
     /**
-     * Get's a users privilege level and id as a JWTData object.
-     * @param email address associated with user to retrieve data for.
-     * @return JWTData object containing userId and privilege level.
+     * Given a secret key and a new password, update the user that's associated with the key's
+     * password.
      */
-    JWTData getUserJWTData(String email);
+    void resetPassword(ResetPasswordRequest request);
+
+    /**
+     * Allows clients to submit a secret key in order to verify their email.
+     * @param secretKey string of user's verificaiton token.
+     */
+    void verifyEmail(String secretKey);
 }

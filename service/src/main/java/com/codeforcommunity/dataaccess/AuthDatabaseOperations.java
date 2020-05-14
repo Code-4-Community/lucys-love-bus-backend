@@ -5,9 +5,11 @@ import com.codeforcommunity.auth.Passwords;
 import com.codeforcommunity.dto.auth.AddressData;
 import com.codeforcommunity.dto.auth.NewUserRequest;
 import com.codeforcommunity.enums.PrivilegeLevel;
+import com.codeforcommunity.enums.VerificationKeyType;
 import com.codeforcommunity.exceptions.EmailAlreadyInUseException;
-import com.codeforcommunity.exceptions.ExpiredEmailVerificationTokenException;
-import com.codeforcommunity.exceptions.InvalidEmailVerificationTokenException;
+import com.codeforcommunity.exceptions.ExpiredSecretKeyException;
+import com.codeforcommunity.exceptions.InvalidSecretKeyException;
+import com.codeforcommunity.exceptions.UsedSecretKeyException;
 import com.codeforcommunity.exceptions.UserDoesNotExistException;
 import com.codeforcommunity.processor.AuthProcessorImpl;
 import com.codeforcommunity.propertiesLoader.PropertiesLoader;
@@ -21,9 +23,11 @@ import org.jooq.generated.tables.records.VerificationKeysRecord;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.Optional;
+import java.util.Properties;
 
 import static org.jooq.generated.Tables.CONTACTS;
 import static org.jooq.generated.Tables.USERS;
+import static org.jooq.generated.Tables.VERIFICATION_KEYS;
 
 /**
  * Encapsulates all the database operations that are required for {@link AuthProcessorImpl}.
@@ -32,16 +36,17 @@ public class AuthDatabaseOperations {
 
     private final DSLContext db;
 
-    public final int SECONDS_VERIFICATION_EMAIL_VALID;
-    public final int MS_REFRESH_EXPIRATION;
+    private final int secondsVerificationEmailValid;
+    private final int secondsForgotPasswordValid;
+    private final int msRefreshExpiration;
 
     public AuthDatabaseOperations(DSLContext db) {
         this.db = db;
 
-        this.SECONDS_VERIFICATION_EMAIL_VALID = Integer.parseInt(PropertiesLoader
-            .getExpirationProperties().getProperty("seconds_verification_email_valid"));
-        this.MS_REFRESH_EXPIRATION = Integer.parseInt(PropertiesLoader
-            .getExpirationProperties().getProperty("ms_refresh_expiration"));
+        Properties expirationProperties = PropertiesLoader.getExpirationProperties();
+        this.secondsVerificationEmailValid = Integer.parseInt(expirationProperties.getProperty("seconds_verification_email_valid"));
+        this.secondsForgotPasswordValid = Integer.parseInt(expirationProperties.getProperty("seconds_forgot_password_valid"));
+        this.msRefreshExpiration = Integer.parseInt(expirationProperties.getProperty("ms_refresh_expiration"));
     }
 
     /**
@@ -116,7 +121,7 @@ public class AuthDatabaseOperations {
      * Given a JWT signature, store it in the BLACKLISTED_REFRESHES table.
      */
     public void addToBlackList(String signature) {
-        Timestamp expirationTimestamp = Timestamp.from(Instant.now().plusMillis(MS_REFRESH_EXPIRATION));
+        Timestamp expirationTimestamp = Timestamp.from(Instant.now().plusMillis(msRefreshExpiration));
         db.newRecord(Tables.BLACKLISTED_REFRESHES)
             .values(signature, expirationTimestamp)
             .store();
@@ -132,58 +137,77 @@ public class AuthDatabaseOperations {
     }
 
     /**
-     * Validates the email/secret key for the user it was created for.
+     * Validates the secret key for the user it was created for and returns
+     * the appropriate user.
      *
-     * @throws InvalidEmailVerificationTokenException if the given token does not exist.
-     * @throws ExpiredEmailVerificationTokenException if the given token is expired.
+     * @throws InvalidSecretKeyException if the given token does not exist.
+     * @throws UsedSecretKeyException if the given token has already been used.
+     * @throws ExpiredSecretKeyException if the given token is expired.
      */
-    public void validateSecretKey(String secretKey) {
+    public UsersRecord validateSecretKey(String secretKey, VerificationKeyType type) {
         VerificationKeysRecord verificationKey = db.selectFrom(Tables.VERIFICATION_KEYS)
             .where(Tables.VERIFICATION_KEYS.ID.eq(secretKey)
-                .and(Tables.VERIFICATION_KEYS.USED.eq(false)))
+                .and(VERIFICATION_KEYS.TYPE.eq(type)))
             .fetchOneInto(VerificationKeysRecord.class);
 
         if (verificationKey == null) {
-            throw new InvalidEmailVerificationTokenException();
+            throw new InvalidSecretKeyException(type);
         }
 
-        if (!isTokenDateValid(verificationKey)) {
-            throw new ExpiredEmailVerificationTokenException();
+        if (verificationKey.getUsed()) {
+            throw new UsedSecretKeyException(type);
+        }
+
+        if (!isTokenDateValid(verificationKey, type)) {
+            throw new ExpiredSecretKeyException(type);
         }
 
         verificationKey.setUsed(true);
         verificationKey.store();
-        db.update(USERS).set(USERS.VERIFIED, 1)
-            .where(USERS.ID.eq(verificationKey.getUserId()));
+
+        return db.selectFrom(USERS)
+            .where(USERS.ID.eq(verificationKey.getUserId()))
+            .fetchOne();
     }
 
+
     /**
-     * Given a userId and token, stores the token in the verification_keys table for the user.
+     * TODO: This method should be called as part of sign-up flow
      *
-     * @throws UserDoesNotExistException if given userId does not match a user.
+     * Given a userId and token, stores the token in the verification_keys table for the user
+     * and invalidates all other keys of this type for this user.
      */
-    public String createSecretKey(int userId) {
-        if (!db.fetchExists(USERS.where(USERS.ID.eq(userId)))) {
-            throw new UserDoesNotExistException(userId);
-        }
+    public String createSecretKey(int userId, VerificationKeyType type) {
+        db.update(VERIFICATION_KEYS).set(VERIFICATION_KEYS.USED, true)
+            .where(VERIFICATION_KEYS.USER_ID.eq(userId))
+            .and(VERIFICATION_KEYS.TYPE.eq(type))
+            .execute();
 
         String token = Passwords.generateRandomToken(50);
 
         VerificationKeysRecord keysRecord = db.newRecord(Tables.VERIFICATION_KEYS);
         keysRecord.setId(token);
         keysRecord.setUserId(userId);
+        keysRecord.setType(type);
         keysRecord.store();
 
         return token;
     }
 
     /**
-     * Determines if given token date is still valid.
+     * Determines if given token of a specified type is still valid.
      *
      * @return true if it is within the time specified in the expiration.properties file.
      */
-    private boolean isTokenDateValid(VerificationKeysRecord tokenResult) {
-        Timestamp cutoffDate = Timestamp.from(Instant.now().minusSeconds(SECONDS_VERIFICATION_EMAIL_VALID));
+    private boolean isTokenDateValid(VerificationKeysRecord tokenResult, VerificationKeyType type) {
+        Timestamp cutoffDate;
+        if (type == VerificationKeyType.VERIFY_EMAIL) {
+            cutoffDate = Timestamp.from(Instant.now().minusSeconds(secondsVerificationEmailValid));
+        } else if (type == VerificationKeyType.FORGOT_PASSWORD) {
+            cutoffDate = Timestamp.from(Instant.now().minusSeconds(secondsForgotPasswordValid));
+        } else {
+            throw new IllegalStateException(String.format("Verification type %s not implemented", type.name()));
+        }
         return tokenResult.getCreated().after(cutoffDate);
     }
 
