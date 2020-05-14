@@ -2,6 +2,8 @@ package com.codeforcommunity.auth;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.Arrays;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -22,9 +24,7 @@ class PasswordsTest {
     byte[] hash1 = Passwords.createHash(pass);
     byte[] hash2 = Passwords.createHash(pass);
     assertEquals(hash1.length, hash2.length);
-    for (int i = 0; i < hash1.length; i++) {
-      assertNotEquals(hash1[i], hash2[i]);
-    }
+    assertNotEquals(Arrays.toString(hash1), Arrays.toString(hash2));
   }
 
   @Test
