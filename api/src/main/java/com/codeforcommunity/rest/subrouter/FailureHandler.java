@@ -1,6 +1,7 @@
 package com.codeforcommunity.rest.subrouter;
 
 import com.codeforcommunity.exceptions.EmailAlreadyInUseException;
+import com.codeforcommunity.exceptions.EventDoesNotExistException;
 import com.codeforcommunity.exceptions.InsufficientEventCapacityException;
 import com.codeforcommunity.exceptions.HandledException;
 import com.codeforcommunity.exceptions.MalformedParameterException;
@@ -122,6 +123,11 @@ public class FailureHandler {
   public void handleS3FailedUpload(RoutingContext ctx, String exceptionMessage) {
     String message = "The given file could not be uploaded to AWS S3: " + exceptionMessage;
     end(ctx, message, 502);
+  }
+
+  public void handleEventDoesNotExistException(RoutingContext ctx, EventDoesNotExistException exception) {
+    String message = "There is no event with id: " + exception.getEventId();
+    end(ctx, message, 400);
   }
 
   private void handleUncaughtError(RoutingContext ctx, Throwable throwable){

@@ -3,10 +3,11 @@ package com.codeforcommunity.rest.subrouter;
 import com.codeforcommunity.api.IEventsProcessor;
 import com.codeforcommunity.auth.JWTData;
 import com.codeforcommunity.dto.userEvents.requests.CreateEventRequest;
-import com.codeforcommunity.dto.userEvents.requests.GetUserEventsRequest;
 import com.codeforcommunity.dto.userEvents.requests.ModifyEventRequest;
-import com.codeforcommunity.dto.userEvents.responses.GetEventsResponse;
+import com.codeforcommunity.dto.userEvents.responses.EventRegistrations;
 import com.codeforcommunity.dto.userEvents.responses.SingleEventResponse;
+import com.codeforcommunity.dto.userEvents.requests.GetUserEventsRequest;
+import com.codeforcommunity.dto.userEvents.responses.GetEventsResponse;
 import com.codeforcommunity.rest.IRouter;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
@@ -43,6 +44,7 @@ public class EventsRouter implements IRouter {
     registerGetSingleEvent(router);
     registerModifyEvent(router);
     registerDeleteEvent(router);
+    registerGetEventRegisteredUsers(router);
 
     return router;
   }
@@ -80,6 +82,11 @@ public class EventsRouter implements IRouter {
   private void registerDeleteEvent(Router router) {
     Route deleteEventRoute = router.delete("/:event_id");
     deleteEventRoute.handler(this::handleDeleteEventRoute);
+  }
+
+  private void registerGetEventRegisteredUsers(Router router) {
+    Route getUsersSignedUpEventRoute = router.get("/:event_id/registrations");
+    getUsersSignedUpEventRoute.handler(this::handleGetEventRegisteredUsers);
   }
 
   private void handleGetEvents(RoutingContext ctx) {
@@ -146,4 +153,11 @@ public class EventsRouter implements IRouter {
     end(ctx.response(), 200);
   }
 
+  private void handleGetEventRegisteredUsers(RoutingContext ctx) {
+    int eventId = getRequestParameterAsInt(ctx.request(), "event_id");
+    JWTData userData = ctx.get("jwt_data");
+
+    EventRegistrations regs = processor.getEventRegisteredUsers(eventId, userData);
+    end(ctx.response(), 200, JsonObject.mapFrom(regs).encode());
+  }
 }
