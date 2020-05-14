@@ -37,6 +37,7 @@ import java.time.Period;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static org.jooq.generated.Tables.CONTACTS;
 import static org.jooq.generated.Tables.EVENTS;
 import static org.jooq.generated.Tables.EVENT_REGISTRATIONS;
 import static org.jooq.generated.Tables.USERS;
@@ -197,11 +198,12 @@ public class EventsProcessorImpl implements IEventsProcessor {
     }
 
     List<Registration> regs =
-        db.select(USERS.FIRST_NAME, USERS.LAST_NAME, USERS.EMAIL, EVENT_REGISTRATIONS.TICKET_QUANTITY)
-        .from(EVENT_REGISTRATIONS)
-        .join(USERS).on(EVENT_REGISTRATIONS.USER_ID.eq(USERS.ID))
-        .where(EVENT_REGISTRATIONS.EVENT_ID.eq(eventId))
-        .fetchInto(Registration.class);
+        db.select(CONTACTS.FIRST_NAME, CONTACTS.LAST_NAME, CONTACTS.EMAIL, EVENT_REGISTRATIONS.TICKET_QUANTITY)
+          .from(EVENT_REGISTRATIONS)
+          .join(CONTACTS).on(EVENT_REGISTRATIONS.USER_ID.eq(USERS.ID))
+          .where(EVENT_REGISTRATIONS.EVENT_ID.eq(eventId))
+          .and(CONTACTS.IS_MAIN_CONTACT.isTrue())
+          .fetchInto(Registration.class);
 
     return new EventRegistrations(regs);
   }
