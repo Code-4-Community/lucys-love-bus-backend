@@ -22,8 +22,8 @@ CREATE TABLE IF NOT EXISTS contacts (
 
     first_name VARCHAR(36) NOT NULL,
     last_name VARCHAR(36) NOT NULL,
-    date_of_birth TIMESTAMP NOT NULL,
 
+    date_of_birth TIMESTAMP,
 	phone_number VARCHAR(16),
     pronouns VARCHAR(36),
 	allergies TEXT,

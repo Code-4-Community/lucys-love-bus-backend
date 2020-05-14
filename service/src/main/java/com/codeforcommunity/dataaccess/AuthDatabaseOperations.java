@@ -14,6 +14,7 @@ import com.codeforcommunity.propertiesLoader.PropertiesLoader;
 import org.jooq.DSLContext;
 import org.jooq.generated.Tables;
 import org.jooq.generated.tables.pojos.Users;
+import org.jooq.generated.tables.records.ContactsRecord;
 import org.jooq.generated.tables.records.UsersRecord;
 import org.jooq.generated.tables.records.VerificationKeysRecord;
 
@@ -21,6 +22,7 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.Optional;
 
+import static org.jooq.generated.Tables.CONTACTS;
 import static org.jooq.generated.Tables.USERS;
 
 /**
@@ -90,15 +92,22 @@ public class AuthDatabaseOperations {
         UsersRecord newUser = db.newRecord(USERS);
         newUser.setEmail(email);
         newUser.setPassHash(Passwords.createHash(request.getPassword()));
-        newUser.setFirstName(request.getFirstName());
-        newUser.setLastName(request.getLastName());
-        newUser.setPhonenumber(request.getPhoneNumber());
-        newUser.setAllergies(request.getAllergies());
-
         addAddressDataToUserRecord(newUser, request.getLocation());
-
         newUser.setPrivilegeLevel(PrivilegeLevel.GP);
         newUser.store();
+
+        ContactsRecord mainContact = db.newRecord(CONTACTS);
+        mainContact.setIsMainContact(true);
+        mainContact.setUserId(newUser.getId());
+        mainContact.setEmail(email);
+        mainContact.setShouldSendEmails(true);
+
+        mainContact.setFirstName(request.getFirstName());
+        mainContact.setLastName(request.getLastName());
+        mainContact.setPhoneNumber(request.getPhoneNumber());
+        mainContact.setAllergies(request.getAllergies());
+        mainContact.store();
+
 
         // TODO: Send verification email
     }
