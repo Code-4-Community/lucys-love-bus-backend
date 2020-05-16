@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS contacts (
     first_name VARCHAR(36) NOT NULL,
     last_name VARCHAR(36) NOT NULL,
 
-    date_of_birth TIMESTAMP,
+    date_of_birth DATE,
 	phone_number VARCHAR(16),
     pronouns VARCHAR(36),
 	allergies TEXT,
@@ -40,7 +40,7 @@ CREATE TABLE IF NOT EXISTS children (
 
     first_name VARCHAR(36) NOT NULL,
     last_name VARCHAR(36) NOT NULL,
-    date_of_birth TIMESTAMP NOT NULL,
+    date_of_birth DATE NOT NULL,
 	pronouns VARCHAR(32) NOT NULL,
 
 	school_year VARCHAR(32),

@@ -69,7 +69,7 @@ public class ServiceMain {
     JWTAuthorizer jwtAuthorizer = new JWTAuthorizer(jwtHandler);
     JWTCreator jwtCreator = new JWTCreator(jwtHandler);
 
-    Emailer emailer = new Emailer(); // TODO: Utilize this
+    //Emailer emailer = new Emailer(); // TODO: Utilize this
 
     IAuthProcessor authProcessor = new AuthProcessorImpl(this.db, jwtCreator);
     IProtectedUserProcessor protectedUserProcessor = new ProtectedUserProcessorImpl(this.db);

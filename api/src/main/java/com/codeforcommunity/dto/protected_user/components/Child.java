@@ -1,12 +1,12 @@
 package com.codeforcommunity.dto.protected_user.components;
 
-import java.sql.Timestamp;
+import java.sql.Date;
 
 public class Child {
 
     private String firstName;
     private String lastName;
-    private Timestamp dob;
+    private Date dob;
     private String pronouns;
     private String schoolYear;
     private String school;
@@ -17,7 +17,7 @@ public class Child {
 
     public Child() {}
 
-    public Child(String firstName, String lastName, Timestamp dob, String pronouns, String schoolYear, String school, String allergies, String diagnosis, String medications, String notes) {
+    public Child(String firstName, String lastName, Date dob, String pronouns, String schoolYear, String school, String allergies, String diagnosis, String medications, String notes) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.dob = dob;
@@ -46,11 +46,11 @@ public class Child {
         this.lastName = lastName;
     }
 
-    public Timestamp getDob() {
+    public Date getDob() {
         return dob;
     }
 
-    public void setDob(Timestamp dob) {
+    public void setDob(Date dob) {
         this.dob = dob;
     }
 
