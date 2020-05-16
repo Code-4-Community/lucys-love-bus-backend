@@ -3,16 +3,20 @@ package com.codeforcommunity.processor;
 import com.codeforcommunity.api.IProtectedUserProcessor;
 import com.codeforcommunity.auth.JWTData;
 import com.codeforcommunity.auth.Passwords;
+import com.codeforcommunity.dto.protected_user.SetUserContactInfoRequest;
+import com.codeforcommunity.dto.protected_user.components.Child;
+import com.codeforcommunity.dto.protected_user.components.Contact;
 import com.codeforcommunity.dto.user.ChangePasswordRequest;
 import com.codeforcommunity.exceptions.UserDoesNotExistException;
 import com.codeforcommunity.exceptions.WrongPasswordException;
 import org.jooq.DSLContext;
+import org.jooq.generated.tables.records.ChildrenRecord;
+import org.jooq.generated.tables.records.ContactsRecord;
 import org.jooq.generated.tables.records.UsersRecord;
 
-import static org.jooq.generated.Tables.EVENT_REGISTRATIONS;
-import static org.jooq.generated.Tables.PF_REQUESTS;
-import static org.jooq.generated.Tables.USERS;
-import static org.jooq.generated.Tables.VERIFICATION_KEYS;
+import java.util.List;
+
+import static org.jooq.generated.Tables.*;
 
 public class ProtectedUserProcessorImpl implements IProtectedUserProcessor {
 
@@ -60,4 +64,97 @@ public class ProtectedUserProcessorImpl implements IProtectedUserProcessor {
       throw new WrongPasswordException();
     }
   }
+
+  @Override
+  public void setUserContactInfo(JWTData userData, SetUserContactInfoRequest setUserContactInfoRequest) {
+
+    updateMainContact(userData, setUserContactInfoRequest.getMainContact());
+
+    if (setUserContactInfoRequest.getChildren() != null &&
+            !setUserContactInfoRequest.getChildren().isEmpty()) {
+      addChildren(setUserContactInfoRequest.getChildren(), userData);
+    }
+
+    if (setUserContactInfoRequest.getAdditionalContacts() != null &&
+            !setUserContactInfoRequest.getAdditionalContacts().isEmpty()) {
+      addAdditionalContacts(setUserContactInfoRequest.getAdditionalContacts(), userData);
+    }
+
+  }
+  
+  private void updateMainContact(JWTData userData, Contact newContactData) {
+
+    ContactsRecord mainContact = db.selectFrom(CONTACTS)
+            .where(CONTACTS.USER_ID.eq(userData.getUserId())
+                    .and(CONTACTS.IS_MAIN_CONTACT))
+            .fetchOne();
+
+    if (mainContact == null) {
+      return;
+    }
+
+    mainContact.setFirstName(newContactData.getFirstName());
+    mainContact.setLastName(newContactData.getLastName());
+    mainContact.setDateOfBirth(newContactData.getDob());
+    mainContact.setEmail(newContactData.getEmail());
+    mainContact.setPhoneNumber(newContactData.getPhoneNumber());
+    mainContact.setAllergies(newContactData.getAllergies());
+    mainContact.setDiagnosis(newContactData.getDiagnosis());
+    mainContact.setMedications(newContactData.getMedications());
+    mainContact.setNotes(newContactData.getNotes());
+    mainContact.setPronouns(newContactData.getPronouns());
+
+    mainContact.store();
+
+    UsersRecord usersRecord = db.selectFrom(USERS)
+            .where(USERS.ID.eq(userData.getUserId()))
+                    .fetchOne();
+
+    usersRecord.setEmail(newContactData.getEmail());
+
+    usersRecord.store();
+  }
+
+  private void addChildren(List<Child> children, JWTData userData) {
+    
+    for (Child c : children) {
+
+      ChildrenRecord childrenRecord = db.newRecord(CHILDREN);
+      childrenRecord.setUserId(userData.getUserId());
+      childrenRecord.setFirstName(c.getFirstName());
+      childrenRecord.setLastName(c.getLastName());
+      childrenRecord.setDateOfBirth(c.getDob());
+      childrenRecord.setPronouns(c.getPronouns());
+      childrenRecord.setSchoolYear(c.getSchoolYear());
+      childrenRecord.setSchool(c.getSchool());
+      childrenRecord.setAllergies(c.getAllergies());
+      childrenRecord.setDiagnosis(c.getDiagnosis());
+      childrenRecord.setMedications(c.getMedications());
+      childrenRecord.setNotes(c.getNotes());
+      
+      childrenRecord.store();
+    }
+  }
+
+  private void addAdditionalContacts(List<Contact> additionalContacts, JWTData userData) {
+    
+    for (Contact c : additionalContacts) {
+
+      ContactsRecord contactsRecord = db.newRecord(CONTACTS);
+      contactsRecord.setUserId(userData.getUserId());
+      contactsRecord.setFirstName(c.getFirstName());
+      contactsRecord.setLastName(c.getLastName());
+      contactsRecord.setDateOfBirth(c.getDob());
+      contactsRecord.setEmail(c.getEmail());
+      contactsRecord.setPronouns(c.getPronouns());
+      contactsRecord.setAllergies(c.getAllergies());
+      contactsRecord.setDiagnosis(c.getDiagnosis());
+      contactsRecord.setMedications(c.getMedications());
+      contactsRecord.setNotes(c.getNotes());
+      contactsRecord.setShouldSendEmails(c.isShouldEmail());
+
+      contactsRecord.store();
+    }
+  } 
+  
 }

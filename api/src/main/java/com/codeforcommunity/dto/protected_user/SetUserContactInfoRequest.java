@@ -5,13 +5,15 @@ import com.codeforcommunity.dto.protected_user.components.Contact;
 
 import java.util.List;
 
-public class SetUserInfoRequest {
+public class SetUserContactInfoRequest {
 
     private Contact mainContact;
     private List<Contact> additionalContacts;
     private List<Child> children;
 
-    public SetUserInfoRequest(Contact mainContact, List<Contact> additionalContacts, List<Child> children) {
+    public SetUserContactInfoRequest() {}
+
+    public SetUserContactInfoRequest(Contact mainContact, List<Contact> additionalContacts, List<Child> children) {
         this.mainContact = mainContact;
         this.additionalContacts = additionalContacts;
         this.children = children;
