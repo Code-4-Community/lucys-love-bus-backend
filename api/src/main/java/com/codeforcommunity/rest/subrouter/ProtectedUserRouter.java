@@ -2,7 +2,7 @@ package com.codeforcommunity.rest.subrouter;
 
 import com.codeforcommunity.api.IProtectedUserProcessor;
 import com.codeforcommunity.auth.JWTData;
-import com.codeforcommunity.dto.protected_user.SetUserContactInfoRequest;
+import com.codeforcommunity.dto.protected_user.SetContactsAndChildrenoRequest;
 import com.codeforcommunity.dto.user.ChangePasswordRequest;
 import com.codeforcommunity.rest.IRouter;
 import io.vertx.core.Vertx;
@@ -66,9 +66,9 @@ public class ProtectedUserRouter implements IRouter {
 
   private void handleSetUserContactInfo(RoutingContext ctx) {
     JWTData userData = ctx.get("jwt_data");
-    SetUserContactInfoRequest setUserContactInfoRequest = getJsonBodyAsClass(ctx, SetUserContactInfoRequest.class);
+    SetContactsAndChildrenoRequest setUserContactInfoRequest = getJsonBodyAsClass(ctx, SetContactsAndChildrenoRequest.class);
 
-    processor.setUserContactInfo(userData, setUserContactInfoRequest);
+    processor.setContactsAndChildren(userData, setUserContactInfoRequest);
 
     end(ctx.response(), 201);
   }

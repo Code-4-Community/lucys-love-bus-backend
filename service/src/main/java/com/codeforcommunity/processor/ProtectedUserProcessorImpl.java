@@ -3,7 +3,7 @@ package com.codeforcommunity.processor;
 import com.codeforcommunity.api.IProtectedUserProcessor;
 import com.codeforcommunity.auth.JWTData;
 import com.codeforcommunity.auth.Passwords;
-import com.codeforcommunity.dto.protected_user.SetUserContactInfoRequest;
+import com.codeforcommunity.dto.protected_user.SetContactsAndChildrenoRequest;
 import com.codeforcommunity.dto.protected_user.components.Child;
 import com.codeforcommunity.dto.protected_user.components.Contact;
 import com.codeforcommunity.dto.user.ChangePasswordRequest;
@@ -66,18 +66,18 @@ public class ProtectedUserProcessorImpl implements IProtectedUserProcessor {
   }
 
   @Override
-  public void setUserContactInfo(JWTData userData, SetUserContactInfoRequest setUserContactInfoRequest) {
+  public void setContactsAndChildren(JWTData userData, SetContactsAndChildrenoRequest setContactsAndChildrenRequest) {
 
-    updateMainContact(userData, setUserContactInfoRequest.getMainContact());
+    updateMainContact(userData, setContactsAndChildrenRequest.getMainContact());
 
-    if (setUserContactInfoRequest.getChildren() != null &&
-            !setUserContactInfoRequest.getChildren().isEmpty()) {
-      addChildren(setUserContactInfoRequest.getChildren(), userData);
+    if (setContactsAndChildrenRequest.getChildren() != null &&
+            !setContactsAndChildrenRequest.getChildren().isEmpty()) {
+      addChildren(setContactsAndChildrenRequest.getChildren(), userData);
     }
 
-    if (setUserContactInfoRequest.getAdditionalContacts() != null &&
-            !setUserContactInfoRequest.getAdditionalContacts().isEmpty()) {
-      addAdditionalContacts(setUserContactInfoRequest.getAdditionalContacts(), userData);
+    if (setContactsAndChildrenRequest.getAdditionalContacts() != null &&
+            !setContactsAndChildrenRequest.getAdditionalContacts().isEmpty()) {
+      addAdditionalContacts(setContactsAndChildrenRequest.getAdditionalContacts(), userData);
     }
 
   }
