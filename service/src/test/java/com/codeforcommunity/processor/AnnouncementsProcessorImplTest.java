@@ -320,9 +320,6 @@ public class AnnouncementsProcessorImplTest {
         myJooqMock.addReturn("SELECT", announcements);
         myJooqMock.addReturn("INSERT", announcements);
 
-        // TODO: To the dev team, please review this
-        // Is it supposed to just return the 1st announcement associated with the given event id?
-        // Because I thought it is supposed to work for announcement2, not announcement1
         PostAnnouncementResponse res = myAnnouncementsProcessorImpl.postEventSpecificAnnouncement(req, myUserData, 1);
         assertEquals(res.getAnnouncement().getEventId(), announcement1.getEventId());
         assertEquals((Integer) res.getAnnouncement().getId(), announcement1.getId());

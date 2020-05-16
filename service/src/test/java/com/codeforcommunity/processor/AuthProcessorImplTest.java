@@ -315,24 +315,4 @@ public class AuthProcessorImplTest {
         // is the binding correct
         assertEquals("token", myJooqMock.getSqlBindings().get("INSERT").get(0)[0]);
     }
-
-    // test if validateSecretKey constructs the correct SQL bindings
-    @Test
-    public void testValidateSecretKey() {
-        // mock the verification keys table
-        VerificationKeysRecord myVerificationKey = new VerificationKeysRecord();
-
-        // 10 seconds should be far enough in the future not to expire
-        Timestamp future = new Timestamp(new Date().getTime() + 10000);
-        myVerificationKey.setCreated(future);
-        myVerificationKey.setUserId(0);
-        myJooqMock.addReturn("SELECT", myVerificationKey);
-        myJooqMock.addReturn("INSERT", myVerificationKey);
-
-        myAuthProcessorImpl.validateSecretKey("secret key");
-
-        // is the binding correct for secret key
-        // TODO: dev team should review, not sure if this is what I really need to test
-        assertEquals("secret key", myJooqMock.getSqlBindings().get("SELECT").get(0)[0]);
-    }
 }
