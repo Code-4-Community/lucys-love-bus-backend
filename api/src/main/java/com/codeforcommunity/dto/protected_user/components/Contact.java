@@ -14,11 +14,12 @@ public class Contact {
     private String medications;
     private String notes;
     private String pronouns;
-    private boolean shouldEmail;
+    private boolean shouldSendEmail;
 
     public Contact() {}
 
-    public Contact(String firstName, String lastName, Timestamp dob, String email, String phoneNumber, String allergies, String diagnosis, String medication, String notes, String pronouns, boolean shouldEmail) {
+    public Contact(String firstName, String lastName, Timestamp dob, String email, String phoneNumber,
+                   String allergies, String diagnosis, String medication, String notes, String pronouns, boolean shouldSendEmail) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.dob = dob;
@@ -29,7 +30,7 @@ public class Contact {
         this.medications = medication;
         this.notes = notes;
         this.pronouns = pronouns;
-        this.shouldEmail = shouldEmail;
+        this.shouldSendEmail = shouldSendEmail;
     }
 
     public String getFirstName() {
@@ -112,11 +113,11 @@ public class Contact {
         this.pronouns = pronouns;
     }
 
-    public boolean isShouldEmail() {
-        return shouldEmail;
+    public boolean getShouldSendEmail() {
+        return shouldSendEmail;
     }
 
-    public void setShouldEmail(boolean shouldEmail) {
-        this.shouldEmail = shouldEmail;
+    public void setShouldSendEmail(boolean shouldSendEmail) {
+        this.shouldSendEmail = shouldSendEmail;
     }
 }

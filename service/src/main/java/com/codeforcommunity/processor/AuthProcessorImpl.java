@@ -177,14 +177,4 @@ public class AuthProcessorImpl implements IAuthProcessor {
         return token.split("\\.")[2];
     }
 
-    /**
-     * Get's a users privilege level and id as a JWTData object.
-     * @param email address associated with user to retrieve data for.
-     * @return JWTData object containing userId and privilege level.
-     */
-    public JWTData getUserJWTData(String email) {
-        return authDatabaseOperations.getUserJWTData(email);
-    }
-
-
 }

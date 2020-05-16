@@ -16,7 +16,6 @@ import com.codeforcommunity.rest.subrouter.PfRequestRouter;
 import com.codeforcommunity.rest.subrouter.CheckoutRouter;
 import com.codeforcommunity.rest.subrouter.ProtectedUserRouter;
 import com.codeforcommunity.rest.subrouter.WebhooksRouter;
-import com.codeforcommunity.rest.subrouter.PfOperationsRouter;
 import io.vertx.core.Vertx;
 
 import io.vertx.core.http.HttpServerResponse;
@@ -32,8 +31,6 @@ public class ApiRouter implements IRouter {
     private final AnnouncementsRouter announcementsRouter;
     private final CheckoutRouter checkoutRouter;
     private final WebhooksRouter webhooksRouter;
-    private final PfOperationsRouter pfOperationsRouter;
-
     public ApiRouter(IAuthProcessor authProcessor,
                      IProtectedUserProcessor protectedUserProcessor,
                      IRequestsProcessor requestsProcessor,
@@ -50,7 +47,6 @@ public class ApiRouter implements IRouter {
         this.announcementsRouter = new AnnouncementsRouter(announcementEventsProcessor);
         this.checkoutRouter = new CheckoutRouter(checkoutProcessor);
         this.webhooksRouter = new WebhooksRouter(checkoutProcessor);
-        this.pfOperationsRouter = new PfOperationsRouter(authProcessor, requestsProcessor);
     }
 
     /**
@@ -62,7 +58,6 @@ public class ApiRouter implements IRouter {
         router.mountSubRouter("/user", authRouter.initializeRouter(vertx));
         router.mountSubRouter("/webhooks", webhooksRouter.initializeRouter(vertx));
         router.mountSubRouter("/protected", defineProtectedRoutes(vertx));
-        router.mountSubRouter("/pf", pfOperationsRouter.initializeRouter(vertx));
 
         return router;
     }

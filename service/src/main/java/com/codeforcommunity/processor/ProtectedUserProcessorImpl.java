@@ -151,7 +151,7 @@ public class ProtectedUserProcessorImpl implements IProtectedUserProcessor {
       contactsRecord.setDiagnosis(c.getDiagnosis());
       contactsRecord.setMedications(c.getMedications());
       contactsRecord.setNotes(c.getNotes());
-      contactsRecord.setShouldSendEmails(c.isShouldEmail());
+      contactsRecord.setShouldSendEmails(c.getShouldSendEmail());
 
       contactsRecord.store();
     }
