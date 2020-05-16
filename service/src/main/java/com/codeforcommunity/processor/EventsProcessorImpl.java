@@ -53,7 +53,8 @@ public class EventsProcessorImpl implements IEventsProcessor {
   }
 
   @Override
-  public SingleEventResponse createEvent(CreateEventRequest request, JWTData userData) throws BadRequestImageException, S3FailedUploadException {
+  public SingleEventResponse createEvent(CreateEventRequest request, JWTData userData)
+      throws BadRequestImageException, S3FailedUploadException {
     if (userData.getPrivilegeLevel() != PrivilegeLevel.ADMIN) {
       throw new AdminOnlyRouteException();
     }

@@ -21,7 +21,6 @@ import org.jooq.generated.tables.records.BlacklistedRefreshesRecord;
 import org.jooq.generated.tables.records.UsersRecord;
 
 import org.jooq.generated.tables.records.VerificationKeysRecord;
-import org.jooq.meta.derby.sys.Sys;
 import org.junit.Before;
 import org.junit.Test;
 import static org.junit.Assert.assertEquals;
@@ -150,8 +149,6 @@ public class AuthDatabaseOperationsTest {
         assertEquals(sampleFN, insertBindings.get(0)[0]);
         assertEquals(sampleLN, insertBindings.get(0)[1]);
         assertEquals(sampleEmail, insertBindings.get(0)[2]);
-        // TODO: wait for what the dev team says about this
-        // assertEquals(Passwords.createHash(samplePassword), insertBindings.get(0)[3]);
     }
 
     // test that adding to blacklist works without breaking

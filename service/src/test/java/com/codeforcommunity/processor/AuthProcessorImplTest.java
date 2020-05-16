@@ -12,16 +12,13 @@ import com.codeforcommunity.dto.auth.SessionResponse;
 import com.codeforcommunity.enums.PrivilegeLevel;
 import com.codeforcommunity.exceptions.AuthException;
 
-import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
 import org.jooq.generated.Tables;
 import org.jooq.generated.tables.records.BlacklistedRefreshesRecord;
 import org.jooq.generated.tables.records.UsersRecord;
-import org.jooq.generated.tables.records.VerificationKeysRecord;
 import org.jooq.impl.UpdatableRecordImpl;
 
 import org.mockito.Mockito;
@@ -241,6 +238,17 @@ public class AuthProcessorImplTest {
         assertEquals(res.getRefreshToken(), REFRESH_TOKEN_EXAMPLE);
     }
 
+    // test that logout adds token to blacklist correctly
+    @Test
+    public void testLogout() {
+        // mock the blacklisted refresh token table
+        myJooqMock.addReturn("INSERT", new ArrayList<BlacklistedRefreshesRecord>());
+        myAuthProcessorImpl.logout("sample.refresh.token");
+
+        // is the binding correct
+        assertEquals("token", myJooqMock.getSqlBindings().get("INSERT").get(0)[0]);
+    }
+
     // test session refresh with correctly refreshed token
     @Test
     public void testRefreshSession1() {
@@ -303,16 +311,5 @@ public class AuthProcessorImplTest {
         } catch (AuthException e) {
             assertEquals(e.getMessage(), "The refresh token has been invalidated by a previous logout");
         }
-    }
-
-    // test that logout adds token to blacklist correctly
-    @Test
-    public void testLogout() {
-        // mock the blacklisted refresh token table
-        myJooqMock.addReturn("INSERT", new ArrayList<BlacklistedRefreshesRecord>());
-        myAuthProcessorImpl.logout("sample.refresh.token");
-
-        // is the binding correct
-        assertEquals("token", myJooqMock.getSqlBindings().get("INSERT").get(0)[0]);
     }
 }
