@@ -4,14 +4,24 @@ import com.codeforcommunity.JooqMock;
 import com.codeforcommunity.auth.JWTData;
 import com.codeforcommunity.auth.Passwords;
 import com.codeforcommunity.enums.PrivilegeLevel;
+import com.codeforcommunity.enums.VerificationKeyType;
 import com.codeforcommunity.exceptions.EmailAlreadyInUseException;
+import com.codeforcommunity.exceptions.ExpiredSecretKeyException;
+import com.codeforcommunity.exceptions.InvalidSecretKeyException;
+import com.codeforcommunity.exceptions.UsedSecretKeyException;
 import com.codeforcommunity.exceptions.UserDoesNotExistException;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 
+import java.util.Date;
+import java.util.List;
 import org.jooq.generated.Tables;
+import org.jooq.generated.tables.records.BlacklistedRefreshesRecord;
 import org.jooq.generated.tables.records.UsersRecord;
 
+import org.jooq.generated.tables.records.VerificationKeysRecord;
+import org.jooq.meta.derby.sys.Sys;
 import org.junit.Before;
 import org.junit.Test;
 import static org.junit.Assert.assertEquals;
@@ -23,6 +33,10 @@ import static org.junit.Assert.fail;
 public class AuthDatabaseOperationsTest {
     JooqMock myJooqMock;
     AuthDatabaseOperations myAuthDatabaseOperations;
+
+    // use UNIX time for ease of testing
+    // 04/16/2020 @ 1:20am (UTC)
+    private final int TIMESTAMP_TEST = 1587000000;
 
     // set up all the mocks
     @Before
@@ -122,32 +136,140 @@ public class AuthDatabaseOperationsTest {
     @Test
     public void testCreateNewUser2() {
         // no users in DB
-        myJooqMock.addReturn("SELECT", new ArrayList<UsersRecord>());
+        myJooqMock.addReturn("INSERT", new ArrayList<UsersRecord>());
 
-        myAuthDatabaseOperations.createNewUser("conner@example.com", "letmeout", "Conner", "Nilsen");
+        String sampleEmail = "conner@example.com";
+        String samplePassword = "letmeout";
+        String sampleFN = "Conner";
+        String sampleLN = "Nilsen";
+
+        myAuthDatabaseOperations.createNewUser(sampleEmail, samplePassword, sampleFN, sampleLN);
+
+        List<Object[]> insertBindings = myJooqMock.getSqlBindings().get("INSERT");
+
+        assertEquals(sampleFN, insertBindings.get(0)[0]);
+        assertEquals(sampleLN, insertBindings.get(0)[1]);
+        assertEquals(sampleEmail, insertBindings.get(0)[2]);
+        // TODO: wait for what the dev team says about this
+        // assertEquals(Passwords.createHash(samplePassword), insertBindings.get(0)[3]);
     }
 
-    // TODO
+    // test that adding to blacklist works without breaking
     @Test
     public void testAddToBlackList() {
-        fail();
+        // set up mock DB for inserting blacklisted refreshes
+        myJooqMock.addReturn("INSERT", new ArrayList<BlacklistedRefreshesRecord>());
+
+        myAuthDatabaseOperations.addToBlackList("sample signature");
+
+        List<Object[]> bindings = myJooqMock.getSqlBindings().get("INSERT");
+
+        assertEquals("sample signature", bindings.get(0)[0]);
     }
 
-    // TODO
+    // test case where signature isn't on blacklist
     @Test
-    public void testIsOnBlackList() {
-        fail();
+    public void testIsOnBlackList1() {
+        // set up mock DB for selecting blacklisted refreshes
+        myJooqMock.addReturn("SELECT", new ArrayList<BlacklistedRefreshesRecord>());
+
+        assertFalse(myAuthDatabaseOperations.isOnBlackList("sample signature"));
     }
 
-    // TODO
+    // test case where signature is on the blacklist
     @Test
-    public void testValidateSecretKey() {
-        fail();
+    public void testIsOnBlackList2() {
+        // set up mock DB for selecting blacklisted refreshes
+        BlacklistedRefreshesRecord myBRRecord = new BlacklistedRefreshesRecord("sample signature",
+            new Timestamp(TIMESTAMP_TEST));
+        myJooqMock.addReturn("SELECT", myBRRecord);
+
+        assertTrue(myAuthDatabaseOperations.isOnBlackList("sample signature"));
     }
 
-    // TODO
+    // validation responds correctly handles null verification key
+    @Test
+    public void testValidateSecretKey1() {
+        // set up mock DB for selecting no verification keys
+        myJooqMock.addReturn("SELECT", new ArrayList<VerificationKeysRecord>());
+
+        try {
+            myAuthDatabaseOperations.validateSecretKey("my secret key", VerificationKeyType.FORGOT_PASSWORD);
+            fail();
+        } catch (InvalidSecretKeyException e) {
+            assertEquals(VerificationKeyType.FORGOT_PASSWORD, e.getType());
+        }
+    }
+
+    // validation responds correctly handles null verification key
+    @Test
+    public void testValidateSecretKey2() {
+        // set up mock DB for selecting a used verification key
+        VerificationKeysRecord myVerificationKey = new VerificationKeysRecord(
+            "0", 0, true, new Timestamp(TIMESTAMP_TEST), VerificationKeyType.FORGOT_PASSWORD);
+
+        myJooqMock.addReturn("SELECT", myVerificationKey);
+
+        try {
+            myAuthDatabaseOperations.validateSecretKey("my secret key", VerificationKeyType.FORGOT_PASSWORD);
+            fail();
+        } catch (UsedSecretKeyException e) {
+            assertEquals(VerificationKeyType.FORGOT_PASSWORD, e.getType());
+        }
+    }
+
+    // validation responds correctly handles expired verification key
+    @Test
+    public void testValidateSecretKey3() {
+        // set up mock DB for selecting an expired verification key
+        VerificationKeysRecord myVerificationKey = new VerificationKeysRecord(
+            "0", 0, false, new Timestamp(TIMESTAMP_TEST), VerificationKeyType.FORGOT_PASSWORD);
+
+        myJooqMock.addReturn("SELECT", myVerificationKey);
+
+        try {
+            myAuthDatabaseOperations.validateSecretKey("my secret key", VerificationKeyType.FORGOT_PASSWORD);
+            fail();
+        } catch (ExpiredSecretKeyException e) {
+            assertEquals(VerificationKeyType.FORGOT_PASSWORD, e.getType());
+        }
+    }
+
+    // case where validateSecretKey works correctly
+    @Test
+    public void testValidateSecretKey4() {
+        // set up mock DB for selecting verification key and user records
+        VerificationKeysRecord myVerificationKey = new VerificationKeysRecord(
+            "0", 1, false,
+            new Timestamp(new Date().getTime() + 100000), VerificationKeyType.FORGOT_PASSWORD);
+        myJooqMock.addReturn("SELECT", myVerificationKey);
+
+        UsersRecord myUserRecord = new UsersRecord();
+        myUserRecord.setId(1);
+        myJooqMock.addReturn("SELECT", myUserRecord);
+
+        UsersRecord usersRecordResponse = myAuthDatabaseOperations.validateSecretKey(
+            "my secret key", VerificationKeyType.FORGOT_PASSWORD);
+
+        assertEquals(myUserRecord.getId(), usersRecordResponse.getId());
+    }
+
+    // test that createSecretKey returns a token of correct length and the correct SQL bindings
     @Test
     public void testCreateSecretKey() {
-        fail();
+        myJooqMock.addReturn("UPDATE", new ArrayList<VerificationKeysRecord>());
+        myJooqMock.addReturn("INSERT", new ArrayList<VerificationKeysRecord>());
+
+        String token = myAuthDatabaseOperations.createSecretKey(0, VerificationKeyType.FORGOT_PASSWORD);
+
+        List<Object[]> updateBindings = myJooqMock.getSqlBindings().get("UPDATE");
+        List<Object[]> insertBindings = myJooqMock.getSqlBindings().get("INSERT");
+
+        // returns a token of correct length and the correct SQL bindings
+        assertEquals(50, token.length());
+        assertEquals(true, updateBindings.get(0)[0]);
+        assertEquals(token, insertBindings.get(0)[0]);
+        assertEquals(0, insertBindings.get(0)[1]);
+        assertEquals(VerificationKeyType.FORGOT_PASSWORD.getVal(), insertBindings.get(0)[2]);
     }
 }
