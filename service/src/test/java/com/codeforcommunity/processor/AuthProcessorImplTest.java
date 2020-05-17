@@ -4,28 +4,39 @@ import com.codeforcommunity.JooqMock;
 import com.codeforcommunity.auth.JWTCreator;
 import com.codeforcommunity.auth.JWTData;
 import com.codeforcommunity.auth.Passwords;
+import com.codeforcommunity.dto.auth.ForgotPasswordRequest;
 import com.codeforcommunity.dto.auth.LoginRequest;
 import com.codeforcommunity.dto.auth.NewUserRequest;
 import com.codeforcommunity.dto.auth.RefreshSessionRequest;
 import com.codeforcommunity.dto.auth.RefreshSessionResponse;
+import com.codeforcommunity.dto.auth.ResetPasswordRequest;
 import com.codeforcommunity.dto.auth.SessionResponse;
 import com.codeforcommunity.enums.PrivilegeLevel;
+import com.codeforcommunity.enums.VerificationKeyType;
 import com.codeforcommunity.exceptions.AuthException;
 
+import com.codeforcommunity.exceptions.InvalidPasswordException;
+import com.codeforcommunity.exceptions.UserDoesNotExistException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
 import org.jooq.generated.Tables;
 import org.jooq.generated.tables.records.BlacklistedRefreshesRecord;
 import org.jooq.generated.tables.records.UsersRecord;
+import org.jooq.generated.tables.records.VerificationKeysRecord;
 import org.jooq.impl.UpdatableRecordImpl;
 
-import org.mockito.Mockito;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import org.junit.Before;
@@ -43,7 +54,7 @@ public class AuthProcessorImplTest {
     @Before
     public void setup() {
         this.myJooqMock = new JooqMock();
-        this.mockJWTCreator = Mockito.mock(JWTCreator.class);
+        this.mockJWTCreator = mock(JWTCreator.class);
         this.myAuthProcessorImpl = new AuthProcessorImpl(myJooqMock.getContext(), mockJWTCreator);
     }
 
@@ -311,5 +322,137 @@ public class AuthProcessorImplTest {
         } catch (AuthException e) {
             assertEquals(e.getMessage(), "The refresh token has been invalidated by a previous logout");
         }
+    }
+
+    // test that requestPasswordReset throws proper exception if user doesn't exist
+    @Test
+    public void testRequestPasswordReset1() {
+        String userEmail = "brandon@example.com";
+
+        ForgotPasswordRequest mockReq = mock(ForgotPasswordRequest.class);
+        when(mockReq.getEmail()).thenReturn(userEmail);
+
+        try {
+            myAuthProcessorImpl.requestPasswordReset(mockReq);
+            fail();
+        } catch (UserDoesNotExistException e) {
+            assertEquals("email = " + userEmail, e.getIdentifierMessage());
+        }
+
+        verify(mockReq, times(1)).getEmail();
+    }
+
+    // test that requestPasswordReset succeeds under normal circumstances
+    @Test
+    public void testRequestPasswordReset2() {
+        String userEmail = "brandon@example.com";
+
+        ForgotPasswordRequest mockReq = mock(ForgotPasswordRequest.class);
+        when(mockReq.getEmail()).thenReturn(userEmail);
+
+        // mock the DB for the user
+        UsersRecord myUsersRecord = new UsersRecord();
+        myUsersRecord.setId(0);
+        myUsersRecord.setEmail(userEmail);
+        myJooqMock.addReturn("SELECT", myUsersRecord);
+
+        // so that JooqMock doesn't give us warnings
+        myJooqMock.addEmptyReturn("INSERT");
+        myJooqMock.addEmptyReturn("UPDATE");
+
+        myAuthProcessorImpl.requestPasswordReset(mockReq);
+
+        verify(mockReq, times(1)).getEmail();
+    }
+
+    // test that resetting the password fails if it's too short
+    @Test
+    public void testResetPassword1() {
+        String sk = "secret key";
+        String badPassword1 = "bad";
+        String badPassword2 = "poor";
+
+        ResetPasswordRequest req1 = new ResetPasswordRequest(sk, badPassword1);
+        ResetPasswordRequest req2 = new ResetPasswordRequest(sk, badPassword2);
+
+        try {
+            myAuthProcessorImpl.resetPassword(req1);
+            fail();
+        } catch (InvalidPasswordException e) {
+            // we're good
+        }
+
+        try {
+            myAuthProcessorImpl.resetPassword(req2);
+            fail();
+        } catch (InvalidPasswordException e) {
+            // we're good
+        }
+    }
+
+    // test that resetting the password fails if it's too short
+    @Test
+    public void testResetPassword2() {
+        String sk = "secret key";
+        String goodPassword = "good-password";
+
+        ResetPasswordRequest req = new ResetPasswordRequest(sk, goodPassword);
+
+        // mock the DB so that it contains the correct verification key
+        VerificationKeysRecord vkRecord = new VerificationKeysRecord();
+        vkRecord.setId(sk);
+        vkRecord.setUserId(0);
+        vkRecord.setType(VerificationKeyType.FORGOT_PASSWORD);
+        vkRecord.setUsed(false);
+        vkRecord.setCreated(new Timestamp(new Date().getTime()));
+        myJooqMock.addReturn("SELECT", vkRecord);
+        myJooqMock.addReturn("UPDATE", vkRecord);
+
+        // mock the DB so that it contains an actual user
+        UsersRecord userRecord = new UsersRecord();
+        userRecord.setId(0);
+        myJooqMock.addReturn("SELECT", userRecord);
+        myJooqMock.addReturn("UPDATE", userRecord);
+
+        myAuthProcessorImpl.resetPassword(req);
+
+        // test if the correct items are being updated
+        List<Object[]> updateBindings = myJooqMock.getSqlBindings().get("UPDATE");
+        assertEquals(sk, updateBindings.get(0)[1]);
+
+        // TODO: the nature of these two tests might be worth reviewing in the PR
+        // the new password is being stored, indicated by the bindings
+        assertTrue(updateBindings.get(1)[0] instanceof byte[]);
+        assertEquals(Passwords.createHash(goodPassword).length, ((byte[])(updateBindings.get(1)[0])).length);
+    }
+
+    // test that verifying an email works properly
+    @Test
+    public void testVerifyEmail() {
+        String sk = "secret key";
+
+        // mock the DB so that it contains the correct verification key
+        VerificationKeysRecord vkRecord = new VerificationKeysRecord();
+        vkRecord.setId(sk);
+        vkRecord.setUserId(0);
+        vkRecord.setType(VerificationKeyType.VERIFY_EMAIL);
+        vkRecord.setUsed(false);
+        vkRecord.setCreated(new Timestamp(new Date().getTime()));
+        myJooqMock.addReturn("SELECT", vkRecord);
+        myJooqMock.addReturn("UPDATE", vkRecord);
+
+        // mock the DB so that it contains an actual user
+        UsersRecord userRecord = new UsersRecord();
+        userRecord.setId(0);
+        myJooqMock.addReturn("SELECT", userRecord);
+        myJooqMock.addReturn("UPDATE", userRecord);
+
+        myAuthProcessorImpl.verifyEmail(sk);
+
+        List<Object[]> updateBindings = myJooqMock.getSqlBindings().get("UPDATE");
+
+        // test if the correct items are being updated
+        assertEquals(sk, updateBindings.get(0)[1]);
+        assertEquals(true, updateBindings.get(1)[0]);
     }
 }
