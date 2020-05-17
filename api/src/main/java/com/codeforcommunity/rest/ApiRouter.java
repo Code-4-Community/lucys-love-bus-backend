@@ -31,7 +31,6 @@ public class ApiRouter implements IRouter {
     private final AnnouncementsRouter announcementsRouter;
     private final CheckoutRouter checkoutRouter;
     private final WebhooksRouter webhooksRouter;
-
     public ApiRouter(IAuthProcessor authProcessor,
                      IProtectedUserProcessor protectedUserProcessor,
                      IRequestsProcessor requestsProcessor,

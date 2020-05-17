@@ -21,7 +21,6 @@ import static com.codeforcommunity.rest.ApiRouter.end;
 
 public class AuthRouter implements IRouter {
   private final IAuthProcessor authProcessor;
-
   public AuthRouter(IAuthProcessor authProcessor) {
     this.authProcessor = authProcessor;
   }
@@ -40,7 +39,6 @@ public class AuthRouter implements IRouter {
 
     return router;
   }
-
 
   private void registerLoginUser(Router router) {
     Route loginUserRoute = router.post("/login");
@@ -81,7 +79,6 @@ public class AuthRouter implements IRouter {
     verifySecretKeyRoute.handler(this::handleVerifySecretKey);
   }
 
-
   private void handlePostUserLoginRoute(RoutingContext ctx) {
     LoginRequest userRequest = RestFunctions.getJsonBodyAsClass(ctx, LoginRequest.class);
 
@@ -107,6 +104,7 @@ public class AuthRouter implements IRouter {
 
   private void handlePostNewUser(RoutingContext ctx) {
     NewUserRequest request = RestFunctions.getJsonBodyAsClass(ctx, NewUserRequest.class);
+
     SessionResponse response = authProcessor.signUp(request);
 
     end(ctx.response(), 201, JsonObject.mapFrom(response).toString());

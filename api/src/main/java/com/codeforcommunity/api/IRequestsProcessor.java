@@ -16,5 +16,5 @@ public interface IRequestsProcessor {
 
   void rejectRequest(int requestId, JWTData userData);
 
-  RequestStatus geRequestStatus(int requestId, JWTData userData);
+  RequestStatus getRequestStatus(int requestId, JWTData userData);
 }
