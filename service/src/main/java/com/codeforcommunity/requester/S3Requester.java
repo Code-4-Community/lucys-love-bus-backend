@@ -10,7 +10,6 @@ import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.codeforcommunity.aws.EncodedImage;
 import com.codeforcommunity.exceptions.BadRequestImageException;
 import com.codeforcommunity.exceptions.S3FailedUploadException;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -18,7 +17,8 @@ import java.util.Base64;
 
 public class S3Requester {
 
-  private static final String BUCKET_LLB_PUBLIC_URL = "https://lucys-love-bus-public.s3.us-east-2.amazonaws.com";
+  private static final String BUCKET_LLB_PUBLIC_URL =
+      "https://lucys-love-bus-public.s3.us-east-2.amazonaws.com";
   private static final String BUCKET_LLB_PUBLIC = "lucys-love-bus-public";
   private static final String DIR_LLB_PUBLIC_EVENTS = "events";
 
@@ -29,8 +29,8 @@ public class S3Requester {
   }
 
   /**
-   * Validates whether or not the given String is a base64 encoded image
-   * in the following format: data:image/{extension};base64,{imageData}.
+   * Validates whether or not the given String is a base64 encoded image in the following format:
+   * data:image/{extension};base64,{imageData}.
    *
    * @param base64Image the potential encoding of the image.
    * @return null if the String is not an encoded base64 image, otherwise an {@link EncodedImage}.
@@ -47,27 +47,27 @@ public class S3Requester {
       return null;
     }
 
-    String meta = base64ImageSplit[0];  // The image metadata (e.g. "data:image/png;base64")
-    String[] metaSplit = meta.split(";", 2);  // Split the metadata into data type and encoding type
+    String meta = base64ImageSplit[0]; // The image metadata (e.g. "data:image/png;base64")
+    String[] metaSplit = meta.split(";", 2); // Split the metadata into data type and encoding type
 
     if (metaSplit.length != 2 || !metaSplit[1].equals("base64")) {
       // Ensure the encoding type is base64
       return null;
     }
 
-    String[] dataSplit = metaSplit[0].split(":", 2);  // Split the data type
+    String[] dataSplit = metaSplit[0].split(":", 2); // Split the data type
     if (dataSplit.length != 2) {
       return null;
     }
 
-    String[] data = dataSplit[1].split("/", 2);   // Split the image type here (e.g. "image/png")
+    String[] data = dataSplit[1].split("/", 2); // Split the image type here (e.g. "image/png")
     if (data.length != 2 || !data[0].equals("image")) {
       // Ensure the encoded data is an image
       return null;
     }
 
-    String fileExtension = data[1];  // The image type (e.g. "png")
-    String encodedImage = base64ImageSplit[1];  // The encoded image
+    String fileExtension = data[1]; // The image type (e.g. "png")
+    String encodedImage = base64ImageSplit[1]; // The encoded image
 
     return new EncodedImage("image", fileExtension, encodedImage);
   }
@@ -75,14 +75,16 @@ public class S3Requester {
   /**
    * Validate the given base64 encoding of an image and upload it to the LLB public S3 bucket.
    *
-   * @param fileName       the desired name of the new file in S3 (without a file extension).
-   * @param directoryName  the desired directory of the file in S3 (without leading or trailing '/').
+   * @param fileName the desired name of the new file in S3 (without a file extension).
+   * @param directoryName the desired directory of the file in S3 (without leading or trailing '/').
    * @param base64Encoding the base64 encoding of the image to upload.
    * @return null if the encoding fails validation and image URL if the upload was successful.
    * @throws BadRequestImageException if the base64 image validation or image decoding failed.
-   * @throws S3FailedUploadException  if the upload to S3 failed.
+   * @throws S3FailedUploadException if the upload to S3 failed.
    */
-  private static String validateBase64ImageAndUploadToS3(String fileName, String directoryName, String base64Encoding) throws BadRequestImageException, S3FailedUploadException {
+  private static String validateBase64ImageAndUploadToS3(
+      String fileName, String directoryName, String base64Encoding)
+      throws BadRequestImageException, S3FailedUploadException {
     if (base64Encoding == null) {
       // No validation/uploading required if given no data
       return null;
@@ -111,12 +113,16 @@ public class S3Requester {
     }
 
     // Create the request to upload the image
-    PutObjectRequest awsRequest = new PutObjectRequest(BUCKET_LLB_PUBLIC, directoryName + "/" + fullFileName, tempFile);
-    awsRequest.setCannedAcl(CannedAccessControlList.PublicRead);  // Set the image to be publicly available
+    PutObjectRequest awsRequest =
+        new PutObjectRequest(BUCKET_LLB_PUBLIC, directoryName + "/" + fullFileName, tempFile);
+    awsRequest.setCannedAcl(
+        CannedAccessControlList.PublicRead); // Set the image to be publicly available
 
     // Set the image file metadata
     ObjectMetadata awsObjectMetadata = new ObjectMetadata();
-    awsObjectMetadata.setContentType(encodedImage.getFileType() + encodedImage.getFileExtension());  // Set file type to be an image
+    awsObjectMetadata.setContentType(
+        encodedImage.getFileType()
+            + encodedImage.getFileExtension()); // Set file type to be an image
     awsRequest.setMetadata(awsObjectMetadata);
 
     try {
@@ -134,15 +140,18 @@ public class S3Requester {
   }
 
   /**
-   * Validate the given base64 encoding of an image and upload it to the LLB public S3 bucket for Events.
+   * Validate the given base64 encoding of an image and upload it to the LLB public S3 bucket for
+   * Events.
    *
-   * @param eventTitle     the title of the Event.
+   * @param eventTitle the title of the Event.
    * @param base64Encoding the encoded image to upload.
-   * @return null if the initial base64Encoding was null, or the image URL if the upload was successful.
+   * @return null if the initial base64Encoding was null, or the image URL if the upload was
+   *     successful.
    * @throws BadRequestImageException if the base64 decoding failed.
-   * @throws S3FailedUploadException  if the upload to S3 failed.
+   * @throws S3FailedUploadException if the upload to S3 failed.
    */
-  public static String validateUploadImageToS3LucyEvents(String eventTitle, String base64Encoding) throws BadRequestImageException, S3FailedUploadException {
+  public static String validateUploadImageToS3LucyEvents(String eventTitle, String base64Encoding)
+      throws BadRequestImageException, S3FailedUploadException {
     String fileName = getImageFileNameWithoutExtension(eventTitle);
     return validateBase64ImageAndUploadToS3(fileName, DIR_LLB_PUBLIC_EVENTS, base64Encoding);
   }
@@ -154,7 +163,10 @@ public class S3Requester {
    * @return the String for the image file name (without the file extension).
    */
   public static String getImageFileNameWithoutExtension(String eventTitle) {
-    String title = eventTitle.replaceAll("[!@#$%^&*()=+./\\\\|<>`~\\[\\]{}?]", "");  // Remove special characters
-    return title.replace(" ", "_").toLowerCase() + "_thumbnail";  // The desired name of the file in S3
+    String title =
+        eventTitle.replaceAll(
+            "[!@#$%^&*()=+./\\\\|<>`~\\[\\]{}?]", ""); // Remove special characters
+    return title.replace(" ", "_").toLowerCase()
+        + "_thumbnail"; // The desired name of the file in S3
   }
 }

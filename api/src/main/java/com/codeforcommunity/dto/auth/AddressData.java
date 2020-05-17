@@ -17,10 +17,7 @@ public class AddressData {
   private AddressData() {}
 
   public boolean validate() {
-    return address != null &&
-        city != null &&
-        state != null &&
-        zipCode != null;
+    return address != null && city != null && state != null && zipCode != null;
   }
 
   public String getAddress() {

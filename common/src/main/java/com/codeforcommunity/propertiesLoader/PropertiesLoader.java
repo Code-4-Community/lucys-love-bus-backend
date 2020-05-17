@@ -8,8 +8,7 @@ public class PropertiesLoader {
 
   private static Properties getProperties(String file) {
 
-    try (InputStream input = PropertiesLoader.class.getClassLoader().
-            getResourceAsStream(file)) {
+    try (InputStream input = PropertiesLoader.class.getClassLoader().getResourceAsStream(file)) {
       Properties prop = new Properties();
       prop.load(input);
       return prop;
@@ -21,14 +20,20 @@ public class PropertiesLoader {
   public static Properties getEmailerProperties() {
     return getProperties("properties/emailer.properties");
   }
+
   public static Properties getDbProperties() {
     return getProperties("properties/db.properties");
   }
+
   public static Properties getExpirationProperties() {
     return getProperties("properties/expiration.properties");
   }
+
   public static Properties getJwtProperties() {
     return getProperties("properties/jwt.properties");
   }
-  public static Properties getStripeProperties() { return getProperties("properties/stripe.properties"); }
+
+  public static Properties getStripeProperties() {
+    return getProperties("properties/stripe.properties");
+  }
 }

@@ -2,7 +2,6 @@ package com.codeforcommunity.processor;
 
 import static org.jooq.generated.Tables.CONTACTS;
 import static org.jooq.generated.Tables.EVENT_REGISTRATIONS;
-import static org.jooq.generated.Tables.USERS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -17,8 +16,8 @@ import com.codeforcommunity.exceptions.EventDoesNotExistException;
 import org.jooq.Record4;
 import org.jooq.Result;
 import org.jooq.generated.tables.records.EventsRecord;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
@@ -41,8 +40,8 @@ public class EventsProcessorImplTest {
 
     try {
       processor.getEventRegisteredUsers(1, jwtData);
+    } catch (AdminOnlyRouteException ignored) {
     }
-    catch(AdminOnlyRouteException ignored) {}
   }
 
   @Test
@@ -53,8 +52,7 @@ public class EventsProcessorImplTest {
 
     try {
       processor.getEventRegisteredUsers(125, jwtData);
-    }
-    catch (EventDoesNotExistException e) {
+    } catch (EventDoesNotExistException e) {
       assertEquals(125, e.getEventId());
     }
   }
@@ -78,8 +76,13 @@ public class EventsProcessorImplTest {
     when(jwtData.getPrivilegeLevel()).thenReturn(PrivilegeLevel.ADMIN);
     mock.addReturn("SELECT", new EventsRecord());
 
-    Record4<String, String, String, Integer> result = mock.getContext().newRecord(
-        CONTACTS.FIRST_NAME, CONTACTS.LAST_NAME, CONTACTS.EMAIL, EVENT_REGISTRATIONS.TICKET_QUANTITY);
+    Record4<String, String, String, Integer> result =
+        mock.getContext()
+            .newRecord(
+                CONTACTS.FIRST_NAME,
+                CONTACTS.LAST_NAME,
+                CONTACTS.EMAIL,
+                EVENT_REGISTRATIONS.TICKET_QUANTITY);
     result.values("Conner", "Nilsen", "connernilsen@gmail.com", ticketCount);
     mock.addReturn("SELECT", result);
 
@@ -99,13 +102,22 @@ public class EventsProcessorImplTest {
     when(jwtData.getPrivilegeLevel()).thenReturn(PrivilegeLevel.ADMIN);
     mock.addReturn("SELECT", new EventsRecord());
 
-    Result<Record4<String, String, String, Integer>> result = mock.getContext().newResult(
-        CONTACTS.FIRST_NAME, CONTACTS.LAST_NAME, CONTACTS.EMAIL, EVENT_REGISTRATIONS.TICKET_QUANTITY);
+    Result<Record4<String, String, String, Integer>> result =
+        mock.getContext()
+            .newResult(
+                CONTACTS.FIRST_NAME,
+                CONTACTS.LAST_NAME,
+                CONTACTS.EMAIL,
+                EVENT_REGISTRATIONS.TICKET_QUANTITY);
 
     for (int i = 1; i < 6; i++) {
       Record4<String, String, String, Integer> tempRes =
-          mock.getContext().newRecord(
-              CONTACTS.FIRST_NAME, CONTACTS.LAST_NAME, CONTACTS.EMAIL, EVENT_REGISTRATIONS.TICKET_QUANTITY);
+          mock.getContext()
+              .newRecord(
+                  CONTACTS.FIRST_NAME,
+                  CONTACTS.LAST_NAME,
+                  CONTACTS.EMAIL,
+                  EVENT_REGISTRATIONS.TICKET_QUANTITY);
       tempRes.values("Conner" + i, "Nilsen" + i, "connernilsen@gmail.com" + i, i);
       result.add(tempRes);
     }

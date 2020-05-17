@@ -38,19 +38,19 @@ public class AnnouncementsProcessorImpl implements IAnnouncementsProcessor {
     Timestamp start = request.getStartDate();
     Timestamp end = request.getEndDate();
 
-    List<Announcements> announcements = db.selectFrom(ANNOUNCEMENTS)
-        .where(ANNOUNCEMENTS.CREATED.between(start, end))
-        .and(ANNOUNCEMENTS.EVENT_ID.isNull())
-        .orderBy(ANNOUNCEMENTS.CREATED.desc())
-        .fetchInto(Announcements.class);
+    List<Announcements> announcements =
+        db.selectFrom(ANNOUNCEMENTS)
+            .where(ANNOUNCEMENTS.CREATED.between(start, end))
+            .and(ANNOUNCEMENTS.EVENT_ID.isNull())
+            .orderBy(ANNOUNCEMENTS.CREATED.desc())
+            .fetchInto(Announcements.class);
 
     if (count < announcements.size()) {
       announcements = announcements.subList(0, count);
     }
-    return new GetAnnouncementsResponse(announcements.size(),
-        announcements.stream()
-            .map(this::convertAnnouncementObject)
-            .collect(Collectors.toList()));
+    return new GetAnnouncementsResponse(
+        announcements.size(),
+        announcements.stream().map(this::convertAnnouncementObject).collect(Collectors.toList()));
   }
 
   /**
@@ -60,7 +60,8 @@ public class AnnouncementsProcessorImpl implements IAnnouncementsProcessor {
    * @return an object of type Announcement
    */
   private Announcement convertAnnouncementObject(Announcements announcement) {
-    return new Announcement(announcement.getId(),
+    return new Announcement(
+        announcement.getId(),
         announcement.getTitle(),
         announcement.getDescription(),
         announcement.getCreated(),
@@ -68,7 +69,8 @@ public class AnnouncementsProcessorImpl implements IAnnouncementsProcessor {
   }
 
   @Override
-  public PostAnnouncementResponse postAnnouncement(PostAnnouncementRequest request, JWTData userData) {
+  public PostAnnouncementResponse postAnnouncement(
+      PostAnnouncementRequest request, JWTData userData) {
     if (userData.getPrivilegeLevel() != PrivilegeLevel.ADMIN) {
       throw new AdminOnlyRouteException();
     }
@@ -76,14 +78,16 @@ public class AnnouncementsProcessorImpl implements IAnnouncementsProcessor {
     newAnnouncementsRecord.store();
     // the timestamp wasn't showing correctly, so just
     // get the announcement directly from the database
-    return announcementPojoToResponse(db.selectFrom(ANNOUNCEMENTS)
-        .where(ANNOUNCEMENTS.ID.eq(newAnnouncementsRecord.getId()))
-        .fetchInto(Announcements.class).get(0));
+    return announcementPojoToResponse(
+        db.selectFrom(ANNOUNCEMENTS)
+            .where(ANNOUNCEMENTS.ID.eq(newAnnouncementsRecord.getId()))
+            .fetchInto(Announcements.class)
+            .get(0));
   }
 
   @Override
-  public PostAnnouncementResponse postEventSpecificAnnouncement(PostAnnouncementRequest request,
-      JWTData userData, int eventId) {
+  public PostAnnouncementResponse postEventSpecificAnnouncement(
+      PostAnnouncementRequest request, JWTData userData, int eventId) {
     if (userData.getPrivilegeLevel() != PrivilegeLevel.ADMIN) {
       throw new AdminOnlyRouteException();
     }
@@ -102,15 +106,15 @@ public class AnnouncementsProcessorImpl implements IAnnouncementsProcessor {
     int eventId = request.getEventId();
     validateEventId(eventId);
 
-    List<Announcements> announcements = db.selectFrom(ANNOUNCEMENTS)
-        .where(ANNOUNCEMENTS.EVENT_ID.eq(eventId))
-        .orderBy(ANNOUNCEMENTS.CREATED.desc())
-        .fetchInto(Announcements.class);
+    List<Announcements> announcements =
+        db.selectFrom(ANNOUNCEMENTS)
+            .where(ANNOUNCEMENTS.EVENT_ID.eq(eventId))
+            .orderBy(ANNOUNCEMENTS.CREATED.desc())
+            .fetchInto(Announcements.class);
 
-    return new GetAnnouncementsResponse(announcements.size(),
-        announcements.stream()
-            .map(this::convertAnnouncementObject)
-            .collect(Collectors.toList()));
+    return new GetAnnouncementsResponse(
+        announcements.size(),
+        announcements.stream().map(this::convertAnnouncementObject).collect(Collectors.toList()));
   }
 
   private PostAnnouncementResponse announcementPojoToResponse(Announcements announcements) {
@@ -125,8 +129,8 @@ public class AnnouncementsProcessorImpl implements IAnnouncementsProcessor {
   }
 
   private void validateEventId(int eventId) {
-    List<Events> matchingEvents = db.selectFrom(EVENTS).where(EVENTS.ID.eq(eventId)).fetchInto(
-        Events.class);
+    List<Events> matchingEvents =
+        db.selectFrom(EVENTS).where(EVENTS.ID.eq(eventId)).fetchInto(Events.class);
     if (matchingEvents.size() == 0) {
       throw new MalformedParameterException("event_id");
     }

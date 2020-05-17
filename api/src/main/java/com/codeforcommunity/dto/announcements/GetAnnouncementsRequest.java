@@ -1,7 +1,7 @@
 package com.codeforcommunity.dto.announcements;
 
-import java.sql.Timestamp;
 import com.codeforcommunity.exceptions.MalformedParameterException;
+import java.sql.Timestamp;
 import java.util.Date;
 
 public class GetAnnouncementsRequest {

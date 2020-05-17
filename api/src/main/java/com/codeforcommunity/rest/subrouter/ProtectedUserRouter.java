@@ -1,5 +1,8 @@
 package com.codeforcommunity.rest.subrouter;
 
+import static com.codeforcommunity.rest.ApiRouter.end;
+import static com.codeforcommunity.rest.RestFunctions.getJsonBodyAsClass;
+
 import com.codeforcommunity.api.IProtectedUserProcessor;
 import com.codeforcommunity.auth.JWTData;
 import com.codeforcommunity.dto.protected_user.SetContactsAndChildrenRequest;
@@ -9,9 +12,6 @@ import io.vertx.core.Vertx;
 import io.vertx.ext.web.Route;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
-
-import static com.codeforcommunity.rest.ApiRouter.end;
-import static com.codeforcommunity.rest.RestFunctions.getJsonBodyAsClass;
 
 public class ProtectedUserRouter implements IRouter {
 
@@ -57,7 +57,8 @@ public class ProtectedUserRouter implements IRouter {
 
   private void handleChangePasswordRoute(RoutingContext ctx) {
     JWTData userData = ctx.get("jwt_data");
-    ChangePasswordRequest changePasswordRequest = getJsonBodyAsClass(ctx, ChangePasswordRequest.class);
+    ChangePasswordRequest changePasswordRequest =
+        getJsonBodyAsClass(ctx, ChangePasswordRequest.class);
 
     processor.changePassword(userData, changePasswordRequest);
 
@@ -66,7 +67,8 @@ public class ProtectedUserRouter implements IRouter {
 
   private void handleSetUserContactInfo(RoutingContext ctx) {
     JWTData userData = ctx.get("jwt_data");
-    SetContactsAndChildrenRequest setUserContactInfoRequest = getJsonBodyAsClass(ctx, SetContactsAndChildrenRequest.class);
+    SetContactsAndChildrenRequest setUserContactInfoRequest =
+        getJsonBodyAsClass(ctx, SetContactsAndChildrenRequest.class);
 
     processor.setContactsAndChildren(userData, setUserContactInfoRequest);
 

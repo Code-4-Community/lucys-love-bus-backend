@@ -2,7 +2,6 @@ package com.codeforcommunity.requester;
 
 import com.codeforcommunity.email.EmailOperations;
 import com.codeforcommunity.propertiesLoader.PropertiesLoader;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -19,7 +18,8 @@ public class Emailer {
     String emailHost = emailProperties.getProperty("emailHost");
     int emailPort = Integer.parseInt(emailProperties.getProperty("emailPort"));
 
-    this.emailOperations = new EmailOperations(senderName, sendEmail, sendPassword, emailHost, emailPort);
+    this.emailOperations =
+        new EmailOperations(senderName, sendEmail, sendPassword, emailHost, emailPort);
   }
 
   public void sendWelcomeEmail(String sendToEmail, String sendToName, String verificationLink) {

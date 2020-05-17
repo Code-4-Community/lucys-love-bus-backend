@@ -54,6 +54,4 @@ public class Event {
   public void setDetails(EventDetails details) {
     this.details = details;
   }
-
 }
-

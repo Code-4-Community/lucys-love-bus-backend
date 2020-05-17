@@ -1,7 +1,9 @@
 package com.codeforcommunity.enums;
 
 public enum RequestStatus {
-  PENDING(0), APPROVED(1), REJECTED(2);
+  PENDING(0),
+  APPROVED(1),
+  REJECTED(2);
 
   private int val;
 
@@ -19,6 +21,7 @@ public enum RequestStatus {
         return status;
       }
     }
-    throw new IllegalArgumentException(String.format("Given num (%d) that doesn't correspond to any RequestStatus", val));
+    throw new IllegalArgumentException(
+        String.format("Given num (%d) that doesn't correspond to any RequestStatus", val));
   }
 }

@@ -4,7 +4,6 @@ import com.codeforcommunity.auth.JWTData;
 import com.codeforcommunity.dto.pfrequests.CreateRequest;
 import com.codeforcommunity.dto.pfrequests.RequestData;
 import com.codeforcommunity.enums.RequestStatus;
-
 import java.util.List;
 
 public interface IRequestsProcessor {
