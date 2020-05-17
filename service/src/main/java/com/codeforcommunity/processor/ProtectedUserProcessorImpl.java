@@ -90,7 +90,7 @@ public class ProtectedUserProcessorImpl implements IProtectedUserProcessor {
             .fetchOne();
 
     if (mainContact == null) {
-      return;
+      throw new UserDoesNotExistException(userData.getUserId());
     }
 
     mainContact.setFirstName(newContactData.getFirstName());
@@ -152,6 +152,7 @@ public class ProtectedUserProcessorImpl implements IProtectedUserProcessor {
       contactsRecord.setMedications(c.getMedications());
       contactsRecord.setNotes(c.getNotes());
       contactsRecord.setShouldSendEmails(c.getShouldSendEmail());
+      contactsRecord.setPhoneNumber(c.getPhoneNumber());
 
       contactsRecord.store();
     }
