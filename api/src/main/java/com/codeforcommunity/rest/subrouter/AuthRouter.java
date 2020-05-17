@@ -77,7 +77,7 @@ public class AuthRouter implements IRouter {
    * user's email.
    */
   private void registerVerifySecretKey(Router router) {
-    Route verifySecretKeyRoute = router.get("/verify/:secret_key");
+    Route verifySecretKeyRoute = router.post("/verify/:secret_key");
     verifySecretKeyRoute.handler(this::handleVerifySecretKey);
   }
 
