@@ -98,6 +98,7 @@ public class AuthDatabaseOperations {
         newUser.setPrivilegeLevel(PrivilegeLevel.GP);
         newUser.store();
 
+        String verificationToken = createSecretKey(newUser.getId(), VerificationKeyType.VERIFY_EMAIL);
         // TODO: Send verification email
     }
 
@@ -106,9 +107,10 @@ public class AuthDatabaseOperations {
      */
     public void addToBlackList(String signature) {
         Timestamp expirationTimestamp = Timestamp.from(Instant.now().plusMillis(msRefreshExpiration));
-        db.newRecord(Tables.BLACKLISTED_REFRESHES)
+        db.insertInto(Tables.BLACKLISTED_REFRESHES)
             .values(signature, expirationTimestamp)
-            .store();
+            .onDuplicateKeyIgnore()
+            .execute();
     }
 
     /**
@@ -156,8 +158,6 @@ public class AuthDatabaseOperations {
 
 
     /**
-     * TODO: This method should be called as part of sign-up flow
-     *
      * Given a userId and token, stores the token in the verification_keys table for the user
      * and invalidates all other keys of this type for this user.
      */
