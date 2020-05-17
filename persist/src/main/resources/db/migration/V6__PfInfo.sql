@@ -43,8 +43,8 @@ CREATE TABLE IF NOT EXISTS children (
     date_of_birth DATE NOT NULL,
 	pronouns VARCHAR(32) NOT NULL,
 
-	school_year VARCHAR(32),
-	school VARCHAR(64),
+	school_year VARCHAR(32) NOT NULL,
+	school VARCHAR(64) NOT NULL,
 
 	allergies TEXT,
 	diagnosis TEXT,

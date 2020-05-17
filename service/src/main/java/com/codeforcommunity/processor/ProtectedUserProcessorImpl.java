@@ -3,7 +3,7 @@ package com.codeforcommunity.processor;
 import com.codeforcommunity.api.IProtectedUserProcessor;
 import com.codeforcommunity.auth.JWTData;
 import com.codeforcommunity.auth.Passwords;
-import com.codeforcommunity.dto.protected_user.SetContactsAndChildrenoRequest;
+import com.codeforcommunity.dto.protected_user.SetContactsAndChildrenRequest;
 import com.codeforcommunity.dto.protected_user.components.Child;
 import com.codeforcommunity.dto.protected_user.components.Contact;
 import com.codeforcommunity.dto.user.ChangePasswordRequest;
@@ -66,7 +66,7 @@ public class ProtectedUserProcessorImpl implements IProtectedUserProcessor {
   }
 
   @Override
-  public void setContactsAndChildren(JWTData userData, SetContactsAndChildrenoRequest setContactsAndChildrenRequest) {
+  public void setContactsAndChildren(JWTData userData, SetContactsAndChildrenRequest setContactsAndChildrenRequest) {
 
     updateMainContact(userData, setContactsAndChildrenRequest.getMainContact());
 

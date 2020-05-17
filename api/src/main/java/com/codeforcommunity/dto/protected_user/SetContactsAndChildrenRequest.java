@@ -5,15 +5,15 @@ import com.codeforcommunity.dto.protected_user.components.Contact;
 
 import java.util.List;
 
-public class SetContactsAndChildrenoRequest {
+public class SetContactsAndChildrenRequest {
 
     private Contact mainContact;
     private List<Contact> additionalContacts;
     private List<Child> children;
 
-    public SetContactsAndChildrenoRequest() {}
+    public SetContactsAndChildrenRequest() {}
 
-    public SetContactsAndChildrenoRequest(Contact mainContact, List<Contact> additionalContacts, List<Child> children) {
+    public SetContactsAndChildrenRequest(Contact mainContact, List<Contact> additionalContacts, List<Child> children) {
         this.mainContact = mainContact;
         this.additionalContacts = additionalContacts;
         this.children = children;

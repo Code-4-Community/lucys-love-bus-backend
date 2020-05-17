@@ -1,7 +1,7 @@
 package com.codeforcommunity.api;
 
 import com.codeforcommunity.auth.JWTData;
-import com.codeforcommunity.dto.protected_user.SetContactsAndChildrenoRequest;
+import com.codeforcommunity.dto.protected_user.SetContactsAndChildrenRequest;
 import com.codeforcommunity.dto.user.ChangePasswordRequest;
 
 public interface IProtectedUserProcessor {
@@ -17,5 +17,5 @@ public interface IProtectedUserProcessor {
    */
   void changePassword(JWTData userData, ChangePasswordRequest changePasswordRequest);
 
-  void setContactsAndChildren(JWTData userData, SetContactsAndChildrenoRequest setContactsAndChildrenRequest);
+  void setContactsAndChildren(JWTData userData, SetContactsAndChildrenRequest setContactsAndChildrenRequest);
 }
