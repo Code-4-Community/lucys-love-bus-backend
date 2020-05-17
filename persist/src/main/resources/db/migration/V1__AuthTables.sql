@@ -30,4 +30,4 @@ CREATE TABLE  IF NOT EXISTS pf_requests (
     created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT pf_requests_user_id_fk FOREIGN KEY (user_id) REFERENCES users(id)
-)
+);

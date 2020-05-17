@@ -1,5 +1,6 @@
 package com.codeforcommunity.processor;
 
+import static org.jooq.generated.Tables.CONTACTS;
 import static org.jooq.generated.Tables.EVENT_REGISTRATIONS;
 import static org.jooq.generated.Tables.USERS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -78,7 +79,7 @@ public class EventsProcessorImplTest {
     mock.addReturn("SELECT", new EventsRecord());
 
     Record4<String, String, String, Integer> result = mock.getContext().newRecord(
-        USERS.FIRST_NAME, USERS.LAST_NAME, USERS.EMAIL, EVENT_REGISTRATIONS.TICKET_QUANTITY);
+        CONTACTS.FIRST_NAME, CONTACTS.LAST_NAME, CONTACTS.EMAIL, EVENT_REGISTRATIONS.TICKET_QUANTITY);
     result.values("Conner", "Nilsen", "connernilsen@gmail.com", ticketCount);
     mock.addReturn("SELECT", result);
 
@@ -99,12 +100,12 @@ public class EventsProcessorImplTest {
     mock.addReturn("SELECT", new EventsRecord());
 
     Result<Record4<String, String, String, Integer>> result = mock.getContext().newResult(
-        USERS.FIRST_NAME, USERS.LAST_NAME, USERS.EMAIL, EVENT_REGISTRATIONS.TICKET_QUANTITY);
+        CONTACTS.FIRST_NAME, CONTACTS.LAST_NAME, CONTACTS.EMAIL, EVENT_REGISTRATIONS.TICKET_QUANTITY);
 
     for (int i = 1; i < 6; i++) {
       Record4<String, String, String, Integer> tempRes =
           mock.getContext().newRecord(
-              USERS.FIRST_NAME, USERS.LAST_NAME, USERS.EMAIL, EVENT_REGISTRATIONS.TICKET_QUANTITY);
+              CONTACTS.FIRST_NAME, CONTACTS.LAST_NAME, CONTACTS.EMAIL, EVENT_REGISTRATIONS.TICKET_QUANTITY);
       tempRes.values("Conner" + i, "Nilsen" + i, "connernilsen@gmail.com" + i, i);
       result.add(tempRes);
     }

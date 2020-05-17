@@ -1,6 +1,5 @@
 package com.codeforcommunity.processor;
 
-import com.amazonaws.AmazonServiceException;
 import com.codeforcommunity.api.IEventsProcessor;
 import com.codeforcommunity.auth.JWTData;
 import com.codeforcommunity.dataaccess.EventDatabaseOperations;
@@ -11,18 +10,14 @@ import com.codeforcommunity.dto.userEvents.responses.EventRegistrations;
 import com.codeforcommunity.dto.userEvents.responses.SingleEventResponse;
 import com.codeforcommunity.dto.userEvents.components.Event;
 import com.codeforcommunity.dto.userEvents.components.EventDetails;
-import com.codeforcommunity.dto.userEvents.requests.CreateEventRequest;
 import com.codeforcommunity.dto.userEvents.requests.GetUserEventsRequest;
-import com.codeforcommunity.dto.userEvents.requests.ModifyEventRequest;
 import com.codeforcommunity.dto.userEvents.responses.GetEventsResponse;
-import com.codeforcommunity.dto.userEvents.responses.SingleEventResponse;
 import com.codeforcommunity.enums.PrivilegeLevel;
 import com.codeforcommunity.exceptions.AdminOnlyRouteException;
 import com.codeforcommunity.exceptions.BadRequestImageException;
 import com.codeforcommunity.exceptions.EventDoesNotExistException;
 import com.codeforcommunity.exceptions.S3FailedUploadException;
 import com.codeforcommunity.requester.S3Requester;
-import com.codeforcommunity.exceptions.EventDoesNotExistException;
 import org.jooq.DSLContext;
 import org.jooq.SelectConditionStep;
 import org.jooq.SelectSeekStep1;
@@ -30,13 +25,13 @@ import org.jooq.SelectWhereStep;
 import org.jooq.generated.tables.pojos.Events;
 import org.jooq.generated.tables.records.EventsRecord;
 
-import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.Period;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static org.jooq.generated.Tables.CONTACTS;
 import static org.jooq.generated.Tables.EVENTS;
 import static org.jooq.generated.Tables.EVENT_REGISTRATIONS;
 import static org.jooq.generated.Tables.USERS;
@@ -197,11 +192,12 @@ public class EventsProcessorImpl implements IEventsProcessor {
     }
 
     List<Registration> regs =
-        db.select(USERS.FIRST_NAME, USERS.LAST_NAME, USERS.EMAIL, EVENT_REGISTRATIONS.TICKET_QUANTITY)
-        .from(EVENT_REGISTRATIONS)
-        .join(USERS).on(EVENT_REGISTRATIONS.USER_ID.eq(USERS.ID))
-        .where(EVENT_REGISTRATIONS.EVENT_ID.eq(eventId))
-        .fetchInto(Registration.class);
+        db.select(CONTACTS.FIRST_NAME, CONTACTS.LAST_NAME, CONTACTS.EMAIL, EVENT_REGISTRATIONS.TICKET_QUANTITY)
+          .from(EVENT_REGISTRATIONS)
+          .join(CONTACTS).on(EVENT_REGISTRATIONS.USER_ID.eq(USERS.ID))
+          .where(EVENT_REGISTRATIONS.EVENT_ID.eq(eventId))
+          .and(CONTACTS.IS_MAIN_CONTACT.isTrue())
+          .fetchInto(Registration.class);
 
     return new EventRegistrations(regs);
   }

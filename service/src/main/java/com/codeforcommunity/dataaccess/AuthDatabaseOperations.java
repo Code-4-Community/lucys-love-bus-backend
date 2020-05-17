@@ -2,6 +2,8 @@ package com.codeforcommunity.dataaccess;
 
 import com.codeforcommunity.auth.JWTData;
 import com.codeforcommunity.auth.Passwords;
+import com.codeforcommunity.dto.auth.AddressData;
+import com.codeforcommunity.dto.auth.NewUserRequest;
 import com.codeforcommunity.enums.PrivilegeLevel;
 import com.codeforcommunity.enums.VerificationKeyType;
 import com.codeforcommunity.exceptions.EmailAlreadyInUseException;
@@ -14,6 +16,7 @@ import com.codeforcommunity.propertiesLoader.PropertiesLoader;
 import org.jooq.DSLContext;
 import org.jooq.generated.Tables;
 import org.jooq.generated.tables.pojos.Users;
+import org.jooq.generated.tables.records.ContactsRecord;
 import org.jooq.generated.tables.records.UsersRecord;
 import org.jooq.generated.tables.records.VerificationKeysRecord;
 
@@ -22,6 +25,7 @@ import java.time.Instant;
 import java.util.Optional;
 import java.util.Properties;
 
+import static org.jooq.generated.Tables.CONTACTS;
 import static org.jooq.generated.Tables.USERS;
 import static org.jooq.generated.Tables.VERIFICATION_KEYS;
 
@@ -79,12 +83,12 @@ public class AuthDatabaseOperations {
     }
 
     /**
-     * TODO: Refactor this method to take in a DTO / POJO instance
      * Creates a new row in the USER table with the given values.
      *
      * @throws EmailAlreadyInUseException if the given username and email are already used in the USER table.
      */
-    public void createNewUser(String email, String password, String firstName, String lastName) {
+    public void createNewUser(NewUserRequest request) {
+        String email = request.getEmail();
         boolean emailUsed = db.fetchExists(db.selectFrom(USERS).where(USERS.EMAIL.eq(email)));
         if (emailUsed) {
             throw new EmailAlreadyInUseException(email);
@@ -92,11 +96,23 @@ public class AuthDatabaseOperations {
 
         UsersRecord newUser = db.newRecord(USERS);
         newUser.setEmail(email);
-        newUser.setPassHash(Passwords.createHash(password));
-        newUser.setFirstName(firstName);
-        newUser.setLastName(lastName);
+        newUser.setPassHash(Passwords.createHash(request.getPassword()));
+        addAddressDataToUserRecord(newUser, request.getLocation());
         newUser.setPrivilegeLevel(PrivilegeLevel.GP);
         newUser.store();
+
+        ContactsRecord mainContact = db.newRecord(CONTACTS);
+        mainContact.setIsMainContact(true);
+        mainContact.setUserId(newUser.getId());
+        mainContact.setEmail(email);
+        mainContact.setShouldSendEmails(true);
+
+        mainContact.setFirstName(request.getFirstName());
+        mainContact.setLastName(request.getLastName());
+        mainContact.setPhoneNumber(request.getPhoneNumber());
+        mainContact.setAllergies(request.getAllergies());
+        mainContact.store();
+
 
         String verificationToken = createSecretKey(newUser.getId(), VerificationKeyType.VERIFY_EMAIL);
         // TODO: Send verification email
@@ -193,5 +209,12 @@ public class AuthDatabaseOperations {
             throw new IllegalStateException(String.format("Verification type %s not implemented", type.name()));
         }
         return tokenResult.getCreated().after(cutoffDate);
+    }
+
+    private void addAddressDataToUserRecord(UsersRecord usersRecord, AddressData addressData) {
+        usersRecord.setAddress(addressData.getAddress());
+        usersRecord.setCity(addressData.getCity());
+        usersRecord.setState(addressData.getState());
+        usersRecord.setZipcode(addressData.getZipCode());
     }
 }
