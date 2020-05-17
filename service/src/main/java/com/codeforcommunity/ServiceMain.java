@@ -18,11 +18,9 @@ import com.codeforcommunity.processor.RequestsProcessorImpl;
 import com.codeforcommunity.propertiesLoader.PropertiesLoader;
 import com.codeforcommunity.requester.Emailer;
 import com.codeforcommunity.rest.ApiRouter;
-
+import java.util.Properties;
 import org.jooq.DSLContext;
 import org.jooq.impl.DSL;
-
-import java.util.Properties;
 
 public class ServiceMain {
   private DSLContext db;
@@ -37,35 +35,32 @@ public class ServiceMain {
     }
   }
 
-  /**
-   * Start the server, get everything going.
-   */
+  /** Start the server, get everything going. */
   public void initialize() {
     connectDb();
     initializeServer();
   }
 
-  /**
-   * Connect to the database and create a DSLContext so jOOQ can interact with it.
-   */
+  /** Connect to the database and create a DSLContext so jOOQ can interact with it. */
   private void connectDb() {
-    //This block ensures that the driver is loaded in the classpath
+    // This block ensures that the driver is loaded in the classpath
     try {
       Class.forName(dbProperties.getProperty("database.driver"));
     } catch (ClassNotFoundException e) {
       e.printStackTrace();
     }
 
-    this.db = DSL.using(dbProperties.getProperty("database.url"),
-        dbProperties.getProperty("database.username"),
-        dbProperties.getProperty("database.password"));
+    this.db =
+        DSL.using(
+            dbProperties.getProperty("database.url"),
+            dbProperties.getProperty("database.username"),
+            dbProperties.getProperty("database.password"));
   }
 
-  /**
-   * Initialize the server and get all the supporting classes going.
-   */
+  /** Initialize the server and get all the supporting classes going. */
   private void initializeServer() {
-    JWTHandler jwtHandler = new JWTHandler(PropertiesLoader.getJwtProperties().getProperty("secret_key"));
+    JWTHandler jwtHandler =
+        new JWTHandler(PropertiesLoader.getJwtProperties().getProperty("secret_key"));
     JWTAuthorizer jwtAuthorizer = new JWTAuthorizer(jwtHandler);
     JWTCreator jwtCreator = new JWTCreator(jwtHandler);
 
@@ -78,20 +73,20 @@ public class ServiceMain {
     IAnnouncementsProcessor announcementEventsProcessor = new AnnouncementsProcessorImpl(this.db);
     ICheckoutProcessor checkoutProcessor = new CheckoutProcessorImpl(this.db);
 
-    ApiRouter router = new ApiRouter(authProcessor,
-        protectedUserProcessor,
-        requestsProcessor,
-        eventsProcessor,
-        announcementEventsProcessor,
-        checkoutProcessor,
-        jwtAuthorizer);
+    ApiRouter router =
+        new ApiRouter(
+            authProcessor,
+            protectedUserProcessor,
+            requestsProcessor,
+            eventsProcessor,
+            announcementEventsProcessor,
+            checkoutProcessor,
+            jwtAuthorizer);
 
     startApiServer(router);
   }
 
-  /**
-   * Start up the actual API server that will listen for requests.
-   */
+  /** Start up the actual API server that will listen for requests. */
   private void startApiServer(ApiRouter router) {
     ApiMain apiMain = new ApiMain(router);
     apiMain.startApi();

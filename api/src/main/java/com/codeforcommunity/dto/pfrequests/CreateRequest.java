@@ -7,9 +7,7 @@ public class CreateRequest {
     this.description = description;
   }
 
-  /**
-   * This constructor exists so that Jackson can map JSON directly to it.
-   */
+  /** This constructor exists so that Jackson can map JSON directly to it. */
   private CreateRequest() {}
 
   public String getDescription() {

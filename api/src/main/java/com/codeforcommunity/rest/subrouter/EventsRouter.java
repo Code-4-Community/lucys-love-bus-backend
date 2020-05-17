@@ -1,29 +1,28 @@
 package com.codeforcommunity.rest.subrouter;
 
+import static com.codeforcommunity.rest.ApiRouter.end;
+import static com.codeforcommunity.rest.RestFunctions.getJsonBodyAsClass;
+import static com.codeforcommunity.rest.RestFunctions.getMultipleQueryParams;
+import static com.codeforcommunity.rest.RestFunctions.getOptionalQueryParam;
+import static com.codeforcommunity.rest.RestFunctions.getRequestParameterAsInt;
+
 import com.codeforcommunity.api.IEventsProcessor;
 import com.codeforcommunity.auth.JWTData;
 import com.codeforcommunity.dto.userEvents.requests.CreateEventRequest;
+import com.codeforcommunity.dto.userEvents.requests.GetUserEventsRequest;
 import com.codeforcommunity.dto.userEvents.requests.ModifyEventRequest;
 import com.codeforcommunity.dto.userEvents.responses.EventRegistrations;
-import com.codeforcommunity.dto.userEvents.responses.SingleEventResponse;
-import com.codeforcommunity.dto.userEvents.requests.GetUserEventsRequest;
 import com.codeforcommunity.dto.userEvents.responses.GetEventsResponse;
+import com.codeforcommunity.dto.userEvents.responses.SingleEventResponse;
 import com.codeforcommunity.rest.IRouter;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Route;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
-
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
-
-import static com.codeforcommunity.rest.ApiRouter.end;
-import static com.codeforcommunity.rest.RestFunctions.getJsonBodyAsClass;
-import static com.codeforcommunity.rest.RestFunctions.getMultipleQueryParams;
-import static com.codeforcommunity.rest.RestFunctions.getOptionalQueryParam;
-import static com.codeforcommunity.rest.RestFunctions.getRequestParameterAsInt;
 
 public class EventsRouter implements IRouter {
 
@@ -91,8 +90,7 @@ public class EventsRouter implements IRouter {
 
   private void handleGetEvents(RoutingContext ctx) {
 
-    List<Integer> intIds = getMultipleQueryParams(ctx, "ids",
-            str -> Integer.parseInt(str));
+    List<Integer> intIds = getMultipleQueryParams(ctx, "ids", str -> Integer.parseInt(str));
 
     GetEventsResponse response = processor.getEvents(intIds);
 
@@ -100,15 +98,16 @@ public class EventsRouter implements IRouter {
   }
 
   private void handleGetUserEventsQualified(RoutingContext ctx) {
-     GetEventsResponse response = processor.getEventsQualified(ctx.get("jwt_data"));
-     end(ctx.response(), 200, JsonObject.mapFrom(response).encode());
+    GetEventsResponse response = processor.getEventsQualified(ctx.get("jwt_data"));
+    end(ctx.response(), 200, JsonObject.mapFrom(response).encode());
   }
 
   private void handleGetUserEventsSignedUp(RoutingContext ctx) {
 
     Optional<Integer> count = getOptionalQueryParam(ctx, "count", str -> Integer.parseInt(str));
     Optional<Timestamp> endDate = getOptionalQueryParam(ctx, "end", str -> Timestamp.valueOf(str));
-    Optional<Timestamp> startDate = getOptionalQueryParam(ctx, "start", str -> Timestamp.valueOf(str));
+    Optional<Timestamp> startDate =
+        getOptionalQueryParam(ctx, "start", str -> Timestamp.valueOf(str));
 
     GetUserEventsRequest request = new GetUserEventsRequest(endDate, startDate, count);
 
@@ -116,7 +115,7 @@ public class EventsRouter implements IRouter {
 
     GetEventsResponse response = processor.getEventsSignedUp(request, userData);
 
-    end(ctx.response(),200, JsonObject.mapFrom(response).encode());
+    end(ctx.response(), 200, JsonObject.mapFrom(response).encode());
   }
 
   private void handleCreateEventRoute(RoutingContext ctx) {

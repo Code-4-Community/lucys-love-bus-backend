@@ -1,7 +1,6 @@
 package com.codeforcommunity.dto.userEvents.requests;
 
 import com.codeforcommunity.dto.userEvents.components.EventDetails;
-import java.util.Optional;
 
 public class ModifyEventRequest {
   private String title;
@@ -11,8 +10,8 @@ public class ModifyEventRequest {
 
   private ModifyEventRequest() {}
 
-  public ModifyEventRequest(String title, Integer spotsAvailable, String thumbnail,
-      EventDetails details) {
+  public ModifyEventRequest(
+      String title, Integer spotsAvailable, String thumbnail, EventDetails details) {
     this.title = title;
     this.spotsAvailable = spotsAvailable;
     this.thumbnail = thumbnail;

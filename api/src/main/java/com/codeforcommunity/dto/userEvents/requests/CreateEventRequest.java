@@ -8,7 +8,8 @@ public class CreateEventRequest {
   private String thumbnail;
   private EventDetails details;
 
-  public CreateEventRequest(String title, int spotsAvailable, String thumbnail, EventDetails details) {
+  public CreateEventRequest(
+      String title, int spotsAvailable, String thumbnail, EventDetails details) {
     this.title = title;
     this.spotsAvailable = spotsAvailable;
     this.thumbnail = thumbnail;

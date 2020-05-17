@@ -15,8 +15,8 @@ public class Announcement {
 
   private Announcement() {}
 
-  public Announcement(int id, String title, String description, Timestamp created,
-      Integer eventId) {
+  public Announcement(
+      int id, String title, String description, Timestamp created, Integer eventId) {
     this.id = id;
     this.title = title;
     this.description = description;
@@ -46,12 +46,19 @@ public class Announcement {
 
   @Override
   public String toString() {
-    return "Announcement{" +
-        "id=" + id +
-        ", title='" + title + '\'' +
-        ", description='" + description + '\'' +
-        ", eventId=" + eventId +
-        ", created=" + created +
-        '}';
+    return "Announcement{"
+        + "id="
+        + id
+        + ", title='"
+        + title
+        + '\''
+        + ", description='"
+        + description
+        + '\''
+        + ", eventId="
+        + eventId
+        + ", created="
+        + created
+        + '}';
   }
 }

@@ -1,12 +1,14 @@
 package com.codeforcommunity.rest.subrouter;
 
+import static com.codeforcommunity.rest.ApiRouter.end;
+
 import com.codeforcommunity.api.IRequestsProcessor;
 import com.codeforcommunity.auth.JWTData;
 import com.codeforcommunity.dto.pfrequests.CreateRequest;
 import com.codeforcommunity.dto.pfrequests.GetRequestsResponse;
 import com.codeforcommunity.dto.pfrequests.RequestData;
-import com.codeforcommunity.enums.RequestStatus;
 import com.codeforcommunity.dto.pfrequests.RequestStatusResponse;
+import com.codeforcommunity.enums.RequestStatus;
 import com.codeforcommunity.rest.IRouter;
 import com.codeforcommunity.rest.RestFunctions;
 import io.vertx.core.Vertx;
@@ -14,10 +16,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Route;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
-
 import java.util.List;
-
-import static com.codeforcommunity.rest.ApiRouter.end;
 
 public class PfRequestRouter implements IRouter {
 
@@ -39,7 +38,6 @@ public class PfRequestRouter implements IRouter {
 
     return router;
   }
-
 
   private void registerCreateRequest(Router router) {
     Route createRequestRoute = router.post("/");
@@ -65,7 +63,6 @@ public class PfRequestRouter implements IRouter {
     Route getRequestStatusRoute = router.get("/:request_id");
     getRequestStatusRoute.handler(this::handleGetRequestStatusRoute);
   }
-
 
   private void handleCreateRequestRoute(RoutingContext ctx) {
     CreateRequest requestData = RestFunctions.getJsonBodyAsClass(ctx, CreateRequest.class);
