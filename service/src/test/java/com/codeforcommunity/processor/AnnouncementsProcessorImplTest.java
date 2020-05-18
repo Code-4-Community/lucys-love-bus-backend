@@ -20,12 +20,11 @@ import org.jooq.generated.tables.records.AnnouncementsRecord;
 import org.jooq.generated.tables.records.EventsRecord;
 import org.jooq.impl.UpdatableRecordImpl;
 import org.jooq.generated.Tables;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import org.junit.Before;
-import org.junit.Test;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
-
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -43,7 +42,7 @@ public class AnnouncementsProcessorImplTest {
     private final int START_TIMESTAMP_TEST2 = 1586000000;
 
     // set up all the mocks
-    @Before
+    @BeforeEach
     public void setup() {
         this.myJooqMock = new JooqMock();
         this.myAnnouncementsProcessorImpl = new AnnouncementsProcessorImpl(myJooqMock.getContext());

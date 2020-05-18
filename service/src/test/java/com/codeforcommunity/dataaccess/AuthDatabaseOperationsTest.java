@@ -1,5 +1,10 @@
 package com.codeforcommunity.dataaccess;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
 import com.codeforcommunity.JooqMock;
 import com.codeforcommunity.auth.JWTData;
 import com.codeforcommunity.auth.Passwords;
@@ -21,12 +26,8 @@ import org.jooq.generated.tables.records.BlacklistedRefreshesRecord;
 import org.jooq.generated.tables.records.UsersRecord;
 
 import org.jooq.generated.tables.records.VerificationKeysRecord;
-import org.junit.Before;
-import org.junit.Test;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 // Contains tests for AuthDatabaseOperations.java
 public class AuthDatabaseOperationsTest {
@@ -38,7 +39,7 @@ public class AuthDatabaseOperationsTest {
     private final int TIMESTAMP_TEST = 1587000000;
 
     // set up all the mocks
-    @Before
+    @BeforeEach
     public void setup() {
         this.myJooqMock = new JooqMock();
         this.myAuthDatabaseOperations = new AuthDatabaseOperations(myJooqMock.getContext());

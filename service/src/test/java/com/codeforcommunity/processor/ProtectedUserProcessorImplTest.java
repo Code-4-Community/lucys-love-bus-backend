@@ -1,10 +1,9 @@
 package com.codeforcommunity.processor;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import com.codeforcommunity.JooqMock;
-import com.codeforcommunity.auth.JWTCreator;
 import com.codeforcommunity.auth.JWTData;
 import com.codeforcommunity.auth.Passwords;
 import com.codeforcommunity.dto.user.ChangePasswordRequest;
@@ -16,9 +15,8 @@ import org.jooq.generated.tables.records.EventRegistrationsRecord;
 import org.jooq.generated.tables.records.PfRequestsRecord;
 import org.jooq.generated.tables.records.UsersRecord;
 import org.jooq.generated.tables.records.VerificationKeysRecord;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.Mockito;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 // Contains tests for ProtectedUserProcessorImpl.java in service
 public class ProtectedUserProcessorImplTest {
@@ -26,7 +24,7 @@ public class ProtectedUserProcessorImplTest {
   private ProtectedUserProcessorImpl myProtectedUserProcessorImpl;
 
   // set up all the mocks
-  @Before
+  @BeforeEach
   public void setup() {
     this.myJooqMock = new JooqMock();
     this.myProtectedUserProcessorImpl = new ProtectedUserProcessorImpl(myJooqMock.getContext());
