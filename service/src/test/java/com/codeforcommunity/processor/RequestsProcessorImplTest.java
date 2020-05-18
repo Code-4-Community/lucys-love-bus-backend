@@ -19,14 +19,13 @@ import org.jooq.generated.Tables;
 import org.jooq.generated.tables.records.PfRequestsRecord;
 import org.jooq.generated.tables.records.UsersRecord;
 import org.jooq.impl.UpdatableRecordImpl;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.mock;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
-import org.junit.Before;
-import org.junit.Test;
 
 // Contains tests for RequestsProcessorImpl.java in main
 public class RequestsProcessorImplTest {
@@ -34,7 +33,7 @@ public class RequestsProcessorImplTest {
   private RequestsProcessorImpl myRequestsProcessorImpl;
 
   // set up all the mocks
-  @Before
+  @BeforeEach
   public void setup() {
     this.myJooqMock = new JooqMock();
     this.myRequestsProcessorImpl = new RequestsProcessorImpl(myJooqMock.getContext());

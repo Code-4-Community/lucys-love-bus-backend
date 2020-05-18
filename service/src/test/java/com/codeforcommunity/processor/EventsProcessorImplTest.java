@@ -2,8 +2,14 @@ package com.codeforcommunity.processor;
 
 import static org.jooq.generated.Tables.EVENT_REGISTRATIONS;
 import static org.jooq.generated.Tables.USERS;
-import static org.junit.Assert.fail;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -20,18 +26,16 @@ import com.codeforcommunity.enums.PrivilegeLevel;
 import com.codeforcommunity.exceptions.AdminOnlyRouteException;
 import com.codeforcommunity.exceptions.EventDoesNotExistException;
 import com.codeforcommunity.requester.S3Requester;
+
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+
 import org.jooq.Record4;
 import org.jooq.Result;
 import org.jooq.generated.Tables;
 import org.jooq.generated.tables.records.EventsRecord;
 import org.jooq.impl.UpdatableRecordImpl;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 
 // Contains tests for EventsProcessorImpl.java in main
 public class EventsProcessorImplTest {

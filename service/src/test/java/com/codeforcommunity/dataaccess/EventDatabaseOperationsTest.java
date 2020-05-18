@@ -1,12 +1,13 @@
 package com.codeforcommunity.dataaccess;
 
-import static org.junit.Assert.assertEquals;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.codeforcommunity.JooqMock;
 import org.jooq.Record1;
 import org.jooq.generated.Tables;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 // Contains tests for EventDatabaseOperations.java
 public class EventDatabaseOperationsTest {
@@ -14,7 +15,7 @@ public class EventDatabaseOperationsTest {
   private EventDatabaseOperations myEventDatabaseOperations;
 
   // set up all the mocks
-  @Before
+  @BeforeEach
   public void setup() {
     this.myJooqMock = new JooqMock();
     this.myEventDatabaseOperations = new EventDatabaseOperations(myJooqMock.getContext());

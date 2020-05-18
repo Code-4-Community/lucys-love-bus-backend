@@ -12,22 +12,22 @@ import com.stripe.model.checkout.Session;
 import com.stripe.param.checkout.SessionCreateParams;
 import java.util.ArrayList;
 import java.util.Properties;
-import org.junit.Before;
-import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeAll;
 
 public class CheckoutProcessorImplTest {
   private JooqMock myJooqMock;
   private CheckoutProcessorImpl myCheckoutProcessorImpl;
 
   // set up all the mocks
-  @Before
+  @BeforeAll
   public void setup() {
     this.myJooqMock = new JooqMock();
     this.myCheckoutProcessorImpl = new CheckoutProcessorImpl(myJooqMock.getContext());
