@@ -31,8 +31,8 @@ import static org.mockito.Mockito.when;
 
 // Contains tests for AnnouncementsProcessorImpl.java in main
 public class AnnouncementsProcessorImplTest {
-    JooqMock myJooqMock;
-    AnnouncementsProcessorImpl myAnnouncementsProcessorImpl;
+    private JooqMock myJooqMock;
+    private AnnouncementsProcessorImpl myAnnouncementsProcessorImpl;
 
     // use UNIX time for ease of testing
     // 04/16/2020 @ 1:20am (UTC)

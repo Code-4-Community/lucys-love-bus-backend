@@ -306,8 +306,7 @@ public class AuthProcessorImplTest {
         record.setRefreshHash(ACCESS_TOKEN_EXAMPLE);
         myJooqMock.addReturn("SELECT", record);
 
-        List<UpdatableRecordImpl> emptySelectStatement = new ArrayList<UpdatableRecordImpl>();
-        myJooqMock.addReturn("SELECT", emptySelectStatement);
+        myJooqMock.addEmptyReturn("SELECT");
 
         Optional<String> accessToken = Optional.of(ACCESS_TOKEN_EXAMPLE);
 
@@ -331,6 +330,8 @@ public class AuthProcessorImplTest {
 
         ForgotPasswordRequest mockReq = mock(ForgotPasswordRequest.class);
         when(mockReq.getEmail()).thenReturn(userEmail);
+
+        myJooqMock.addEmptyReturn("SELECT");
 
         try {
             myAuthProcessorImpl.requestPasswordReset(mockReq);
@@ -420,9 +421,7 @@ public class AuthProcessorImplTest {
         List<Object[]> updateBindings = myJooqMock.getSqlBindings().get("UPDATE");
         assertEquals(sk, updateBindings.get(0)[1]);
 
-        // TODO: the nature of these two tests might be worth reviewing in the PR
-        // the new password is being stored, indicated by the bindings
-        assertTrue(updateBindings.get(1)[0] instanceof byte[]);
+        // hashes are of equal length
         assertEquals(Passwords.createHash(goodPassword).length, ((byte[])(updateBindings.get(1)[0])).length);
     }
 

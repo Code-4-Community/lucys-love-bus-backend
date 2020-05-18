@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import com.codeforcommunity.JooqMock;
-import com.codeforcommunity.auth.JWTCreator;
 import com.codeforcommunity.auth.JWTData;
 import com.codeforcommunity.auth.Passwords;
 import com.codeforcommunity.dto.user.ChangePasswordRequest;
@@ -18,7 +17,6 @@ import org.jooq.generated.tables.records.UsersRecord;
 import org.jooq.generated.tables.records.VerificationKeysRecord;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mockito;
 
 // Contains tests for ProtectedUserProcessorImpl.java in service
 public class ProtectedUserProcessorImplTest {
@@ -59,6 +57,7 @@ public class ProtectedUserProcessorImplTest {
     myProtectedUserProcessorImpl.deleteUser(myUser);
     Object bindings = myJooqMock.getSqlStrings();
 
+    // TODO: also, fix some bugs
     fail("TODO!!!");
   }
 

@@ -10,8 +10,8 @@ import org.junit.Test;
 
 // Contains tests for EventDatabaseOperations.java
 public class EventDatabaseOperationsTest {
-  JooqMock myJooqMock;
-  EventDatabaseOperations myEventDatabaseOperations;
+  private JooqMock myJooqMock;
+  private EventDatabaseOperations myEventDatabaseOperations;
 
   // set up all the mocks
   @Before

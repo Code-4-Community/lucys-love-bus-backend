@@ -30,8 +30,8 @@ import org.junit.Test;
 
 // Contains tests for RequestsProcessorImpl.java in main
 public class RequestsProcessorImplTest {
-  JooqMock myJooqMock;
-  RequestsProcessorImpl myRequestsProcessorImpl;
+  private JooqMock myJooqMock;
+  private RequestsProcessorImpl myRequestsProcessorImpl;
 
   // set up all the mocks
   @Before

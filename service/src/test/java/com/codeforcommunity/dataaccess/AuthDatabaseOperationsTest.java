@@ -30,8 +30,8 @@ import static org.junit.Assert.fail;
 
 // Contains tests for AuthDatabaseOperations.java
 public class AuthDatabaseOperationsTest {
-    JooqMock myJooqMock;
-    AuthDatabaseOperations myAuthDatabaseOperations;
+    private JooqMock myJooqMock;
+    private AuthDatabaseOperations myAuthDatabaseOperations;
 
     // use UNIX time for ease of testing
     // 04/16/2020 @ 1:20am (UTC)

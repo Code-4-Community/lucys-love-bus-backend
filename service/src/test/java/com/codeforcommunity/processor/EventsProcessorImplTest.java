@@ -4,7 +4,6 @@ import static org.jooq.generated.Tables.EVENT_REGISTRATIONS;
 import static org.jooq.generated.Tables.USERS;
 import static org.junit.Assert.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -12,7 +11,6 @@ import com.codeforcommunity.Base64TestStrings;
 import com.codeforcommunity.JooqMock;
 import com.codeforcommunity.auth.JWTData;
 import com.codeforcommunity.dataaccess.EventDatabaseOperations;
-import com.codeforcommunity.dto.userEvents.components.Event;
 import com.codeforcommunity.dto.userEvents.components.EventDetails;
 import com.codeforcommunity.dto.userEvents.components.Registration;
 import com.codeforcommunity.dto.userEvents.requests.CreateEventRequest;
@@ -162,19 +160,31 @@ public class EventsProcessorImplTest {
   // TODO
   @Test
   public void testGetEvents() {
-    fail();
+    fail("TODO!!!");
   }
 
   // TODO
   @Test
   public void testGetEventsSignedUp() {
-    fail();
+    fail("TODO!!!");
   }
 
   // TODO
   @Test
   public void testGetEventsQualified() {
-    fail();
+    fail("TODO!!!");
+  }
+
+  // TODO
+  @Test
+  public void testModifyEvent() {
+    fail("TODO!!!");
+  }
+
+  // TODO
+  @Test
+  public void testDeleteEvent() {
+    fail("TODO!!!");
   }
 
   @ParameterizedTest
