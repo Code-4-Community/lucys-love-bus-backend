@@ -7,8 +7,7 @@ public class GetAnnouncementsResponse {
   private int totalCount;
   private List<Announcement> announcements;
 
-  public GetAnnouncementsResponse(int totalCount,
-      List<Announcement> announcements) {
+  public GetAnnouncementsResponse(int totalCount, List<Announcement> announcements) {
     this.totalCount = totalCount;
     this.announcements = announcements;
   }

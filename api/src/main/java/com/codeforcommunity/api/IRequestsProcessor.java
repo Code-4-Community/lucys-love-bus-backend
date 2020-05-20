@@ -4,7 +4,6 @@ import com.codeforcommunity.auth.JWTData;
 import com.codeforcommunity.dto.pfrequests.CreateRequest;
 import com.codeforcommunity.dto.pfrequests.RequestData;
 import com.codeforcommunity.enums.RequestStatus;
-
 import java.util.List;
 
 public interface IRequestsProcessor {
@@ -16,5 +15,5 @@ public interface IRequestsProcessor {
 
   void rejectRequest(int requestId, JWTData userData);
 
-  RequestStatus geRequestStatus(int requestId, JWTData userData);
+  RequestStatus getRequestStatus(int requestId, JWTData userData);
 }

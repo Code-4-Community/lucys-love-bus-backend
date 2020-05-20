@@ -4,11 +4,12 @@ import java.sql.Timestamp;
 import java.util.Optional;
 
 public class GetUserEventsRequest {
-  private Optional<Timestamp> endDate; //optional
-  private Optional<Timestamp> startDate; //optional
-  private Optional<Integer> count; //optional
+  private Optional<Timestamp> endDate; // optional
+  private Optional<Timestamp> startDate; // optional
+  private Optional<Integer> count; // optional
 
-  public GetUserEventsRequest(Optional<Timestamp> endDate, Optional<Timestamp> startDate, Optional<Integer> count) {
+  public GetUserEventsRequest(
+      Optional<Timestamp> endDate, Optional<Timestamp> startDate, Optional<Integer> count) {
     this.endDate = endDate;
     this.startDate = startDate;
     this.count = count;
@@ -37,5 +38,4 @@ public class GetUserEventsRequest {
   public void setCount(Optional<Integer> count) {
     this.count = count;
   }
-
 }

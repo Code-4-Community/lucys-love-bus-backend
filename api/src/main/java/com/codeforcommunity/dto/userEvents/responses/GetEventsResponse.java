@@ -1,7 +1,6 @@
 package com.codeforcommunity.dto.userEvents.responses;
 
 import com.codeforcommunity.dto.userEvents.components.Event;
-
 import java.util.List;
 
 public class GetEventsResponse {
@@ -28,6 +27,4 @@ public class GetEventsResponse {
   public void setTotalCount(int totalCount) {
     this.totalCount = totalCount;
   }
-
 }
-

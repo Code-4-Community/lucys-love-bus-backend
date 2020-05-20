@@ -1,19 +1,20 @@
 package com.codeforcommunity.processor;
 
-import com.amazonaws.AmazonServiceException;
+import static org.jooq.generated.Tables.CONTACTS;
+import static org.jooq.generated.Tables.EVENTS;
+import static org.jooq.generated.Tables.EVENT_REGISTRATIONS;
+import static org.jooq.generated.Tables.USERS;
+
 import com.codeforcommunity.api.IEventsProcessor;
 import com.codeforcommunity.auth.JWTData;
 import com.codeforcommunity.dataaccess.EventDatabaseOperations;
-import com.codeforcommunity.dto.userEvents.components.Registration;
-import com.codeforcommunity.dto.userEvents.requests.CreateEventRequest;
-import com.codeforcommunity.dto.userEvents.requests.ModifyEventRequest;
-import com.codeforcommunity.dto.userEvents.responses.EventRegistrations;
-import com.codeforcommunity.dto.userEvents.responses.SingleEventResponse;
 import com.codeforcommunity.dto.userEvents.components.Event;
 import com.codeforcommunity.dto.userEvents.components.EventDetails;
+import com.codeforcommunity.dto.userEvents.components.Registration;
 import com.codeforcommunity.dto.userEvents.requests.CreateEventRequest;
 import com.codeforcommunity.dto.userEvents.requests.GetUserEventsRequest;
 import com.codeforcommunity.dto.userEvents.requests.ModifyEventRequest;
+import com.codeforcommunity.dto.userEvents.responses.EventRegistrations;
 import com.codeforcommunity.dto.userEvents.responses.GetEventsResponse;
 import com.codeforcommunity.dto.userEvents.responses.SingleEventResponse;
 import com.codeforcommunity.enums.PrivilegeLevel;
@@ -22,25 +23,17 @@ import com.codeforcommunity.exceptions.BadRequestImageException;
 import com.codeforcommunity.exceptions.EventDoesNotExistException;
 import com.codeforcommunity.exceptions.S3FailedUploadException;
 import com.codeforcommunity.requester.S3Requester;
-import com.codeforcommunity.exceptions.EventDoesNotExistException;
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.Period;
+import java.util.List;
+import java.util.stream.Collectors;
 import org.jooq.DSLContext;
 import org.jooq.SelectConditionStep;
 import org.jooq.SelectSeekStep1;
 import org.jooq.SelectWhereStep;
 import org.jooq.generated.tables.pojos.Events;
 import org.jooq.generated.tables.records.EventsRecord;
-
-import java.io.IOException;
-import java.sql.Timestamp;
-import java.time.Instant;
-import java.time.Period;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import static org.jooq.generated.Tables.EVENTS;
-import static org.jooq.generated.Tables.EVENT_REGISTRATIONS;
-import static org.jooq.generated.Tables.USERS;
-
 
 public class EventsProcessorImpl implements IEventsProcessor {
 
@@ -59,8 +52,11 @@ public class EventsProcessorImpl implements IEventsProcessor {
       throw new AdminOnlyRouteException();
     }
 
-    String publicImageUrl = S3Requester.validateUploadImageToS3LucyEvents(request.getTitle(), request.getThumbnail());
-    request.setThumbnail(publicImageUrl);  // Update the request to contain the URL for the DB and JSON response OR null if no image given
+    String publicImageUrl =
+        S3Requester.validateUploadImageToS3LucyEvents(request.getTitle(), request.getThumbnail());
+    request.setThumbnail(
+        publicImageUrl); // Update the request to contain the URL for the DB and JSON response OR
+    // null if no image given
 
     EventsRecord newEventRecord = eventRequestToRecord(request);
     newEventRecord.store();
@@ -69,9 +65,7 @@ public class EventsProcessorImpl implements IEventsProcessor {
 
   @Override
   public SingleEventResponse getSingleEvent(int eventId) {
-    Events event = db.selectFrom(EVENTS)
-        .where(EVENTS.ID.eq(eventId))
-        .fetchOneInto(Events.class);
+    Events event = db.selectFrom(EVENTS).where(EVENTS.ID.eq(eventId)).fetchOneInto(Events.class);
 
     if (event == null) {
       throw new EventDoesNotExistException(eventId);
@@ -89,17 +83,24 @@ public class EventsProcessorImpl implements IEventsProcessor {
   @Override
   public GetEventsResponse getEventsSignedUp(GetUserEventsRequest request, JWTData userData) {
 
-    SelectConditionStep q = db.select(EVENTS.fields())
-        .from(USERS
-            .join(EVENT_REGISTRATIONS).onKey(EVENT_REGISTRATIONS.USER_ID)
-            .join(EVENTS).onKey(EVENT_REGISTRATIONS.EVENT_ID))
-        .where(USERS.ID.eq(userData.getUserId()));
+    SelectConditionStep q =
+        db.select(EVENTS.fields())
+            .from(
+                USERS
+                    .join(EVENT_REGISTRATIONS)
+                    .onKey(EVENT_REGISTRATIONS.USER_ID)
+                    .join(EVENTS)
+                    .onKey(EVENT_REGISTRATIONS.EVENT_ID))
+            .where(USERS.ID.eq(userData.getUserId()));
 
     SelectConditionStep afterDateFilter = q;
 
     if (request.getEndDate().isPresent()) {
       if (request.getStartDate().isPresent()) {
-        afterDateFilter = q.and(EVENTS.START_TIME.between(request.getStartDate().get(), request.getEndDate().get()));
+        afterDateFilter =
+            q.and(
+                EVENTS.START_TIME.between(
+                    request.getStartDate().get(), request.getEndDate().get()));
       } else {
         afterDateFilter = q.and(EVENTS.START_TIME.lessOrEqual(request.getEndDate().get()));
       }
@@ -144,8 +145,8 @@ public class EventsProcessorImpl implements IEventsProcessor {
   }
 
   @Override
-  public SingleEventResponse modifyEvent(int eventId, ModifyEventRequest request,
-                                         JWTData userData) {
+  public SingleEventResponse modifyEvent(
+      int eventId, ModifyEventRequest request, JWTData userData) {
     if (userData.getPrivilegeLevel() != PrivilegeLevel.ADMIN) {
       throw new AdminOnlyRouteException();
     }
@@ -198,11 +199,17 @@ public class EventsProcessorImpl implements IEventsProcessor {
     }
 
     List<Registration> regs =
-        db.select(USERS.FIRST_NAME, USERS.LAST_NAME, USERS.EMAIL, EVENT_REGISTRATIONS.TICKET_QUANTITY)
-        .from(EVENT_REGISTRATIONS)
-        .join(USERS).on(EVENT_REGISTRATIONS.USER_ID.eq(USERS.ID))
-        .where(EVENT_REGISTRATIONS.EVENT_ID.eq(eventId))
-        .fetchInto(Registration.class);
+        db.select(
+                CONTACTS.FIRST_NAME,
+                CONTACTS.LAST_NAME,
+                CONTACTS.EMAIL,
+                EVENT_REGISTRATIONS.TICKET_QUANTITY)
+            .from(EVENT_REGISTRATIONS)
+            .join(CONTACTS)
+            .on(EVENT_REGISTRATIONS.USER_ID.eq(USERS.ID))
+            .where(EVENT_REGISTRATIONS.EVENT_ID.eq(eventId))
+            .and(CONTACTS.IS_MAIN_CONTACT.isTrue())
+            .fetchInto(Registration.class);
 
     return new EventRegistrations(regs);
   }
@@ -215,30 +222,42 @@ public class EventsProcessorImpl implements IEventsProcessor {
    */
   private List<Event> listOfEventsToListOfEvent(List<Events> events) {
 
-    return events.stream().map(event -> {
-      EventDetails details = new EventDetails(event.getDescription(), event.getLocation(), event.getStartTime(),
-          event.getEndTime());
-      Event e = new Event(event.getId(), event.getTitle(),
-          eventDatabaseOperations.getSpotsLeft(event.getId()), event.getThumbnail(),
-          details);
-      return e;
-    }).collect(Collectors.toList());
-
+    return events.stream()
+        .map(
+            event -> {
+              EventDetails details =
+                  new EventDetails(
+                      event.getDescription(),
+                      event.getLocation(),
+                      event.getStartTime(),
+                      event.getEndTime());
+              Event e =
+                  new Event(
+                      event.getId(),
+                      event.getTitle(),
+                      eventDatabaseOperations.getSpotsLeft(event.getId()),
+                      event.getThumbnail(),
+                      details);
+              return e;
+            })
+        .collect(Collectors.toList());
   }
 
-  /**
-   * Takes a database representation of a single event and returns the dto representation.
-   */
+  /** Takes a database representation of a single event and returns the dto representation. */
   private SingleEventResponse eventPojoToResponse(Events event) {
-    EventDetails details = new EventDetails(event.getDescription(), event.getLocation(),
-        event.getStartTime(), event.getEndTime());
-    return new SingleEventResponse(event.getId(), event.getTitle(),
-        eventDatabaseOperations.getSpotsLeft(event.getId()), event.getCapacity(), event.getThumbnail(), details);
+    EventDetails details =
+        new EventDetails(
+            event.getDescription(), event.getLocation(), event.getStartTime(), event.getEndTime());
+    return new SingleEventResponse(
+        event.getId(),
+        event.getTitle(),
+        eventDatabaseOperations.getSpotsLeft(event.getId()),
+        event.getCapacity(),
+        event.getThumbnail(),
+        details);
   }
 
-  /**
-   * Takes a dto representation of an event and returns the database record representation.
-   */
+  /** Takes a dto representation of an event and returns the database record representation. */
   private EventsRecord eventRequestToRecord(CreateEventRequest request) {
     EventsRecord newRecord = db.newRecord(EVENTS);
     newRecord.setTitle(request.getTitle());

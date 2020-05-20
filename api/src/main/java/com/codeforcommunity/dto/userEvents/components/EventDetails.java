@@ -48,7 +48,4 @@ public class EventDetails {
   public void setEnd(Timestamp end) {
     this.end = end;
   }
-
 }
-
-
