@@ -192,6 +192,7 @@ public class EventsProcessorImplTest {
     assertEquals(res.getDetails().getDescription(), myEventDetails.getDescription());
   }
 
+  // TODO: please do not forget...
   // TODO
   @Test
   public void testGetEvents() {
