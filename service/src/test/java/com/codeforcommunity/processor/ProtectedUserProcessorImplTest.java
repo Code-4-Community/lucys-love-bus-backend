@@ -57,7 +57,7 @@ public class ProtectedUserProcessorImplTest {
     myProtectedUserProcessorImpl.deleteUser(myUser);
     Object bindings = myJooqMock.getSqlStrings();
 
-    // TODO: also, fix some bugs
+    // TODO: add a feature in JooqMock to help with executeAsync()
     fail("TODO!!!");
   }
 

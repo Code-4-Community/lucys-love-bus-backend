@@ -1,6 +1,5 @@
 package com.codeforcommunity.dataaccess;
 
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.codeforcommunity.JooqMock;

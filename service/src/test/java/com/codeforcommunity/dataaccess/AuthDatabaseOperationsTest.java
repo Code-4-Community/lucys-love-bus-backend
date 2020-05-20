@@ -143,6 +143,7 @@ public class AuthDatabaseOperationsTest {
         String sampleFN = "Conner";
         String sampleLN = "Nilsen";
 
+        // TODO: fix JooqMock to be able to set ID (this gives a NPE)
         myAuthDatabaseOperations.createNewUser(sampleEmail, samplePassword, sampleFN, sampleLN);
 
         List<Object[]> insertBindings = myJooqMock.getSqlBindings().get("INSERT");

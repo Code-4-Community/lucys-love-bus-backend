@@ -5,11 +5,18 @@ import static org.jooq.generated.Tables.USERS;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
+
+import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.amazonaws.services.s3.model.PutObjectResult;
+import com.codeforcommunity.requester.S3Requester.Externs;
+import org.jooq.Record1;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -86,8 +93,17 @@ public class EventsProcessorImplTest {
     CreateEventRequest myEventRequest = new CreateEventRequest("sample", 5,
         Base64TestStrings.TEST_STRING_1, myEventDetails);
 
-    when(S3Requester.validateUploadImageToS3LucyEvents("sample", Base64TestStrings.TEST_STRING_1))
-        .thenReturn("https://sampleurl.com");
+    AmazonS3Client mockS3Client = mock(AmazonS3Client.class);
+    PutObjectResult mockPutObjectResult = mock(PutObjectResult.class);
+
+    when(mockS3Client.putObject(any(PutObjectRequest.class)))
+        .thenReturn(mockPutObjectResult);
+
+    S3Requester.Externs mockExterns = mock(S3Requester.Externs.class);
+    when(mockExterns.getS3Client())
+        .thenReturn(mockS3Client);
+
+    S3Requester.setExterns(mockExterns);
 
     // mock the DB
     JWTData goodUser = mock(JWTData.class);
@@ -135,7 +151,7 @@ public class EventsProcessorImplTest {
     CreateEventRequest myEventRequest = new CreateEventRequest("sample", 5,
         "sample thumbnail", myEventDetails);
 
-    // mock the DB
+    // mock the DB for events
     EventsRecord record = myJooqMock.getContext().newRecord(Tables.EVENTS);
     record.setId(1);
     record.setThumbnail(myEventRequest.getThumbnail());
@@ -145,20 +161,35 @@ public class EventsProcessorImplTest {
     record.setDescription(myEventDetails.getDescription());
     record.setStartTime(myEventDetails.getStart());
     record.setEndTime(myEventDetails.getEnd());
-
     myJooqMock.addReturn("SELECT", record);
     myJooqMock.addReturn("INSERT", record);
+
+    // mock the DB for event registrations
+    Record1<Integer> myTicketsRecord = myJooqMock
+        .getContext()
+        .newRecord(Tables.EVENT_REGISTRATIONS.TICKET_QUANTITY);
+    myTicketsRecord.values(1);
+
+    Record1<Integer> myEventRegistration = myJooqMock
+        .getContext()
+        .newRecord(Tables.EVENTS.CAPACITY);
+    myEventRegistration.values(5);
+
+    myJooqMock.addReturn("SELECT", myTicketsRecord);
+    myJooqMock.addReturn("SELECT", myEventRegistration);
 
     SingleEventResponse res = processor.getSingleEvent(1);
 
     assertEquals(res.getId(), 1);
+    assertEquals(res.getSpotsAvailable(), 4);
+    assertEquals(res.getCapacity(), 5);
+    assertEquals(res.getThumbnail(), myEventRequest.getThumbnail());
+    assertEquals(res.getTitle(), myEventRequest.getTitle());
+
     assertEquals(res.getDetails().getStart(), myEventDetails.getStart());
     assertEquals(res.getDetails().getEnd(), myEventDetails.getEnd());
     assertEquals(res.getDetails().getLocation(), myEventDetails.getLocation());
     assertEquals(res.getDetails().getDescription(), myEventDetails.getDescription());
-    assertEquals(res.getSpotsAvailable(), myEventRequest.getSpotsAvailable());
-    assertEquals(res.getThumbnail(), myEventRequest.getThumbnail());
-    assertEquals(res.getTitle(), myEventRequest.getTitle());
   }
 
   // TODO
