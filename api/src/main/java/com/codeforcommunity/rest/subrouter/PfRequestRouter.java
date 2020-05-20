@@ -4,7 +4,6 @@ import static com.codeforcommunity.rest.ApiRouter.end;
 
 import com.codeforcommunity.api.IRequestsProcessor;
 import com.codeforcommunity.auth.JWTData;
-import com.codeforcommunity.dto.pfrequests.CreateRequest;
 import com.codeforcommunity.dto.pfrequests.GetRequestsResponse;
 import com.codeforcommunity.dto.pfrequests.RequestData;
 import com.codeforcommunity.dto.pfrequests.RequestStatusResponse;
@@ -65,10 +64,9 @@ public class PfRequestRouter implements IRouter {
   }
 
   private void handleCreateRequestRoute(RoutingContext ctx) {
-    CreateRequest requestData = RestFunctions.getJsonBodyAsClass(ctx, CreateRequest.class);
-    JWTData userData = ctx.get("jwt_data"); // TODO: Make sure this isn't throwing NP exceptions
+    JWTData userData = ctx.get("jwt_data");
 
-    requestsProcessor.createRequest(requestData, userData);
+    requestsProcessor.createRequest(userData);
 
     end(ctx.response(), 200);
   }
