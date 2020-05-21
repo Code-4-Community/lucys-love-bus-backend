@@ -1,22 +1,21 @@
 package com.codeforcommunity.dto.userEvents.responses;
 
-import com.codeforcommunity.dto.userEvents.components.Event;
 import java.util.List;
 
 public class GetEventsResponse {
-  private List<Event> events;
+  private List<SingleEventResponse> events;
   private int totalCount;
 
-  public GetEventsResponse(List<Event> events, int totalCount) {
+  public GetEventsResponse(List<SingleEventResponse> events, int totalCount) {
     this.events = events;
     this.totalCount = totalCount;
   }
 
-  public List<Event> getEvents() {
+  public List<SingleEventResponse> getEvents() {
     return events;
   }
 
-  public void setEvents(List<Event> events) {
+  public void setEvents(List<SingleEventResponse> events) {
     this.events = events;
   }
 

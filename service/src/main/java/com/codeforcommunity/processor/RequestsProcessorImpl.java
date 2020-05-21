@@ -1,12 +1,13 @@
 package com.codeforcommunity.processor;
 
+import static org.jooq.generated.Tables.CONTACTS;
 import static org.jooq.generated.Tables.PF_REQUESTS;
 import static org.jooq.generated.Tables.USERS;
 
 import com.codeforcommunity.api.IRequestsProcessor;
 import com.codeforcommunity.auth.JWTData;
-import com.codeforcommunity.dto.pfrequests.CreateRequest;
 import com.codeforcommunity.dto.pfrequests.RequestData;
+import com.codeforcommunity.dto.pfrequests.RequestUser;
 import com.codeforcommunity.enums.PrivilegeLevel;
 import com.codeforcommunity.enums.RequestStatus;
 import com.codeforcommunity.exceptions.AdminOnlyRouteException;
@@ -27,7 +28,7 @@ public class RequestsProcessorImpl implements IRequestsProcessor {
   }
 
   @Override
-  public void createRequest(CreateRequest requestData, JWTData userData) {
+  public void createRequest(JWTData userData) {
     // Check that this user is a GP
     // Check that this user doesn't have outstanding requests
     // Add request to database
@@ -47,7 +48,6 @@ public class RequestsProcessorImpl implements IRequestsProcessor {
     PfRequestsRecord newRecord = db.newRecord(PF_REQUESTS);
     newRecord.setUserId(userData.getUserId());
     newRecord.setStatus(RequestStatus.PENDING);
-    newRecord.setDescription(requestData.getDescription());
     newRecord.store();
   }
 
@@ -62,13 +62,29 @@ public class RequestsProcessorImpl implements IRequestsProcessor {
     }
 
     List<RequestData> outstandingRequests =
-        db.select(PF_REQUESTS.ID, PF_REQUESTS.DESCRIPTION, USERS.EMAIL)
+        db.select(
+                PF_REQUESTS.ID,
+                PF_REQUESTS.USER_ID,
+                CONTACTS.EMAIL,
+                CONTACTS.FIRST_NAME,
+                CONTACTS.LAST_NAME,
+                CONTACTS.PHONE_NUMBER)
             .from(PF_REQUESTS)
-            .join(USERS)
-            .onKey()
-            .where(PF_REQUESTS.STATUS.eq(RequestStatus.PENDING))
+            .join(CONTACTS)
+            .on(PF_REQUESTS.USER_ID.eq(CONTACTS.USER_ID))
+            .where(CONTACTS.IS_MAIN_CONTACT.isTrue())
+            .and(PF_REQUESTS.STATUS.eq(RequestStatus.PENDING))
             .fetch()
-            .map(r -> new RequestData(r.component1(), r.component2(), r.component3()));
+            .map(
+                r ->
+                    new RequestData(
+                        r.component1(),
+                        new RequestUser(
+                            r.component2(),
+                            r.component3(),
+                            r.component4(),
+                            r.component5(),
+                            r.component6())));
 
     return outstandingRequests;
   }
