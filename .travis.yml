@@ -3,11 +3,9 @@ language: java
 services:
 - postgresql
 
-env:
-  - NODE_VERSION="0.14"
 
 before_install:
-  - nvm install $NODE_VERSION
+  - nvm install node
 
   - cd common/src/main/resources/properties/
   - cp db.properties.example input.properties
