@@ -1,0 +1,1195 @@
+{
+	"info": {
+		"_postman_id": "a6714b2a-558a-4a08-af81-68b512134239",
+		"name": "LLB",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "sanity check",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{domain}}",
+					"host": [
+						"{{domain}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get all events unauth",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "9c3a161f-87e6-4dff-94a7-2b343dd938d0",
+						"exec": [
+							"pm.test(\"Status code is 401\", function () {",
+							"    pm.response.to.have.status(401);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Access-Token",
+						"type": "text",
+						"value": ""
+					},
+					{
+						"key": "X-Refresh-Token",
+						"type": "text",
+						"value": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{domain}}/api/v1/protected/events/",
+					"host": [
+						"{{domain}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"protected",
+						"events",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get all events qualified unauth",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "0df595d9-0a68-4196-a929-2982e19f5204",
+						"exec": [
+							"pm.test(\"Status code is 401\", function () {",
+							"    pm.response.to.have.status(401);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Access-Token",
+						"type": "text",
+						"value": ""
+					},
+					{
+						"key": "X-Refresh-Token",
+						"type": "text",
+						"value": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{domain}}/api/v1/protected/events/qualified",
+					"host": [
+						"{{domain}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"protected",
+						"events",
+						"qualified"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get all events signed up unauth",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "d02c4398-5abc-42c9-8d7f-17e942c13e49",
+						"exec": [
+							"pm.test(\"Status code is 401\", function () {",
+							"    pm.response.to.have.status(401);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Access-Token",
+						"type": "text",
+						"value": ""
+					},
+					{
+						"key": "X-Refresh-Token",
+						"type": "text",
+						"value": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{domain}}/api/v1/protected/events/signed_up",
+					"host": [
+						"{{domain}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"protected",
+						"events",
+						"signed_up"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get all events ids unauth",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "d614e3a7-2aec-45ff-851f-860ac5d29975",
+						"exec": [
+							"// pm.test(\"Status code is 200\", function () {",
+							"//     pm.response.to.have.status(200);",
+							"// });"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Access-Token",
+						"type": "text",
+						"value": ""
+					},
+					{
+						"key": "X-Refresh-Token",
+						"type": "text",
+						"value": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{domain}}/api/v1/protected/events?ids=1,2,3",
+					"host": [
+						"{{domain}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"protected",
+						"events"
+					],
+					"query": [
+						{
+							"key": "ids",
+							"value": "1,2,3"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get single event by id unauth",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "0e7f600f-9e0e-4a03-ac74-cb3136a0a7a9",
+						"exec": [
+							"pm.test(\"Status code is 401\", function () {",
+							"    pm.response.to.have.status(401);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Access-Token",
+						"type": "text",
+						"value": ""
+					},
+					{
+						"key": "X-Refresh-Token",
+						"type": "text",
+						"value": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{domain}}/api/v1/protected/events/1",
+					"host": [
+						"{{domain}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"protected",
+						"events",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "create new event unauth",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "ed5b6bd8-22e5-45d5-b317-25d436159029",
+						"exec": [
+							"pm.test(\"Status code is 401\", function () {",
+							"    pm.response.to.have.status(401);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-Access-Token",
+						"type": "text",
+						"value": ""
+					},
+					{
+						"key": "X-Refresh-Token",
+						"type": "text",
+						"value": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"title\": \"event title\",\r\n  \"spotsAvailable\": 2,\r\n  \"thumbnail\": \"https://i.ytimg.com/vi/bDVZW14fo-4/hqdefault.jpg\",\r\n  \"details\": {\r\n    \"description\": \"event desc\",\r\n    \"location\": \"Place\",\r\n    \"start\": \"2020-01-01\",\r\n    \"end\": \"2020-01-02\"\r\n  }\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{domain}}/api/v1/protected/events/",
+					"host": [
+						"{{domain}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"protected",
+						"events",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get all announcements unauth",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "ed455912-d2c0-44cd-8e1b-26d7225a8ba2",
+						"exec": [
+							"pm.test(\"Status code is 401\", function () {",
+							"    pm.response.to.have.status(401);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Access-Token",
+						"type": "text",
+						"value": ""
+					},
+					{
+						"key": "X-Refresh-Token",
+						"type": "text",
+						"value": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{domain}}/api/v1/protected/announcements",
+					"host": [
+						"{{domain}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"protected",
+						"announcements"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "create new announcement with event id unauth",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "eb9f796c-3fee-4ae7-a2d3-9a2641eea84e",
+						"exec": [
+							"pm.test(\"Status code is 401\", function () {",
+							"    pm.response.to.have.status(401);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-Access-Token",
+						"type": "text",
+						"value": ""
+					},
+					{
+						"key": "X-Refresh-Token",
+						"type": "text",
+						"value": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"title\": \"title\",\r\n  \"description\": \"desc\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{domain}}/api/v1/protected/announcements/1",
+					"host": [
+						"{{domain}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"protected",
+						"announcements",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "sign up",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "6151f5dd-361f-41fd-aabf-06c36a30f7ed",
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"email\" : \"test.email@email.com\",\r\n  \"password\" : \"password123\",\r\n  \"firstName\" : \"John\",\r\n  \"lastName\" : \"Doe\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{domain}}/api/v1/user/signup",
+					"host": [
+						"{{domain}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"user",
+						"signup"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "log in",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "308034a5-51ca-4283-b566-5f799b1a3c0f",
+						"exec": [
+							"pm.test(\"Status code is 201\", function () {",
+							"    pm.response.to.have.status(201);",
+							"});",
+							"",
+							"let accessToken = pm.response.json().accessToken;",
+							"let refreshToken = pm.response.json().refreshToken;",
+							"",
+							"pm.collectionVariables.set(\"accessToken\", accessToken);",
+							"pm.collectionVariables.set(\"refreshToken\", refreshToken);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"email\" : \"test.email@email.com\",\r\n    \"password\" : \"password123\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{domain}}/api/v1/user/login",
+					"host": [
+						"{{domain}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"user",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "log in admin",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "f51a6df1-3363-4863-9c52-0766d34a91b7",
+						"exec": [
+							"pm.test(\"Status code is 201\", function () {",
+							"    pm.response.to.have.status(201);",
+							"});",
+							"",
+							"let accessToken = pm.response.json().accessToken;",
+							"let refreshToken = pm.response.json().refreshToken;",
+							"",
+							"pm.collectionVariables.set(\"accessToken\", accessToken);",
+							"pm.collectionVariables.set(\"refreshToken\", refreshToken);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"email\" : \"admin@email.com\",\r\n    \"password\" : \"secret\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{domain}}/api/v1/user/login",
+					"host": [
+						"{{domain}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"user",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get all events",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "81788ac8-b311-4f62-9cdd-4cea1c8cf2b1",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Access-Token",
+						"type": "text",
+						"value": "{{accessToken}}"
+					},
+					{
+						"key": "X-Refresh-Token",
+						"type": "text",
+						"value": "{{refreshToken}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{domain}}/api/v1/protected/events/",
+					"host": [
+						"{{domain}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"protected",
+						"events",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get all events qualified",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "546cf217-0419-4c0d-b40f-6970029f2af6",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Access-Token",
+						"type": "text",
+						"value": "{{accessToken}}"
+					},
+					{
+						"key": "X-Refresh-Token",
+						"type": "text",
+						"value": "{{refreshToken}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{domain}}/api/v1/protected/events/qualified",
+					"host": [
+						"{{domain}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"protected",
+						"events",
+						"qualified"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get all events signed up",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "afa2f790-d8bc-4b22-a1c0-9eaa3ba9786f",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Access-Token",
+						"type": "text",
+						"value": "{{accessToken}}"
+					},
+					{
+						"key": "X-Refresh-Token",
+						"type": "text",
+						"value": "{{refreshToken}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{domain}}/api/v1/protected/events/signed_up",
+					"host": [
+						"{{domain}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"protected",
+						"events",
+						"signed_up"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get all events ids",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "84791b02-0419-4041-a346-ae8687a6cfe7",
+						"exec": [
+							"// pm.test(\"Status code is 200\", function () {",
+							"//     pm.response.to.have.status(200);",
+							"// });"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Access-Token",
+						"type": "text",
+						"value": "{{accessToken}}"
+					},
+					{
+						"key": "X-Refresh-Token",
+						"type": "text",
+						"value": "{{refreshToken}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{domain}}/api/v1/protected/events?ids=1,2,3",
+					"host": [
+						"{{domain}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"protected",
+						"events"
+					],
+					"query": [
+						{
+							"key": "ids",
+							"value": "1,2,3"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get single event by id",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "5a507fa3-a1f3-4de2-a66c-4fdd3021e3e0",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Access-Token",
+						"type": "text",
+						"value": "{{accessToken}}"
+					},
+					{
+						"key": "X-Refresh-Token",
+						"type": "text",
+						"value": "{{refreshToken}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{domain}}/api/v1/protected/events/1",
+					"host": [
+						"{{domain}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"protected",
+						"events",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "create new event",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "2c88b630-63ce-4043-8b4e-db6bb8e59ab2",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-Access-Token",
+						"type": "text",
+						"value": "{{accessToken}}"
+					},
+					{
+						"key": "X-Refresh-Token",
+						"type": "text",
+						"value": "{{refreshToken}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"title\": \"event title\",\r\n  \"spotsAvailable\": 2,\r\n  \"thumbnail\": \"https://i.ytimg.com/vi/bDVZW14fo-4/hqdefault.jpg\",\r\n  \"details\": {\r\n    \"description\": \"event desc\",\r\n    \"location\": \"Place\",\r\n    \"start\": \"2020-01-01\",\r\n    \"end\": \"2020-01-02\"\r\n  }\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{domain}}/api/v1/protected/events/",
+					"host": [
+						"{{domain}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"protected",
+						"events",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get all announcements",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "e9675c2b-8e20-4256-b4f3-3e39ae41e007",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Access-Token",
+						"type": "text",
+						"value": "{{accessToken}}"
+					},
+					{
+						"key": "X-Refresh-Token",
+						"type": "text",
+						"value": "{{refreshToken}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{domain}}/api/v1/protected/announcements",
+					"host": [
+						"{{domain}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"protected",
+						"announcements"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "create new announcement",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "ec84307d-041e-4146-9ba6-56d7ff72cfa7",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-Access-Token",
+						"type": "text",
+						"value": "{{accessToken}}"
+					},
+					{
+						"key": "X-Refresh-Token",
+						"type": "text",
+						"value": "{{refreshToken}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"title\": \"title\",\r\n  \"description\": \"desc\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{domain}}/api/v1/protected/announcements",
+					"host": [
+						"{{domain}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"protected",
+						"announcements"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "create new announcement with event id",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "f160a5c5-e31f-42f1-be81-27b40aa5f9da",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-Access-Token",
+						"type": "text",
+						"value": "{{accessToken}}"
+					},
+					{
+						"key": "X-Refresh-Token",
+						"type": "text",
+						"value": "{{refreshToken}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"title\": \"title\",\r\n  \"description\": \"desc\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{domain}}/api/v1/protected/announcements/1",
+					"host": [
+						"{{domain}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"protected",
+						"announcements",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "log out",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "X-Access-Token",
+						"value": "{{accessToken}}",
+						"type": "text"
+					},
+					{
+						"key": "X-Refresh-Token",
+						"value": "{{refreshToken}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{domain}}/api/v1/user/login",
+					"host": [
+						"{{domain}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"user",
+						"login"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"variable": [
+		{
+			"id": "f945fb4c-953f-4b12-b0a5-ee084a82fa9f",
+			"key": "accessToken",
+			"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJwcml2aWxlZ2VMZXZlbCI6MiwiaXNzIjoiYzRjIiwiZXhwIjoxNTg5MTM2OTc2LCJ1c2VySWQiOjd9.491p7OHlrPut_B1u0HaQhxUMuHmUSAbQFa_8EhcYLH4",
+			"type": "string"
+		},
+		{
+			"id": "296ec9b6-fc77-42d0-8592-7fc5583e2fe9",
+			"key": "refreshToken",
+			"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJwcml2aWxlZ2VMZXZlbCI6MiwiaXNzIjoiYzRjIiwiZXhwIjoxNTg5NzM5OTc2LCJ1c2VySWQiOjd9.NLo0JKLURpX5SndrJAe23cLKGvtUT5xniX1CF9mS2cA",
+			"type": "string"
+		}
+	],
+	"protocolProfileBehavior": {}
+}
