@@ -1,5 +1,7 @@
 package com.codeforcommunity.processor;
 
+import static org.jooq.generated.Tables.CONTACTS;
+import static org.jooq.generated.Tables.PF_REQUESTS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
@@ -7,7 +9,6 @@ import static org.mockito.Mockito.when;
 
 import com.codeforcommunity.JooqMock;
 import com.codeforcommunity.auth.JWTData;
-import com.codeforcommunity.dto.pfrequests.CreateRequest;
 import com.codeforcommunity.dto.pfrequests.RequestData;
 import com.codeforcommunity.enums.PrivilegeLevel;
 import com.codeforcommunity.enums.RequestStatus;
@@ -17,7 +18,7 @@ import com.codeforcommunity.exceptions.ResourceNotOwnedException;
 import com.codeforcommunity.exceptions.WrongPrivilegeException;
 import java.util.ArrayList;
 import java.util.List;
-import org.jooq.Record3;
+import org.jooq.Record6;
 import org.jooq.generated.Tables;
 import org.jooq.generated.tables.records.PfRequestsRecord;
 import org.jooq.generated.tables.records.UsersRecord;
@@ -44,10 +45,8 @@ public class RequestsProcessorImplTest {
     JWTData myUserData = mock(JWTData.class);
     when(myUserData.getPrivilegeLevel()).thenReturn(PrivilegeLevel.ADMIN);
 
-    CreateRequest myRequest = new CreateRequest("sample description");
-
     try {
-      myRequestsProcessorImpl.createRequest(myRequest, myUserData);
+      myRequestsProcessorImpl.createRequest(myUserData);
       fail();
     } catch (WrongPrivilegeException e) {
       assertEquals(e.getRequiredPrivilegeLevel(), PrivilegeLevel.GP);
@@ -68,10 +67,8 @@ public class RequestsProcessorImplTest {
     myPFReqRecord.setStatus(RequestStatus.PENDING);
     myJooqMock.addReturn("SELECT", myPFReqRecord);
 
-    CreateRequest myRequest = new CreateRequest("sample description");
-
     try {
-      myRequestsProcessorImpl.createRequest(myRequest, myUserData);
+      myRequestsProcessorImpl.createRequest(myUserData);
       fail();
     } catch (OutstandingRequestException e) {
       // we're good
@@ -93,8 +90,7 @@ public class RequestsProcessorImplTest {
     myJooqMock.addReturn("SELECT", myPFReqRecord);
     myJooqMock.addReturn("INSERT", myPFReqRecord);
 
-    CreateRequest myRequest = new CreateRequest("sample description");
-    myRequestsProcessorImpl.createRequest(myRequest, myUserData);
+    myRequestsProcessorImpl.createRequest(myUserData);
   }
 
   // getting the requests fails if the user isn't an admin
@@ -136,19 +132,28 @@ public class RequestsProcessorImplTest {
     when(myUserData.getPrivilegeLevel()).thenReturn(PrivilegeLevel.ADMIN);
 
     // mock the DB for PF requests
-    Record3<Integer, String, String> record =
+    Record6<Integer, Integer, String, String, String, String> record =
         myJooqMock
             .getContext()
-            .newRecord(Tables.PF_REQUESTS.ID, Tables.PF_REQUESTS.DESCRIPTION, Tables.USERS.EMAIL);
-    record.values(0, "sample description", "brandon@example.com");
+            .newRecord(
+                Tables.PF_REQUESTS.ID,
+                Tables.PF_REQUESTS.USER_ID,
+                Tables.CONTACTS.EMAIL,
+                Tables.CONTACTS.FIRST_NAME,
+                Tables.CONTACTS.LAST_NAME,
+                Tables.CONTACTS.PHONE_NUMBER);
+    record.values(0, 0, "brandon@example.com", "Brandon", "Liang", "555-555-5555");
     myJooqMock.addReturn("SELECT", record);
 
     List<RequestData> reqs = myRequestsProcessorImpl.getRequests(myUserData);
 
     assertEquals(reqs.size(), 1);
     assertEquals(reqs.get(0).getId(), 0);
-    assertEquals(reqs.get(0).getDescription(), "sample description");
-    assertEquals(reqs.get(0).getUserEmail(), "brandon@example.com");
+    assertEquals(reqs.get(0).getUser().getId(), 0);
+    assertEquals(reqs.get(0).getUser().getEmail(), "brandon@example.com");
+    assertEquals(reqs.get(0).getUser().getFirstName(), "Brandon");
+    assertEquals(reqs.get(0).getUser().getLastName(), "Liang");
+    assertEquals(reqs.get(0).getUser().getPhoneNumber(), "555-555-5555");
   }
 
   // test for list of requests with multiple elements
@@ -159,18 +164,31 @@ public class RequestsProcessorImplTest {
     when(myUserData.getPrivilegeLevel()).thenReturn(PrivilegeLevel.ADMIN);
 
     // mock the DB for PF requests
-    Record3<Integer, String, String> record1 =
+    Record6<Integer, Integer, String, String, String, String> record1 =
         myJooqMock
             .getContext()
-            .newRecord(Tables.PF_REQUESTS.ID, Tables.PF_REQUESTS.DESCRIPTION, Tables.USERS.EMAIL);
-    record1.values(0, "sample description", "brandon@example.com");
-    Record3<Integer, String, String> record2 =
-        myJooqMock
-            .getContext()
-            .newRecord(Tables.PF_REQUESTS.ID, Tables.PF_REQUESTS.DESCRIPTION, Tables.USERS.EMAIL);
-    record2.values(1, "code for community", "conner@example.com");
+            .newRecord(
+                Tables.PF_REQUESTS.ID,
+                Tables.PF_REQUESTS.USER_ID,
+                Tables.CONTACTS.EMAIL,
+                Tables.CONTACTS.FIRST_NAME,
+                Tables.CONTACTS.LAST_NAME,
+                Tables.CONTACTS.PHONE_NUMBER);
+    record1.values(0, 0, "brandon@example.com", "Brandon", "Liang", "555-555-5555");
 
-    List<Record3> records = new ArrayList<Record3>();
+    Record6<Integer, Integer, String, String, String, String> record2 =
+        myJooqMock
+            .getContext()
+            .newRecord(
+                Tables.PF_REQUESTS.ID,
+                Tables.PF_REQUESTS.USER_ID,
+                Tables.CONTACTS.EMAIL,
+                Tables.CONTACTS.FIRST_NAME,
+                Tables.CONTACTS.LAST_NAME,
+                Tables.CONTACTS.PHONE_NUMBER);
+    record2.values(1, 2, "conner@example.com", "Conner", "Nilsen", "222-323-9090");
+
+    List<Record6> records = new ArrayList<>();
     records.add(record1);
     records.add(record2);
     myJooqMock.addReturn("SELECT", records);
@@ -178,12 +196,20 @@ public class RequestsProcessorImplTest {
     List<RequestData> reqs = myRequestsProcessorImpl.getRequests(myUserData);
 
     assertEquals(reqs.size(), 2);
+
     assertEquals(reqs.get(0).getId(), 0);
-    assertEquals(reqs.get(0).getDescription(), "sample description");
-    assertEquals(reqs.get(0).getUserEmail(), "brandon@example.com");
+    assertEquals(reqs.get(0).getUser().getId(), 0);
+    assertEquals(reqs.get(0).getUser().getEmail(), "brandon@example.com");
+    assertEquals(reqs.get(0).getUser().getFirstName(), "Brandon");
+    assertEquals(reqs.get(0).getUser().getLastName(), "Liang");
+    assertEquals(reqs.get(0).getUser().getPhoneNumber(), "555-555-5555");
+
     assertEquals(reqs.get(1).getId(), 1);
-    assertEquals(reqs.get(1).getDescription(), "code for community");
-    assertEquals(reqs.get(1).getUserEmail(), "conner@example.com");
+    assertEquals(reqs.get(1).getUser().getId(), 2);
+    assertEquals(reqs.get(1).getUser().getEmail(), "conner@example.com");
+    assertEquals(reqs.get(1).getUser().getFirstName(), "Conner");
+    assertEquals(reqs.get(1).getUser().getLastName(), "Nilsen");
+    assertEquals(reqs.get(1).getUser().getPhoneNumber(), "222-323-9090");
   }
 
   // general users can't approve requests
