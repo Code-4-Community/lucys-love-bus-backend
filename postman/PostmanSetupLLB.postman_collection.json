@@ -38,7 +38,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n  \"email\" : \"test.email@email.com\",\r\n  \"password\" : \"password123\",\r\n  \"firstName\" : \"John\",\r\n  \"lastName\" : \"Doe\"\r\n}",
+					"raw": "{\r\n  \"email\" : \"admin.email@email.com\",\r\n  \"password\" : \"secret\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -85,19 +85,19 @@
 	],
 	"variable": [
 		{
-			"id": "bc73dbbb-1c27-4fe2-9585-7425f9b9aaeb",
+			"id": "6a5f9677-65f0-43d9-ae2f-53889b6aba40",
 			"key": "accessToken",
 			"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJwcml2aWxlZ2VMZXZlbCI6MiwiaXNzIjoiYzRjIiwiZXhwIjoxNTg5MTM2OTc2LCJ1c2VySWQiOjd9.491p7OHlrPut_B1u0HaQhxUMuHmUSAbQFa_8EhcYLH4",
 			"type": "string"
 		},
 		{
-			"id": "0b19299e-4e86-47ab-adb3-6859a008adf9",
+			"id": "b6c6fdf0-6a02-41cf-8efb-ce6706e1b6f2",
 			"key": "refreshToken",
 			"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJwcml2aWxlZ2VMZXZlbCI6MiwiaXNzIjoiYzRjIiwiZXhwIjoxNTg5NzM5OTc2LCJ1c2VySWQiOjd9.NLo0JKLURpX5SndrJAe23cLKGvtUT5xniX1CF9mS2cA",
 			"type": "string"
 		},
 		{
-			"id": "e57861fb-6289-4897-86ce-30af58b16ae3",
+			"id": "8538fe55-f7cc-471c-81f1-803531c7c6c0",
 			"key": "domain",
 			"value": "http://localhost:8081",
 			"type": "string"

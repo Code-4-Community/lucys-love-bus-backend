@@ -20,64 +20,6 @@
 			"response": []
 		},
 		{
-			"name": "get all events unauth",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"id": "9c3a161f-87e6-4dff-94a7-2b343dd938d0",
-						"exec": [
-							"pm.test(\"Status code is 401\", function () {",
-							"    pm.response.to.have.status(401);",
-							"});"
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"protocolProfileBehavior": {
-				"disableBodyPruning": true
-			},
-			"request": {
-				"method": "GET",
-				"header": [
-					{
-						"key": "X-Access-Token",
-						"type": "text",
-						"value": ""
-					},
-					{
-						"key": "X-Refresh-Token",
-						"type": "text",
-						"value": ""
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "{{domain}}/api/v1/protected/events/",
-					"host": [
-						"{{domain}}"
-					],
-					"path": [
-						"api",
-						"v1",
-						"protected",
-						"events",
-						""
-					]
-				}
-			},
-			"response": []
-		},
-		{
 			"name": "get all events qualified unauth",
 			"event": [
 				{
@@ -500,7 +442,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n  \"email\" : \"test.email@email.com\",\r\n  \"password\" : \"password123\",\r\n  \"firstName\" : \"John\",\r\n  \"lastName\" : \"Doe\"\r\n}",
+					"raw": "{\r\n  \"email\" : \"test.email@email.com\",\r\n  \"password\" : \"password123\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -598,7 +540,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"email\" : \"admin@email.com\",\r\n    \"password\" : \"secret\"\r\n}",
+					"raw": "{\r\n    \"email\" : \"admin.email@email.com\",\r\n    \"password\" : \"secret\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -916,61 +858,6 @@
 			"response": []
 		},
 		{
-			"name": "create new event",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"id": "2c88b630-63ce-4043-8b4e-db6bb8e59ab2",
-						"exec": [
-							"pm.test(\"Status code is 200\", function () {",
-							"    pm.response.to.have.status(200);",
-							"});"
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "X-Access-Token",
-						"type": "text",
-						"value": "{{accessToken}}"
-					},
-					{
-						"key": "X-Refresh-Token",
-						"type": "text",
-						"value": "{{refreshToken}}"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n  \"title\": \"event title\",\r\n  \"spotsAvailable\": 2,\r\n  \"thumbnail\": \"https://i.ytimg.com/vi/bDVZW14fo-4/hqdefault.jpg\",\r\n  \"details\": {\r\n    \"description\": \"event desc\",\r\n    \"location\": \"Place\",\r\n    \"start\": \"2020-01-01\",\r\n    \"end\": \"2020-01-02\"\r\n  }\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "{{domain}}/api/v1/protected/events/",
-					"host": [
-						"{{domain}}"
-					],
-					"path": [
-						"api",
-						"v1",
-						"protected",
-						"events",
-						""
-					]
-				}
-			},
-			"response": []
-		},
-		{
 			"name": "get all announcements",
 			"event": [
 				{
@@ -1201,21 +1088,21 @@
 	],
 	"variable": [
 		{
-			"id": "a10b22fa-93e3-4939-9314-03b0fbbbc4e7",
+			"id": "492b95f5-3020-4e2d-95cf-f6ee5ec1beb7",
 			"key": "accessToken",
-			"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJwcml2aWxlZ2VMZXZlbCI6MiwiaXNzIjoiYzRjIiwiZXhwIjoxNTg5MTM2OTc2LCJ1c2VySWQiOjd9.491p7OHlrPut_B1u0HaQhxUMuHmUSAbQFa_8EhcYLH4",
+			"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJwcml2aWxlZ2VMZXZlbCI6MCwiaXNzIjoiYzRjIiwiZXhwIjoxNTkwMTE3NzAzLCJ1c2VySWQiOjE2fQ.iEPXlJEuGNhySlX_lFDyepkEtsaVRwXu9ZJh4gmy7hM",
 			"type": "string"
 		},
 		{
-			"id": "5ad16175-d3bd-473f-a359-fd564e56c2e6",
+			"id": "79818b84-e31c-446d-a6a5-d298894f0097",
 			"key": "refreshToken",
-			"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJwcml2aWxlZ2VMZXZlbCI6MiwiaXNzIjoiYzRjIiwiZXhwIjoxNTg5NzM5OTc2LCJ1c2VySWQiOjd9.NLo0JKLURpX5SndrJAe23cLKGvtUT5xniX1CF9mS2cA",
+			"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJwcml2aWxlZ2VMZXZlbCI6MCwiaXNzIjoiYzRjIiwiZXhwIjoxNTkwNzIwNzAzLCJ1c2VySWQiOjE2fQ.zYprHyKfIt2oronJaxaOiIa-tSdPdYD3Q1sWkeentTg",
 			"type": "string"
 		},
 		{
-			"id": "eba0b235-940b-4c7e-b484-cf3cf559aaf8",
+			"id": "17f4783e-e510-4192-bf76-351f45ef4f9f",
 			"key": "domain",
-			"value": "http://localhost:8081",
+			"value": "",
 			"type": "string"
 		}
 	],
