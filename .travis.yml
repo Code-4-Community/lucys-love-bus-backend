@@ -2,7 +2,6 @@ language: java
 
 services:
   - postgresql
-  - docker
 
 before_install:
   - nvm install node
@@ -22,10 +21,11 @@ before_install:
 install:
   - npm install newman
 
-scripts:
-  - docker run -d -p 127.0.0.1 /bin/sh -c "mvn clean install && java -jar service/target/service-1.0-SNAPSHOT-jar-with-dependencies.jar;"
+script:
+  - mvn clean install
+  - java -jar service/target/service-1.0-SNAPSHOT-jar-with-dependencies.jar &
+  - sleep 25
   - node_modules/.bin/newman run postman/LLB.postman_collection.json
-
 
 before_deploy:
   - cd common/src/main/resources/properties/
@@ -38,8 +38,6 @@ before_deploy:
   - rm input.properties
   - cd /home/travis/build/Code-4-Community/lucys-love-bus-backend/
   - mvn clean install
-
-
 
   - zip build.zip Dockerfile service/target/service-1.0-SNAPSHOT-jar-with-dependencies.jar .ebextensions/size.config
 deploy:
