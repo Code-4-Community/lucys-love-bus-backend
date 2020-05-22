@@ -1,5 +1,3 @@
 package com.codeforcommunity.propertiesLoader;
 
-public class PropertiesLoaderTest {
-
-}
+public class PropertiesLoaderTest {}

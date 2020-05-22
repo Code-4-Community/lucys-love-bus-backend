@@ -1,5 +1,3 @@
 package com.codeforcommunity.auth;
 
-public class JWTAuthorizerTest {
-
-}
+public class JWTAuthorizerTest {}

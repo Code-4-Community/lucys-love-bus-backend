@@ -1,5 +1,3 @@
 package com.codeforcommunity.logger;
 
-public class LoggerTest {
-
-}
+public class LoggerTest {}

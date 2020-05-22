@@ -1,5 +1,3 @@
 package com.codeforcommunity.auth;
 
-public class JWTCreatorTest {
-
-}
+public class JWTCreatorTest {}

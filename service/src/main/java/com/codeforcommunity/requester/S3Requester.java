@@ -18,7 +18,8 @@ import java.util.Base64;
 public class S3Requester {
   // for testing purposes so we can mock this
   public static class Externs {
-    private static final AmazonS3 s3Client = AmazonS3ClientBuilder.standard().withRegion(Regions.US_EAST_2).build();
+    private static final AmazonS3 s3Client =
+        AmazonS3ClientBuilder.standard().withRegion(Regions.US_EAST_2).build();
 
     public AmazonS3 getS3Client() {
       return s3Client;
@@ -26,7 +27,8 @@ public class S3Requester {
   }
 
   private static Externs externs = new Externs();
-  private static final String BUCKET_LLB_PUBLIC_URL = "https://lucys-love-bus-public.s3.us-east-2.amazonaws.com";
+  private static final String BUCKET_LLB_PUBLIC_URL =
+      "https://lucys-love-bus-public.s3.us-east-2.amazonaws.com";
   private static final String BUCKET_LLB_PUBLIC = "lucys-love-bus-public";
   private static final String DIR_LLB_PUBLIC_EVENTS = "events";
 

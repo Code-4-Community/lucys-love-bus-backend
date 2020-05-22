@@ -1,6 +1,5 @@
 package com.codeforcommunity.rest;
 
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -15,167 +14,161 @@ import org.junit.jupiter.api.Test;
 
 // Contains tests for RestFunctions.java in main
 public class RestFunctionsTest {
-    private final HttpServerRequest mockRequest = mock(HttpServerRequest.class);
-    private final RoutingContext mockRoutingContext = mock(RoutingContext.class);
+  private final HttpServerRequest mockRequest = mock(HttpServerRequest.class);
+  private final RoutingContext mockRoutingContext = mock(RoutingContext.class);
 
-    // Test for empty JSON response
-    @Test
-    public void testGetJsonBodyAsClass1() {
-        String emptyJSONString = "{}";
-        JsonObject emptyJSONObject = new JsonObject(emptyJSONString);
+  // Test for empty JSON response
+  @Test
+  public void testGetJsonBodyAsClass1() {
+    String emptyJSONString = "{}";
+    JsonObject emptyJSONObject = new JsonObject(emptyJSONString);
 
-        when(mockRoutingContext.getBodyAsJson())
-        .thenReturn(emptyJSONObject);
+    when(mockRoutingContext.getBodyAsJson()).thenReturn(emptyJSONObject);
 
-        LoginRequest result = RestFunctions.getJsonBodyAsClass(mockRoutingContext, LoginRequest.class);
+    LoginRequest result = RestFunctions.getJsonBodyAsClass(mockRoutingContext, LoginRequest.class);
 
-        assertEquals(result.getEmail(), null);
-        assertEquals(result.getPassword(), null);
-    }
+    assertEquals(result.getEmail(), null);
+    assertEquals(result.getPassword(), null);
+  }
 
-    // Test for JSON response for login request
-    @Test
-    public void testGetJsonBodyAsClass2() {
-        String loginRequestJSONString = "{\"email\":\"testemail\",\"password\":\"testpassword\"}";
-        JsonObject loginRequestJSONObject = new JsonObject(loginRequestJSONString);
+  // Test for JSON response for login request
+  @Test
+  public void testGetJsonBodyAsClass2() {
+    String loginRequestJSONString = "{\"email\":\"testemail\",\"password\":\"testpassword\"}";
+    JsonObject loginRequestJSONObject = new JsonObject(loginRequestJSONString);
 
-        when(mockRoutingContext.getBodyAsJson())
-        .thenReturn(loginRequestJSONObject);
+    when(mockRoutingContext.getBodyAsJson()).thenReturn(loginRequestJSONObject);
 
-        LoginRequest result = RestFunctions.getJsonBodyAsClass(mockRoutingContext, LoginRequest.class);
+    LoginRequest result = RestFunctions.getJsonBodyAsClass(mockRoutingContext, LoginRequest.class);
 
-        String expectedEmail = "testemail";
-        String expectedPassword = "testpassword";
+    String expectedEmail = "testemail";
+    String expectedPassword = "testpassword";
 
-        assertEquals(result.getEmail(), expectedEmail);
-        assertEquals(result.getPassword(), expectedPassword);
-    }
+    assertEquals(result.getEmail(), expectedEmail);
+    assertEquals(result.getPassword(), expectedPassword);
+  }
 
-    // Test for JSON response for new user request
-    @Test
-    public void testGetJsonBodyAsClass3() {
-        String loginRequestJSONString = "{\"email\":\"brandon@example.com\","
-        + "\"password\":\"password\","
-        + "\"firstName\":\"brandon\","
-        + "\"lastName\":\"liang\"}";
-        JsonObject loginRequestJSONObject = new JsonObject(loginRequestJSONString);
+  // Test for JSON response for new user request
+  @Test
+  public void testGetJsonBodyAsClass3() {
+    String loginRequestJSONString =
+        "{\"email\":\"brandon@example.com\","
+            + "\"password\":\"password\","
+            + "\"firstName\":\"brandon\","
+            + "\"lastName\":\"liang\"}";
+    JsonObject loginRequestJSONObject = new JsonObject(loginRequestJSONString);
 
-        when(mockRoutingContext.getBodyAsJson())
-        .thenReturn(loginRequestJSONObject);
+    when(mockRoutingContext.getBodyAsJson()).thenReturn(loginRequestJSONObject);
 
-        NewUserRequest result = RestFunctions.getJsonBodyAsClass(mockRoutingContext, NewUserRequest.class);
+    NewUserRequest result =
+        RestFunctions.getJsonBodyAsClass(mockRoutingContext, NewUserRequest.class);
 
-        String expectedEmail = "brandon@example.com";
-        String expectedPassword = "password";
-        String expectedFirstName = "brandon";
-        String expectedLastName = "liang";
+    String expectedEmail = "brandon@example.com";
+    String expectedPassword = "password";
+    String expectedFirstName = "brandon";
+    String expectedLastName = "liang";
 
-        assertEquals(result.getEmail(), expectedEmail);
-        assertEquals(result.getPassword(), expectedPassword);
-        assertEquals(result.getFirstName(), expectedFirstName);
-        assertEquals(result.getLastName(), expectedLastName);
-    }
+    assertEquals(result.getEmail(), expectedEmail);
+    assertEquals(result.getPassword(), expectedPassword);
+    assertEquals(result.getFirstName(), expectedFirstName);
+    assertEquals(result.getLastName(), expectedLastName);
+  }
 
-    // test request header for existence
-    @Test
-    public void testGetRequestHeader1() {
-        String myVal = "test";
-        
-        when(mockRequest.getHeader(any()))
-        .thenReturn(myVal);
+  // test request header for existence
+  @Test
+  public void testGetRequestHeader1() {
+    String myVal = "test";
 
-        String result = RestFunctions.getRequestHeader(mockRequest, myVal);
+    when(mockRequest.getHeader(any())).thenReturn(myVal);
 
-        assertEquals(result, myVal);
-    }
+    String result = RestFunctions.getRequestHeader(mockRequest, myVal);
 
-//    // test request header for exception thrown
-//    @Test(expected = MissingHeaderException.class)
-//    public void testGetRequestHeader2() {
-//        String name = "name";
-//
-//        when(mockRequest.getHeader(null))
-//        .thenReturn(name);
-//
-//        when(RestFunctions.getRequestHeader(mockRequest, name))
-//        .thenThrow(new MissingHeaderException(name));
-//    }
+    assertEquals(result, myVal);
+  }
 
-    // test request parameter as int when given nat
-    @Test
-    public void testGetRequestParameterAsInt1() {
-        String myInt = "200";
-        
-        when(mockRequest.getParam(any()))
-        .thenReturn(myInt);
+  //    // test request header for exception thrown
+  //    @Test(expected = MissingHeaderException.class)
+  //    public void testGetRequestHeader2() {
+  //        String name = "name";
+  //
+  //        when(mockRequest.getHeader(null))
+  //        .thenReturn(name);
+  //
+  //        when(RestFunctions.getRequestHeader(mockRequest, name))
+  //        .thenThrow(new MissingHeaderException(name));
+  //    }
 
-        int result = RestFunctions.getRequestParameterAsInt(mockRequest, myInt);
-        int expectedResult = 200;
+  // test request parameter as int when given nat
+  @Test
+  public void testGetRequestParameterAsInt1() {
+    String myInt = "200";
 
-        assertEquals(result, expectedResult);
-    }
+    when(mockRequest.getParam(any())).thenReturn(myInt);
 
-    // test request parameter as int when given negative int
-    @Test
-    public void testGetRequestParameterAsInt2() {
-        String myInt = "-200";
-        
-        when(mockRequest.getParam(any()))
-        .thenReturn(myInt);
+    int result = RestFunctions.getRequestParameterAsInt(mockRequest, myInt);
+    int expectedResult = 200;
 
-        int result = RestFunctions.getRequestParameterAsInt(mockRequest, myInt);
-        int expectedResult = -200;
+    assertEquals(result, expectedResult);
+  }
 
-        assertEquals(result, expectedResult);
-    }
+  // test request parameter as int when given negative int
+  @Test
+  public void testGetRequestParameterAsInt2() {
+    String myInt = "-200";
 
-    // test request parameter exception when given malformed int
-//    @Test(expected = MalformedParameterException.class)
-//    public void testGetRequestParameterAsInt3() {
-//        String myInt = "hello";
-//
-//        when(mockRequest.getParam(any()))
-//        .thenReturn(myInt);
-//
-//        when(RestFunctions.getRequestParameterAsInt(mockRequest, myInt))
-//        .thenThrow(new MissingHeaderException(myInt));
-//    }
+    when(mockRequest.getParam(any())).thenReturn(myInt);
 
-    // test request parameter as string when given number
-    @Test
-    public void testGetRequestParameterAsString1() {
-        String myInt = "200";
-        
-        when(mockRequest.getParam(any()))
-        .thenReturn(myInt);
+    int result = RestFunctions.getRequestParameterAsInt(mockRequest, myInt);
+    int expectedResult = -200;
 
-        String result = RestFunctions.getRequestParameterAsString(mockRequest, myInt);
+    assertEquals(result, expectedResult);
+  }
 
-        assertEquals(result, myInt);
-    }
+  // test request parameter exception when given malformed int
+  //    @Test(expected = MalformedParameterException.class)
+  //    public void testGetRequestParameterAsInt3() {
+  //        String myInt = "hello";
+  //
+  //        when(mockRequest.getParam(any()))
+  //        .thenReturn(myInt);
+  //
+  //        when(RestFunctions.getRequestParameterAsInt(mockRequest, myInt))
+  //        .thenThrow(new MissingHeaderException(myInt));
+  //    }
 
-    // test request parameter as string when given all letters
-    @Test
-    public void testGetRequestParameterAsString2() {
-        String myString = "foobar";
-        
-        when(mockRequest.getParam(any()))
-        .thenReturn(myString);
+  // test request parameter as string when given number
+  @Test
+  public void testGetRequestParameterAsString1() {
+    String myInt = "200";
 
-        String result = RestFunctions.getRequestParameterAsString(mockRequest, myString);
+    when(mockRequest.getParam(any())).thenReturn(myInt);
 
-        assertEquals(result, myString);
-    }
+    String result = RestFunctions.getRequestParameterAsString(mockRequest, myInt);
 
-    // test request parameter exception when parameter is missing
-//    @Test(expected = MissingParameterException.class)
-//    public void testGetRequestParameterAsString3() {
-//        String name = "name";
-//
-//        when(mockRequest.getParam(null))
-//        .thenReturn(name);
-//
-//        when(RestFunctions.getRequestParameterAsString(mockRequest, name))
-//        .thenThrow(new MissingParameterException(name));
-//    }
+    assertEquals(result, myInt);
+  }
+
+  // test request parameter as string when given all letters
+  @Test
+  public void testGetRequestParameterAsString2() {
+    String myString = "foobar";
+
+    when(mockRequest.getParam(any())).thenReturn(myString);
+
+    String result = RestFunctions.getRequestParameterAsString(mockRequest, myString);
+
+    assertEquals(result, myString);
+  }
+
+  // test request parameter exception when parameter is missing
+  //    @Test(expected = MissingParameterException.class)
+  //    public void testGetRequestParameterAsString3() {
+  //        String name = "name";
+  //
+  //        when(mockRequest.getParam(null))
+  //        .thenReturn(name);
+  //
+  //        when(RestFunctions.getRequestParameterAsString(mockRequest, name))
+  //        .thenThrow(new MissingParameterException(name));
+  //    }
 }

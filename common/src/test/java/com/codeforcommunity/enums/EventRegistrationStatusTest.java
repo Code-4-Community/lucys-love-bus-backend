@@ -1,5 +1,3 @@
 package com.codeforcommunity.enums;
 
-public class EventRegistrationStatusTest {
-
-}
+public class EventRegistrationStatusTest {}
