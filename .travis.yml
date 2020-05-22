@@ -23,8 +23,11 @@ install:
 
 script:
   - mvn clean install
+  - psql -c 'create database "lucys-love-bus";' -U postgres
   - java -jar service/target/service-1.0-SNAPSHOT-jar-with-dependencies.jar &
   - sleep 25
+  - node_modules/.bin/newman run postman/PostmanSetupLLB.postman_collection.json
+  - psql -U postgres -d lucys-love-bus -c 'UPDATE SET privilege_level = 2, verified = 2, WHERE email = "admin.email@email.com";'
   - node_modules/.bin/newman run postman/LLB.postman_collection.json
 
 before_deploy:

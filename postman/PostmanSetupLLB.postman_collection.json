@@ -1,0 +1,107 @@
+{
+	"info": {
+		"_postman_id": "da1d8c1c-da14-49b4-aa73-5458cb439e70",
+		"name": "PostmanSetupLLB",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "sanity check",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{domain}}",
+					"host": [
+						"{{domain}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "sign up",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "6ca00840-ab51-4bf4-97ff-a1d315fdd6a7",
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"email\" : \"test.email@email.com\",\r\n  \"password\" : \"password123\",\r\n  \"firstName\" : \"John\",\r\n  \"lastName\" : \"Doe\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{domain}}/api/v1/user/signup",
+					"host": [
+						"{{domain}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"user",
+						"signup"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "969500a3-1a06-4d10-8fcb-da90458280e8",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "eba67c2d-1d91-47c9-8d65-008f28c0a443",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"id": "bc73dbbb-1c27-4fe2-9585-7425f9b9aaeb",
+			"key": "accessToken",
+			"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJwcml2aWxlZ2VMZXZlbCI6MiwiaXNzIjoiYzRjIiwiZXhwIjoxNTg5MTM2OTc2LCJ1c2VySWQiOjd9.491p7OHlrPut_B1u0HaQhxUMuHmUSAbQFa_8EhcYLH4",
+			"type": "string"
+		},
+		{
+			"id": "0b19299e-4e86-47ab-adb3-6859a008adf9",
+			"key": "refreshToken",
+			"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJwcml2aWxlZ2VMZXZlbCI6MiwiaXNzIjoiYzRjIiwiZXhwIjoxNTg5NzM5OTc2LCJ1c2VySWQiOjd9.NLo0JKLURpX5SndrJAe23cLKGvtUT5xniX1CF9mS2cA",
+			"type": "string"
+		},
+		{
+			"id": "e57861fb-6289-4897-86ce-30af58b16ae3",
+			"key": "domain",
+			"value": "http://localhost:8081",
+			"type": "string"
+		}
+	],
+	"protocolProfileBehavior": {}
+}
