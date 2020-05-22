@@ -1088,21 +1088,21 @@
 	],
 	"variable": [
 		{
-			"id": "492b95f5-3020-4e2d-95cf-f6ee5ec1beb7",
+			"id": "5d3b0e9f-a317-44ec-9112-811dbb381031",
 			"key": "accessToken",
 			"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJwcml2aWxlZ2VMZXZlbCI6MCwiaXNzIjoiYzRjIiwiZXhwIjoxNTkwMTE3NzAzLCJ1c2VySWQiOjE2fQ.iEPXlJEuGNhySlX_lFDyepkEtsaVRwXu9ZJh4gmy7hM",
 			"type": "string"
 		},
 		{
-			"id": "79818b84-e31c-446d-a6a5-d298894f0097",
+			"id": "15799e10-3535-46df-8317-d53e2fd07a39",
 			"key": "refreshToken",
 			"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJwcml2aWxlZ2VMZXZlbCI6MCwiaXNzIjoiYzRjIiwiZXhwIjoxNTkwNzIwNzAzLCJ1c2VySWQiOjE2fQ.zYprHyKfIt2oronJaxaOiIa-tSdPdYD3Q1sWkeentTg",
 			"type": "string"
 		},
 		{
-			"id": "17f4783e-e510-4192-bf76-351f45ef4f9f",
+			"id": "903a4cfe-db66-4aa3-b0d4-d484fa03c771",
 			"key": "domain",
-			"value": "",
+			"value": "http://localhost:8081",
 			"type": "string"
 		}
 	],
