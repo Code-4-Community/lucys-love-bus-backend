@@ -1,5 +1,10 @@
 package com.codeforcommunity.processor;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import com.codeforcommunity.JooqMock;
 import com.codeforcommunity.auth.JWTData;
 import com.codeforcommunity.dto.checkout.PostCreateCheckoutSession;
@@ -12,15 +17,8 @@ import com.stripe.model.checkout.Session;
 import com.stripe.param.checkout.SessionCreateParams;
 import java.util.ArrayList;
 import java.util.Properties;
-
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import static org.junit.jupiter.api.Assertions.fail;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 public class CheckoutProcessorImplTest {
   private JooqMock myJooqMock;
@@ -39,11 +37,11 @@ public class CheckoutProcessorImplTest {
     JWTData myUser1 = new JWTData(1, PrivilegeLevel.PF);
     JWTData myUser2 = new JWTData(1, PrivilegeLevel.ADMIN);
 
-    PostCreateCheckoutSession req = new PostCreateCheckoutSession(
-        new ArrayList<>(),
-        "https://lucy.c4cneu.com/checkout",
-        "https://lucy.c4cneu.com/checkout"
-    );
+    PostCreateCheckoutSession req =
+        new PostCreateCheckoutSession(
+            new ArrayList<>(),
+            "https://lucy.c4cneu.com/checkout",
+            "https://lucy.c4cneu.com/checkout");
 
     try {
       myCheckoutProcessorImpl.createCheckoutSessionAndEventRegistration(req, myUser1);
@@ -65,11 +63,11 @@ public class CheckoutProcessorImplTest {
   public void testCreateCheckoutSessionAndEventRegistration2() throws StripeException {
     JWTData myUser = new JWTData(1, PrivilegeLevel.GP);
 
-    PostCreateCheckoutSession req = new PostCreateCheckoutSession(
-        new ArrayList<>(),
-        "https://lucy.c4cneu.com/checkout",
-        "https://lucy.c4cneu.com/checkout"
-    );
+    PostCreateCheckoutSession req =
+        new PostCreateCheckoutSession(
+            new ArrayList<>(),
+            "https://lucy.c4cneu.com/checkout",
+            "https://lucy.c4cneu.com/checkout");
 
     // mock the Stripe API interface
     Session mockSession = mock(Session.class);

@@ -23,14 +23,12 @@ public class EventDatabaseOperationsTest {
   // test getting how many spots left where capacity > registration
   @Test
   public void testGetSpotsLeft1() {
-    Record1<Integer> myTicketsRecord = myJooqMock
-        .getContext()
-        .newRecord(Tables.EVENT_REGISTRATIONS.TICKET_QUANTITY);
+    Record1<Integer> myTicketsRecord =
+        myJooqMock.getContext().newRecord(Tables.EVENT_REGISTRATIONS.TICKET_QUANTITY);
     myTicketsRecord.values(1);
 
-    Record1<Integer> myEventRegistration = myJooqMock
-        .getContext()
-        .newRecord(Tables.EVENTS.CAPACITY);
+    Record1<Integer> myEventRegistration =
+        myJooqMock.getContext().newRecord(Tables.EVENTS.CAPACITY);
     myEventRegistration.values(4);
 
     myJooqMock.addReturn("SELECT", myTicketsRecord);
@@ -42,14 +40,12 @@ public class EventDatabaseOperationsTest {
   // test getting how many spots left where capacity = registration
   @Test
   public void testGetSpotsLeft2() {
-    Record1<Integer> myTicketsRecord = myJooqMock
-        .getContext()
-        .newRecord(Tables.EVENT_REGISTRATIONS.TICKET_QUANTITY);
+    Record1<Integer> myTicketsRecord =
+        myJooqMock.getContext().newRecord(Tables.EVENT_REGISTRATIONS.TICKET_QUANTITY);
     myTicketsRecord.values(4);
 
-    Record1<Integer> myEventRegistration = myJooqMock
-        .getContext()
-        .newRecord(Tables.EVENTS.CAPACITY);
+    Record1<Integer> myEventRegistration =
+        myJooqMock.getContext().newRecord(Tables.EVENTS.CAPACITY);
     myEventRegistration.values(4);
 
     myJooqMock.addReturn("SELECT", myTicketsRecord);
@@ -61,14 +57,12 @@ public class EventDatabaseOperationsTest {
   // test getting how many spots left where capacity < registration
   @Test
   public void testGetSpotsLeft3() {
-    Record1<Integer> myTicketsRecord = myJooqMock
-        .getContext()
-        .newRecord(Tables.EVENT_REGISTRATIONS.TICKET_QUANTITY);
+    Record1<Integer> myTicketsRecord =
+        myJooqMock.getContext().newRecord(Tables.EVENT_REGISTRATIONS.TICKET_QUANTITY);
     myTicketsRecord.values(10);
 
-    Record1<Integer> myEventRegistration = myJooqMock
-        .getContext()
-        .newRecord(Tables.EVENTS.CAPACITY);
+    Record1<Integer> myEventRegistration =
+        myJooqMock.getContext().newRecord(Tables.EVENTS.CAPACITY);
     myEventRegistration.values(4);
 
     myJooqMock.addReturn("SELECT", myTicketsRecord);
@@ -82,14 +76,12 @@ public class EventDatabaseOperationsTest {
   // test getting how many spots left where you have negative capacity
   @Test
   public void testGetSpotsLeft4() {
-    Record1<Integer> myTicketsRecord = myJooqMock
-        .getContext()
-        .newRecord(Tables.EVENT_REGISTRATIONS.TICKET_QUANTITY);
+    Record1<Integer> myTicketsRecord =
+        myJooqMock.getContext().newRecord(Tables.EVENT_REGISTRATIONS.TICKET_QUANTITY);
     myTicketsRecord.values(2);
 
-    Record1<Integer> myEventRegistration = myJooqMock
-        .getContext()
-        .newRecord(Tables.EVENTS.CAPACITY);
+    Record1<Integer> myEventRegistration =
+        myJooqMock.getContext().newRecord(Tables.EVENTS.CAPACITY);
     myEventRegistration.values(-4);
 
     myJooqMock.addReturn("SELECT", myTicketsRecord);
@@ -103,14 +95,12 @@ public class EventDatabaseOperationsTest {
   // test getting how many spots left where you have negative registration
   @Test
   public void testGetSpotsLeft5() {
-    Record1<Integer> myTicketsRecord = myJooqMock
-        .getContext()
-        .newRecord(Tables.EVENT_REGISTRATIONS.TICKET_QUANTITY);
+    Record1<Integer> myTicketsRecord =
+        myJooqMock.getContext().newRecord(Tables.EVENT_REGISTRATIONS.TICKET_QUANTITY);
     myTicketsRecord.values(-2);
 
-    Record1<Integer> myEventRegistration = myJooqMock
-        .getContext()
-        .newRecord(Tables.EVENTS.CAPACITY);
+    Record1<Integer> myEventRegistration =
+        myJooqMock.getContext().newRecord(Tables.EVENTS.CAPACITY);
     myEventRegistration.values(4);
 
     myJooqMock.addReturn("SELECT", myTicketsRecord);
@@ -124,14 +114,12 @@ public class EventDatabaseOperationsTest {
   // test getting how many spots left where you have both negative registration/capacity
   @Test
   public void testGetSpotsLeft6() {
-    Record1<Integer> myTicketsRecord = myJooqMock
-        .getContext()
-        .newRecord(Tables.EVENT_REGISTRATIONS.TICKET_QUANTITY);
+    Record1<Integer> myTicketsRecord =
+        myJooqMock.getContext().newRecord(Tables.EVENT_REGISTRATIONS.TICKET_QUANTITY);
     myTicketsRecord.values(-6);
 
-    Record1<Integer> myEventRegistration = myJooqMock
-        .getContext()
-        .newRecord(Tables.EVENTS.CAPACITY);
+    Record1<Integer> myEventRegistration =
+        myJooqMock.getContext().newRecord(Tables.EVENTS.CAPACITY);
     myEventRegistration.values(-4);
 
     myJooqMock.addReturn("SELECT", myTicketsRecord);

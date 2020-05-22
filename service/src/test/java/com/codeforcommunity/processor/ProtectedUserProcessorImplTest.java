@@ -1,5 +1,8 @@
 package com.codeforcommunity.processor;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
+
 import com.codeforcommunity.JooqMock;
 import com.codeforcommunity.auth.JWTData;
 import com.codeforcommunity.auth.Passwords;
@@ -12,11 +15,8 @@ import org.jooq.generated.tables.records.EventRegistrationsRecord;
 import org.jooq.generated.tables.records.PfRequestsRecord;
 import org.jooq.generated.tables.records.UsersRecord;
 import org.jooq.generated.tables.records.VerificationKeysRecord;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
 
 // Contains tests for ProtectedUserProcessorImpl.java in service
 public class ProtectedUserProcessorImplTest {
@@ -32,7 +32,7 @@ public class ProtectedUserProcessorImplTest {
 
   // test properly deleting a user
   @Test
-  public void testDeleteUser1() {
+  public void testDeleteUser() {
     JWTData myUser = new JWTData(0, PrivilegeLevel.ADMIN);
 
     // mock four associated tables with the user
@@ -115,5 +115,11 @@ public class ProtectedUserProcessorImplTest {
     List<Object[]> updateBindings = myJooqMock.getSqlBindings().get("UPDATE");
 
     assertEquals(1, updateBindings.size());
+  }
+
+  // TODO
+  @Test
+  public void testSetContactsAndChildren() {
+    fail("TODO!!!");
   }
 }

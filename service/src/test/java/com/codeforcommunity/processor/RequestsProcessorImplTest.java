@@ -1,19 +1,22 @@
 package com.codeforcommunity.processor;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import com.codeforcommunity.JooqMock;
-import com.codeforcommunity.enums.PrivilegeLevel;
 import com.codeforcommunity.auth.JWTData;
 import com.codeforcommunity.dto.pfrequests.CreateRequest;
 import com.codeforcommunity.dto.pfrequests.RequestData;
+import com.codeforcommunity.enums.PrivilegeLevel;
 import com.codeforcommunity.enums.RequestStatus;
 import com.codeforcommunity.exceptions.AdminOnlyRouteException;
 import com.codeforcommunity.exceptions.OutstandingRequestException;
 import com.codeforcommunity.exceptions.ResourceNotOwnedException;
 import com.codeforcommunity.exceptions.WrongPrivilegeException;
-
 import java.util.ArrayList;
 import java.util.List;
-
 import org.jooq.Record3;
 import org.jooq.generated.Tables;
 import org.jooq.generated.tables.records.PfRequestsRecord;
@@ -21,11 +24,6 @@ import org.jooq.generated.tables.records.UsersRecord;
 import org.jooq.impl.UpdatableRecordImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.mock;
 
 // Contains tests for RequestsProcessorImpl.java in main
 public class RequestsProcessorImplTest {
@@ -138,7 +136,10 @@ public class RequestsProcessorImplTest {
     when(myUserData.getPrivilegeLevel()).thenReturn(PrivilegeLevel.ADMIN);
 
     // mock the DB for PF requests
-    Record3<Integer, String, String> record = myJooqMock.getContext().newRecord(Tables.PF_REQUESTS.ID, Tables.PF_REQUESTS.DESCRIPTION, Tables.USERS.EMAIL);
+    Record3<Integer, String, String> record =
+        myJooqMock
+            .getContext()
+            .newRecord(Tables.PF_REQUESTS.ID, Tables.PF_REQUESTS.DESCRIPTION, Tables.USERS.EMAIL);
     record.values(0, "sample description", "brandon@example.com");
     myJooqMock.addReturn("SELECT", record);
 
@@ -158,9 +159,15 @@ public class RequestsProcessorImplTest {
     when(myUserData.getPrivilegeLevel()).thenReturn(PrivilegeLevel.ADMIN);
 
     // mock the DB for PF requests
-    Record3<Integer, String, String> record1 = myJooqMock.getContext().newRecord(Tables.PF_REQUESTS.ID, Tables.PF_REQUESTS.DESCRIPTION, Tables.USERS.EMAIL);
+    Record3<Integer, String, String> record1 =
+        myJooqMock
+            .getContext()
+            .newRecord(Tables.PF_REQUESTS.ID, Tables.PF_REQUESTS.DESCRIPTION, Tables.USERS.EMAIL);
     record1.values(0, "sample description", "brandon@example.com");
-    Record3<Integer, String, String> record2 = myJooqMock.getContext().newRecord(Tables.PF_REQUESTS.ID, Tables.PF_REQUESTS.DESCRIPTION, Tables.USERS.EMAIL);
+    Record3<Integer, String, String> record2 =
+        myJooqMock
+            .getContext()
+            .newRecord(Tables.PF_REQUESTS.ID, Tables.PF_REQUESTS.DESCRIPTION, Tables.USERS.EMAIL);
     record2.values(1, "code for community", "conner@example.com");
 
     List<Record3> records = new ArrayList<Record3>();
@@ -218,7 +225,8 @@ public class RequestsProcessorImplTest {
 
     myRequestsProcessorImpl.approveRequest(0, myUserData);
 
-    assertEquals(myJooqMock.getSqlBindings().get("UPDATE").get(0)[0], RequestStatus.APPROVED.getVal());
+    assertEquals(
+        myJooqMock.getSqlBindings().get("UPDATE").get(0)[0], RequestStatus.APPROVED.getVal());
     assertEquals(myJooqMock.getSqlBindings().get("UPDATE").get(0)[1], myUserRecord.getId());
     assertEquals(myJooqMock.getSqlBindings().get("UPDATE").get(1)[0], PrivilegeLevel.PF.getVal());
     assertEquals(myJooqMock.getSqlBindings().get("UPDATE").get(1)[1], myUserRecord.getId());
@@ -257,13 +265,14 @@ public class RequestsProcessorImplTest {
 
     myRequestsProcessorImpl.rejectRequest(0, myUserData);
 
-    assertEquals(myJooqMock.getSqlBindings().get("UPDATE").get(0)[0], RequestStatus.REJECTED.getVal());
+    assertEquals(
+        myJooqMock.getSqlBindings().get("UPDATE").get(0)[0], RequestStatus.REJECTED.getVal());
     assertEquals(myJooqMock.getSqlBindings().get("UPDATE").get(0)[1], myPFReqRecord.getUserId());
   }
 
   // test for exception when getting request status from an unauthorized user
   @Test
-  public void testGeRequestStatus1() {
+  public void testGetRequestStatus1() {
     // mock a general user
     JWTData myUserData = mock(JWTData.class);
     when(myUserData.getPrivilegeLevel()).thenReturn(PrivilegeLevel.GP);
@@ -283,7 +292,7 @@ public class RequestsProcessorImplTest {
     int testRequestID = 0;
 
     try {
-      myRequestsProcessorImpl.geRequestStatus(testRequestID, myUserData);
+      myRequestsProcessorImpl.getRequestStatus(testRequestID, myUserData);
       fail();
     } catch (ResourceNotOwnedException e) {
       assertEquals(e.getResource(), "request " + testRequestID);
@@ -292,7 +301,7 @@ public class RequestsProcessorImplTest {
 
   // test for pending request status
   @Test
-  public void testGeRequestStatus2() {
+  public void testGetRequestStatus2() {
     // mock a general user
     JWTData myUserData = mock(JWTData.class);
     when(myUserData.getPrivilegeLevel()).thenReturn(PrivilegeLevel.GP);
@@ -312,12 +321,13 @@ public class RequestsProcessorImplTest {
 
     int testRequestID = 0;
 
-    assertEquals(myRequestsProcessorImpl.geRequestStatus(testRequestID, myUserData), RequestStatus.PENDING);
+    assertEquals(
+        myRequestsProcessorImpl.getRequestStatus(testRequestID, myUserData), RequestStatus.PENDING);
   }
 
   // test for approved request status
   @Test
-  public void testGeRequestStatus3() {
+  public void testGetRequestStatus3() {
     // mock an admin user
     JWTData myUserData = mock(JWTData.class);
     when(myUserData.getPrivilegeLevel()).thenReturn(PrivilegeLevel.ADMIN);
@@ -330,12 +340,14 @@ public class RequestsProcessorImplTest {
 
     int testRequestID = 0;
 
-    assertEquals(myRequestsProcessorImpl.geRequestStatus(testRequestID, myUserData), RequestStatus.APPROVED);
+    assertEquals(
+        myRequestsProcessorImpl.getRequestStatus(testRequestID, myUserData),
+        RequestStatus.APPROVED);
   }
 
   // test for rejected request status
   @Test
-  public void testGeRequestStatus4() {
+  public void testGetRequestStatus4() {
     // mock an admin user
     JWTData myUserData = mock(JWTData.class);
     when(myUserData.getPrivilegeLevel()).thenReturn(PrivilegeLevel.ADMIN);
@@ -348,6 +360,8 @@ public class RequestsProcessorImplTest {
 
     int testRequestID = 0;
 
-    assertEquals(myRequestsProcessorImpl.geRequestStatus(testRequestID, myUserData), RequestStatus.REJECTED);
+    assertEquals(
+        myRequestsProcessorImpl.getRequestStatus(testRequestID, myUserData),
+        RequestStatus.REJECTED);
   }
 }
