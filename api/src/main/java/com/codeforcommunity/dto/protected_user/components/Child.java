@@ -1,12 +1,16 @@
 package com.codeforcommunity.dto.protected_user.components;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import java.sql.Date;
 
 public class Child {
 
   private String firstName;
   private String lastName;
-  private Date dob;
+
+  @JsonFormat(pattern="yyyy-MM-dd")
+  private Date dateOfBirth;
   private String pronouns;
   private String schoolYear;
   private String school;
@@ -20,7 +24,7 @@ public class Child {
   public Child(
       String firstName,
       String lastName,
-      Date dob,
+      Date dateOfBirth,
       String pronouns,
       String schoolYear,
       String school,
@@ -30,7 +34,7 @@ public class Child {
       String notes) {
     this.firstName = firstName;
     this.lastName = lastName;
-    this.dob = dob;
+    this.dateOfBirth = dateOfBirth;
     this.pronouns = pronouns;
     this.schoolYear = schoolYear;
     this.school = school;
@@ -56,12 +60,12 @@ public class Child {
     this.lastName = lastName;
   }
 
-  public Date getDob() {
-    return dob;
+  public Date getDateOfBirth() {
+    return dateOfBirth;
   }
 
-  public void setDob(Date dob) {
-    this.dob = dob;
+  public void setDateOfBirth(Date dateOfBirth) {
+    this.dateOfBirth = dateOfBirth;
   }
 
   public String getPronouns() {

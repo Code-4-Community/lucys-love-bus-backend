@@ -1,12 +1,16 @@
 package com.codeforcommunity.dto.protected_user.components;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import java.sql.Date;
 
 public class Contact {
 
   private String firstName;
   private String lastName;
-  private Date dob;
+
+  @JsonFormat(pattern="yyyy-MM-dd")
+  private Date dateOfBirth;
   private String email;
   private String phoneNumber;
   private String allergies;
@@ -14,14 +18,14 @@ public class Contact {
   private String medications;
   private String notes;
   private String pronouns;
-  private boolean shouldSendEmail;
+  private boolean shouldSendEmails;
 
   public Contact() {}
 
   public Contact(
       String firstName,
       String lastName,
-      Date dob,
+      Date dateOfBirth,
       String email,
       String phoneNumber,
       String allergies,
@@ -29,10 +33,10 @@ public class Contact {
       String medication,
       String notes,
       String pronouns,
-      boolean shouldSendEmail) {
+      boolean shouldSendEmails) {
     this.firstName = firstName;
     this.lastName = lastName;
-    this.dob = dob;
+    this.dateOfBirth = dateOfBirth;
     this.email = email;
     this.phoneNumber = phoneNumber;
     this.allergies = allergies;
@@ -40,7 +44,7 @@ public class Contact {
     this.medications = medication;
     this.notes = notes;
     this.pronouns = pronouns;
-    this.shouldSendEmail = shouldSendEmail;
+    this.shouldSendEmails = shouldSendEmails;
   }
 
   public String getFirstName() {
@@ -59,12 +63,12 @@ public class Contact {
     this.lastName = lastName;
   }
 
-  public Date getDob() {
-    return dob;
+  public Date getDateOfBirth() {
+    return dateOfBirth;
   }
 
-  public void setDob(Date dob) {
-    this.dob = dob;
+  public void setDateOfBirth(Date dateOfBirth) {
+    this.dateOfBirth = dateOfBirth;
   }
 
   public String getEmail() {
@@ -123,11 +127,11 @@ public class Contact {
     this.pronouns = pronouns;
   }
 
-  public boolean getShouldSendEmail() {
-    return shouldSendEmail;
+  public boolean getShouldSendEmails() {
+    return shouldSendEmails;
   }
 
-  public void setShouldSendEmail(boolean shouldSendEmail) {
-    this.shouldSendEmail = shouldSendEmail;
+  public void setShouldSendEmails(boolean shouldSendEmails) {
+    this.shouldSendEmails = shouldSendEmails;
   }
 }
