@@ -26,7 +26,7 @@ script:
   - java -jar service/target/service-1.0-SNAPSHOT-jar-with-dependencies.jar &
   - sleep 5
   - node_modules/.bin/newman run postman/PostmanSetupLLB.postman_collection.json
-  - psql -U postgres -d lucys-love-bus -c 'UPDATE users SET privilege_level = 2, verified = 2 WHERE email = "admin.email@email.com";'
+  - psql -U postgres -d lucys-love-bus -c 'UPDATE users SET privilege_level = 2, verified = 2 WHERE id = 1;'
   - node_modules/.bin/newman run postman/LLB.postman_collection.json
 
 before_deploy:
