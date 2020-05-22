@@ -2,24 +2,18 @@ package com.codeforcommunity.dto.pfrequests;
 
 public class RequestData {
   private int id;
-  private String description;
-  private String userEmail;
+  private RequestUser user;
 
-  public RequestData(int id, String description, String userEmail) {
+  public RequestData(int id, RequestUser user) {
     this.id = id;
-    this.description = description;
-    this.userEmail = userEmail;
+    this.user = user;
   }
 
   public int getId() {
     return id;
   }
 
-  public String getDescription() {
-    return description;
-  }
-
-  public String getUserEmail() {
-    return userEmail;
+  public RequestUser getUser() {
+    return user;
   }
 }

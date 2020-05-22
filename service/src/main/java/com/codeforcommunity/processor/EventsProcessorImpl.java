@@ -8,7 +8,6 @@ import static org.jooq.generated.Tables.USERS;
 import com.codeforcommunity.api.IEventsProcessor;
 import com.codeforcommunity.auth.JWTData;
 import com.codeforcommunity.dataaccess.EventDatabaseOperations;
-import com.codeforcommunity.dto.userEvents.components.Event;
 import com.codeforcommunity.dto.userEvents.components.EventDetails;
 import com.codeforcommunity.dto.userEvents.components.Registration;
 import com.codeforcommunity.dto.userEvents.requests.CreateEventRequest;
@@ -77,7 +76,7 @@ public class EventsProcessorImpl implements IEventsProcessor {
   @Override
   public GetEventsResponse getEvents(List<Integer> eventIds) {
     List<Events> e = db.selectFrom(EVENTS).where(EVENTS.ID.in(eventIds)).fetchInto(Events.class);
-    return new GetEventsResponse(listOfEventsToListOfEvent(e), e.size());
+    return new GetEventsResponse(listOfEventsToListOfSingleEventResponse(e), e.size());
   }
 
   @Override
@@ -119,7 +118,7 @@ public class EventsProcessorImpl implements IEventsProcessor {
       eventPojos = s.fetchInto(Events.class);
     }
 
-    List<Event> res = listOfEventsToListOfEvent(eventPojos);
+    List<SingleEventResponse> res = listOfEventsToListOfSingleEventResponse(eventPojos);
     return new GetEventsResponse(res, res.size());
   }
 
@@ -138,8 +137,9 @@ public class EventsProcessorImpl implements IEventsProcessor {
     } else {
       afterDateFilter = select.where(EVENTS.START_TIME.greaterOrEqual(startDate));
     }
+    List<Events> eventsList = afterDateFilter.fetchInto(Events.class);
 
-    List<Event> res = listOfEventsToListOfEvent(afterDateFilter.fetchInto(Events.class));
+    List<SingleEventResponse> res = listOfEventsToListOfSingleEventResponse(eventsList);
 
     return new GetEventsResponse(res, res.size());
   }
@@ -220,7 +220,7 @@ public class EventsProcessorImpl implements IEventsProcessor {
    * @param events jOOq data objects.
    * @return List of our Event data object.
    */
-  private List<Event> listOfEventsToListOfEvent(List<Events> events) {
+  private List<SingleEventResponse> listOfEventsToListOfSingleEventResponse(List<Events> events) {
 
     return events.stream()
         .map(
@@ -231,11 +231,12 @@ public class EventsProcessorImpl implements IEventsProcessor {
                       event.getLocation(),
                       event.getStartTime(),
                       event.getEndTime());
-              Event e =
-                  new Event(
+              SingleEventResponse e =
+                  new SingleEventResponse(
                       event.getId(),
                       event.getTitle(),
                       eventDatabaseOperations.getSpotsLeft(event.getId()),
+                      event.getCapacity(),
                       event.getThumbnail(),
                       details);
               return e;
