@@ -6,6 +6,8 @@ import java.sql.Date;
 
 public class Contact {
 
+  /** Used on PUT requests, ignored on POST */
+  private int id;
   private String firstName;
   private String lastName;
 
@@ -18,11 +20,12 @@ public class Contact {
   private String medications;
   private String notes;
   private String pronouns;
-  private boolean shouldSendEmails;
+  private Boolean shouldSendEmails;
 
   public Contact() {}
 
   public Contact(
+      int id,
       String firstName,
       String lastName,
       Date dateOfBirth,
@@ -33,7 +36,8 @@ public class Contact {
       String medication,
       String notes,
       String pronouns,
-      boolean shouldSendEmails) {
+      Boolean shouldSendEmails) {
+    this.id = id;
     this.firstName = firstName;
     this.lastName = lastName;
     this.dateOfBirth = dateOfBirth;
@@ -45,6 +49,14 @@ public class Contact {
     this.notes = notes;
     this.pronouns = pronouns;
     this.shouldSendEmails = shouldSendEmails;
+  }
+
+  public int getId() {
+    return id;
+  }
+
+  public void setId(int id) {
+    this.id = id;
   }
 
   public String getFirstName() {
@@ -127,11 +139,11 @@ public class Contact {
     this.pronouns = pronouns;
   }
 
-  public boolean getShouldSendEmails() {
+  public Boolean getShouldSendEmails() {
     return shouldSendEmails;
   }
 
-  public void setShouldSendEmails(boolean shouldSendEmails) {
+  public void setShouldSendEmails(Boolean shouldSendEmails) {
     this.shouldSendEmails = shouldSendEmails;
   }
 }

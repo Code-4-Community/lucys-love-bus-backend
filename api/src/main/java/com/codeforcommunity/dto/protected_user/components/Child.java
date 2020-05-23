@@ -6,6 +6,8 @@ import java.sql.Date;
 
 public class Child {
 
+  /** Used on PUT requests, ignored on POST */
+  private int id;
   private String firstName;
   private String lastName;
 
@@ -22,6 +24,7 @@ public class Child {
   public Child() {}
 
   public Child(
+      int id,
       String firstName,
       String lastName,
       Date dateOfBirth,
@@ -32,6 +35,7 @@ public class Child {
       String diagnosis,
       String medications,
       String notes) {
+    this.id = id;
     this.firstName = firstName;
     this.lastName = lastName;
     this.dateOfBirth = dateOfBirth;
@@ -42,6 +46,14 @@ public class Child {
     this.diagnosis = diagnosis;
     this.medications = medications;
     this.notes = notes;
+  }
+
+  public int getId() {
+    return id;
+  }
+
+  public void setId(int id) {
+    this.id = id;
   }
 
   public String getFirstName() {
