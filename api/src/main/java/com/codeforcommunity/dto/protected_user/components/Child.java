@@ -1,18 +1,19 @@
 package com.codeforcommunity.dto.protected_user.components;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-
 import java.sql.Date;
 
 public class Child {
 
   /** Used on PUT requests, ignored on POST */
   private int id;
+
   private String firstName;
   private String lastName;
 
-  @JsonFormat(pattern="yyyy-MM-dd")
+  @JsonFormat(pattern = "yyyy-MM-dd")
   private Date dateOfBirth;
+
   private String pronouns;
   private String schoolYear;
   private String school;
