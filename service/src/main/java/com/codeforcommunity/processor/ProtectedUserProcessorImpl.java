@@ -85,7 +85,7 @@ public class ProtectedUserProcessorImpl implements IProtectedUserProcessor {
 
     mainContact.setFirstName(newContactData.getFirstName());
     mainContact.setLastName(newContactData.getLastName());
-    mainContact.setDateOfBirth(newContactData.getDob());
+    mainContact.setDateOfBirth(newContactData.getDateOfBirth());
     mainContact.setEmail(newContactData.getEmail());
     mainContact.setPhoneNumber(newContactData.getPhoneNumber());
     mainContact.setAllergies(newContactData.getAllergies());
@@ -112,7 +112,7 @@ public class ProtectedUserProcessorImpl implements IProtectedUserProcessor {
       childrenRecord.setUserId(userData.getUserId());
       childrenRecord.setFirstName(c.getFirstName());
       childrenRecord.setLastName(c.getLastName());
-      childrenRecord.setDateOfBirth(c.getDob());
+      childrenRecord.setDateOfBirth(c.getDateOfBirth());
       childrenRecord.setPronouns(c.getPronouns());
       childrenRecord.setSchoolYear(c.getSchoolYear());
       childrenRecord.setSchool(c.getSchool());
@@ -133,14 +133,14 @@ public class ProtectedUserProcessorImpl implements IProtectedUserProcessor {
       contactsRecord.setUserId(userData.getUserId());
       contactsRecord.setFirstName(c.getFirstName());
       contactsRecord.setLastName(c.getLastName());
-      contactsRecord.setDateOfBirth(c.getDob());
+      contactsRecord.setDateOfBirth(c.getDateOfBirth());
       contactsRecord.setEmail(c.getEmail());
       contactsRecord.setPronouns(c.getPronouns());
       contactsRecord.setAllergies(c.getAllergies());
       contactsRecord.setDiagnosis(c.getDiagnosis());
       contactsRecord.setMedications(c.getMedications());
       contactsRecord.setNotes(c.getNotes());
-      contactsRecord.setShouldSendEmails(c.getShouldSendEmail());
+      contactsRecord.setShouldSendEmails(c.getShouldSendEmails());
       contactsRecord.setPhoneNumber(c.getPhoneNumber());
 
       contactsRecord.store();
