@@ -2,8 +2,6 @@ package com.codeforcommunity.processor;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 import com.codeforcommunity.JooqMock;
 import com.codeforcommunity.auth.JWTData;
@@ -172,8 +170,7 @@ public class AnnouncementsProcessorImplTest {
     PostAnnouncementRequest req = new PostAnnouncementRequest("sample title", "sample description");
 
     // mock the user
-    JWTData myUserData = mock(JWTData.class);
-    when(myUserData.getPrivilegeLevel()).thenReturn(PrivilegeLevel.GP);
+    JWTData myUserData = new JWTData(0, PrivilegeLevel.GP);
 
     try {
       myAnnouncementsProcessorImpl.postAnnouncement(req, myUserData);
@@ -199,8 +196,7 @@ public class AnnouncementsProcessorImplTest {
     myJooqMock.addReturn("INSERT", announcement);
 
     // mock the user
-    JWTData myUserData = mock(JWTData.class);
-    when(myUserData.getPrivilegeLevel()).thenReturn(PrivilegeLevel.ADMIN);
+    JWTData myUserData = new JWTData(0, PrivilegeLevel.ADMIN);
 
     PostAnnouncementResponse res = myAnnouncementsProcessorImpl.postAnnouncement(req, myUserData);
 
@@ -216,8 +212,7 @@ public class AnnouncementsProcessorImplTest {
     PostAnnouncementRequest req = new PostAnnouncementRequest("c4c", "code for community");
 
     // mock the user
-    JWTData myUserData = mock(JWTData.class);
-    when(myUserData.getPrivilegeLevel()).thenReturn(PrivilegeLevel.GP);
+    JWTData myUserData = new JWTData(0, PrivilegeLevel.GP);
 
     try {
       myAnnouncementsProcessorImpl.postEventSpecificAnnouncement(req, myUserData, 1);
@@ -233,8 +228,7 @@ public class AnnouncementsProcessorImplTest {
     PostAnnouncementRequest req = new PostAnnouncementRequest("c4c", "code for community");
 
     // mock the user
-    JWTData myUserData = mock(JWTData.class);
-    when(myUserData.getPrivilegeLevel()).thenReturn(PrivilegeLevel.ADMIN);
+    JWTData myUserData = new JWTData(0, PrivilegeLevel.ADMIN);
 
     // return no events
     myJooqMock.addReturn("SELECT", new ArrayList<EventsRecord>());
@@ -253,8 +247,7 @@ public class AnnouncementsProcessorImplTest {
     PostAnnouncementRequest req = new PostAnnouncementRequest("c4c", "code for community");
 
     // mock the user
-    JWTData myUserData = mock(JWTData.class);
-    when(myUserData.getPrivilegeLevel()).thenReturn(PrivilegeLevel.ADMIN);
+    JWTData myUserData = new JWTData(0, PrivilegeLevel.ADMIN);
 
     // mock the specific event inside the DB
     EventsRecord event = myJooqMock.getContext().newRecord(Tables.EVENTS);
@@ -284,8 +277,7 @@ public class AnnouncementsProcessorImplTest {
     PostAnnouncementRequest req = new PostAnnouncementRequest("LLB", "Lucy's Love Bus");
 
     // mock the user
-    JWTData myUserData = mock(JWTData.class);
-    when(myUserData.getPrivilegeLevel()).thenReturn(PrivilegeLevel.ADMIN);
+    JWTData myUserData = new JWTData(0, PrivilegeLevel.ADMIN);
 
     // mock the specific event inside the DB
     EventsRecord event = myJooqMock.getContext().newRecord(Tables.EVENTS);

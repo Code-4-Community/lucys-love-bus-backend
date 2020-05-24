@@ -158,6 +158,8 @@ public class AuthDatabaseOperationsTest {
             samplePN,
             sampleAllergies);
 
+    myJooqMock.addEmptyReturn("SELECT");
+
     // TODO: fix JooqMock to be able to set ID (this gives a NPE)
     myAuthDatabaseOperations.createNewUser(req);
 

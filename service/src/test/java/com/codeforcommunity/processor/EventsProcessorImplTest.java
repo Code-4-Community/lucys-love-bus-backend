@@ -1,6 +1,7 @@
 package com.codeforcommunity.processor;
 
 import static org.jooq.generated.Tables.CONTACTS;
+import static org.jooq.generated.Tables.EVENTS;
 import static org.jooq.generated.Tables.EVENT_REGISTRATIONS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -222,9 +223,10 @@ public class EventsProcessorImplTest {
     List<Integer> eventIds = new ArrayList<>();
     eventIds.add(0);
 
-    EventsRecord event1 = new EventsRecord();
+    EventsRecord event1 = myJooqMock.getContext().newRecord(EVENTS);
     event1.setId(0);
     event1.setTitle("title 1");
+    event1.setCapacity(10);
     myJooqMock.addReturn("SELECT", event1);
 
     GetEventsResponse res = myEventsProcessorImpl.getEvents(eventIds);
@@ -289,10 +291,11 @@ public class EventsProcessorImplTest {
             Optional.of(new Timestamp(START_TIMESTAMP_TEST)),
             Optional.of(1));
 
-    EventsRecord myEvent1 = new EventsRecord();
+    EventsRecord myEvent1 = myJooqMock.getContext().newRecord(EVENTS);
     myEvent1.setId(0);
     myEvent1.setTitle("Event 1");
     myEvent1.setDescription("Description 1");
+    myEvent1.setCapacity(10);
     myJooqMock.addReturn("SELECT", myEvent1);
 
     JWTData myUserData = new JWTData(0, PrivilegeLevel.GP);
