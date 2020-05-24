@@ -137,9 +137,8 @@ public class EventsProcessorImpl implements IEventsProcessor {
     } else {
       afterDateFilter = select.where(EVENTS.START_TIME.greaterOrEqual(startDate));
     }
-    List<Events> eventsList = afterDateFilter
-        .orderBy(EVENTS.START_TIME.asc())
-        .fetchInto(Events.class);
+    List<Events> eventsList =
+        afterDateFilter.orderBy(EVENTS.START_TIME.asc()).fetchInto(Events.class);
 
     List<SingleEventResponse> res = listOfEventsToListOfSingleEventResponse(eventsList);
 
