@@ -1,12 +1,19 @@
 package com.codeforcommunity.dto.protected_user.components;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import java.sql.Date;
 
 public class Child {
 
+  /** Used on PUT requests, ignored on POST */
+  private int id;
+
   private String firstName;
   private String lastName;
-  private Date dob;
+
+  @JsonFormat(pattern = "yyyy-MM-dd")
+  private Date dateOfBirth;
+
   private String pronouns;
   private String schoolYear;
   private String school;
@@ -18,9 +25,10 @@ public class Child {
   public Child() {}
 
   public Child(
+      int id,
       String firstName,
       String lastName,
-      Date dob,
+      Date dateOfBirth,
       String pronouns,
       String schoolYear,
       String school,
@@ -28,9 +36,10 @@ public class Child {
       String diagnosis,
       String medications,
       String notes) {
+    this.id = id;
     this.firstName = firstName;
     this.lastName = lastName;
-    this.dob = dob;
+    this.dateOfBirth = dateOfBirth;
     this.pronouns = pronouns;
     this.schoolYear = schoolYear;
     this.school = school;
@@ -38,6 +47,14 @@ public class Child {
     this.diagnosis = diagnosis;
     this.medications = medications;
     this.notes = notes;
+  }
+
+  public int getId() {
+    return id;
+  }
+
+  public void setId(int id) {
+    this.id = id;
   }
 
   public String getFirstName() {
@@ -56,12 +73,12 @@ public class Child {
     this.lastName = lastName;
   }
 
-  public Date getDob() {
-    return dob;
+  public Date getDateOfBirth() {
+    return dateOfBirth;
   }
 
-  public void setDob(Date dob) {
-    this.dob = dob;
+  public void setDateOfBirth(Date dateOfBirth) {
+    this.dateOfBirth = dateOfBirth;
   }
 
   public String getPronouns() {
