@@ -36,8 +36,8 @@ import org.jooq.generated.tables.records.EventsRecord;
 public class CheckoutProcessorImpl implements ICheckoutProcessor {
 
   public static final int TICKET_PRICE_CENTS = 500;
-  public static final String CANCEL_URL = "";
-  public static final String SUCCESS_URL = "";
+  public static final String CANCEL_URL = "https://llb.c4cneu.com/checkout";
+  public static final String SUCCESS_URL = "https://llb.c4cneu.com/?session_id={CHECKOUT_SESSION_ID}";
 
   private final DSLContext db;
   private final EventDatabaseOperations eventDatabaseOperations;
