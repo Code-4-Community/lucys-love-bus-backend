@@ -56,9 +56,9 @@ public class CheckoutProcessorImpl implements ICheckoutProcessor {
 
   @Override
   public String createCheckoutSessionAndEventRegistration(
-      PostCreateEventRegistrations originalRequest, JWTData user) throws StripeExternalException {
-    List<LineItem> lineItems = convertLineItems(originalRequest.getLineItemRequests());
-    CreateCheckoutSessionData request =
+      PostCreateEventRegistrations request, JWTData user) throws StripeExternalException {
+    List<LineItem> lineItems = convertLineItems(request.getLineItemRequests());
+    CreateCheckoutSessionData checkoutRequest =
         new CreateCheckoutSessionData(lineItems, CANCEL_URL, SUCCESS_URL);
 
     Stripe.apiKey = this.stripeAPISecretKey;
@@ -69,15 +69,15 @@ public class CheckoutProcessorImpl implements ICheckoutProcessor {
 
     SessionCreateParams params =
         new SessionCreateParams.Builder()
-            .addAllLineItem(request.getStripeLineItems())
+            .addAllLineItem(checkoutRequest.getStripeLineItems())
             .addPaymentMethodType(SessionCreateParams.PaymentMethodType.CARD)
-            .setSuccessUrl(request.getSuccessUrl())
-            .setCancelUrl(request.getCancelUrl())
+            .setSuccessUrl(checkoutRequest.getSuccessUrl())
+            .setCancelUrl(checkoutRequest.getCancelUrl())
             .build();
     try {
       Session session = Session.create(params);
       String checkoutSessionId = session.getId();
-      this.createEventRegistrationUtil(request.getLineItems(), user, checkoutSessionId);
+      this.createEventRegistrationUtil(checkoutRequest.getLineItems(), user, checkoutSessionId);
       return session.getId();
     } catch (StripeException e) {
       throw new StripeExternalException(e.getMessage());
