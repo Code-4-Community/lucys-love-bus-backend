@@ -33,6 +33,7 @@ public class ProtectedUserProcessorImplTest {
   // make examples for Contacts
   private final Contact CONTACT_EXAMPLE_1 =
       new Contact(
+          0,
           "Brandon",
           "Liang",
           // January 1, 1970 00:00 UTC
@@ -48,6 +49,7 @@ public class ProtectedUserProcessorImplTest {
 
   private final Contact CONTACT_EXAMPLE_2 =
       new Contact(
+          1,
           "Conner",
           "Nilsen",
           // May 1, 1990 00:00 UTC
@@ -63,6 +65,7 @@ public class ProtectedUserProcessorImplTest {
 
   private final Contact CONTACT_EXAMPLE_3 =
       new Contact(
+          2,
           "Ada",
           "Lovelace",
           null,
@@ -77,6 +80,7 @@ public class ProtectedUserProcessorImplTest {
 
   private final Child CHILD_EXAMPLE_1 =
       new Child(
+          0,
           "Kazuto",
           "Kirigaya",
           // October 7, 2008 @ 7:00:00 am UTC
@@ -91,6 +95,7 @@ public class ProtectedUserProcessorImplTest {
 
   private final Child CHILD_EXAMPLE_2 =
       new Child(
+          1,
           "Chad",
           null,
           null,
