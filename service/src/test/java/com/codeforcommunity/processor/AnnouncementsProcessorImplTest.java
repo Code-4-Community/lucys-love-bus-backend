@@ -255,7 +255,7 @@ public class AnnouncementsProcessorImplTest {
     myJooqMock.addReturn("SELECT", event);
 
     // mock the announcement inside the DB
-    AnnouncementsRecord announcement = new AnnouncementsRecord();
+    AnnouncementsRecord announcement = myJooqMock.getContext().newRecord(Tables.ANNOUNCEMENTS);
     announcement.setId(1);
     announcement.setEventId(1);
     announcement.setTitle("c4c");
@@ -285,13 +285,13 @@ public class AnnouncementsProcessorImplTest {
     myJooqMock.addReturn("SELECT", event);
 
     // mock the announcements inside the DB
-    AnnouncementsRecord announcement1 = new AnnouncementsRecord();
+    AnnouncementsRecord announcement1 = myJooqMock.getContext().newRecord(Tables.ANNOUNCEMENTS);
     announcement1.setId(1);
     announcement1.setEventId(1);
     announcement1.setTitle("c4c");
     announcement1.setDescription("code for community");
 
-    AnnouncementsRecord announcement2 = new AnnouncementsRecord();
+    AnnouncementsRecord announcement2 = myJooqMock.getContext().newRecord(Tables.ANNOUNCEMENTS);
     announcement2.setId(2);
     announcement2.setEventId(1);
     announcement2.setTitle("LLB");

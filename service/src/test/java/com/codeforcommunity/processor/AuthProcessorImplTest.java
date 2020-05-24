@@ -59,8 +59,7 @@ public class AuthProcessorImplTest {
   // test sign up where all the fields are null
   @Test
   public void testSignUp1() {
-    List<UpdatableRecordImpl> emptySelectStatement = new ArrayList<UpdatableRecordImpl>();
-    myJooqMock.addReturn("SELECT", emptySelectStatement);
+    myJooqMock.addEmptyReturn("SELECT");
 
     // seed the db
     UsersRecord record = myJooqMock.getContext().newRecord(Tables.USERS);
@@ -82,16 +81,13 @@ public class AuthProcessorImplTest {
       myAuthProcessorImpl.signUp(myNewUserRequest);
       fail();
     } catch (NullPointerException e) {
-      // we're good
+      // TODO: are you certain this is what you want?
     }
   }
 
   // test sign up where all the fields are filled in
   @Test
   public void testSignUp2() {
-    List<UpdatableRecordImpl> emptySelectStatement = new ArrayList<UpdatableRecordImpl>();
-    myJooqMock.addReturn("SELECT", emptySelectStatement);
-
     // seed the db
     UsersRecord record = myJooqMock.getContext().newRecord(Tables.USERS);
     record.setId(0);
@@ -116,6 +112,7 @@ public class AuthProcessorImplTest {
             "555-555-5555",
             "Peanuts");
 
+    // TODO: it throws a EmailAlreadyInUseException, not sure what to make of this
     SessionResponse res = myAuthProcessorImpl.signUp(req);
 
     assertEquals(res.getAccessToken(), ACCESS_TOKEN_EXAMPLE);
@@ -125,8 +122,7 @@ public class AuthProcessorImplTest {
   // test log in where all the fields are null
   @Test
   public void testLogin1() {
-    List<UpdatableRecordImpl> emptySelectStatement = new ArrayList<UpdatableRecordImpl>();
-    myJooqMock.addReturn("SELECT", emptySelectStatement);
+    myJooqMock.addEmptyReturn("SELECT");
 
     LoginRequest myLoginRequest = new LoginRequest();
 
@@ -141,13 +137,15 @@ public class AuthProcessorImplTest {
   // test log in with user email not found
   @Test
   public void testLogin2() {
-    List<UpdatableRecordImpl> emptySelectStatement = new ArrayList<UpdatableRecordImpl>();
-    myJooqMock.addReturn("SELECT", emptySelectStatement);
+    String incorrectEmail = "incorrect@email.com";
+    String incorrectPass = "incorrect";
+
+    myJooqMock.addEmptyReturn("SELECT");
 
     LoginRequest myLoginRequest = new LoginRequest();
 
-    myLoginRequest.setEmail("incorrect@email.com");
-    myLoginRequest.setPassword("incorrect");
+    myLoginRequest.setEmail(incorrectEmail);
+    myLoginRequest.setPassword(incorrectPass);
 
     try {
       myAuthProcessorImpl.login(myLoginRequest);
@@ -160,12 +158,18 @@ public class AuthProcessorImplTest {
   // test log in with user incorrect password
   @Test
   public void testLogin3() {
+    String loginEmail = "conner@example.com";
+    String loginPass = "fundies";
+
+    int recordId = 1;
+    PrivilegeLevel recordPL = PrivilegeLevel.GP;
+
     // make a user record
     UsersRecord record = myJooqMock.getContext().newRecord(Tables.USERS);
-    record.setId(1);
-    record.setPrivilegeLevel(PrivilegeLevel.GP);
-    record.setEmail("conner@example.com");
-    record.setPassHash(Passwords.createHash("fundies"));
+    record.setId(recordId);
+    record.setPrivilegeLevel(recordPL);
+    record.setEmail(loginEmail);
+    record.setPassHash(Passwords.createHash(loginPass));
     myJooqMock.addReturn("SELECT", record);
 
     when(mockJWTCreator.createNewRefreshToken(any(JWTData.class)))
@@ -177,8 +181,8 @@ public class AuthProcessorImplTest {
 
     LoginRequest myLoginRequest = new LoginRequest();
 
-    myLoginRequest.setEmail("conner@example.com");
-    myLoginRequest.setPassword("incorrect");
+    myLoginRequest.setEmail(loginEmail);
+    myLoginRequest.setPassword("making " + loginPass + " incorrect");
 
     try {
       myAuthProcessorImpl.login(myLoginRequest);
@@ -191,12 +195,18 @@ public class AuthProcessorImplTest {
   // test log in with correct credentials 1
   @Test
   public void testLogin4() {
+    String loginEmail = "conner@example.com";
+    String loginPass = "fundies";
+
+    int recordId = 1;
+    PrivilegeLevel recordPL = PrivilegeLevel.GP;
+
     // make a user record
     UsersRecord record = myJooqMock.getContext().newRecord(Tables.USERS);
-    record.setId(1);
-    record.setPrivilegeLevel(PrivilegeLevel.GP);
-    record.setEmail("conner@example.com");
-    record.setPassHash(Passwords.createHash("fundies"));
+    record.setId(recordId);
+    record.setPrivilegeLevel(recordPL);
+    record.setEmail(loginEmail);
+    record.setPassHash(Passwords.createHash(loginPass));
     myJooqMock.addReturn("SELECT", record);
 
     when(mockJWTCreator.createNewRefreshToken(any(JWTData.class)))
@@ -208,8 +218,8 @@ public class AuthProcessorImplTest {
 
     LoginRequest myLoginRequest = new LoginRequest();
 
-    myLoginRequest.setEmail("conner@example.com");
-    myLoginRequest.setPassword("fundies");
+    myLoginRequest.setEmail(loginEmail);
+    myLoginRequest.setPassword(loginPass);
 
     SessionResponse res = myAuthProcessorImpl.login(myLoginRequest);
 
@@ -220,12 +230,18 @@ public class AuthProcessorImplTest {
   // test log in with correct credentials 2
   @Test
   public void testLogin5() {
+    String loginEmail = "brandon@example.com";
+    String loginPass = "fundies";
+
+    int recordId = 1;
+    PrivilegeLevel recordPL = PrivilegeLevel.GP;
+
     // make a user record
     UsersRecord recordCopy = myJooqMock.getContext().newRecord(Tables.USERS);
-    recordCopy.setId(1);
-    recordCopy.setPrivilegeLevel(PrivilegeLevel.GP);
-    recordCopy.setEmail("brandon@example.com");
-    recordCopy.setPassHash(Passwords.createHash("fundies"));
+    recordCopy.setId(recordId);
+    recordCopy.setPrivilegeLevel(recordPL);
+    recordCopy.setEmail(loginEmail);
+    recordCopy.setPassHash(Passwords.createHash(loginPass));
     myJooqMock.addReturn("SELECT", recordCopy);
 
     when(mockJWTCreator.createNewRefreshToken(any(JWTData.class)))
@@ -237,8 +253,8 @@ public class AuthProcessorImplTest {
 
     LoginRequest myLoginRequest = new LoginRequest();
 
-    myLoginRequest.setEmail("brandon@example.com");
-    myLoginRequest.setPassword("fundies");
+    myLoginRequest.setEmail(loginEmail);
+    myLoginRequest.setPassword(loginPass);
 
     SessionResponse res = myAuthProcessorImpl.login(myLoginRequest);
 

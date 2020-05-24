@@ -85,8 +85,7 @@ public class RestFunctionsTest {
   // tests that forces the RequestBodyMappingException to be thrown
   @Test
   public void testGetJsonBodyAsClass4() {
-    when(mockRoutingContext.getBodyAsJson())
-        .thenReturn(null);
+    when(mockRoutingContext.getBodyAsJson()).thenReturn(null);
 
     // in the case where the body is not present
     try {
@@ -102,8 +101,7 @@ public class RestFunctionsTest {
             + "\"lastName\":\"liang\"}";
     JsonObject loginRequestJSONObject = new JsonObject(loginRequestJSONString);
 
-    when(mockRoutingContext.getBodyAsJson())
-        .thenReturn(loginRequestJSONObject);
+    when(mockRoutingContext.getBodyAsJson()).thenReturn(loginRequestJSONObject);
 
     // in the case where the wrong class was given as an argument
     try {
@@ -125,8 +123,7 @@ public class RestFunctionsTest {
             + "\"firstName\":\"brandon\"}";
     JsonObject loginRequestJSONObject = new JsonObject(loginRequestJSONString);
 
-    when(mockRoutingContext.getBodyAsJson())
-        .thenReturn(loginRequestJSONObject);
+    when(mockRoutingContext.getBodyAsJson()).thenReturn(loginRequestJSONObject);
 
     NewUserRequest result =
         RestFunctions.getJsonBodyAsClass(mockRoutingContext, NewUserRequest.class);
@@ -152,14 +149,14 @@ public class RestFunctionsTest {
             + "\"lastName\":\"liang\"}";
     JsonObject loginRequestJSONObject = new JsonObject(loginRequestJSONString);
 
-    when(mockRoutingContext.getBodyAsJson())
-        .thenReturn(loginRequestJSONObject);
+    when(mockRoutingContext.getBodyAsJson()).thenReturn(loginRequestJSONObject);
 
     // TODO: just confirming that this is what you guys want
     try {
       RestFunctions.getJsonBodyAsClass(mockRoutingContext, NewUserRequest.class);
       fail();
-    } catch (RequestBodyMappingException ignored) {}
+    } catch (RequestBodyMappingException ignored) {
+    }
   }
 
   // test handling JSON has fields with repeated fields
@@ -173,8 +170,7 @@ public class RestFunctionsTest {
             + "\"lastName\":\"liang\"}";
     JsonObject loginRequestJSONObject = new JsonObject(loginRequestJSONString);
 
-    when(mockRoutingContext.getBodyAsJson())
-        .thenReturn(loginRequestJSONObject);
+    when(mockRoutingContext.getBodyAsJson()).thenReturn(loginRequestJSONObject);
 
     NewUserRequest result =
         RestFunctions.getJsonBodyAsClass(mockRoutingContext, NewUserRequest.class);
@@ -201,14 +197,14 @@ public class RestFunctionsTest {
             + "\"lastName\":\"liang\"}";
     JsonObject loginRequestJSONObject = new JsonObject(loginRequestJSONString);
 
-    when(mockRoutingContext.getBodyAsJson())
-        .thenReturn(loginRequestJSONObject);
+    when(mockRoutingContext.getBodyAsJson()).thenReturn(loginRequestJSONObject);
 
     // TODO: again, just confirming that this is what you guys want
     try {
       RestFunctions.getJsonBodyAsClass(mockRoutingContext, NewUserRequest.class);
       fail();
-    } catch (RequestBodyMappingException ignored) {}
+    } catch (RequestBodyMappingException ignored) {
+    }
   }
 
   // test request header for existence
@@ -228,8 +224,7 @@ public class RestFunctionsTest {
   public void testGetRequestHeader2() {
     String name = "name";
 
-    when(mockRequest.getHeader(name))
-        .thenReturn(null);
+    when(mockRequest.getHeader(name)).thenReturn(null);
 
     try {
       RestFunctions.getRequestHeader(mockRequest, name);
@@ -270,8 +265,7 @@ public class RestFunctionsTest {
   public void testGetRequestParameterAsInt3() {
     String myInt = "hello";
 
-    when(mockRequest.getParam(any()))
-        .thenReturn(myInt);
+    when(mockRequest.getParam(any())).thenReturn(myInt);
 
     try {
       RestFunctions.getRequestParameterAsInt(mockRequest, myInt);
@@ -310,8 +304,7 @@ public class RestFunctionsTest {
   public void testGetRequestParameterAsString3() {
     String param = "param";
 
-    when(mockRequest.getParam(param))
-        .thenReturn(null);
+    when(mockRequest.getParam(param)).thenReturn(null);
 
     try {
       RestFunctions.getRequestParameterAsString(mockRequest, param);
