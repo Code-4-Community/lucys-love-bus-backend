@@ -1,6 +1,7 @@
 package com.codeforcommunity.processor;
 
 import static org.jooq.generated.Tables.CONTACTS;
+import static org.jooq.generated.Tables.EVENTS;
 import static org.jooq.generated.Tables.EVENT_REGISTRATIONS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
@@ -9,10 +10,16 @@ import static org.mockito.Mockito.when;
 import com.codeforcommunity.JooqMock;
 import com.codeforcommunity.auth.JWTData;
 import com.codeforcommunity.dto.userEvents.components.Registration;
+import com.codeforcommunity.dto.userEvents.requests.GetUserEventsRequest;
 import com.codeforcommunity.dto.userEvents.responses.EventRegistrations;
+import com.codeforcommunity.dto.userEvents.responses.GetEventsResponse;
 import com.codeforcommunity.enums.PrivilegeLevel;
 import com.codeforcommunity.exceptions.AdminOnlyRouteException;
 import com.codeforcommunity.exceptions.EventDoesNotExistException;
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.util.Optional;
+import org.jooq.Record2;
 import org.jooq.Record4;
 import org.jooq.Result;
 import org.jooq.generated.tables.records.EventsRecord;
@@ -133,5 +140,58 @@ public class EventsProcessorImplTest {
       assertEquals("connernilsen@gmail.com" + i, reg.getEmail());
       assertEquals(i, reg.getTicketCount());
     }
+  }
+
+  private void prepSignedUp(Boolean signedUp) {
+    EventsRecord eventResult = mock.getContext().newRecord(EVENTS);
+    eventResult.setStartTime(Timestamp.from(Instant.now()));
+    eventResult.setEndTime(Timestamp.from(Instant.now()));
+    eventResult.setLocation("HERE");
+    eventResult.setCapacity(5);
+    eventResult.setDescription("DESC");
+    eventResult.setTitle("TITLE");
+    eventResult.setId(1);
+    mock.addReturn("SELECT", eventResult);
+    Result<Record2<Integer, Integer>> res =
+        mock.getContext().newResult(EVENTS.ID, EVENT_REGISTRATIONS.TICKET_QUANTITY);
+    Record2<Integer, Integer> record =
+        mock.getContext().newRecord(EVENTS.ID, EVENT_REGISTRATIONS.TICKET_QUANTITY);
+    record.value1(1);
+    record.value2(signedUp ? 1 : 0);
+    mock.addReturn("SELECT", record);
+  }
+
+  @ParameterizedTest
+  @ValueSource(booleans = {true, false})
+  public void testGetEventsSignedUpUserSignedUp(boolean signedUp) {
+    prepSignedUp(signedUp);
+
+    GetUserEventsRequest req =
+        new GetUserEventsRequest(Optional.empty(), Optional.empty(), Optional.empty());
+    JWTData data = new JWTData(1, PrivilegeLevel.GP);
+    GetEventsResponse resp = processor.getEventsSignedUp(req, data);
+
+    assertEquals(signedUp, resp.getEvents().get(0).getSignedUp());
+  }
+
+  @ParameterizedTest
+  @ValueSource(booleans = {true, false})
+  public void testGetEventsQualifiedUserSignedUp(boolean signedUp) {
+    JWTData data = new JWTData(1, PrivilegeLevel.GP);
+
+    prepSignedUp(signedUp);
+
+    GetEventsResponse resp = processor.getEventsQualified(data);
+    assertEquals(signedUp, resp.getEvents().get(0).getSignedUp());
+  }
+
+  @ParameterizedTest
+  @ValueSource(booleans = {true, false})
+  public void testGetSingleEventUserSignedUp(boolean signedUp) {
+    JWTData data = new JWTData(1, PrivilegeLevel.GP);
+
+    prepSignedUp(signedUp);
+    GetEventsResponse resp = processor.getEventsQualified(data);
+    assertEquals(signedUp, resp.getEvents().get(0).getSignedUp());
   }
 }
