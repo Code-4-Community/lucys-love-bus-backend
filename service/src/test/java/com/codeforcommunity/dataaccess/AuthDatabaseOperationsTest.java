@@ -144,22 +144,19 @@ public class AuthDatabaseOperationsTest {
     String samplePassword = "letmeout";
     String sampleFN = "Conner";
     String sampleLN = "Nilsen";
-    AddressData sampleLocation = new AddressData(
-      "420 Hemenway Street",
-      "Boston",
-      "MA",
-      "02115");
+    AddressData sampleLocation = new AddressData("420 Hemenway Street", "Boston", "MA", "02115");
     String samplePN = "200-233-4334";
     String sampleAllergies = "Eggs/Fish";
 
-    NewUserRequest req = new NewUserRequest(
-        sampleEmail,
-        samplePassword,
-        sampleFN,
-        sampleLN,
-        sampleLocation,
-        samplePN,
-        sampleAllergies);
+    NewUserRequest req =
+        new NewUserRequest(
+            sampleEmail,
+            samplePassword,
+            sampleFN,
+            sampleLN,
+            sampleLocation,
+            samplePN,
+            sampleAllergies);
 
     // TODO: fix JooqMock to be able to set ID (this gives a NPE)
     myAuthDatabaseOperations.createNewUser(req);

@@ -1,5 +1,9 @@
 package com.codeforcommunity.processor;
 
+import static org.jooq.generated.Tables.CONTACTS;
+import static org.jooq.generated.Tables.EVENT_REGISTRATIONS;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -7,7 +11,6 @@ import static org.mockito.Mockito.when;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.PutObjectResult;
-
 import com.codeforcommunity.Base64TestStrings;
 import com.codeforcommunity.JooqMock;
 import com.codeforcommunity.auth.JWTData;
@@ -24,30 +27,20 @@ import com.codeforcommunity.enums.PrivilegeLevel;
 import com.codeforcommunity.exceptions.AdminOnlyRouteException;
 import com.codeforcommunity.exceptions.EventDoesNotExistException;
 import com.codeforcommunity.requester.S3Requester;
-
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
 import org.jooq.Record1;
 import org.jooq.Record4;
 import org.jooq.Result;
 import org.jooq.generated.Tables;
 import org.jooq.generated.tables.records.EventsRecord;
-
-import static org.jooq.generated.Tables.CONTACTS;
-import static org.jooq.generated.Tables.EVENT_REGISTRATIONS;
-
 import org.jooq.impl.UpdatableRecordImpl;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
 
 // Contains tests for EventsProcessorImpl.java in main
 public class EventsProcessorImplTest {
@@ -64,8 +57,8 @@ public class EventsProcessorImplTest {
   @BeforeEach
   private void setup() {
     this.myJooqMock = new JooqMock();
-    EventDatabaseOperations myEventDatabaseOperations = new EventDatabaseOperations(
-        myJooqMock.getContext());
+    EventDatabaseOperations myEventDatabaseOperations =
+        new EventDatabaseOperations(myJooqMock.getContext());
     this.myEventsProcessorImpl = new EventsProcessorImpl(myJooqMock.getContext());
 
     // mock Amazon S3
@@ -115,11 +108,8 @@ public class EventsProcessorImplTest {
             new Timestamp(START_TIMESTAMP_TEST),
             new Timestamp(END_TIMESTAMP_TEST));
 
-    CreateEventRequest req = new CreateEventRequest(
-        "sample",
-        5,
-        Base64TestStrings.TEST_STRING_1,
-        myEventDetails);
+    CreateEventRequest req =
+        new CreateEventRequest("sample", 5, Base64TestStrings.TEST_STRING_1, myEventDetails);
 
     // mock the DB
     JWTData goodUser = mock(JWTData.class);
@@ -137,7 +127,8 @@ public class EventsProcessorImplTest {
     assertEquals(res.getTitle(), "sample");
     assertEquals(res.getCapacity(), 5);
     // TODO: please verify if this is intended
-    assertEquals(res.getThumbnail(),
+    assertEquals(
+        res.getThumbnail(),
         "https://lucys-love-bus-public.s3.us-east-2.amazonaws.com/events/sample_thumbnail.gif");
     assertEquals(res.getDetails().getDescription(), myEventDetails.getDescription());
     assertEquals(res.getDetails().getLocation(), myEventDetails.getLocation());
@@ -273,10 +264,11 @@ public class EventsProcessorImplTest {
   // test getting events user signed up for if there are none
   @Test
   public void testGetEventsSignedUp1() {
-    GetUserEventsRequest req = new GetUserEventsRequest(
-        Optional.of(new Timestamp(END_TIMESTAMP_TEST)),
-        Optional.of(new Timestamp(START_TIMESTAMP_TEST)),
-        Optional.of(1));
+    GetUserEventsRequest req =
+        new GetUserEventsRequest(
+            Optional.of(new Timestamp(END_TIMESTAMP_TEST)),
+            Optional.of(new Timestamp(START_TIMESTAMP_TEST)),
+            Optional.of(1));
 
     myJooqMock.addEmptyReturn("SELECT");
 
@@ -291,10 +283,11 @@ public class EventsProcessorImplTest {
   // test getting one event user signed up for
   @Test
   public void testGetEventsSignedUp2() {
-    GetUserEventsRequest req = new GetUserEventsRequest(
-        Optional.of(new Timestamp(END_TIMESTAMP_TEST)),
-        Optional.of(new Timestamp(START_TIMESTAMP_TEST)),
-        Optional.of(1));
+    GetUserEventsRequest req =
+        new GetUserEventsRequest(
+            Optional.of(new Timestamp(END_TIMESTAMP_TEST)),
+            Optional.of(new Timestamp(START_TIMESTAMP_TEST)),
+            Optional.of(1));
 
     EventsRecord myEvent1 = new EventsRecord();
     myEvent1.setId(0);
@@ -318,10 +311,11 @@ public class EventsProcessorImplTest {
   // test getting multiple events user signed up for with no limit
   @Test
   public void testGetEventsSignedUp3() {
-    GetUserEventsRequest req = new GetUserEventsRequest(
-        Optional.of(new Timestamp(END_TIMESTAMP_TEST)),
-        Optional.of(new Timestamp(START_TIMESTAMP_TEST)),
-        Optional.of(3));
+    GetUserEventsRequest req =
+        new GetUserEventsRequest(
+            Optional.of(new Timestamp(END_TIMESTAMP_TEST)),
+            Optional.of(new Timestamp(START_TIMESTAMP_TEST)),
+            Optional.of(3));
 
     // add three events to the mock DB
     EventsRecord myEvent1 = myJooqMock.getContext().newRecord(Tables.EVENTS);
@@ -370,10 +364,11 @@ public class EventsProcessorImplTest {
   // test getting multiple events user signed up for with a limit
   @Test
   public void testGetEventsSignedUp4() {
-    GetUserEventsRequest req = new GetUserEventsRequest(
-        Optional.of(new Timestamp(END_TIMESTAMP_TEST)),
-        Optional.of(new Timestamp(START_TIMESTAMP_TEST)),
-        Optional.of(1));
+    GetUserEventsRequest req =
+        new GetUserEventsRequest(
+            Optional.of(new Timestamp(END_TIMESTAMP_TEST)),
+            Optional.of(new Timestamp(START_TIMESTAMP_TEST)),
+            Optional.of(1));
 
     // add three events to the mock DB
     EventsRecord myEvent1 = myJooqMock.getContext().newRecord(Tables.EVENTS);
@@ -457,10 +452,11 @@ public class EventsProcessorImplTest {
 
     assertEquals(resGPActualEvent.getId(), resAdminActualEvent.getId());
     assertEquals(resGPActualEvent.getTitle(), resAdminActualEvent.getTitle());
-    assertEquals(resGPActualEvent.getDetails().getDescription(),
+    assertEquals(
+        resGPActualEvent.getDetails().getDescription(),
         resAdminActualEvent.getDetails().getDescription());
-    assertEquals(resGPActualEvent.getDetails().getStart(),
-        resAdminActualEvent.getDetails().getStart());
+    assertEquals(
+        resGPActualEvent.getDetails().getStart(), resAdminActualEvent.getDetails().getStart());
   }
 
   // user qualifies for multiple events
@@ -511,14 +507,16 @@ public class EventsProcessorImplTest {
     SingleEventResponse adminActualEvent1 = resAdmin.getEvents().get(0);
     assertEquals(adminActualEvent1.getId(), gpActualEvent1.getId());
     assertEquals(adminActualEvent1.getTitle(), gpActualEvent1.getTitle());
-    assertEquals(adminActualEvent1.getDetails().getDescription(),
+    assertEquals(
+        adminActualEvent1.getDetails().getDescription(),
         gpActualEvent1.getDetails().getDescription());
     assertEquals(adminActualEvent1.getDetails().getStart(), gpActualEvent1.getDetails().getStart());
 
     SingleEventResponse adminActualEvent2 = resAdmin.getEvents().get(1);
     assertEquals(adminActualEvent2.getId(), gpActualEvent2.getId());
     assertEquals(adminActualEvent2.getTitle(), gpActualEvent2.getTitle());
-    assertEquals(adminActualEvent2.getDetails().getDescription(),
+    assertEquals(
+        adminActualEvent2.getDetails().getDescription(),
         gpActualEvent2.getDetails().getDescription());
     assertEquals(adminActualEvent2.getDetails().getStart(), gpActualEvent2.getDetails().getStart());
   }
@@ -528,11 +526,7 @@ public class EventsProcessorImplTest {
   public void testModifyEvent1() {
     JWTData myUserData = new JWTData(0, PrivilegeLevel.GP);
 
-    ModifyEventRequest req = new ModifyEventRequest(
-        null,
-        null,
-        null,
-        null);
+    ModifyEventRequest req = new ModifyEventRequest(null, null, null, null);
 
     try {
       myEventsProcessorImpl.modifyEvent(0, req, myUserData);
@@ -546,11 +540,7 @@ public class EventsProcessorImplTest {
   public void testModifyEvent2() {
     JWTData myUserData = new JWTData(0, PrivilegeLevel.ADMIN);
 
-    ModifyEventRequest req = new ModifyEventRequest(
-        null,
-        null,
-        null,
-        null);
+    ModifyEventRequest req = new ModifyEventRequest(null, null, null, null);
 
     myJooqMock.addEmptyReturn("SELECT");
 
@@ -568,16 +558,16 @@ public class EventsProcessorImplTest {
   public void testModifyEvent3() {
     JWTData myUserData = new JWTData(0, PrivilegeLevel.ADMIN);
 
-    ModifyEventRequest req = new ModifyEventRequest(
-        "edited title",
-        10,
-        "edited thumbnail",
-        new EventDetails(
-            "new description",
-            "new location",
-            new Timestamp(START_TIMESTAMP_TEST),
-            new Timestamp(END_TIMESTAMP_TEST)
-        ));
+    ModifyEventRequest req =
+        new ModifyEventRequest(
+            "edited title",
+            10,
+            "edited thumbnail",
+            new EventDetails(
+                "new description",
+                "new location",
+                new Timestamp(START_TIMESTAMP_TEST),
+                new Timestamp(END_TIMESTAMP_TEST)));
 
     EventsRecord myEvent = myJooqMock.getContext().newRecord(Tables.EVENTS);
     myEvent.setId(0);
@@ -611,11 +601,7 @@ public class EventsProcessorImplTest {
   public void testModifyEvent4() {
     JWTData myUserData = new JWTData(0, PrivilegeLevel.ADMIN);
 
-    ModifyEventRequest req = new ModifyEventRequest(
-        "edited title",
-        10,
-        "edited thumbnail",
-        null);
+    ModifyEventRequest req = new ModifyEventRequest("edited title", 10, "edited thumbnail", null);
 
     EventsRecord myEvent = myJooqMock.getContext().newRecord(Tables.EVENTS);
     myEvent.setId(0);
@@ -645,11 +631,7 @@ public class EventsProcessorImplTest {
   public void testModifyEvent5() {
     JWTData myUserData = new JWTData(0, PrivilegeLevel.ADMIN);
 
-    ModifyEventRequest req = new ModifyEventRequest(
-        "edited title",
-        null,
-        "edited thumbnail",
-        null);
+    ModifyEventRequest req = new ModifyEventRequest("edited title", null, "edited thumbnail", null);
 
     EventsRecord myEvent = myJooqMock.getContext().newRecord(Tables.EVENTS);
     myEvent.setId(0);
@@ -678,11 +660,7 @@ public class EventsProcessorImplTest {
   public void testModifyEvent6() {
     JWTData myUserData = new JWTData(0, PrivilegeLevel.ADMIN);
 
-    ModifyEventRequest req = new ModifyEventRequest(
-        null,
-        null,
-        null,
-        null);
+    ModifyEventRequest req = new ModifyEventRequest(null, null, null, null);
 
     EventsRecord myEvent = myJooqMock.getContext().newRecord(Tables.EVENTS);
     myEvent.setId(0);
@@ -708,15 +686,12 @@ public class EventsProcessorImplTest {
   public void testModifyEvent7() {
     JWTData myUserData = new JWTData(0, PrivilegeLevel.ADMIN);
 
-    ModifyEventRequest req = new ModifyEventRequest(
-        "edited title",
-        null,
-        "edited thumbnail",
-        new EventDetails(
-            "new description",
-            "new location",
+    ModifyEventRequest req =
+        new ModifyEventRequest(
+            "edited title",
             null,
-            null));
+            "edited thumbnail",
+            new EventDetails("new description", "new location", null, null));
 
     EventsRecord myEvent = myJooqMock.getContext().newRecord(Tables.EVENTS);
     myEvent.setId(0);
@@ -777,7 +752,6 @@ public class EventsProcessorImplTest {
    * NOTE: The following tests for {@code getEventRegisteredUsers} were written by Conner, not
    * Brandon.
    */
-
   @ParameterizedTest
   @ValueSource(ints = {0, 1})
   public void testGetEventRegisteredUsersIncorrectPrivilegeLevel(int privLevel) {

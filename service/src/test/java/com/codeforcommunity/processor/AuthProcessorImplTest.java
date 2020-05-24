@@ -106,18 +106,15 @@ public class AuthProcessorImplTest {
 
     when(mockJWTCreator.getNewAccessToken(anyString())).thenReturn(accessToken);
 
-    NewUserRequest req = new NewUserRequest(
-        "hello@example.com",
-        "password",
-        "Brandon",
-        "Liang",
-        new AddressData(
-            "West 5th Street",
-            "New York",
-            "NY",
-            "10002"),
-        "555-555-5555",
-        "Peanuts");
+    NewUserRequest req =
+        new NewUserRequest(
+            "hello@example.com",
+            "password",
+            "Brandon",
+            "Liang",
+            new AddressData("West 5th Street", "New York", "NY", "10002"),
+            "555-555-5555",
+            "Peanuts");
 
     SessionResponse res = myAuthProcessorImpl.signUp(req);
 

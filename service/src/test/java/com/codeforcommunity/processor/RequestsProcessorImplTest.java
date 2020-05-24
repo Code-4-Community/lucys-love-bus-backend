@@ -1,7 +1,5 @@
 package com.codeforcommunity.processor;
 
-import static org.jooq.generated.Tables.CONTACTS;
-import static org.jooq.generated.Tables.PF_REQUESTS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
@@ -238,7 +236,6 @@ public class RequestsProcessorImplTest {
     PfRequestsRecord myPFReqRecord = myJooqMock.getContext().newRecord(Tables.PF_REQUESTS);
     myPFReqRecord.setUserId(0);
     myPFReqRecord.setId(0);
-    myPFReqRecord.setDescription("sample description");
     myPFReqRecord.setStatus(RequestStatus.PENDING);
     myJooqMock.addReturn("SELECT", myPFReqRecord);
     myJooqMock.addReturn("UPDATE", myPFReqRecord);
@@ -284,7 +281,6 @@ public class RequestsProcessorImplTest {
     PfRequestsRecord myPFReqRecord = myJooqMock.getContext().newRecord(Tables.PF_REQUESTS);
     myPFReqRecord.setUserId(0);
     myPFReqRecord.setId(0);
-    myPFReqRecord.setDescription("sample description");
     myPFReqRecord.setStatus(RequestStatus.PENDING);
     myJooqMock.addReturn("SELECT", myPFReqRecord);
     myJooqMock.addReturn("UPDATE", myPFReqRecord);
