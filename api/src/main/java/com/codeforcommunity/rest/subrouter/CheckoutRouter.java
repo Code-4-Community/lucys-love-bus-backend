@@ -4,7 +4,6 @@ import static com.codeforcommunity.rest.ApiRouter.end;
 
 import com.codeforcommunity.api.ICheckoutProcessor;
 import com.codeforcommunity.auth.JWTData;
-import com.codeforcommunity.dto.checkout.CreateCheckoutSessionData;
 import com.codeforcommunity.dto.checkout.PostCreateEventRegistrations;
 import com.codeforcommunity.rest.IRouter;
 import com.codeforcommunity.rest.RestFunctions;
