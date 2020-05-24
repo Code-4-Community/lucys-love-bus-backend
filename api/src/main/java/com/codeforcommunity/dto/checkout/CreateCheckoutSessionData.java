@@ -4,7 +4,7 @@ import com.stripe.param.checkout.SessionCreateParams;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PostCreateCheckoutSession {
+public class CreateCheckoutSessionData {
 
   public static final String CURRENCY_UNITS = "usd";
 
@@ -12,9 +12,9 @@ public class PostCreateCheckoutSession {
   private String cancelUrl;
   private String successUrl;
 
-  public PostCreateCheckoutSession() {}
+  public CreateCheckoutSessionData() {}
 
-  public PostCreateCheckoutSession(
+  public CreateCheckoutSessionData(
       List<LineItem> lineItems, String cancelUrl, String successUrl) {
     this.lineItems = lineItems;
     this.cancelUrl = cancelUrl;

@@ -8,7 +8,7 @@ import com.codeforcommunity.auth.JWTData;
 import com.codeforcommunity.dataaccess.EventDatabaseOperations;
 import com.codeforcommunity.dto.checkout.LineItem;
 import com.codeforcommunity.dto.checkout.LineItemRequest;
-import com.codeforcommunity.dto.checkout.PostCreateCheckoutSession;
+import com.codeforcommunity.dto.checkout.CreateCheckoutSessionData;
 import com.codeforcommunity.dto.checkout.PostCreateEventRegistrations;
 import com.codeforcommunity.enums.EventRegistrationStatus;
 import com.codeforcommunity.enums.PrivilegeLevel;
@@ -25,23 +25,19 @@ import com.stripe.model.checkout.Session;
 import com.stripe.net.Webhook;
 import com.stripe.param.checkout.SessionCreateParams;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.stream.Collectors;
 import org.jooq.DSLContext;
-import org.jooq.Record3;
-import org.jooq.Result;
-import org.jooq.Row2;
 import org.jooq.generated.tables.records.EventRegistrationsRecord;
 import org.jooq.generated.tables.records.EventsRecord;
-import org.jooq.impl.DSL;
 
 public class CheckoutProcessorImpl implements ICheckoutProcessor {
 
   public static final int TICKET_PRICE_CENTS = 500;
+  public static final String CANCEL_URL = "";
+  public static final String SUCCESS_URL = "";
 
   private final DSLContext db;
   private final EventDatabaseOperations eventDatabaseOperations;
@@ -59,7 +55,11 @@ public class CheckoutProcessorImpl implements ICheckoutProcessor {
 
   @Override
   public String createCheckoutSessionAndEventRegistration(
-      PostCreateCheckoutSession request, JWTData user) throws StripeExternalException {
+      PostCreateEventRegistrations originalRequest, JWTData user) throws StripeExternalException {
+    List<LineItem> lineItems = convertLineItems(originalRequest.getLineItemRequests());
+    CreateCheckoutSessionData request = new CreateCheckoutSessionData(
+        lineItems, CANCEL_URL, SUCCESS_URL
+    );
 
     Stripe.apiKey = this.stripeAPISecretKey;
 

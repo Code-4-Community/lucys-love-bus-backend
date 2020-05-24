@@ -4,7 +4,7 @@ import static com.codeforcommunity.rest.ApiRouter.end;
 
 import com.codeforcommunity.api.ICheckoutProcessor;
 import com.codeforcommunity.auth.JWTData;
-import com.codeforcommunity.dto.checkout.PostCreateCheckoutSession;
+import com.codeforcommunity.dto.checkout.CreateCheckoutSessionData;
 import com.codeforcommunity.dto.checkout.PostCreateEventRegistrations;
 import com.codeforcommunity.rest.IRouter;
 import com.codeforcommunity.rest.RestFunctions;
@@ -52,8 +52,8 @@ public class CheckoutRouter implements IRouter {
   }
 
   private void handleCreateCheckoutSessionAndEventRegistration(RoutingContext ctx) {
-    PostCreateCheckoutSession requestData =
-        RestFunctions.getJsonBodyAsClass(ctx, PostCreateCheckoutSession.class);
+    PostCreateEventRegistrations requestData =
+        RestFunctions.getJsonBodyAsClass(ctx, PostCreateEventRegistrations.class);
     JWTData userData = ctx.get("jwt_data");
 
     String checkoutSessionID =
