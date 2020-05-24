@@ -6,20 +6,22 @@ import java.util.List;
 
 public class PostCreateCheckoutSession {
 
-  private List<LineItemRequest> lineItems;
+  public static final String CURRENCY_UNITS = "usd";
+
+  private List<LineItem> lineItems;
   private String cancelUrl;
   private String successUrl;
 
-  private PostCreateCheckoutSession() {}
+  public PostCreateCheckoutSession() {}
 
   public PostCreateCheckoutSession(
-      List<LineItemRequest> lineItems, String cancelUrl, String successUrl) {
+      List<LineItem> lineItems, String cancelUrl, String successUrl) {
     this.lineItems = lineItems;
     this.cancelUrl = cancelUrl;
     this.successUrl = successUrl;
   }
 
-  public List<LineItemRequest> getLineItems() {
+  public List<LineItem> getLineItems() {
     return this.lineItems;
   }
 
@@ -33,12 +35,12 @@ public class PostCreateCheckoutSession {
 
   public List<SessionCreateParams.LineItem> getStripeLineItems() {
     List<SessionCreateParams.LineItem> out = new ArrayList<>();
-    for (LineItemRequest item : this.lineItems) {
+    for (LineItem item : this.lineItems) {
       SessionCreateParams.LineItem stripe_line_item =
           new SessionCreateParams.LineItem.Builder()
               .setName(item.getName())
-              .setAmount(item.getAmount() * 100)
-              .setCurrency(item.getCurrency())
+              .setAmount(item.getCents())
+              .setCurrency(CURRENCY_UNITS)
               .setQuantity(item.getQuantity())
               .setDescription(item.getDescription())
               .build();
