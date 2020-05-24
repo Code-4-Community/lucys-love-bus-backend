@@ -9,12 +9,7 @@ public class LineItem {
 
   private LineItem() {}
 
-  public LineItem(
-      String name,
-      String description,
-      Integer amount,
-      Integer quantity,
-      Integer id) {
+  public LineItem(String name, String description, Integer amount, Integer quantity, Integer id) {
     this.name = name;
     this.description = description;
     this.cents = Long.valueOf(amount);

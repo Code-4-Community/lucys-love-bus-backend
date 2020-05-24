@@ -8,8 +8,7 @@ public class PostCreateEventRegistrations {
 
   public PostCreateEventRegistrations() {}
 
-  public PostCreateEventRegistrations(
-      List<LineItemRequest> lineItemRequests) {
+  public PostCreateEventRegistrations(List<LineItemRequest> lineItemRequests) {
     this.lineItemRequests = lineItemRequests;
   }
 

@@ -6,9 +6,9 @@ import static org.jooq.generated.Tables.EVENT_REGISTRATIONS;
 import com.codeforcommunity.api.ICheckoutProcessor;
 import com.codeforcommunity.auth.JWTData;
 import com.codeforcommunity.dataaccess.EventDatabaseOperations;
+import com.codeforcommunity.dto.checkout.CreateCheckoutSessionData;
 import com.codeforcommunity.dto.checkout.LineItem;
 import com.codeforcommunity.dto.checkout.LineItemRequest;
-import com.codeforcommunity.dto.checkout.CreateCheckoutSessionData;
 import com.codeforcommunity.dto.checkout.PostCreateEventRegistrations;
 import com.codeforcommunity.enums.EventRegistrationStatus;
 import com.codeforcommunity.enums.PrivilegeLevel;
@@ -37,7 +37,8 @@ public class CheckoutProcessorImpl implements ICheckoutProcessor {
 
   public static final int TICKET_PRICE_CENTS = 500;
   public static final String CANCEL_URL = "https://llb.c4cneu.com/checkout";
-  public static final String SUCCESS_URL = "https://llb.c4cneu.com/?session_id={CHECKOUT_SESSION_ID}";
+  public static final String SUCCESS_URL =
+      "https://llb.c4cneu.com/?session_id={CHECKOUT_SESSION_ID}";
 
   private final DSLContext db;
   private final EventDatabaseOperations eventDatabaseOperations;
@@ -57,9 +58,8 @@ public class CheckoutProcessorImpl implements ICheckoutProcessor {
   public String createCheckoutSessionAndEventRegistration(
       PostCreateEventRegistrations originalRequest, JWTData user) throws StripeExternalException {
     List<LineItem> lineItems = convertLineItems(originalRequest.getLineItemRequests());
-    CreateCheckoutSessionData request = new CreateCheckoutSessionData(
-        lineItems, CANCEL_URL, SUCCESS_URL
-    );
+    CreateCheckoutSessionData request =
+        new CreateCheckoutSessionData(lineItems, CANCEL_URL, SUCCESS_URL);
 
     Stripe.apiKey = this.stripeAPISecretKey;
 
@@ -134,11 +134,11 @@ public class CheckoutProcessorImpl implements ICheckoutProcessor {
   }
 
   private List<LineItem> convertLineItems(List<LineItemRequest> lineItemRequests) {
-    List<Integer> eventIds = lineItemRequests.stream().map(LineItemRequest::getEventId).collect(
-        Collectors.toList());
+    List<Integer> eventIds =
+        lineItemRequests.stream().map(LineItemRequest::getEventId).collect(Collectors.toList());
 
-    Map<Integer, EventsRecord> retrievedEvents = db
-        .selectFrom(EVENTS).where(EVENTS.ID.in(eventIds)).fetchMap(EVENTS.ID);
+    Map<Integer, EventsRecord> retrievedEvents =
+        db.selectFrom(EVENTS).where(EVENTS.ID.in(eventIds)).fetchMap(EVENTS.ID);
 
     List<LineItem> lineItems = new ArrayList<>();
 
@@ -146,13 +146,13 @@ public class CheckoutProcessorImpl implements ICheckoutProcessor {
       if (retrievedEvents.containsKey(request.getEventId())) {
         EventsRecord event = retrievedEvents.get(request.getEventId());
         int ticketQuantity = request.getQuantity();
-        lineItems.add(new LineItem(
-            event.get(EVENTS.TITLE),
-            event.get(EVENTS.DESCRIPTION),
-            ticketQuantity * TICKET_PRICE_CENTS,
-            ticketQuantity,
-            request.getEventId()
-        ));
+        lineItems.add(
+            new LineItem(
+                event.get(EVENTS.TITLE),
+                event.get(EVENTS.DESCRIPTION),
+                ticketQuantity * TICKET_PRICE_CENTS,
+                ticketQuantity,
+                request.getEventId()));
       } else {
         throw new EventDoesNotExistException(request.getEventId());
       }

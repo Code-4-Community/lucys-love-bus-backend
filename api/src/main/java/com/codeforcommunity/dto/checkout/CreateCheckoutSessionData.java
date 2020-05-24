@@ -14,8 +14,7 @@ public class CreateCheckoutSessionData {
 
   public CreateCheckoutSessionData() {}
 
-  public CreateCheckoutSessionData(
-      List<LineItem> lineItems, String cancelUrl, String successUrl) {
+  public CreateCheckoutSessionData(List<LineItem> lineItems, String cancelUrl, String successUrl) {
     this.lineItems = lineItems;
     this.cancelUrl = cancelUrl;
     this.successUrl = successUrl;

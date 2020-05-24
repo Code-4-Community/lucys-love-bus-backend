@@ -1,7 +1,6 @@
 package com.codeforcommunity.api;
 
 import com.codeforcommunity.auth.JWTData;
-import com.codeforcommunity.dto.checkout.CreateCheckoutSessionData;
 import com.codeforcommunity.dto.checkout.PostCreateEventRegistrations;
 import com.codeforcommunity.exceptions.StripeExternalException;
 
