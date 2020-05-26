@@ -9,7 +9,7 @@ import org.jooq.DSLContext;
 
 public class EventDatabaseOperations {
 
-  private DSLContext db;
+  private final DSLContext db;
 
   public EventDatabaseOperations(DSLContext db) {
     this.db = db;

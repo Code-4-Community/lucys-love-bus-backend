@@ -7,6 +7,7 @@ import com.codeforcommunity.auth.JWTData;
 import com.codeforcommunity.dto.pfrequests.GetRequestsResponse;
 import com.codeforcommunity.dto.pfrequests.RequestData;
 import com.codeforcommunity.dto.pfrequests.RequestStatusResponse;
+import com.codeforcommunity.dto.protected_user.UserInformation;
 import com.codeforcommunity.enums.RequestStatus;
 import com.codeforcommunity.rest.IRouter;
 import com.codeforcommunity.rest.RestFunctions;
@@ -31,6 +32,7 @@ public class PfRequestRouter implements IRouter {
 
     registerCreateRequest(router);
     registerGetRequests(router);
+    registerGetRequestData(router);
     registerApproveRequest(router);
     registerRejectRequest(router);
     registerGetRequestStatus(router);
@@ -48,6 +50,11 @@ public class PfRequestRouter implements IRouter {
     getRequestsRoute.handler(this::handleGetRequestsRoute);
   }
 
+  private void registerGetRequestData(Router router) {
+    Route getRequestData = router.get("/:request_id");
+    getRequestData.handler(this::handleGetRequestDataRoute);
+  }
+
   private void registerApproveRequest(Router router) {
     Route approveRequestRoute = router.post("/:request_id/approve");
     approveRequestRoute.handler(this::handleApproveRequestRoute);
@@ -59,7 +66,7 @@ public class PfRequestRouter implements IRouter {
   }
 
   private void registerGetRequestStatus(Router router) {
-    Route getRequestStatusRoute = router.get("/:request_id");
+    Route getRequestStatusRoute = router.get("/:request_id/status");
     getRequestStatusRoute.handler(this::handleGetRequestStatusRoute);
   }
 
@@ -78,6 +85,15 @@ public class PfRequestRouter implements IRouter {
     GetRequestsResponse response = new GetRequestsResponse(requests);
 
     end(ctx.response(), 200, JsonObject.mapFrom(response).encode());
+  }
+
+  private void handleGetRequestDataRoute(RoutingContext ctx) {
+    int requestId = RestFunctions.getRequestParameterAsInt(ctx.request(), "request_id");
+    JWTData userData = ctx.get("jwt_data");
+
+    UserInformation requestInformation = requestsProcessor.getRequestData(requestId, userData);
+
+    end(ctx.response(), 200, JsonObject.mapFrom(requestInformation).encode());
   }
 
   private void handleApproveRequestRoute(RoutingContext ctx) {

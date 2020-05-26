@@ -2,6 +2,7 @@ package com.codeforcommunity.api;
 
 import com.codeforcommunity.auth.JWTData;
 import com.codeforcommunity.dto.protected_user.SetContactsAndChildrenRequest;
+import com.codeforcommunity.dto.protected_user.UserInformation;
 import com.codeforcommunity.dto.user.ChangePasswordRequest;
 
 public interface IProtectedUserProcessor {
@@ -17,4 +18,7 @@ public interface IProtectedUserProcessor {
 
   void setContactsAndChildren(
       JWTData userData, SetContactsAndChildrenRequest setContactsAndChildrenRequest);
+
+  /** Returns all information associated with a user's personal account. */
+  UserInformation getPersonalUserInformation(JWTData userData);
 }

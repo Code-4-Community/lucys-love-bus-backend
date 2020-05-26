@@ -5,7 +5,9 @@ import static org.jooq.generated.Tables.*;
 import com.codeforcommunity.api.IProtectedUserProcessor;
 import com.codeforcommunity.auth.JWTData;
 import com.codeforcommunity.auth.Passwords;
+import com.codeforcommunity.dataaccess.AuthDatabaseOperations;
 import com.codeforcommunity.dto.protected_user.SetContactsAndChildrenRequest;
+import com.codeforcommunity.dto.protected_user.UserInformation;
 import com.codeforcommunity.dto.protected_user.components.Child;
 import com.codeforcommunity.dto.protected_user.components.Contact;
 import com.codeforcommunity.dto.user.ChangePasswordRequest;
@@ -13,6 +15,7 @@ import com.codeforcommunity.exceptions.UserDoesNotExistException;
 import com.codeforcommunity.exceptions.WrongPasswordException;
 import java.util.List;
 import org.jooq.DSLContext;
+import org.jooq.generated.tables.pojos.Users;
 import org.jooq.generated.tables.records.ChildrenRecord;
 import org.jooq.generated.tables.records.ContactsRecord;
 import org.jooq.generated.tables.records.UsersRecord;
@@ -20,9 +23,11 @@ import org.jooq.generated.tables.records.UsersRecord;
 public class ProtectedUserProcessorImpl implements IProtectedUserProcessor {
 
   private final DSLContext db;
+  private final AuthDatabaseOperations authDatabaseOperations;
 
   public ProtectedUserProcessorImpl(DSLContext db) {
     this.db = db;
+    this.authDatabaseOperations = new AuthDatabaseOperations(db);
   }
 
   @Override
@@ -70,6 +75,18 @@ public class ProtectedUserProcessorImpl implements IProtectedUserProcessor {
         && !setContactsAndChildrenRequest.getAdditionalContacts().isEmpty()) {
       addAdditionalContacts(setContactsAndChildrenRequest.getAdditionalContacts(), userData);
     }
+  }
+
+  @Override
+  public UserInformation getPersonalUserInformation(JWTData userData) {
+    Users user =
+        db.selectFrom(USERS).where(USERS.ID.eq(userData.getUserId())).fetchOneInto(Users.class);
+
+    if (user == null) {
+      throw new UserDoesNotExistException(userData.getUserId());
+    }
+
+    return authDatabaseOperations.getUserInformation(user);
   }
 
   private void updateMainContact(JWTData userData, Contact newContactData) {
