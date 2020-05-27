@@ -12,6 +12,7 @@ import com.codeforcommunity.dto.protected_user.UserInformation;
 import com.codeforcommunity.dto.protected_user.components.Child;
 import com.codeforcommunity.dto.protected_user.components.Contact;
 import com.codeforcommunity.dto.user.ChangePasswordRequest;
+import com.codeforcommunity.exceptions.EmailAlreadyInUseException;
 import com.codeforcommunity.exceptions.UserDoesNotExistException;
 import com.codeforcommunity.exceptions.WrongPasswordException;
 import java.util.List;
@@ -69,6 +70,10 @@ public class ProtectedUserProcessorImpl implements IProtectedUserProcessor {
     }
 
     if (Passwords.isExpectedPassword(changeEmailRequest.getPassword(), user.getPassHash())) {
+      if (db.fetchExists(USERS, USERS.EMAIL.eq(changeEmailRequest.getNewEmail()))) {
+        throw new EmailAlreadyInUseException(changeEmailRequest.getNewEmail());
+      }
+
       user.setEmail(changeEmailRequest.getNewEmail());
 
       ContactsRecord mainContact =
