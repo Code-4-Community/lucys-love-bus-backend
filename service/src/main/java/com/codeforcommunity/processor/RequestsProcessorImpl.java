@@ -8,6 +8,7 @@ import com.codeforcommunity.api.IRequestsProcessor;
 import com.codeforcommunity.auth.JWTData;
 import com.codeforcommunity.dataaccess.AuthDatabaseOperations;
 import com.codeforcommunity.dto.pfrequests.RequestData;
+import com.codeforcommunity.dto.pfrequests.RequestStatusData;
 import com.codeforcommunity.dto.pfrequests.RequestUser;
 import com.codeforcommunity.dto.protected_user.UserInformation;
 import com.codeforcommunity.enums.PrivilegeLevel;
@@ -162,28 +163,13 @@ public class RequestsProcessorImpl implements IRequestsProcessor {
   }
 
   @Override
-  public RequestStatus getRequestStatus(int requestId, JWTData userData) {
-    // Get requests user id
-    // Check that this user is an Admin or the same user
+  public List<RequestStatusData> getRequestStatuses(JWTData userData) {
+    List<RequestStatusData> requestStatuses = db.select(PF_REQUESTS.ID, PF_REQUESTS.STATUS, PF_REQUESTS.CREATED)
+        .from(PF_REQUESTS)
+        .where(PF_REQUESTS.USER_ID.eq(userData.getUserId()))
+        .orderBy(PF_REQUESTS.CREATED.desc())
+        .fetchInto(RequestStatusData.class);
 
-    PfRequests request =
-        db.selectFrom(PF_REQUESTS)
-            .where(PF_REQUESTS.ID.eq(requestId))
-            .fetchOneInto(PfRequests.class);
-
-    if (request == null) {
-      throw new RequestDoesNotExistException(requestId);
-    }
-
-    if (userData.getPrivilegeLevel() != PrivilegeLevel.ADMIN) {
-      Users requestUser =
-          db.selectFrom(USERS).where(USERS.ID.eq(request.getUserId())).fetchOneInto(Users.class);
-
-      if (!requestUser.getId().equals(userData.getUserId())) {
-        throw new ResourceNotOwnedException("request " + requestId);
-      }
-    }
-
-    return request.getStatus();
+    return requestStatuses;
   }
 }
