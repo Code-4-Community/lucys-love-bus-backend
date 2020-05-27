@@ -9,6 +9,7 @@ import com.codeforcommunity.exceptions.InvalidSecretKeyException;
 import com.codeforcommunity.exceptions.MalformedParameterException;
 import com.codeforcommunity.exceptions.MissingHeaderException;
 import com.codeforcommunity.exceptions.MissingParameterException;
+import com.codeforcommunity.exceptions.RequestDoesNotExistException;
 import com.codeforcommunity.exceptions.ResourceNotOwnedException;
 import com.codeforcommunity.exceptions.StripeExternalException;
 import com.codeforcommunity.exceptions.UsedSecretKeyException;
@@ -73,6 +74,12 @@ public class FailureHandler {
   public void handleUserDoesNotExist(RoutingContext ctx, UserDoesNotExistException exception) {
     String message =
         String.format("No user with property <%s> exists", exception.getIdentifierMessage());
+    end(ctx, message, 400);
+  }
+
+  public void handleRequestDoesNotExist(
+      RoutingContext ctx, RequestDoesNotExistException exception) {
+    String message = String.format("No request with id <%d> exists", exception.getRequestId());
     end(ctx, message, 400);
   }
 

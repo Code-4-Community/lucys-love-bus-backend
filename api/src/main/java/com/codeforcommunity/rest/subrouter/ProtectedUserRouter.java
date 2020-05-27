@@ -6,9 +6,11 @@ import static com.codeforcommunity.rest.RestFunctions.getJsonBodyAsClass;
 import com.codeforcommunity.api.IProtectedUserProcessor;
 import com.codeforcommunity.auth.JWTData;
 import com.codeforcommunity.dto.protected_user.SetContactsAndChildrenRequest;
+import com.codeforcommunity.dto.protected_user.UserInformation;
 import com.codeforcommunity.dto.user.ChangePasswordRequest;
 import com.codeforcommunity.rest.IRouter;
 import io.vertx.core.Vertx;
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Route;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
@@ -28,6 +30,7 @@ public class ProtectedUserRouter implements IRouter {
     registerDeleteUser(router);
     registerChangePassword(router);
     registerSetUserContactInfo(router);
+    registerGetUserContactInfo(router);
 
     return router;
   }
@@ -45,6 +48,11 @@ public class ProtectedUserRouter implements IRouter {
   private void registerSetUserContactInfo(Router router) {
     Route setUserContactInfoRoute = router.post("/contact_info");
     setUserContactInfoRoute.handler(this::handleSetUserContactInfo);
+  }
+
+  private void registerGetUserContactInfo(Router router) {
+    Route setUserContactInfoRoute = router.get("/contact_info");
+    setUserContactInfoRoute.handler(this::handleGetUserContactInfo);
   }
 
   private void handleDeleteUser(RoutingContext ctx) {
@@ -73,5 +81,13 @@ public class ProtectedUserRouter implements IRouter {
     processor.setContactsAndChildren(userData, setUserContactInfoRequest);
 
     end(ctx.response(), 201);
+  }
+
+  private void handleGetUserContactInfo(RoutingContext ctx) {
+    JWTData userData = ctx.get("jwt_data");
+
+    UserInformation userInformation = processor.getPersonalUserInformation(userData);
+
+    end(ctx.response(), 200, JsonObject.mapFrom(userInformation).encode());
   }
 }

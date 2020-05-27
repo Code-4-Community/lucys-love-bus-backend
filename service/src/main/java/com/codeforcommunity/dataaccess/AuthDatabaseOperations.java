@@ -1,5 +1,6 @@
 package com.codeforcommunity.dataaccess;
 
+import static org.jooq.generated.Tables.CHILDREN;
 import static org.jooq.generated.Tables.CONTACTS;
 import static org.jooq.generated.Tables.USERS;
 import static org.jooq.generated.Tables.VERIFICATION_KEYS;
@@ -8,6 +9,9 @@ import com.codeforcommunity.auth.JWTData;
 import com.codeforcommunity.auth.Passwords;
 import com.codeforcommunity.dto.auth.AddressData;
 import com.codeforcommunity.dto.auth.NewUserRequest;
+import com.codeforcommunity.dto.protected_user.UserInformation;
+import com.codeforcommunity.dto.protected_user.components.Child;
+import com.codeforcommunity.dto.protected_user.components.Contact;
 import com.codeforcommunity.enums.PrivilegeLevel;
 import com.codeforcommunity.enums.VerificationKeyType;
 import com.codeforcommunity.exceptions.EmailAlreadyInUseException;
@@ -19,6 +23,7 @@ import com.codeforcommunity.processor.AuthProcessorImpl;
 import com.codeforcommunity.propertiesLoader.PropertiesLoader;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
 import org.jooq.DSLContext;
@@ -65,6 +70,27 @@ public class AuthDatabaseOperations {
     } else {
       throw new UserDoesNotExistException(email);
     }
+  }
+
+  /** Get a UserInformation object from a user pojo. */
+  public UserInformation getUserInformation(Users user) {
+    Contact mainContact =
+        db.selectFrom(CONTACTS)
+            .where(CONTACTS.USER_ID.eq(user.getId()))
+            .and(CONTACTS.IS_MAIN_CONTACT.isTrue())
+            .fetchOneInto(Contact.class);
+    List<Contact> additionalContacts =
+        db.selectFrom(CONTACTS)
+            .where(CONTACTS.USER_ID.eq(user.getId()))
+            .and(CONTACTS.IS_MAIN_CONTACT.isFalse())
+            .fetchInto(Contact.class);
+    List<Child> children =
+        db.selectFrom(CHILDREN).where(CHILDREN.USER_ID.eq(user.getId())).fetchInto(Child.class);
+    AddressData locationData = extractAddressDataFromUser(user);
+    PrivilegeLevel accountPrivilegeLevel = user.getPrivilegeLevel();
+
+    return new UserInformation(
+        mainContact, additionalContacts, children, locationData, accountPrivilegeLevel);
   }
 
   /**
@@ -209,5 +235,9 @@ public class AuthDatabaseOperations {
     usersRecord.setCity(addressData.getCity());
     usersRecord.setState(addressData.getState());
     usersRecord.setZipcode(addressData.getZipCode());
+  }
+
+  private AddressData extractAddressDataFromUser(Users user) {
+    return new AddressData(user.getAddress(), user.getCity(), user.getState(), user.getZipcode());
   }
 }
