@@ -1,6 +1,7 @@
 package com.codeforcommunity.api;
 
 import com.codeforcommunity.auth.JWTData;
+import com.codeforcommunity.dto.protected_user.ChangeEmailRequest;
 import com.codeforcommunity.dto.protected_user.SetContactsAndChildrenRequest;
 import com.codeforcommunity.dto.protected_user.UserInformation;
 import com.codeforcommunity.dto.user.ChangePasswordRequest;
@@ -16,6 +17,13 @@ public interface IProtectedUserProcessor {
    */
   void changePassword(JWTData userData, ChangePasswordRequest changePasswordRequest);
 
+  /**
+   * If the given password matches the calling user's password, update the email associated with the
+   * main contact and the user account.
+   */
+  void changePrimaryEmail(JWTData userData, ChangeEmailRequest changeEmailRequest);
+
+  /** Set the contact and children tables associated with the calling user's account. */
   void setContactsAndChildren(
       JWTData userData, SetContactsAndChildrenRequest setContactsAndChildrenRequest);
 
