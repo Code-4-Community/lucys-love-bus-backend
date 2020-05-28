@@ -16,11 +16,9 @@ import com.codeforcommunity.enums.RequestStatus;
 import com.codeforcommunity.exceptions.AdminOnlyRouteException;
 import com.codeforcommunity.exceptions.OutstandingRequestException;
 import com.codeforcommunity.exceptions.RequestDoesNotExistException;
-import com.codeforcommunity.exceptions.ResourceNotOwnedException;
 import com.codeforcommunity.exceptions.WrongPrivilegeException;
 import java.util.List;
 import org.jooq.DSLContext;
-import org.jooq.generated.tables.pojos.PfRequests;
 import org.jooq.generated.tables.pojos.Users;
 import org.jooq.generated.tables.records.PfRequestsRecord;
 
@@ -164,11 +162,12 @@ public class RequestsProcessorImpl implements IRequestsProcessor {
 
   @Override
   public List<RequestStatusData> getRequestStatuses(JWTData userData) {
-    List<RequestStatusData> requestStatuses = db.select(PF_REQUESTS.ID, PF_REQUESTS.STATUS, PF_REQUESTS.CREATED)
-        .from(PF_REQUESTS)
-        .where(PF_REQUESTS.USER_ID.eq(userData.getUserId()))
-        .orderBy(PF_REQUESTS.CREATED.desc())
-        .fetchInto(RequestStatusData.class);
+    List<RequestStatusData> requestStatuses =
+        db.select(PF_REQUESTS.ID, PF_REQUESTS.STATUS, PF_REQUESTS.CREATED)
+            .from(PF_REQUESTS)
+            .where(PF_REQUESTS.USER_ID.eq(userData.getUserId()))
+            .orderBy(PF_REQUESTS.CREATED.desc())
+            .fetchInto(RequestStatusData.class);
 
     return requestStatuses;
   }
