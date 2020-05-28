@@ -36,13 +36,17 @@ public class ProtectedUserProcessorImpl implements IProtectedUserProcessor {
   public void deleteUser(JWTData userData) {
     int userId = userData.getUserId();
 
-    db.deleteFrom(EVENT_REGISTRATIONS).where(EVENT_REGISTRATIONS.USER_ID.eq(userId)).executeAsync();
+    db.deleteFrom(EVENT_REGISTRATIONS).where(EVENT_REGISTRATIONS.USER_ID.eq(userId)).execute();
 
-    db.deleteFrom(VERIFICATION_KEYS).where(VERIFICATION_KEYS.USER_ID.eq(userId)).executeAsync();
+    db.deleteFrom(VERIFICATION_KEYS).where(VERIFICATION_KEYS.USER_ID.eq(userId)).execute();
 
-    db.deleteFrom(PF_REQUESTS).where(PF_REQUESTS.USER_ID.eq(userId)).executeAsync();
+    db.deleteFrom(PF_REQUESTS).where(PF_REQUESTS.USER_ID.eq(userId)).execute();
 
-    db.deleteFrom(USERS).where(USERS.ID.eq(userId)).executeAsync();
+    db.deleteFrom(CHILDREN).where(CHILDREN.USER_ID.eq(userId)).execute();
+
+    db.deleteFrom(CONTACTS).where(CONTACTS.USER_ID.eq(userId)).execute();
+
+    db.deleteFrom(USERS).where(USERS.ID.eq(userId)).execute();
   }
 
   @Override
