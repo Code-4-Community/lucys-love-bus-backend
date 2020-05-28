@@ -1,7 +1,6 @@
 package com.codeforcommunity.dto.pfrequests;
 
 import com.codeforcommunity.enums.RequestStatus;
-
 import java.sql.Timestamp;
 
 public class RequestStatusData {
