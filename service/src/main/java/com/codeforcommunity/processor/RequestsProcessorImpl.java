@@ -6,25 +6,29 @@ import static org.jooq.generated.Tables.USERS;
 
 import com.codeforcommunity.api.IRequestsProcessor;
 import com.codeforcommunity.auth.JWTData;
+import com.codeforcommunity.dataaccess.AuthDatabaseOperations;
 import com.codeforcommunity.dto.pfrequests.RequestData;
+import com.codeforcommunity.dto.pfrequests.RequestStatusData;
 import com.codeforcommunity.dto.pfrequests.RequestUser;
+import com.codeforcommunity.dto.protected_user.UserInformation;
 import com.codeforcommunity.enums.PrivilegeLevel;
 import com.codeforcommunity.enums.RequestStatus;
 import com.codeforcommunity.exceptions.AdminOnlyRouteException;
 import com.codeforcommunity.exceptions.OutstandingRequestException;
-import com.codeforcommunity.exceptions.ResourceNotOwnedException;
+import com.codeforcommunity.exceptions.RequestDoesNotExistException;
 import com.codeforcommunity.exceptions.WrongPrivilegeException;
 import java.util.List;
 import org.jooq.DSLContext;
-import org.jooq.generated.tables.pojos.PfRequests;
 import org.jooq.generated.tables.pojos.Users;
 import org.jooq.generated.tables.records.PfRequestsRecord;
 
 public class RequestsProcessorImpl implements IRequestsProcessor {
-  private DSLContext db;
+  private final DSLContext db;
+  private final AuthDatabaseOperations authDatabaseOperations;
 
   public RequestsProcessorImpl(DSLContext db) {
     this.db = db;
+    this.authDatabaseOperations = new AuthDatabaseOperations(db);
   }
 
   @Override
@@ -90,6 +94,25 @@ public class RequestsProcessorImpl implements IRequestsProcessor {
   }
 
   @Override
+  public UserInformation getRequestData(int requestId, JWTData userData) {
+    if (userData.getPrivilegeLevel() != PrivilegeLevel.ADMIN) {
+      throw new AdminOnlyRouteException();
+    }
+
+    Users user =
+        db.select(USERS.fields())
+            .from(PF_REQUESTS.join(USERS).onKey())
+            .where(PF_REQUESTS.ID.eq(requestId))
+            .fetchOneInto(Users.class);
+
+    if (user == null) {
+      throw new RequestDoesNotExistException(requestId);
+    }
+
+    return authDatabaseOperations.getUserInformation(user);
+  }
+
+  @Override
   public void approveRequest(int requestId, JWTData userData) {
     // Check that this user is an Admin
     // Get request users id
@@ -102,6 +125,10 @@ public class RequestsProcessorImpl implements IRequestsProcessor {
 
     PfRequestsRecord requestsRecord =
         db.selectFrom(PF_REQUESTS).where(PF_REQUESTS.ID.eq(requestId)).fetchOne();
+
+    if (requestsRecord == null) {
+      throw new RequestDoesNotExistException(requestId);
+    }
 
     requestsRecord.setStatus(RequestStatus.APPROVED);
     requestsRecord.store(PF_REQUESTS.STATUS);
@@ -125,29 +152,23 @@ public class RequestsProcessorImpl implements IRequestsProcessor {
     PfRequestsRecord requestsRecord =
         db.selectFrom(PF_REQUESTS).where(PF_REQUESTS.ID.eq(requestId)).fetchOne();
 
+    if (requestsRecord == null) {
+      throw new RequestDoesNotExistException(requestId);
+    }
+
     requestsRecord.setStatus(RequestStatus.REJECTED);
     requestsRecord.store(PF_REQUESTS.STATUS);
   }
 
   @Override
-  public RequestStatus getRequestStatus(int requestId, JWTData userData) {
-    // Get requests user id
-    // Check that this user is an Admin or the same user
+  public List<RequestStatusData> getRequestStatuses(JWTData userData) {
+    List<RequestStatusData> requestStatuses =
+        db.select(PF_REQUESTS.ID, PF_REQUESTS.STATUS, PF_REQUESTS.CREATED)
+            .from(PF_REQUESTS)
+            .where(PF_REQUESTS.USER_ID.eq(userData.getUserId()))
+            .orderBy(PF_REQUESTS.CREATED.desc())
+            .fetchInto(RequestStatusData.class);
 
-    PfRequests request =
-        db.selectFrom(PF_REQUESTS)
-            .where(PF_REQUESTS.ID.eq(requestId))
-            .fetchOneInto(PfRequests.class);
-
-    if (userData.getPrivilegeLevel() != PrivilegeLevel.ADMIN) {
-      Users requestUser =
-          db.selectFrom(USERS).where(USERS.ID.eq(request.getUserId())).fetchOneInto(Users.class);
-
-      if (!requestUser.getId().equals(userData.getUserId())) {
-        throw new ResourceNotOwnedException("request " + requestId);
-      }
-    }
-
-    return request.getStatus();
+    return requestStatuses;
   }
 }

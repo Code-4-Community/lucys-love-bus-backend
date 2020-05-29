@@ -219,9 +219,9 @@ public class JooqMock implements MockDataProvider {
     }).when(context).newRecord(any(Table.class));
 
     // create the recordReturns object and add the 'UNKNOWN' and 'DROP/CREATE' operations
-    recordReturns = new HashMap<>();
-    recordReturns.put("UNKNOWN", new Operations());
-    recordReturns.put("DROP/CREATE", new Operations());
+    this.recordReturns = new HashMap<>();
+    this.recordReturns.put("UNKNOWN", new Operations());
+    this.recordReturns.put("DROP/CREATE", new Operations());
 
     // create the classMap object and seed with database tables
     classMap = new HashMap<>();

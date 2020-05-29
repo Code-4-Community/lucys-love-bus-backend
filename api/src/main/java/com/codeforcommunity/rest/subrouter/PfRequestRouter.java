@@ -6,8 +6,9 @@ import com.codeforcommunity.api.IRequestsProcessor;
 import com.codeforcommunity.auth.JWTData;
 import com.codeforcommunity.dto.pfrequests.GetRequestsResponse;
 import com.codeforcommunity.dto.pfrequests.RequestData;
+import com.codeforcommunity.dto.pfrequests.RequestStatusData;
 import com.codeforcommunity.dto.pfrequests.RequestStatusResponse;
-import com.codeforcommunity.enums.RequestStatus;
+import com.codeforcommunity.dto.protected_user.UserInformation;
 import com.codeforcommunity.rest.IRouter;
 import com.codeforcommunity.rest.RestFunctions;
 import io.vertx.core.Vertx;
@@ -31,9 +32,10 @@ public class PfRequestRouter implements IRouter {
 
     registerCreateRequest(router);
     registerGetRequests(router);
+    registerGetRequestStatus(router);
+    registerGetRequestData(router);
     registerApproveRequest(router);
     registerRejectRequest(router);
-    registerGetRequestStatus(router);
 
     return router;
   }
@@ -48,6 +50,16 @@ public class PfRequestRouter implements IRouter {
     getRequestsRoute.handler(this::handleGetRequestsRoute);
   }
 
+  private void registerGetRequestStatus(Router router) {
+    Route getRequestStatusRoute = router.get("/status");
+    getRequestStatusRoute.handler(this::handleGetRequestStatusRoute);
+  }
+
+  private void registerGetRequestData(Router router) {
+    Route getRequestData = router.get("/:request_id");
+    getRequestData.handler(this::handleGetRequestDataRoute);
+  }
+
   private void registerApproveRequest(Router router) {
     Route approveRequestRoute = router.post("/:request_id/approve");
     approveRequestRoute.handler(this::handleApproveRequestRoute);
@@ -56,11 +68,6 @@ public class PfRequestRouter implements IRouter {
   private void registerRejectRequest(Router router) {
     Route rejectRequestRoute = router.post("/:request_id/reject");
     rejectRequestRoute.handler(this::handleRejectRequestRoute);
-  }
-
-  private void registerGetRequestStatus(Router router) {
-    Route getRequestStatusRoute = router.get("/:request_id");
-    getRequestStatusRoute.handler(this::handleGetRequestStatusRoute);
   }
 
   private void handleCreateRequestRoute(RoutingContext ctx) {
@@ -80,6 +87,24 @@ public class PfRequestRouter implements IRouter {
     end(ctx.response(), 200, JsonObject.mapFrom(response).encode());
   }
 
+  private void handleGetRequestStatusRoute(RoutingContext ctx) {
+    JWTData userData = ctx.get("jwt_data");
+
+    List<RequestStatusData> requestStatuses = requestsProcessor.getRequestStatuses(userData);
+    RequestStatusResponse response = new RequestStatusResponse(requestStatuses);
+
+    end(ctx.response(), 200, JsonObject.mapFrom(response).encode());
+  }
+
+  private void handleGetRequestDataRoute(RoutingContext ctx) {
+    int requestId = RestFunctions.getRequestParameterAsInt(ctx.request(), "request_id");
+    JWTData userData = ctx.get("jwt_data");
+
+    UserInformation requestInformation = requestsProcessor.getRequestData(requestId, userData);
+
+    end(ctx.response(), 200, JsonObject.mapFrom(requestInformation).encode());
+  }
+
   private void handleApproveRequestRoute(RoutingContext ctx) {
     int requestId = RestFunctions.getRequestParameterAsInt(ctx.request(), "request_id");
     JWTData userData = ctx.get("jwt_data");
@@ -96,15 +121,5 @@ public class PfRequestRouter implements IRouter {
     requestsProcessor.rejectRequest(requestId, userData);
 
     end(ctx.response(), 200);
-  }
-
-  private void handleGetRequestStatusRoute(RoutingContext ctx) {
-    int requestId = RestFunctions.getRequestParameterAsInt(ctx.request(), "request_id");
-    JWTData userData = ctx.get("jwt_data");
-
-    RequestStatus requestStatus = requestsProcessor.getRequestStatus(requestId, userData);
-    RequestStatusResponse response = new RequestStatusResponse(requestStatus);
-
-    end(ctx.response(), 200, JsonObject.mapFrom(response).encode());
   }
 }

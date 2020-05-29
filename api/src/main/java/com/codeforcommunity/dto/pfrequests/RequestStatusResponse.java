@@ -1,15 +1,15 @@
 package com.codeforcommunity.dto.pfrequests;
 
-import com.codeforcommunity.enums.RequestStatus;
+import java.util.List;
 
 public class RequestStatusResponse {
-  private RequestStatus status;
+  private List<RequestStatusData> requests;
 
-  public RequestStatusResponse(RequestStatus status) {
-    this.status = status;
+  public RequestStatusResponse(List<RequestStatusData> requests) {
+    this.requests = requests;
   }
 
-  public RequestStatus getStatus() {
-    return status;
+  public List<RequestStatusData> getRequests() {
+    return requests;
   }
 }
