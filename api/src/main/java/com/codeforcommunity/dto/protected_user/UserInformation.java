@@ -23,19 +23,37 @@ public class UserInformation {
     this.location = location;
   }
 
+  private UserInformation() {}
+
   public Contact getMainContact() {
     return mainContact;
+  }
+
+  public void setMainContact(Contact mainContact) {
+    this.mainContact = mainContact;
   }
 
   public List<Contact> getAdditionalContacts() {
     return additionalContacts;
   }
 
+  public void setAdditionalContacts(List<Contact> additionalContacts) {
+    this.additionalContacts = additionalContacts;
+  }
+
   public List<Child> getChildren() {
     return children;
   }
 
+  public void setChildren(List<Child> children) {
+    this.children = children;
+  }
+
   public AddressData getLocation() {
     return location;
+  }
+
+  public void setLocation(AddressData location) {
+    this.location = location;
   }
 }
