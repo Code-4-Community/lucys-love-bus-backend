@@ -128,8 +128,12 @@ public class FailureHandler {
     end(ctx, message, 401);
   }
 
-  public void handleTableNotMatchingUser(RoutingContext ctx, TableNotMatchingUserException exception) {
-    String message = String.format("The passed %s resource with id %d is not owned by the calling user", exception.getTableName(), exception.getTableId());
+  public void handleTableNotMatchingUser(
+      RoutingContext ctx, TableNotMatchingUserException exception) {
+    String message =
+        String.format(
+            "The passed %s resource with id %d is not owned by the calling user",
+            exception.getTableName(), exception.getTableId());
     end(ctx, message, 400);
   }
 

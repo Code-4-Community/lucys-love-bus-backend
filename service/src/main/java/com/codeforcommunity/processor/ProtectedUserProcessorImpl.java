@@ -20,7 +20,6 @@ import com.codeforcommunity.exceptions.UserDoesNotExistException;
 import com.codeforcommunity.exceptions.WrongPasswordException;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import org.jooq.DSLContext;
 import org.jooq.generated.tables.pojos.Users;
 import org.jooq.generated.tables.records.ChildrenRecord;
@@ -141,51 +140,55 @@ public class ProtectedUserProcessorImpl implements IProtectedUserProcessor {
   }
 
   /**
-   * Based on a list of new contact dtos update, insert, or remove the given user's contact
-   * table to reflect the dto list.
+   * Based on a list of new contact dtos update, insert, or remove the given user's contact table to
+   * reflect the dto list.
    */
   private void updateContacts(List<Contact> contacts, JWTData userData) {
-    Map<Integer, ContactsRecord> currentContacts = db.selectFrom(CONTACTS)
-        .where(CONTACTS.USER_ID.eq(userData.getUserId()))
-        .and(CONTACTS.IS_MAIN_CONTACT.isFalse())
-        .fetchMap(CONTACTS.ID);
-    contacts.forEach(contact -> {
-      if (contact.getId() == null) {
-        ContactsRecord newContact = db.newRecord(CONTACTS);
-        newContact.setUserId(userData.getUserId());
-        userInformationDbOps.updateStoreContactRecord(newContact, contact);
-      } else {
-        ContactsRecord updatableContact = currentContacts.remove(contact.getId());
-        if (updatableContact == null) {
-          throw new TableNotMatchingUserException("Contact", contact.getId());
-        }
-        userInformationDbOps.updateStoreContactRecord(updatableContact, contact);
-      }
-    });
+    Map<Integer, ContactsRecord> currentContacts =
+        db.selectFrom(CONTACTS)
+            .where(CONTACTS.USER_ID.eq(userData.getUserId()))
+            .and(CONTACTS.IS_MAIN_CONTACT.isFalse())
+            .fetchMap(CONTACTS.ID);
+    contacts.forEach(
+        contact -> {
+          if (contact.getId() == null) {
+            ContactsRecord newContact = db.newRecord(CONTACTS);
+            newContact.setUserId(userData.getUserId());
+            userInformationDbOps.updateStoreContactRecord(newContact, contact);
+          } else {
+            ContactsRecord updatableContact = currentContacts.remove(contact.getId());
+            if (updatableContact == null) {
+              throw new TableNotMatchingUserException("Contact", contact.getId());
+            }
+            userInformationDbOps.updateStoreContactRecord(updatableContact, contact);
+          }
+        });
     currentContacts.values().forEach(UpdatableRecordImpl::delete);
   }
 
   /**
-   * Based on a list of new children dtos update, insert, or remove the given user's children
-   * table to reflect the dto list.
+   * Based on a list of new children dtos update, insert, or remove the given user's children table
+   * to reflect the dto list.
    */
   private void updateChildren(List<Child> children, JWTData userData) {
-    Map<Integer, ChildrenRecord> currentChildren = db.selectFrom(CHILDREN)
-        .where(CHILDREN.USER_ID.eq(userData.getUserId()))
-        .fetchMap(CHILDREN.ID);
-    children.forEach(child -> {
-      if (child.getId() == null) {
-        ChildrenRecord newChild = db.newRecord(CHILDREN);
-        newChild.setUserId(userData.getUserId());
-        userInformationDbOps.updateStoreChildRecord(newChild, child);
-      } else {
-        ChildrenRecord updatableChild = currentChildren.remove(child.getId());
-        if (updatableChild == null) {
-          throw new TableNotMatchingUserException("Child", child.getId());
-        }
-        userInformationDbOps.updateStoreChildRecord(updatableChild, child);
-      }
-    });
+    Map<Integer, ChildrenRecord> currentChildren =
+        db.selectFrom(CHILDREN)
+            .where(CHILDREN.USER_ID.eq(userData.getUserId()))
+            .fetchMap(CHILDREN.ID);
+    children.forEach(
+        child -> {
+          if (child.getId() == null) {
+            ChildrenRecord newChild = db.newRecord(CHILDREN);
+            newChild.setUserId(userData.getUserId());
+            userInformationDbOps.updateStoreChildRecord(newChild, child);
+          } else {
+            ChildrenRecord updatableChild = currentChildren.remove(child.getId());
+            if (updatableChild == null) {
+              throw new TableNotMatchingUserException("Child", child.getId());
+            }
+            userInformationDbOps.updateStoreChildRecord(updatableChild, child);
+          }
+        });
     currentChildren.values().forEach(UpdatableRecordImpl::delete);
   }
 }
