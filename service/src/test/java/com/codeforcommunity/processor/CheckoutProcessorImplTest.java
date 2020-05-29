@@ -4,12 +4,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.mockito.ArgumentMatchers.anyString;
 
 import com.codeforcommunity.JooqMock;
 import com.codeforcommunity.auth.JWTData;
 import com.codeforcommunity.dto.checkout.LineItemRequest;
-import com.codeforcommunity.dto.checkout.PostCreateCheckoutSession;
 import com.codeforcommunity.dto.checkout.PostCreateEventRegistrations;
 import com.codeforcommunity.enums.EventRegistrationStatus;
 import com.codeforcommunity.enums.PrivilegeLevel;
@@ -17,15 +15,17 @@ import com.codeforcommunity.exceptions.InsufficientEventCapacityException;
 import com.codeforcommunity.exceptions.StripeExternalException;
 import com.codeforcommunity.exceptions.WrongPrivilegeException;
 import com.stripe.exception.StripeException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import org.jooq.Record1;
 import org.jooq.generated.Tables;
 import org.jooq.generated.tables.records.EventRegistrationsRecord;
+import org.jooq.generated.tables.records.EventsRecord;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-// Jack said don't worry about testing a properly working createCheckoutSessionAndEventRegistration
+// Jack said don't worry about testing createCheckoutSessionAndEventRegistration
 // or handleStripeCheckoutEventComplete "cause it has to do with another api"
 
 // Contains unit tests for CheckoutProcessorImpl.java in the service module
@@ -46,11 +46,9 @@ public class CheckoutProcessorImplTest {
     JWTData myUser1 = new JWTData(1, PrivilegeLevel.PF);
     JWTData myUser2 = new JWTData(2, PrivilegeLevel.ADMIN);
 
-    PostCreateCheckoutSession req =
-        new PostCreateCheckoutSession(
-            new ArrayList<>(),
-            "https://lucy.c4cneu.com/checkout",
-            "https://lucy.c4cneu.com/checkout");
+    PostCreateEventRegistrations req = new PostCreateEventRegistrations(new ArrayList<>());
+
+    myJooqMock.addEmptyReturn("SELECT");
 
     try {
       myCheckoutProcessorImpl.createCheckoutSessionAndEventRegistration(req, myUser1);
@@ -72,11 +70,10 @@ public class CheckoutProcessorImplTest {
   public void testCreateCheckoutSessionAndEventRegistration2() {
     JWTData myUser1 = new JWTData(0, PrivilegeLevel.GP);
 
-    PostCreateCheckoutSession req =
-        new PostCreateCheckoutSession(
-            new ArrayList<>(),
-            "https://lucy.c4cneu.com/checkout",
-            "https://lucy.c4cneu.com/checkout");
+    List<LineItemRequest> lineItemRequests = new ArrayList<>();
+
+    myJooqMock.addEmptyReturn("SELECT");
+    PostCreateEventRegistrations req = new PostCreateEventRegistrations(lineItemRequests);
 
     try {
       myCheckoutProcessorImpl.createCheckoutSessionAndEventRegistration(req, myUser1);
@@ -95,13 +92,13 @@ public class CheckoutProcessorImplTest {
 
     PostCreateEventRegistrations req = new PostCreateEventRegistrations(lineItems);
 
-    myCheckoutProcessorImpl.createEventRegistration(req, myUserData);
-
     myJooqMock.addEmptyReturn("SELECT");
     myJooqMock.addEmptyReturn("INSERT");
 
+    myCheckoutProcessorImpl.createEventRegistration(req, myUserData);
+
     assertEquals(0, myJooqMock.getSqlBindings().get("INSERT").size());
-    assertEquals(0, myJooqMock.getSqlBindings().get("SELECT").size());
+    assertEquals(1, myJooqMock.getSqlBindings().get("SELECT").size());
   }
 
   // test creating an event registration a line item's quantity is beyond capacity
@@ -109,16 +106,17 @@ public class CheckoutProcessorImplTest {
   public void testCreateEventRegistration2() {
     JWTData myUserData = new JWTData(0, PrivilegeLevel.GP);
 
-    LineItemRequest lineItem1 =
-        new LineItemRequest(
-            "Jellybeans", "A jar of jellybeans of assorted colors", 5, "USD", 10, 40);
+    LineItemRequest lineItem1 = new LineItemRequest(0, 50);
 
     List<LineItemRequest> lineItems = new ArrayList<>();
     lineItems.add(lineItem1);
 
-    myJooqMock.addEmptyReturn("SELECT");
-
     PostCreateEventRegistrations req = new PostCreateEventRegistrations(lineItems);
+
+    EventsRecord myEvent = myJooqMock.getContext().newRecord(Tables.EVENTS);
+    myEvent.setId(0);
+    myEvent.setTitle("Jellybeans");
+    myJooqMock.addReturn("SELECT", myEvent);
 
     try {
       myCheckoutProcessorImpl.createEventRegistration(req, myUserData);
@@ -133,9 +131,7 @@ public class CheckoutProcessorImplTest {
   public void testCreateEventRegistration3() {
     JWTData myUserData = new JWTData(0, PrivilegeLevel.GP);
 
-    LineItemRequest lineItem1 =
-        new LineItemRequest(
-            "Jellybeans", "A jar of jellybeans of assorted colors", 3, "USD", 4, 40);
+    LineItemRequest lineItem1 = new LineItemRequest(0, 1);
 
     List<LineItemRequest> lineItems = new ArrayList<>();
     lineItems.add(lineItem1);
@@ -144,23 +140,32 @@ public class CheckoutProcessorImplTest {
     Record1<Integer> myTicketsRecord =
         myJooqMock.getContext().newRecord(Tables.EVENT_REGISTRATIONS.TICKET_QUANTITY);
     myTicketsRecord.values(1);
+    myJooqMock.addReturn("SELECT", myTicketsRecord);
 
     Record1<Integer> myEventRegistration =
         myJooqMock.getContext().newRecord(Tables.EVENTS.CAPACITY);
     myEventRegistration.values(5);
-
-    myJooqMock.addReturn("SELECT", myTicketsRecord);
     myJooqMock.addReturn("SELECT", myEventRegistration);
+
+    EventsRecord myEvent = myJooqMock.getContext().newRecord(Tables.EVENTS);
+    myEvent.setId(0);
+    myEvent.setTitle("Example title");
+    myEvent.setDescription("Example description");
+    myEvent.setCapacity(10);
+    myEvent.setLocation("Boston");
+    myEvent.setStartTime(new Timestamp(0));
+    myEvent.setEndTime(new Timestamp(10000));
+    myEvent.setThumbnail("random url");
+    myJooqMock.addReturn("SELECT", myEvent);
 
     // for mocking the stored event
     EventRegistrationsRecord eventRegistrationFromLineItem =
         myJooqMock.getContext().newRecord(Tables.EVENT_REGISTRATIONS);
     eventRegistrationFromLineItem.setUserId(myUserData.getUserId());
-    eventRegistrationFromLineItem.setEventId(lineItem1.getId());
+    // eventRegistrationFromLineItem.setEventId(lineItem1.getId());
     eventRegistrationFromLineItem.setRegistrationStatus(EventRegistrationStatus.PAYMENT_INCOMPLETE);
     eventRegistrationFromLineItem.setTicketQuantity(lineItem1.getQuantity().intValue());
     eventRegistrationFromLineItem.setStripeCheckoutSessionId(null);
-
     myJooqMock.addReturn("INSERT", eventRegistrationFromLineItem);
 
     PostCreateEventRegistrations req = new PostCreateEventRegistrations(lineItems);
@@ -171,22 +176,11 @@ public class CheckoutProcessorImplTest {
 
     assertEquals(5, insertBindings.length);
     assertEquals(myUserData.getUserId(), insertBindings[0]);
-    assertEquals(lineItem1.getId(), insertBindings[1]);
+    // assertEquals(lineItem1.getId(), insertBindings[1]);
     assertEquals(lineItem1.getQuantity(), Long.valueOf((int) insertBindings[2]));
     assertEquals(2, insertBindings[3]);
     assertNull(insertBindings[4]);
   }
 
   // TODO: test for adding multiple line items, figure out how to resolve the TooManyRowsException
-
-  // test completing checkout event session fails with garbage webhook signature
-  @Test
-  public void testHandleStripeCheckoutEventComplete() {
-    try {
-      myCheckoutProcessorImpl.handleStripeCheckoutEventComplete(anyString(), anyString());
-      fail();
-    } catch (StripeExternalException e) {
-      assertEquals("Error verifying signature of incoming webhook", e.getMessage());
-    }
-  }
 }

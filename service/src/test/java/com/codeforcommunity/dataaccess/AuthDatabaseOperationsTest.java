@@ -159,15 +159,16 @@ public class AuthDatabaseOperationsTest {
             sampleAllergies);
 
     myJooqMock.addEmptyReturn("SELECT");
+    myJooqMock.addEmptyReturn("UPDATE");
 
     // TODO: fix JooqMock to be able to set ID (this gives a NPE)
     myAuthDatabaseOperations.createNewUser(req);
 
     List<Object[]> insertBindings = myJooqMock.getSqlBindings().get("INSERT");
 
-    assertEquals(sampleFN, insertBindings.get(0)[0]);
-    assertEquals(sampleLN, insertBindings.get(0)[1]);
-    assertEquals(sampleEmail, insertBindings.get(0)[2]);
+    assertEquals(sampleFN, insertBindings.get(1)[5]);
+    assertEquals(sampleLN, insertBindings.get(1)[6]);
+    assertEquals(sampleEmail, insertBindings.get(1)[3]);
   }
 
   // test that adding to blacklist works without breaking

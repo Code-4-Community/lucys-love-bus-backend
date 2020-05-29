@@ -236,16 +236,20 @@ public class ProtectedUserProcessorImplTest {
     myContact.setIsMainContact(true);
     myJooqMock.addReturn("SELECT", myContact);
     myJooqMock.addReturn("INSERT", myContact);
+    myJooqMock.addReturn("UPDATE", myContact);
 
     myProtectedUserProcessorImpl.setContactsAndChildren(myUser, req);
 
+    Object bindings = myJooqMock.getSqlBindings();
     List<Object[]> insertBindings = myJooqMock.getSqlBindings().get("INSERT");
+    List<Object[]> updateBindings = myJooqMock.getSqlBindings().get("UPDATE");
 
-    assertEquals(4, insertBindings.size());
-    assertEquals("Brandon", insertBindings.get(0)[1]);
-    assertEquals("brandon@example.com", insertBindings.get(1)[0]);
-    assertEquals("Kazuto", insertBindings.get(2)[1]);
-    assertEquals("Chad", insertBindings.get(3)[1]);
+    assertEquals(2, insertBindings.size());
+    assertEquals(2, updateBindings.size());
+    assertEquals("Brandon", updateBindings.get(0)[1]);
+    assertEquals("brandon@example.com", updateBindings.get(0)[0]);
+    assertEquals("Kazuto", insertBindings.get(0)[2]);
+    assertEquals("Chad", insertBindings.get(1)[2]);
   }
 
   // setting contacts and children responds correctly to non-null and non-empty additional contacts
@@ -265,16 +269,19 @@ public class ProtectedUserProcessorImplTest {
     myContact.setIsMainContact(true);
     myJooqMock.addReturn("SELECT", myContact);
     myJooqMock.addReturn("INSERT", myContact);
+    myJooqMock.addReturn("UPDATE", myContact);
 
     myProtectedUserProcessorImpl.setContactsAndChildren(myUser, req);
 
     List<Object[]> insertBindings = myJooqMock.getSqlBindings().get("INSERT");
+    List<Object[]> updateBindings = myJooqMock.getSqlBindings().get("UPDATE");
 
-    assertEquals(4, insertBindings.size());
-    assertEquals("Brandon", insertBindings.get(0)[1]);
-    assertEquals("brandon@example.com", insertBindings.get(1)[0]);
-    assertEquals("Conner", insertBindings.get(2)[3]);
-    assertEquals("Ada", insertBindings.get(3)[3]);
+    assertEquals(2, insertBindings.size());
+    assertEquals(2, updateBindings.size());
+    assertEquals("Brandon", updateBindings.get(0)[1]);
+    assertEquals("brandon@example.com", updateBindings.get(0)[0]);
+    assertEquals("Conner", insertBindings.get(0)[4]);
+    assertEquals("Ada", insertBindings.get(1)[4]);
   }
 
   // setting contacts and children responds correctly to non-null and non-empty children and
@@ -299,17 +306,20 @@ public class ProtectedUserProcessorImplTest {
     myContact.setIsMainContact(true);
     myJooqMock.addReturn("SELECT", myContact);
     myJooqMock.addReturn("INSERT", myContact);
+    myJooqMock.addReturn("UPDATE", myContact);
 
     myProtectedUserProcessorImpl.setContactsAndChildren(myUser, req);
 
     List<Object[]> insertBindings = myJooqMock.getSqlBindings().get("INSERT");
+    List<Object[]> updateBindings = myJooqMock.getSqlBindings().get("UPDATE");
 
-    assertEquals(6, insertBindings.size());
-    assertEquals("Brandon", insertBindings.get(0)[1]);
-    assertEquals("brandon@example.com", insertBindings.get(1)[0]);
-    assertEquals("Kazuto", insertBindings.get(2)[1]);
-    assertEquals("Chad", insertBindings.get(3)[1]);
-    assertEquals("Conner", insertBindings.get(4)[3]);
-    assertEquals("Ada", insertBindings.get(5)[3]);
+    assertEquals(2, updateBindings.size());
+    assertEquals(4, insertBindings.size());
+    assertEquals("Brandon", updateBindings.get(0)[1]);
+    assertEquals("brandon@example.com", updateBindings.get(0)[0]);
+    assertEquals("Kazuto", insertBindings.get(0)[2]);
+    assertEquals("Chad", insertBindings.get(1)[2]);
+    assertEquals("Conner", insertBindings.get(2)[4]);
+    assertEquals("Ada", insertBindings.get(3)[4]);
   }
 }
