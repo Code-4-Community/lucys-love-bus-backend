@@ -1,5 +1,10 @@
 package com.codeforcommunity;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
+
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -10,22 +15,29 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.Supplier;
 import org.jooq.DSLContext;
+import org.jooq.Field;
 import org.jooq.Record;
 import org.jooq.Result;
 import org.jooq.SQLDialect;
 import org.jooq.Table;
+import org.jooq.TableRecord;
 import org.jooq.generated.DefaultSchema;
 import org.jooq.impl.DSL;
 import org.jooq.tools.jdbc.*;
+import org.mockito.stubbing.Answer;
 
 /** A class to mock database interactions. */
 public class JooqMock implements MockDataProvider {
   // Operations mapped to the list of things to walk through
   private Map<String, Operations> recordReturns;
-  // DSL Context to use
+  // Actual DSL context
+  private DSLContext raw_context;
+  // Spy DSL Context to use
   private DSLContext context;
   // Map of class names to classes
   private Map<String, Table> classMap;
+  // the id to give a table object
+  private int id;
 
   /** A class to hold all operation handler functions and call information. */
   class Operations {
@@ -187,7 +199,24 @@ public class JooqMock implements MockDataProvider {
   public JooqMock() {
     // create DSL context
     MockConnection connection = new MockConnection(this);
-    context = DSL.using(connection, SQLDialect.POSTGRES);
+    raw_context = DSL.using(connection, SQLDialect.POSTGRES);
+    context = spy(raw_context);
+    id = 1;
+
+    // Sets the id of an object being inserted
+    doAnswer(invocation -> {
+      Object object = invocation.callRealMethod();
+      if (object instanceof Record) {
+        Record record = (Record)object;
+        Field<?> field = record.field("id");
+        if (field != null) {
+          Field<Integer> itemId = field.coerce(Integer.class);
+          record.set(itemId, id);
+        }
+      }
+      id++;
+      return object;
+    }).when(context).newRecord(any(Table.class));
 
     // create the recordReturns object and add the 'UNKNOWN' and 'DROP/CREATE' operations
     recordReturns = new HashMap<>();
@@ -371,6 +400,14 @@ public class JooqMock implements MockDataProvider {
           result.put(k, opResult);
         });
     return result;
+  }
+
+  /**
+   * Returns the ID of the next insertion.
+   * @return an integer representing the ID.
+   */
+  public int getId() {
+    return id;
   }
 
   /**
