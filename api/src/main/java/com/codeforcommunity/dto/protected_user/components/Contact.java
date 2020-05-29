@@ -6,7 +6,7 @@ import java.sql.Date;
 public class Contact {
 
   /** Used on PUT requests, ignored on POST */
-  private int id;
+  private Integer id;
 
   private String firstName;
   private String lastName;
@@ -26,7 +26,7 @@ public class Contact {
   public Contact() {}
 
   public Contact(
-      int id,
+      Integer id,
       String firstName,
       String lastName,
       Date dateOfBirth,
@@ -52,11 +52,11 @@ public class Contact {
     this.shouldSendEmails = shouldSendEmails;
   }
 
-  public int getId() {
+  public Integer getId() {
     return id;
   }
 
-  public void setId(int id) {
+  public void setId(Integer id) {
     this.id = id;
   }
 

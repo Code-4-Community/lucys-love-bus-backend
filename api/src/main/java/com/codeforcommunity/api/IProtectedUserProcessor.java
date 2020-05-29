@@ -29,4 +29,7 @@ public interface IProtectedUserProcessor {
 
   /** Returns all information associated with a user's personal account. */
   UserInformation getPersonalUserInformation(JWTData userData);
+
+  /** Updates a user's information to match the given userInformation object */
+  void updatePersonalUserInformation(UserInformation userInformation, JWTData userData);
 }

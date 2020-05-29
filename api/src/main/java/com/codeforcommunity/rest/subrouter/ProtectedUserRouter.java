@@ -33,6 +33,7 @@ public class ProtectedUserRouter implements IRouter {
     registerChangeEmail(router);
     registerSetUserContactInfo(router);
     registerGetUserContactInfo(router);
+    registerUpdateUserContactInfo(router);
 
     return router;
   }
@@ -60,6 +61,11 @@ public class ProtectedUserRouter implements IRouter {
   private void registerGetUserContactInfo(Router router) {
     Route setUserContactInfoRoute = router.get("/contact_info");
     setUserContactInfoRoute.handler(this::handleGetUserContactInfo);
+  }
+
+  private void registerUpdateUserContactInfo(Router router) {
+    Route setUserContactInfoRoute = router.put("/contact_info");
+    setUserContactInfoRoute.handler(this::handleUpdateUserContactInfo);
   }
 
   private void handleDeleteUser(RoutingContext ctx) {
@@ -105,5 +111,14 @@ public class ProtectedUserRouter implements IRouter {
     UserInformation userInformation = processor.getPersonalUserInformation(userData);
 
     end(ctx.response(), 200, JsonObject.mapFrom(userInformation).encode());
+  }
+
+  private void handleUpdateUserContactInfo(RoutingContext ctx) {
+    JWTData userData = ctx.get("jwt_data");
+    UserInformation userInformation = getJsonBodyAsClass(ctx, UserInformation.class);
+
+    processor.updatePersonalUserInformation(userInformation, userData);
+
+    end(ctx.response(), 200);
   }
 }
