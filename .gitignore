@@ -7,4 +7,5 @@
 .project
 .settings/
 .vscode/
+.factorypath
 .DS_Store
