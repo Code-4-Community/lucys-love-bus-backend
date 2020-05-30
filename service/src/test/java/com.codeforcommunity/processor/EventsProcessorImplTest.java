@@ -19,7 +19,7 @@ import com.codeforcommunity.exceptions.EventDoesNotExistException;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.Optional;
-import org.jooq.Record1;
+import org.jooq.Record2;
 import org.jooq.Record4;
 import org.jooq.Result;
 import org.jooq.generated.tables.records.EventsRecord;
@@ -142,7 +142,7 @@ public class EventsProcessorImplTest {
     }
   }
 
-  private void prepSignedUp(Boolean signedUp) {
+  private void prepSignedUp(int count) {
     EventsRecord eventResult = mock.getContext().newRecord(EVENTS);
     eventResult.setStartTime(Timestamp.from(Instant.now()));
     eventResult.setEndTime(Timestamp.from(Instant.now()));
@@ -152,9 +152,10 @@ public class EventsProcessorImplTest {
     eventResult.setTitle("TITLE");
     eventResult.setId(1);
     mock.addReturn("SELECT", eventResult);
-    if (signedUp) {
-      Record1<Integer> record = mock.getContext().newRecord(EVENTS.ID);
-      record.value1(1);
+    if (count >= 0) {
+      Record2<Integer, Integer> record =
+          mock.getContext().newRecord(EVENTS.ID, EVENT_REGISTRATIONS.TICKET_QUANTITY);
+      record.values(1, count);
       mock.addReturn("SELECT", record);
     } else {
       mock.addEmptyReturn("SELECT");
@@ -162,36 +163,36 @@ public class EventsProcessorImplTest {
   }
 
   @ParameterizedTest
-  @ValueSource(booleans = {true, false})
-  public void testGetEventsSignedUpUserSignedUp(boolean signedUp) {
-    prepSignedUp(signedUp);
+  @ValueSource(ints = {-1, 0, 1, 2, 3})
+  public void testGetEventsSignedUpUserSignedUp(int ticketCount) {
+    prepSignedUp(ticketCount);
 
     GetUserEventsRequest req =
         new GetUserEventsRequest(Optional.empty(), Optional.empty(), Optional.empty());
     JWTData data = new JWTData(1, PrivilegeLevel.GP);
     GetEventsResponse resp = processor.getEventsSignedUp(req, data);
 
-    assertEquals(signedUp, resp.getEvents().get(0).getSignedUp());
+    assertEquals(ticketCount == -1 ? 0 : ticketCount, resp.getEvents().get(0).getTicketCount());
   }
 
   @ParameterizedTest
-  @ValueSource(booleans = {true, false})
-  public void testGetEventsQualifiedUserSignedUp(boolean signedUp) {
+  @ValueSource(ints = {-1, 0, 1, 2})
+  public void testGetEventsQualifiedUserSignedUp(int count) {
     JWTData data = new JWTData(1, PrivilegeLevel.GP);
 
-    prepSignedUp(signedUp);
+    prepSignedUp(count);
 
     GetEventsResponse resp = processor.getEventsQualified(data);
-    assertEquals(signedUp, resp.getEvents().get(0).getSignedUp());
+    assertEquals(count == -1 ? 0 : count, resp.getEvents().get(0).getTicketCount());
   }
 
   @ParameterizedTest
-  @ValueSource(booleans = {true, false})
-  public void testGetSingleEventUserSignedUp(boolean signedUp) {
+  @ValueSource(ints = {-1, 0, 1, 2})
+  public void testGetSingleEventUserSignedUp(int count) {
     JWTData data = new JWTData(1, PrivilegeLevel.GP);
 
-    prepSignedUp(signedUp);
+    prepSignedUp(count);
     GetEventsResponse resp = processor.getEventsQualified(data);
-    assertEquals(signedUp, resp.getEvents().get(0).getSignedUp());
+    assertEquals(count == -1 ? 0 : count, resp.getEvents().get(0).getTicketCount());
   }
 }
