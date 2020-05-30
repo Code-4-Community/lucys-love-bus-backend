@@ -36,6 +36,6 @@ public class EventDatabaseOperations {
                     .where(EVENTS.ID.eq(eventId))
                     .fetchOneInto(Integer.class))
             .orElse(0);
-    return capacity - sumRegistrations;
+    return Math.max(capacity - sumRegistrations, 0);
   }
 }
