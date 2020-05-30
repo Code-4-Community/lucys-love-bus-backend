@@ -6,6 +6,8 @@ import com.codeforcommunity.api.IProtectedUserProcessor;
 import com.codeforcommunity.auth.JWTData;
 import com.codeforcommunity.auth.Passwords;
 import com.codeforcommunity.dataaccess.AuthDatabaseOperations;
+import com.codeforcommunity.dataaccess.UserInformationDatabaseOperations;
+import com.codeforcommunity.dto.auth.AddressData;
 import com.codeforcommunity.dto.protected_user.ChangeEmailRequest;
 import com.codeforcommunity.dto.protected_user.SetContactsAndChildrenRequest;
 import com.codeforcommunity.dto.protected_user.UserInformation;
@@ -13,40 +15,34 @@ import com.codeforcommunity.dto.protected_user.components.Child;
 import com.codeforcommunity.dto.protected_user.components.Contact;
 import com.codeforcommunity.dto.user.ChangePasswordRequest;
 import com.codeforcommunity.exceptions.EmailAlreadyInUseException;
+import com.codeforcommunity.exceptions.TableNotMatchingUserException;
 import com.codeforcommunity.exceptions.UserDoesNotExistException;
 import com.codeforcommunity.exceptions.WrongPasswordException;
 import java.util.List;
+import java.util.Map;
 import org.jooq.DSLContext;
 import org.jooq.generated.tables.pojos.Users;
 import org.jooq.generated.tables.records.ChildrenRecord;
 import org.jooq.generated.tables.records.ContactsRecord;
 import org.jooq.generated.tables.records.UsersRecord;
+import org.jooq.impl.UpdatableRecordImpl;
 
 public class ProtectedUserProcessorImpl implements IProtectedUserProcessor {
 
   private final DSLContext db;
   private final AuthDatabaseOperations authDatabaseOperations;
+  private final UserInformationDatabaseOperations userInformationDbOps;
 
   public ProtectedUserProcessorImpl(DSLContext db) {
     this.db = db;
     this.authDatabaseOperations = new AuthDatabaseOperations(db);
+    this.userInformationDbOps = new UserInformationDatabaseOperations(db);
   }
 
   @Override
   public void deleteUser(JWTData userData) {
     int userId = userData.getUserId();
-
-    db.deleteFrom(EVENT_REGISTRATIONS).where(EVENT_REGISTRATIONS.USER_ID.eq(userId)).execute();
-
-    db.deleteFrom(VERIFICATION_KEYS).where(VERIFICATION_KEYS.USER_ID.eq(userId)).execute();
-
-    db.deleteFrom(PF_REQUESTS).where(PF_REQUESTS.USER_ID.eq(userId)).execute();
-
-    db.deleteFrom(CHILDREN).where(CHILDREN.USER_ID.eq(userId)).execute();
-
-    db.deleteFrom(CONTACTS).where(CONTACTS.USER_ID.eq(userId)).execute();
-
-    db.deleteFrom(USERS).where(USERS.ID.eq(userId)).execute();
+    userInformationDbOps.deleteUserRelatedTables(userId);
   }
 
   @Override
@@ -100,16 +96,18 @@ public class ProtectedUserProcessorImpl implements IProtectedUserProcessor {
   public void setContactsAndChildren(
       JWTData userData, SetContactsAndChildrenRequest setContactsAndChildrenRequest) {
 
-    updateMainContact(userData, setContactsAndChildrenRequest.getMainContact());
+    userInformationDbOps.updateMainContact(
+        setContactsAndChildrenRequest.getMainContact(), userData);
 
     if (setContactsAndChildrenRequest.getChildren() != null
         && !setContactsAndChildrenRequest.getChildren().isEmpty()) {
-      addChildren(setContactsAndChildrenRequest.getChildren(), userData);
+      userInformationDbOps.addChildren(setContactsAndChildrenRequest.getChildren(), userData);
     }
 
     if (setContactsAndChildrenRequest.getAdditionalContacts() != null
         && !setContactsAndChildrenRequest.getAdditionalContacts().isEmpty()) {
-      addAdditionalContacts(setContactsAndChildrenRequest.getAdditionalContacts(), userData);
+      userInformationDbOps.addAdditionalContacts(
+          setContactsAndChildrenRequest.getAdditionalContacts(), userData);
     }
   }
 
@@ -125,78 +123,72 @@ public class ProtectedUserProcessorImpl implements IProtectedUserProcessor {
     return authDatabaseOperations.getUserInformation(user);
   }
 
-  private void updateMainContact(JWTData userData, Contact newContactData) {
+  @Override
+  public void updatePersonalUserInformation(UserInformation userInformation, JWTData userData) {
+    userInformationDbOps.updateMainContact(userInformation.getMainContact(), userData);
 
-    ContactsRecord mainContact =
-        db.selectFrom(CONTACTS)
-            .where(CONTACTS.USER_ID.eq(userData.getUserId()).and(CONTACTS.IS_MAIN_CONTACT))
-            .fetchOne();
-
-    if (mainContact == null) {
-      throw new UserDoesNotExistException(userData.getUserId());
-    }
-
-    mainContact.setFirstName(newContactData.getFirstName());
-    mainContact.setLastName(newContactData.getLastName());
-    mainContact.setDateOfBirth(newContactData.getDateOfBirth());
-    mainContact.setEmail(newContactData.getEmail());
-    mainContact.setPhoneNumber(newContactData.getPhoneNumber());
-    mainContact.setAllergies(newContactData.getAllergies());
-    mainContact.setDiagnosis(newContactData.getDiagnosis());
-    mainContact.setMedications(newContactData.getMedications());
-    mainContact.setNotes(newContactData.getNotes());
-    mainContact.setPronouns(newContactData.getPronouns());
-
-    mainContact.store();
-
+    AddressData locationData = userInformation.getLocation();
     UsersRecord usersRecord =
         db.selectFrom(USERS).where(USERS.ID.eq(userData.getUserId())).fetchOne();
+    userInformationDbOps.updateStoreLocationRecord(usersRecord, locationData);
 
-    usersRecord.setEmail(newContactData.getEmail());
+    List<Contact> additionalContacts = userInformation.getAdditionalContacts();
+    updateContacts(additionalContacts, userData);
 
-    usersRecord.store();
+    List<Child> children = userInformation.getChildren();
+    updateChildren(children, userData);
   }
 
-  private void addChildren(List<Child> children, JWTData userData) {
-
-    for (Child c : children) {
-
-      ChildrenRecord childrenRecord = db.newRecord(CHILDREN);
-      childrenRecord.setUserId(userData.getUserId());
-      childrenRecord.setFirstName(c.getFirstName());
-      childrenRecord.setLastName(c.getLastName());
-      childrenRecord.setDateOfBirth(c.getDateOfBirth());
-      childrenRecord.setPronouns(c.getPronouns());
-      childrenRecord.setSchoolYear(c.getSchoolYear());
-      childrenRecord.setSchool(c.getSchool());
-      childrenRecord.setAllergies(c.getAllergies());
-      childrenRecord.setDiagnosis(c.getDiagnosis());
-      childrenRecord.setMedications(c.getMedications());
-      childrenRecord.setNotes(c.getNotes());
-
-      childrenRecord.store();
-    }
+  /**
+   * Based on a list of new contact dtos update, insert, or remove the given user's contact table to
+   * reflect the dto list.
+   */
+  private void updateContacts(List<Contact> contacts, JWTData userData) {
+    Map<Integer, ContactsRecord> currentContacts =
+        db.selectFrom(CONTACTS)
+            .where(CONTACTS.USER_ID.eq(userData.getUserId()))
+            .and(CONTACTS.IS_MAIN_CONTACT.isFalse())
+            .fetchMap(CONTACTS.ID);
+    contacts.forEach(
+        contact -> {
+          if (contact.getId() == null) {
+            ContactsRecord newContact = db.newRecord(CONTACTS);
+            newContact.setUserId(userData.getUserId());
+            userInformationDbOps.updateStoreContactRecord(newContact, contact);
+          } else {
+            ContactsRecord updatableContact = currentContacts.remove(contact.getId());
+            if (updatableContact == null) {
+              throw new TableNotMatchingUserException("Contact", contact.getId());
+            }
+            userInformationDbOps.updateStoreContactRecord(updatableContact, contact);
+          }
+        });
+    currentContacts.values().forEach(UpdatableRecordImpl::delete);
   }
 
-  private void addAdditionalContacts(List<Contact> additionalContacts, JWTData userData) {
-
-    for (Contact c : additionalContacts) {
-
-      ContactsRecord contactsRecord = db.newRecord(CONTACTS);
-      contactsRecord.setUserId(userData.getUserId());
-      contactsRecord.setFirstName(c.getFirstName());
-      contactsRecord.setLastName(c.getLastName());
-      contactsRecord.setDateOfBirth(c.getDateOfBirth());
-      contactsRecord.setEmail(c.getEmail());
-      contactsRecord.setPronouns(c.getPronouns());
-      contactsRecord.setAllergies(c.getAllergies());
-      contactsRecord.setDiagnosis(c.getDiagnosis());
-      contactsRecord.setMedications(c.getMedications());
-      contactsRecord.setNotes(c.getNotes());
-      contactsRecord.setShouldSendEmails(c.getShouldSendEmails());
-      contactsRecord.setPhoneNumber(c.getPhoneNumber());
-
-      contactsRecord.store();
-    }
+  /**
+   * Based on a list of new children dtos update, insert, or remove the given user's children table
+   * to reflect the dto list.
+   */
+  private void updateChildren(List<Child> children, JWTData userData) {
+    Map<Integer, ChildrenRecord> currentChildren =
+        db.selectFrom(CHILDREN)
+            .where(CHILDREN.USER_ID.eq(userData.getUserId()))
+            .fetchMap(CHILDREN.ID);
+    children.forEach(
+        child -> {
+          if (child.getId() == null) {
+            ChildrenRecord newChild = db.newRecord(CHILDREN);
+            newChild.setUserId(userData.getUserId());
+            userInformationDbOps.updateStoreChildRecord(newChild, child);
+          } else {
+            ChildrenRecord updatableChild = currentChildren.remove(child.getId());
+            if (updatableChild == null) {
+              throw new TableNotMatchingUserException("Child", child.getId());
+            }
+            userInformationDbOps.updateStoreChildRecord(updatableChild, child);
+          }
+        });
+    currentChildren.values().forEach(UpdatableRecordImpl::delete);
   }
 }

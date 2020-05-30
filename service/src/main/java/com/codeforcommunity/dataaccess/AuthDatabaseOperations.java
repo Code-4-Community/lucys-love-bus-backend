@@ -87,10 +87,8 @@ public class AuthDatabaseOperations {
     List<Child> children =
         db.selectFrom(CHILDREN).where(CHILDREN.USER_ID.eq(user.getId())).fetchInto(Child.class);
     AddressData locationData = extractAddressDataFromUser(user);
-    PrivilegeLevel accountPrivilegeLevel = user.getPrivilegeLevel();
 
-    return new UserInformation(
-        mainContact, additionalContacts, children, locationData, accountPrivilegeLevel);
+    return new UserInformation(mainContact, additionalContacts, children, locationData);
   }
 
   /**
