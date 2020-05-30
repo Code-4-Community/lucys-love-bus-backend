@@ -16,9 +16,9 @@ public interface IEventsProcessor {
   SingleEventResponse createEvent(CreateEventRequest request, JWTData userData)
       throws BadRequestImageException, S3FailedUploadException;
 
-  SingleEventResponse getSingleEvent(int eventId);
+  SingleEventResponse getSingleEvent(int eventId, int userId);
 
-  GetEventsResponse getEvents(List<Integer> event);
+  GetEventsResponse getEvents(List<Integer> event, int userId);
 
   GetEventsResponse getEventsSignedUp(GetUserEventsRequest request, JWTData userData);
 

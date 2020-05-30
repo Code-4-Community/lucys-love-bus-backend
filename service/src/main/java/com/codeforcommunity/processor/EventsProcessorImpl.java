@@ -16,6 +16,7 @@ import com.codeforcommunity.dto.userEvents.requests.ModifyEventRequest;
 import com.codeforcommunity.dto.userEvents.responses.EventRegistrations;
 import com.codeforcommunity.dto.userEvents.responses.GetEventsResponse;
 import com.codeforcommunity.dto.userEvents.responses.SingleEventResponse;
+import com.codeforcommunity.enums.EventRegistrationStatus;
 import com.codeforcommunity.enums.PrivilegeLevel;
 import com.codeforcommunity.exceptions.AdminOnlyRouteException;
 import com.codeforcommunity.exceptions.BadRequestImageException;
@@ -63,24 +64,24 @@ public class EventsProcessorImpl implements IEventsProcessor {
 
     EventsRecord newEventRecord = eventRequestToRecord(request);
     newEventRecord.store();
-    return eventPojoToResponse(newEventRecord.into(Events.class));
+    return eventPojoToResponse(newEventRecord.into(Events.class), userData.getUserId());
   }
 
   @Override
-  public SingleEventResponse getSingleEvent(int eventId) {
+  public SingleEventResponse getSingleEvent(int eventId, int userId) {
     Events event = db.selectFrom(EVENTS).where(EVENTS.ID.eq(eventId)).fetchOneInto(Events.class);
 
     if (event == null) {
       throw new EventDoesNotExistException(eventId);
     }
 
-    return eventPojoToResponse(event);
+    return eventPojoToResponse(event, userId);
   }
 
   @Override
-  public GetEventsResponse getEvents(List<Integer> eventIds) {
+  public GetEventsResponse getEvents(List<Integer> eventIds, int userId) {
     List<Events> e = db.selectFrom(EVENTS).where(EVENTS.ID.in(eventIds)).fetchInto(Events.class);
-    return new GetEventsResponse(listOfEventsToListOfSingleEventResponse(e), e.size());
+    return new GetEventsResponse(listOfEventsToListOfSingleEventResponse(e, userId), e.size());
   }
 
   @Override
@@ -122,7 +123,8 @@ public class EventsProcessorImpl implements IEventsProcessor {
       eventPojos = s.fetchInto(Events.class);
     }
 
-    List<SingleEventResponse> res = listOfEventsToListOfSingleEventResponse(eventPojos);
+    List<SingleEventResponse> res =
+        listOfEventsToListOfSingleEventResponse(eventPojos, userData.getUserId());
     return new GetEventsResponse(res, res.size());
   }
 
@@ -144,19 +146,26 @@ public class EventsProcessorImpl implements IEventsProcessor {
     List<Events> eventsList =
         afterDateFilter.orderBy(EVENTS.START_TIME.asc()).fetchInto(Events.class);
 
-    List<SingleEventResponse> res = listOfEventsToListOfSingleEventResponse(eventsList);
+    List<SingleEventResponse> res =
+        listOfEventsToListOfSingleEventResponse(eventsList, userData.getUserId());
 
     return new GetEventsResponse(res, res.size());
   }
 
-  private Map<Integer, Boolean> getRegistrationStatus(List<Events> events) {
+  private Map<Integer, Boolean> getRegistrationStatus(List<Events> events, int userId) {
     List<Integer> ids = events.stream().map(Events::getId).collect(Collectors.toList());
     Map<Integer, Integer> regs =
         db.select(EVENTS.ID, EVENT_REGISTRATIONS.TICKET_QUANTITY)
             .from(EVENTS)
             .leftJoin(EVENT_REGISTRATIONS)
             .on(EVENTS.ID.eq(EVENT_REGISTRATIONS.EVENT_ID))
-            .where(EVENTS.ID.in(ids))
+            .where(
+                EVENTS
+                    .ID
+                    .in(ids)
+                    .and(EVENT_REGISTRATIONS.USER_ID.eq(userId))
+                    .and(
+                        EVENT_REGISTRATIONS.REGISTRATION_STATUS.eq(EventRegistrationStatus.ACTIVE)))
             .fetchMap(EVENTS.ID, EVENT_REGISTRATIONS.TICKET_QUANTITY);
 
     Map<Integer, Boolean> result = new HashMap<>();
@@ -202,7 +211,7 @@ public class EventsProcessorImpl implements IEventsProcessor {
     }
     record.store();
 
-    return getSingleEvent(eventId);
+    return getSingleEvent(eventId, userData.getUserId());
   }
 
   @Override
@@ -245,8 +254,9 @@ public class EventsProcessorImpl implements IEventsProcessor {
    * @param events jOOq data objects.
    * @return List of our Event data object.
    */
-  private List<SingleEventResponse> listOfEventsToListOfSingleEventResponse(List<Events> events) {
-    Map<Integer, Boolean> signedUp = getRegistrationStatus(events);
+  private List<SingleEventResponse> listOfEventsToListOfSingleEventResponse(
+      List<Events> events, int userId) {
+    Map<Integer, Boolean> signedUp = getRegistrationStatus(events, userId);
     return events.stream()
         .map(
             event -> {
@@ -269,8 +279,8 @@ public class EventsProcessorImpl implements IEventsProcessor {
   }
 
   /** Takes a database representation of a single event and returns the dto representation. */
-  private SingleEventResponse eventPojoToResponse(Events event) {
-    boolean signedUp = getRegistrationStatus(Arrays.asList(event)).get(event.getId());
+  private SingleEventResponse eventPojoToResponse(Events event, int userId) {
+    boolean signedUp = getRegistrationStatus(Arrays.asList(event), userId).get(event.getId());
 
     EventDetails details =
         new EventDetails(

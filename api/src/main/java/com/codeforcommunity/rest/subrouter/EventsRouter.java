@@ -91,8 +91,9 @@ public class EventsRouter implements IRouter {
   private void handleGetEvents(RoutingContext ctx) {
 
     List<Integer> intIds = getMultipleQueryParams(ctx, "ids", str -> Integer.parseInt(str));
+    JWTData userData = ctx.get("jwt_data");
 
-    GetEventsResponse response = processor.getEvents(intIds);
+    GetEventsResponse response = processor.getEvents(intIds, userData.getUserId());
 
     end(ctx.response(), 200, JsonObject.mapFrom(response).encode());
   }
@@ -129,8 +130,9 @@ public class EventsRouter implements IRouter {
 
   private void handleGetSingleEventRoute(RoutingContext ctx) {
     int eventId = getRequestParameterAsInt(ctx.request(), "event_id");
+    JWTData userData = ctx.get("jwt_data");
 
-    SingleEventResponse response = processor.getSingleEvent(eventId);
+    SingleEventResponse response = processor.getSingleEvent(eventId, userData.getUserId());
 
     end(ctx.response(), 200, JsonObject.mapFrom(response).encode());
   }
