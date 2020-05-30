@@ -15,7 +15,6 @@ import com.codeforcommunity.enums.PrivilegeLevel;
 import com.codeforcommunity.exceptions.EventDoesNotExistException;
 import com.codeforcommunity.exceptions.InsufficientEventCapacityException;
 import com.codeforcommunity.exceptions.StripeExternalException;
-import com.codeforcommunity.exceptions.WrongPrivilegeException;
 import com.codeforcommunity.propertiesLoader.PropertiesLoader;
 import com.stripe.Stripe;
 import com.stripe.exception.SignatureVerificationException;
@@ -80,8 +79,8 @@ public class CheckoutProcessorImpl implements ICheckoutProcessor {
   }
 
   @Override
-  public Optional<String> createEventRegistration(PostCreateEventRegistrations request,
-      JWTData user) throws StripeExternalException {
+  public Optional<String> createEventRegistration(
+      PostCreateEventRegistrations request, JWTData user) throws StripeExternalException {
     if (user.getPrivilegeLevel() == PrivilegeLevel.GP) {
       return Optional.of(createCheckoutSessionAndEventRegistration(request, user));
     } else {
