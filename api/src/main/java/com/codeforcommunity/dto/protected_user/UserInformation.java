@@ -1,11 +1,12 @@
 package com.codeforcommunity.dto.protected_user;
 
+import com.codeforcommunity.api.ApiDto;
 import com.codeforcommunity.dto.auth.AddressData;
 import com.codeforcommunity.dto.protected_user.components.Child;
 import com.codeforcommunity.dto.protected_user.components.Contact;
 import java.util.List;
 
-public class UserInformation {
+public class UserInformation implements ApiDto {
 
   private Contact mainContact;
   private List<Contact> additionalContacts;
@@ -56,4 +57,7 @@ public class UserInformation {
   public void setLocation(AddressData location) {
     this.location = location;
   }
+
+  @Override
+  public void validate() {}
 }

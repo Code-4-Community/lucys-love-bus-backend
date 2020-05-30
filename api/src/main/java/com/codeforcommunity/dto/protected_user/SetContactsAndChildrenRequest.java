@@ -1,10 +1,11 @@
 package com.codeforcommunity.dto.protected_user;
 
+import com.codeforcommunity.api.ApiDto;
 import com.codeforcommunity.dto.protected_user.components.Child;
 import com.codeforcommunity.dto.protected_user.components.Contact;
 import java.util.List;
 
-public class SetContactsAndChildrenRequest {
+public class SetContactsAndChildrenRequest implements ApiDto {
 
   private Contact mainContact;
   private List<Contact> additionalContacts;
@@ -42,4 +43,7 @@ public class SetContactsAndChildrenRequest {
   public void setChildren(List<Child> children) {
     this.children = children;
   }
+
+  @Override
+  public void validate() {}
 }

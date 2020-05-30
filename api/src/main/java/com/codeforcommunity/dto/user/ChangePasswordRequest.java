@@ -1,6 +1,9 @@
 package com.codeforcommunity.dto.user;
 
-public class ChangePasswordRequest {
+import com.codeforcommunity.api.ApiDto;
+import com.codeforcommunity.exceptions.MalformedParameterException;
+
+public class ChangePasswordRequest implements ApiDto {
 
   private String currentPassword;
   private String newPassword;
@@ -26,5 +29,15 @@ public class ChangePasswordRequest {
 
   public void setNewPassword(String newPassword) {
     this.newPassword = newPassword;
+  }
+
+  @Override
+  public void validate() {
+    if (currentPassword == null) {
+      throw new MalformedParameterException("Current password");
+    }
+    if (newPassword == null) {
+      throw new MalformedParameterException("New password");
+    }
   }
 }

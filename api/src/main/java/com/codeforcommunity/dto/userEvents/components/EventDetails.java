@@ -1,8 +1,9 @@
 package com.codeforcommunity.dto.userEvents.components;
 
+import com.codeforcommunity.api.ApiDto;
 import java.sql.Timestamp;
 
-public class EventDetails {
+public class EventDetails implements ApiDto {
   private String description;
   private String location;
   private Timestamp start;
@@ -48,4 +49,7 @@ public class EventDetails {
   public void setEnd(Timestamp end) {
     this.end = end;
   }
+
+  @Override
+  public void validate() {}
 }

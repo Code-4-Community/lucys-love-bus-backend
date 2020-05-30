@@ -4,7 +4,7 @@ import com.codeforcommunity.enums.PrivilegeLevel;
 import com.codeforcommunity.rest.subrouter.FailureHandler;
 import io.vertx.ext.web.RoutingContext;
 
-public class WrongPrivilegeException extends RuntimeException implements HandledException {
+public class WrongPrivilegeException extends HandledException {
 
   private PrivilegeLevel requiredPrivilegeLevel;
 

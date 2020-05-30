@@ -1,8 +1,9 @@
 package com.codeforcommunity.dto.checkout;
 
+import com.codeforcommunity.api.ApiDto;
 import java.util.List;
 
-public class PostCreateEventRegistrations {
+public class PostCreateEventRegistrations implements ApiDto {
 
   private List<LineItemRequest> lineItemRequests;
 
@@ -15,4 +16,7 @@ public class PostCreateEventRegistrations {
   public List<LineItemRequest> getLineItemRequests() {
     return lineItemRequests;
   }
+
+  @Override
+  public void validate() {}
 }

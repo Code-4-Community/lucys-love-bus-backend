@@ -1,6 +1,10 @@
 package com.codeforcommunity.dto.auth;
 
-public class ResetPasswordRequest {
+import com.codeforcommunity.api.ApiDto;
+import com.codeforcommunity.exceptions.HandledException;
+import com.codeforcommunity.exceptions.MalformedParameterException;
+
+public class ResetPasswordRequest implements ApiDto {
 
   private String secretKey;
   private String newPassword;
@@ -26,5 +30,15 @@ public class ResetPasswordRequest {
 
   public void setNewPassword(String newPassword) {
     this.newPassword = newPassword;
+  }
+
+  @Override
+  public void validate() throws HandledException {
+    if (secretKey == null) {
+      throw new MalformedParameterException("Secret key");
+    }
+    if (newPassword == null) {
+      throw new MalformedParameterException("New password");
+    }
   }
 }

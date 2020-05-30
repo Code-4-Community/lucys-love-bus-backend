@@ -1,6 +1,9 @@
 package com.codeforcommunity.dto.auth;
 
-public class ForgotPasswordRequest {
+import com.codeforcommunity.api.ApiDto;
+import com.codeforcommunity.exceptions.MalformedParameterException;
+
+public class ForgotPasswordRequest implements ApiDto {
 
   private String email;
 
@@ -16,5 +19,12 @@ public class ForgotPasswordRequest {
 
   public void setEmail(String email) {
     this.email = email;
+  }
+
+  @Override
+  public void validate() {
+    if (email == null) {
+      throw new MalformedParameterException("Email");
+    }
   }
 }

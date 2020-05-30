@@ -1,6 +1,10 @@
 package com.codeforcommunity.dto.auth;
 
-public class LoginRequest {
+import com.codeforcommunity.api.ApiDto;
+import com.codeforcommunity.exceptions.HandledException;
+import com.codeforcommunity.exceptions.MalformedParameterException;
+
+public class LoginRequest implements ApiDto {
 
   private String email;
   private String password;
@@ -19,5 +23,15 @@ public class LoginRequest {
 
   public void setPassword(String password) {
     this.password = password;
+  }
+
+  @Override
+  public void validate() throws HandledException {
+    if (email == null) {
+      throw new MalformedParameterException("Email");
+    }
+    if (password == null) {
+      throw new MalformedParameterException("Password");
+    }
   }
 }

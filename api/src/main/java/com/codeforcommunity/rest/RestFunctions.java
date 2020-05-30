@@ -1,5 +1,6 @@
 package com.codeforcommunity.rest;
 
+import com.codeforcommunity.api.ApiDto;
 import com.codeforcommunity.exceptions.MalformedParameterException;
 import com.codeforcommunity.exceptions.MissingHeaderException;
 import com.codeforcommunity.exceptions.MissingParameterException;
@@ -22,11 +23,13 @@ public interface RestFunctions {
    * @throws RequestBodyMappingException if the given request does not have a body that can be
    *     parsed.
    */
-  static <T> T getJsonBodyAsClass(RoutingContext ctx, Class<T> clazz) {
+  static <T extends ApiDto> T getJsonBodyAsClass(RoutingContext ctx, Class<T> clazz) {
     Optional<JsonObject> body = Optional.ofNullable(ctx.getBodyAsJson());
     if (body.isPresent()) {
       try {
-        return body.get().mapTo(clazz);
+        T value = body.get().mapTo(clazz);
+        value.validate();
+        return value;
       } catch (IllegalArgumentException e) {
         e.printStackTrace();
         throw new RequestBodyMappingException();

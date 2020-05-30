@@ -1,6 +1,9 @@
 package com.codeforcommunity.dto.auth;
 
-public class NewUserRequest {
+import com.codeforcommunity.api.ApiDto;
+import com.codeforcommunity.exceptions.MalformedParameterException;
+
+public class NewUserRequest implements ApiDto {
 
   private String email;
   private String password;
@@ -29,14 +32,27 @@ public class NewUserRequest {
 
   private NewUserRequest() {}
 
-  public boolean validate() {
-    return email != null
-        && password != null
-        && firstName != null
-        && lastName != null
-        && phoneNumber != null
-        && location != null
-        && location.validate();
+  @Override
+  public void validate() {
+    if (email == null) {
+      throw new MalformedParameterException("Email");
+    }
+    if (password == null) {
+      throw new MalformedParameterException("Password");
+    }
+    if (firstName == null) {
+      throw new MalformedParameterException("First name");
+    }
+    if (lastName == null) {
+      throw new MalformedParameterException("Last name");
+    }
+    if (phoneNumber == null) {
+      throw new MalformedParameterException("Phone number");
+    }
+    if (location == null) {
+      throw new MalformedParameterException("Location");
+    }
+    location.validate();
   }
 
   public String getEmail() {

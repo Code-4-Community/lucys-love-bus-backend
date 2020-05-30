@@ -1,10 +1,12 @@
 package com.codeforcommunity.dto.userEvents.requests;
 
+import com.codeforcommunity.api.ApiDto;
 import com.codeforcommunity.dto.userEvents.components.EventDetails;
+import com.codeforcommunity.exceptions.MalformedParameterException;
 
-public class CreateEventRequest {
+public class CreateEventRequest implements ApiDto {
   private String title;
-  private int spotsAvailable;
+  private Integer spotsAvailable;
   private String thumbnail;
   private EventDetails details;
 
@@ -36,5 +38,20 @@ public class CreateEventRequest {
 
   public EventDetails getDetails() {
     return details;
+  }
+
+  @Override
+  public void validate() {
+    if (title == null) {
+      throw new MalformedParameterException("Title");
+    }
+    if (spotsAvailable == null) {
+      throw new MalformedParameterException("Spots available");
+    }
+    // TODO: can the thumbnail be null?
+    if (details == null) {
+      throw new MalformedParameterException("Details");
+    }
+    details.validate();
   }
 }

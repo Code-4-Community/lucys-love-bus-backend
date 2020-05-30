@@ -1,6 +1,8 @@
 package com.codeforcommunity.dto.auth;
 
-public class AddressData {
+import com.codeforcommunity.api.ApiDto;
+
+public class AddressData implements ApiDto {
 
   private String address;
   private String city;
@@ -16,9 +18,8 @@ public class AddressData {
 
   private AddressData() {}
 
-  public boolean validate() {
-    return address != null && city != null && state != null && zipCode != null;
-  }
+  @Override
+  public void validate() {}
 
   public String getAddress() {
     return address;

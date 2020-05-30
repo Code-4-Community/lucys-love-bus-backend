@@ -32,8 +32,6 @@ public class AnnouncementsProcessorImpl implements IAnnouncementsProcessor {
 
   @Override
   public GetAnnouncementsResponse getAnnouncements(GetAnnouncementsRequest request) {
-    request.validate();
-
     int count = request.getCount();
     Timestamp start = request.getStartDate();
     Timestamp end = request.getEndDate();
@@ -102,7 +100,6 @@ public class AnnouncementsProcessorImpl implements IAnnouncementsProcessor {
   @Override
   public GetAnnouncementsResponse getEventSpecificAnnouncements(
       GetEventSpecificAnnouncementsRequest request) {
-    request.validate();
     int eventId = request.getEventId();
     validateEventId(eventId);
 

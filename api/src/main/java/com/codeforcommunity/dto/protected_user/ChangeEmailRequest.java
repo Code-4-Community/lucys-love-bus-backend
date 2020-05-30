@@ -1,6 +1,9 @@
 package com.codeforcommunity.dto.protected_user;
 
-public class ChangeEmailRequest {
+import com.codeforcommunity.api.ApiDto;
+import com.codeforcommunity.exceptions.MalformedParameterException;
+
+public class ChangeEmailRequest implements ApiDto {
 
   private String newEmail;
   private String password;
@@ -26,5 +29,15 @@ public class ChangeEmailRequest {
 
   public void setPassword(String password) {
     this.password = password;
+  }
+
+  @Override
+  public void validate() {
+    if (newEmail == null) {
+      throw new MalformedParameterException("New email");
+    }
+    if (password == null) {
+      throw new MalformedParameterException("Password");
+    }
   }
 }

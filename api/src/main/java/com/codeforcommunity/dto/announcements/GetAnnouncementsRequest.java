@@ -1,10 +1,11 @@
 package com.codeforcommunity.dto.announcements;
 
+import com.codeforcommunity.api.ApiDto;
 import com.codeforcommunity.exceptions.MalformedParameterException;
 import java.sql.Timestamp;
 import java.util.Date;
 
-public class GetAnnouncementsRequest {
+public class GetAnnouncementsRequest implements ApiDto {
 
   private Timestamp startDate; // optional
   private Timestamp endDate; // optional
@@ -35,6 +36,7 @@ public class GetAnnouncementsRequest {
    *
    * @throws MalformedParameterException if any of the request parameters are invalid
    */
+  @Override
   public void validate() {
     if (count < 1) {
       throw new MalformedParameterException("count");

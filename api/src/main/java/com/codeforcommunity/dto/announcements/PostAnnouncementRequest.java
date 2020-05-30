@@ -1,6 +1,9 @@
 package com.codeforcommunity.dto.announcements;
 
-public class PostAnnouncementRequest {
+import com.codeforcommunity.api.ApiDto;
+import com.codeforcommunity.exceptions.MalformedParameterException;
+
+public class PostAnnouncementRequest implements ApiDto {
 
   private String title;
   private String description;
@@ -18,5 +21,15 @@ public class PostAnnouncementRequest {
 
   public String getDescription() {
     return description;
+  }
+
+  @Override
+  public void validate() {
+    if (title == null) {
+      throw new MalformedParameterException("Title");
+    }
+    if (description == null) {
+      throw new MalformedParameterException("Description");
+    }
   }
 }

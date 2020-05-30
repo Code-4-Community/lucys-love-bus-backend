@@ -1,8 +1,9 @@
 package com.codeforcommunity.dto.userEvents.requests;
 
+import com.codeforcommunity.api.ApiDto;
 import com.codeforcommunity.dto.userEvents.components.EventDetails;
 
-public class ModifyEventRequest {
+public class ModifyEventRequest implements ApiDto {
   private String title;
   private Integer spotsAvailable;
   private String thumbnail;
@@ -33,4 +34,7 @@ public class ModifyEventRequest {
   public EventDetails getDetails() {
     return details;
   }
+
+  @Override
+  public void validate() {}
 }
