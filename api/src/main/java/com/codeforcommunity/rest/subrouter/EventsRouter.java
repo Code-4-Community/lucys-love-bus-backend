@@ -22,7 +22,6 @@ import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import java.sql.Timestamp;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 public class EventsRouter implements IRouter {
@@ -171,7 +170,7 @@ public class EventsRouter implements IRouter {
     int eventId = getRequestParameterAsInt(ctx.request(), "event_id");
     JWTData userData = ctx.get("jwt_data");
 
-    Map<String, String> rsvp = processor.getEventRSVPs(eventId, userData);
-    end(ctx.response(), 200, JsonObject.mapFrom(rsvp).encode());
+    String rsvp = processor.getEventRSVPs(eventId, userData);
+    end(ctx.response(), 200, rsvp, "text/csv");
   }
 }

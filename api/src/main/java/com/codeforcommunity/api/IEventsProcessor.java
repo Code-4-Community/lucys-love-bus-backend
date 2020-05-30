@@ -10,7 +10,6 @@ import com.codeforcommunity.dto.userEvents.responses.SingleEventResponse;
 import com.codeforcommunity.exceptions.BadRequestImageException;
 import com.codeforcommunity.exceptions.S3FailedUploadException;
 import java.util.List;
-import java.util.Map;
 
 public interface IEventsProcessor {
 
@@ -31,5 +30,5 @@ public interface IEventsProcessor {
 
   EventRegistrations getEventRegisteredUsers(int eventId, JWTData userData);
 
-  Map<String, String> getEventRSVPs(int eventId, JWTData userData);
+  String getEventRSVPs(int eventId, JWTData userData);
 }

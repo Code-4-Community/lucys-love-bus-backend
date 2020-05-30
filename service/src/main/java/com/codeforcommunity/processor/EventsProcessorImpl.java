@@ -243,8 +243,15 @@ public class EventsProcessorImpl implements IEventsProcessor {
     return new EventRegistrations(regs);
   }
 
+  /**
+   * Returns a String that contains the CSV data for the given event's RSVPs.
+   *
+   * @param eventId The event to get the RSVPs of.
+   * @param userData The user.
+   * @return The CSV of RSVPs.
+   */
   @Override
-  public Map<String, String> getEventRSVPs(int eventId, JWTData userData) {
+  public String getEventRSVPs(int eventId, JWTData userData) {
     if (userData.getPrivilegeLevel() != PrivilegeLevel.ADMIN) {
       throw new AdminOnlyRouteException();
     }
@@ -321,9 +328,7 @@ public class EventsProcessorImpl implements IEventsProcessor {
       builder.append(rsvp.toRowCSV());
     }
 
-    Map<String, String> content = new HashMap<String, String>();
-    content.put("text", builder.toString());
-    return content;
+    return builder.toString();
   }
 
   /**
