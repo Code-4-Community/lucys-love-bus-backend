@@ -27,6 +27,7 @@ import com.stripe.param.checkout.SessionCreateParams;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.stream.Collectors;
 import org.jooq.DSLContext;
@@ -37,8 +38,7 @@ public class CheckoutProcessorImpl implements ICheckoutProcessor {
 
   public static final int TICKET_PRICE_CENTS = 500;
   public static final String CANCEL_URL = "https://llb.c4cneu.com/checkout";
-  public static final String SUCCESS_URL =
-      "https://llb.c4cneu.com/?session_id={CHECKOUT_SESSION_ID}";
+  public static final String SUCCESS_URL = "https://llb.c4cneu.com/?session_id=%s";
 
   private final DSLContext db;
   private final EventDatabaseOperations eventDatabaseOperations;
@@ -54,8 +54,7 @@ public class CheckoutProcessorImpl implements ICheckoutProcessor {
     this.stripeWebhookSigningSecret = stripeProperties.getProperty("stripe_webhook_signing_secret");
   }
 
-  @Override
-  public String createCheckoutSessionAndEventRegistration(
+  private String createCheckoutSessionAndEventRegistration(
       PostCreateEventRegistrations request, JWTData user) throws StripeExternalException {
     List<LineItem> lineItems = convertLineItems(request.getLineItemRequests());
     CreateCheckoutSessionData checkoutRequest =
@@ -63,20 +62,16 @@ public class CheckoutProcessorImpl implements ICheckoutProcessor {
 
     Stripe.apiKey = this.stripeAPISecretKey;
 
-    if (user.getPrivilegeLevel() != PrivilegeLevel.GP) {
-      throw new WrongPrivilegeException(PrivilegeLevel.GP);
-    }
-
     SessionCreateParams params =
         new SessionCreateParams.Builder()
             .addAllLineItem(checkoutRequest.getStripeLineItems())
             .addPaymentMethodType(SessionCreateParams.PaymentMethodType.CARD)
-            .setSuccessUrl(checkoutRequest.getSuccessUrl())
             .setCancelUrl(checkoutRequest.getCancelUrl())
             .build();
     try {
       Session session = Session.create(params);
       String checkoutSessionId = session.getId();
+      session.setSuccessUrl(String.format(checkoutRequest.getSuccessUrl(), checkoutSessionId));
       this.createEventRegistrationUtil(checkoutRequest.getLineItems(), user, checkoutSessionId);
       return session.getId();
     } catch (StripeException e) {
@@ -85,8 +80,14 @@ public class CheckoutProcessorImpl implements ICheckoutProcessor {
   }
 
   @Override
-  public void createEventRegistration(PostCreateEventRegistrations request, JWTData user) {
-    this.createEventRegistrationUtil(convertLineItems(request.getLineItemRequests()), user, null);
+  public Optional<String> createEventRegistration(PostCreateEventRegistrations request,
+      JWTData user) throws StripeExternalException {
+    if (user.getPrivilegeLevel() == PrivilegeLevel.GP) {
+      return Optional.of(createCheckoutSessionAndEventRegistration(request, user));
+    } else {
+      this.createEventRegistrationUtil(convertLineItems(request.getLineItemRequests()), user, null);
+      return Optional.empty();
+    }
   }
 
   @Override
