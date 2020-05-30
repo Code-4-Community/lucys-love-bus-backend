@@ -27,9 +27,8 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.Period;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.jooq.DSLContext;
 import org.jooq.Record;
@@ -68,20 +67,21 @@ public class EventsProcessorImpl implements IEventsProcessor {
   }
 
   @Override
-  public SingleEventResponse getSingleEvent(int eventId, int userId) {
+  public SingleEventResponse getSingleEvent(int eventId, JWTData userData) {
     Events event = db.selectFrom(EVENTS).where(EVENTS.ID.eq(eventId)).fetchOneInto(Events.class);
 
     if (event == null) {
       throw new EventDoesNotExistException(eventId);
     }
 
-    return eventPojoToResponse(event, userId);
+    return eventPojoToResponse(event, userData.getUserId());
   }
 
   @Override
-  public GetEventsResponse getEvents(List<Integer> eventIds, int userId) {
+  public GetEventsResponse getEvents(List<Integer> eventIds, JWTData userData) {
     List<Events> e = db.selectFrom(EVENTS).where(EVENTS.ID.in(eventIds)).fetchInto(Events.class);
-    return new GetEventsResponse(listOfEventsToListOfSingleEventResponse(e, userId), e.size());
+    return new GetEventsResponse(
+        listOfEventsToListOfSingleEventResponse(e, userData.getUserId()), e.size());
   }
 
   @Override
@@ -152,30 +152,20 @@ public class EventsProcessorImpl implements IEventsProcessor {
     return new GetEventsResponse(res, res.size());
   }
 
-  private Map<Integer, Boolean> getRegistrationStatus(List<Events> events, int userId) {
+  private Set<Integer> getRegistrationStatus(List<Events> events, int userId) {
     List<Integer> ids = events.stream().map(Events::getId).collect(Collectors.toList());
-    Map<Integer, Integer> regs =
-        db.select(EVENTS.ID, EVENT_REGISTRATIONS.TICKET_QUANTITY)
-            .from(EVENTS)
-            .leftJoin(EVENT_REGISTRATIONS)
-            .on(EVENTS.ID.eq(EVENT_REGISTRATIONS.EVENT_ID))
-            .where(
-                EVENTS
-                    .ID
-                    .in(ids)
-                    .and(EVENT_REGISTRATIONS.USER_ID.eq(userId))
-                    .and(
-                        EVENT_REGISTRATIONS.REGISTRATION_STATUS.eq(EventRegistrationStatus.ACTIVE)))
-            .fetchMap(EVENTS.ID, EVENT_REGISTRATIONS.TICKET_QUANTITY);
-
-    Map<Integer, Boolean> result = new HashMap<>();
-    regs.forEach(
-        (key, value) -> {
-          boolean updatedValue = value != null && value > 0;
-          result.put(key, updatedValue);
-        });
-
-    return result;
+    return db.select(EVENTS.ID)
+        .from(EVENTS)
+        .join(EVENT_REGISTRATIONS)
+        .on(EVENTS.ID.eq(EVENT_REGISTRATIONS.EVENT_ID))
+        .where(
+            EVENTS
+                .ID
+                .in(ids)
+                .and(EVENT_REGISTRATIONS.USER_ID.eq(userId))
+                .and(EVENT_REGISTRATIONS.REGISTRATION_STATUS.eq(EventRegistrationStatus.ACTIVE))
+                .and(EVENT_REGISTRATIONS.TICKET_QUANTITY.notEqual(0)))
+        .fetchSet(EVENTS.ID);
   }
 
   @Override
@@ -211,7 +201,7 @@ public class EventsProcessorImpl implements IEventsProcessor {
     }
     record.store();
 
-    return getSingleEvent(eventId, userData.getUserId());
+    return getSingleEvent(eventId, userData);
   }
 
   @Override
@@ -256,7 +246,7 @@ public class EventsProcessorImpl implements IEventsProcessor {
    */
   private List<SingleEventResponse> listOfEventsToListOfSingleEventResponse(
       List<Events> events, int userId) {
-    Map<Integer, Boolean> signedUp = getRegistrationStatus(events, userId);
+    Set<Integer> signedUp = getRegistrationStatus(events, userId);
     return events.stream()
         .map(
             event -> {
@@ -273,14 +263,14 @@ public class EventsProcessorImpl implements IEventsProcessor {
                   event.getCapacity(),
                   event.getThumbnail(),
                   details,
-                  signedUp.getOrDefault(event.getId(), false));
+                  signedUp.contains(event.getId()));
             })
         .collect(Collectors.toList());
   }
 
   /** Takes a database representation of a single event and returns the dto representation. */
   private SingleEventResponse eventPojoToResponse(Events event, int userId) {
-    boolean signedUp = getRegistrationStatus(Arrays.asList(event), userId).get(event.getId());
+    boolean signedUp = getRegistrationStatus(Arrays.asList(event), userId).contains(event.getId());
 
     EventDetails details =
         new EventDetails(

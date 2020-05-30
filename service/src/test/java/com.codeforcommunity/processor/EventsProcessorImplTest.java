@@ -19,7 +19,7 @@ import com.codeforcommunity.exceptions.EventDoesNotExistException;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.Optional;
-import org.jooq.Record2;
+import org.jooq.Record1;
 import org.jooq.Record4;
 import org.jooq.Result;
 import org.jooq.generated.tables.records.EventsRecord;
@@ -152,13 +152,13 @@ public class EventsProcessorImplTest {
     eventResult.setTitle("TITLE");
     eventResult.setId(1);
     mock.addReturn("SELECT", eventResult);
-    Result<Record2<Integer, Integer>> res =
-        mock.getContext().newResult(EVENTS.ID, EVENT_REGISTRATIONS.TICKET_QUANTITY);
-    Record2<Integer, Integer> record =
-        mock.getContext().newRecord(EVENTS.ID, EVENT_REGISTRATIONS.TICKET_QUANTITY);
-    record.value1(1);
-    record.value2(signedUp ? 1 : 0);
-    mock.addReturn("SELECT", record);
+    if (signedUp) {
+      Record1<Integer> record = mock.getContext().newRecord(EVENTS.ID);
+      record.value1(1);
+      mock.addReturn("SELECT", record);
+    } else {
+      mock.addEmptyReturn("SELECT");
+    }
   }
 
   @ParameterizedTest

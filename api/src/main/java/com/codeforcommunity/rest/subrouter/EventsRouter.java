@@ -93,7 +93,7 @@ public class EventsRouter implements IRouter {
     List<Integer> intIds = getMultipleQueryParams(ctx, "ids", str -> Integer.parseInt(str));
     JWTData userData = ctx.get("jwt_data");
 
-    GetEventsResponse response = processor.getEvents(intIds, userData.getUserId());
+    GetEventsResponse response = processor.getEvents(intIds, userData);
 
     end(ctx.response(), 200, JsonObject.mapFrom(response).encode());
   }
@@ -132,7 +132,7 @@ public class EventsRouter implements IRouter {
     int eventId = getRequestParameterAsInt(ctx.request(), "event_id");
     JWTData userData = ctx.get("jwt_data");
 
-    SingleEventResponse response = processor.getSingleEvent(eventId, userData.getUserId());
+    SingleEventResponse response = processor.getSingleEvent(eventId, userData);
 
     end(ctx.response(), 200, JsonObject.mapFrom(response).encode());
   }
