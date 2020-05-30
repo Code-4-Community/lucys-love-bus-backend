@@ -1,5 +1,6 @@
 package com.codeforcommunity.processor;
 
+import static org.jooq.generated.Tables.CHILDREN;
 import static org.jooq.generated.Tables.CONTACTS;
 import static org.jooq.generated.Tables.EVENTS;
 import static org.jooq.generated.Tables.EVENT_REGISTRATIONS;
@@ -9,6 +10,7 @@ import com.codeforcommunity.api.IEventsProcessor;
 import com.codeforcommunity.auth.JWTData;
 import com.codeforcommunity.dataaccess.EventDatabaseOperations;
 import com.codeforcommunity.dto.userEvents.components.EventDetails;
+import com.codeforcommunity.dto.userEvents.components.RSVP;
 import com.codeforcommunity.dto.userEvents.components.Registration;
 import com.codeforcommunity.dto.userEvents.requests.CreateEventRequest;
 import com.codeforcommunity.dto.userEvents.requests.GetUserEventsRequest;
@@ -16,6 +18,7 @@ import com.codeforcommunity.dto.userEvents.requests.ModifyEventRequest;
 import com.codeforcommunity.dto.userEvents.responses.EventRegistrations;
 import com.codeforcommunity.dto.userEvents.responses.GetEventsResponse;
 import com.codeforcommunity.dto.userEvents.responses.SingleEventResponse;
+import com.codeforcommunity.enums.EventRegistrationStatus;
 import com.codeforcommunity.enums.PrivilegeLevel;
 import com.codeforcommunity.exceptions.AdminOnlyRouteException;
 import com.codeforcommunity.exceptions.BadRequestImageException;
@@ -26,6 +29,7 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.Period;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -237,6 +241,89 @@ public class EventsProcessorImpl implements IEventsProcessor {
             .fetchInto(Registration.class);
 
     return new EventRegistrations(regs);
+  }
+
+  @Override
+  public Map<String, String> getEventRSVPs(int eventId, JWTData userData) {
+    if (userData.getPrivilegeLevel() != PrivilegeLevel.ADMIN) {
+      throw new AdminOnlyRouteException();
+    }
+
+    if (!db.fetchExists(EVENTS.where(EVENTS.ID.eq(eventId)))) {
+      throw new EventDoesNotExistException(eventId);
+    }
+
+    List<RSVP> rsvpUsers =
+        db.select(
+                USERS.ID,
+                EVENT_REGISTRATIONS.TICKET_QUANTITY,
+                USERS.EMAIL,
+                USERS.PRIVILEGE_LEVEL,
+                USERS.ADDRESS,
+                USERS.CITY,
+                USERS.STATE,
+                USERS.ZIPCODE)
+            .from(EVENT_REGISTRATIONS)
+            .join(USERS)
+            .on(EVENT_REGISTRATIONS.USER_ID.eq(USERS.ID))
+            .where(EVENT_REGISTRATIONS.EVENT_ID.eq(eventId))
+            .and(EVENT_REGISTRATIONS.REGISTRATION_STATUS.eq(EventRegistrationStatus.ACTIVE))
+            .fetchInto(RSVP.class);
+
+    List<RSVP> rsvpContacts =
+        db.select(
+                EVENT_REGISTRATIONS.USER_ID,
+                CONTACTS.EMAIL,
+                CONTACTS.FIRST_NAME,
+                CONTACTS.LAST_NAME,
+                CONTACTS.IS_MAIN_CONTACT,
+                CONTACTS.DATE_OF_BIRTH,
+                CONTACTS.PHONE_NUMBER,
+                CONTACTS.PRONOUNS,
+                CONTACTS.ALLERGIES,
+                CONTACTS.DIAGNOSIS,
+                CONTACTS.MEDICATIONS,
+                CONTACTS.NOTES)
+            .from(EVENT_REGISTRATIONS)
+            .join(CONTACTS)
+            .on(EVENT_REGISTRATIONS.USER_ID.eq(CONTACTS.USER_ID))
+            .where(EVENT_REGISTRATIONS.EVENT_ID.eq(eventId))
+            .and(EVENT_REGISTRATIONS.REGISTRATION_STATUS.eq(EventRegistrationStatus.ACTIVE))
+            .fetchInto(RSVP.class);
+
+    List<RSVP> rsvpChildren =
+        db.select(
+                EVENT_REGISTRATIONS.USER_ID,
+                CHILDREN.FIRST_NAME,
+                CHILDREN.LAST_NAME,
+                CHILDREN.DATE_OF_BIRTH,
+                CHILDREN.PRONOUNS,
+                CHILDREN.ALLERGIES,
+                CHILDREN.DIAGNOSIS,
+                CHILDREN.MEDICATIONS,
+                CHILDREN.NOTES,
+                CHILDREN.SCHOOL_YEAR,
+                CHILDREN.SCHOOL)
+            .from(EVENT_REGISTRATIONS)
+            .join(CHILDREN)
+            .on(EVENT_REGISTRATIONS.USER_ID.eq(CHILDREN.USER_ID))
+            .where(EVENT_REGISTRATIONS.EVENT_ID.eq(eventId))
+            .and(EVENT_REGISTRATIONS.REGISTRATION_STATUS.eq(EventRegistrationStatus.ACTIVE))
+            .fetchInto(RSVP.class);
+
+    rsvpUsers.addAll(rsvpContacts);
+    rsvpUsers.addAll(rsvpChildren);
+    rsvpUsers.sort(Comparator.comparing(RSVP::getUserId));
+
+    StringBuilder builder = new StringBuilder();
+    builder.append(RSVP.toHeaderCSV());
+    for (RSVP rsvp : rsvpUsers) {
+      builder.append(rsvp.toRowCSV());
+    }
+
+    Map<String, String> content = new HashMap<String, String>();
+    content.put("text", builder.toString());
+    return content;
   }
 
   /**

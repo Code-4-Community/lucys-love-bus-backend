@@ -22,6 +22,7 @@ import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public class EventsRouter implements IRouter {
@@ -44,6 +45,7 @@ public class EventsRouter implements IRouter {
     registerModifyEvent(router);
     registerDeleteEvent(router);
     registerGetEventRegisteredUsers(router);
+    registerGetEventRSVPs(router);
 
     return router;
   }
@@ -86,6 +88,11 @@ public class EventsRouter implements IRouter {
   private void registerGetEventRegisteredUsers(Router router) {
     Route getUsersSignedUpEventRoute = router.get("/:event_id/registrations");
     getUsersSignedUpEventRoute.handler(this::handleGetEventRegisteredUsers);
+  }
+
+  private void registerGetEventRSVPs(Router router) {
+    Route getUsersSignedUpEventRoute = router.get("/:event_id/rsvps");
+    getUsersSignedUpEventRoute.handler(this::handleGetEventRSVPs);
   }
 
   private void handleGetEvents(RoutingContext ctx) {
@@ -158,5 +165,13 @@ public class EventsRouter implements IRouter {
 
     EventRegistrations regs = processor.getEventRegisteredUsers(eventId, userData);
     end(ctx.response(), 200, JsonObject.mapFrom(regs).encode());
+  }
+
+  private void handleGetEventRSVPs(RoutingContext ctx) {
+    int eventId = getRequestParameterAsInt(ctx.request(), "event_id");
+    JWTData userData = ctx.get("jwt_data");
+
+    Map<String, String> rsvp = processor.getEventRSVPs(eventId, userData);
+    end(ctx.response(), 200, JsonObject.mapFrom(rsvp).encode());
   }
 }
