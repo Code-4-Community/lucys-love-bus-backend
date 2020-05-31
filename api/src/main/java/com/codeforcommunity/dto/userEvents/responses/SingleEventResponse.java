@@ -9,7 +9,7 @@ public class SingleEventResponse {
   private int capacity;
   private String thumbnail;
   private EventDetails details;
-  private boolean signedUp;
+  private int ticketCount;
 
   public SingleEventResponse(
       int id,
@@ -18,14 +18,14 @@ public class SingleEventResponse {
       int capacity,
       String thumbnail,
       EventDetails details,
-      boolean signedUp) {
+      int ticketCount) {
     this.id = id;
     this.title = title;
     this.spotsAvailable = spotsAvailable;
     this.capacity = capacity;
     this.thumbnail = thumbnail;
     this.details = details;
-    this.signedUp = signedUp;
+    this.ticketCount = ticketCount;
   }
 
   private SingleEventResponse() {}
@@ -54,7 +54,7 @@ public class SingleEventResponse {
     return details;
   }
 
-  public boolean getSignedUp() {
-    return signedUp;
+  public int getTicketCount() {
+    return ticketCount;
   }
 }

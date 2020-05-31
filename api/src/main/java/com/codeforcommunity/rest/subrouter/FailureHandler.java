@@ -12,6 +12,7 @@ import com.codeforcommunity.exceptions.MissingParameterException;
 import com.codeforcommunity.exceptions.RequestDoesNotExistException;
 import com.codeforcommunity.exceptions.ResourceNotOwnedException;
 import com.codeforcommunity.exceptions.StripeExternalException;
+import com.codeforcommunity.exceptions.TableNotMatchingUserException;
 import com.codeforcommunity.exceptions.UsedSecretKeyException;
 import com.codeforcommunity.exceptions.UserDoesNotExistException;
 import com.codeforcommunity.exceptions.WrongPrivilegeException;
@@ -125,6 +126,15 @@ public class FailureHandler {
             "The resource <%s> is not owned by the calling user and is thus not accessible",
             exception.getResource());
     end(ctx, message, 401);
+  }
+
+  public void handleTableNotMatchingUser(
+      RoutingContext ctx, TableNotMatchingUserException exception) {
+    String message =
+        String.format(
+            "The passed %s resource with id %d is not owned by the calling user",
+            exception.getTableName(), exception.getTableId());
+    end(ctx, message, 400);
   }
 
   public void handleWrongPrivilegeException(RoutingContext ctx, WrongPrivilegeException exception) {
