@@ -11,6 +11,7 @@ import io.vertx.core.Vertx;
 import io.vertx.ext.web.Route;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
+import java.util.Optional;
 
 public class CheckoutRouter implements IRouter {
 
@@ -25,7 +26,6 @@ public class CheckoutRouter implements IRouter {
     Router router = Router.router(vertx);
 
     registerCreateEventRegistrationsHandler(router);
-    registerCheckoutSessionAndEventRegistrationHandler(router);
 
     return router;
   }
@@ -35,29 +35,17 @@ public class CheckoutRouter implements IRouter {
     getRequestsRoute.handler(this::handleCreateEventsRegistration);
   }
 
-  private void registerCheckoutSessionAndEventRegistrationHandler(Router router) {
-    Route getRequestsRoute = router.post("/payment");
-    getRequestsRoute.handler(this::handleCreateCheckoutSessionAndEventRegistration);
-  }
-
   private void handleCreateEventsRegistration(RoutingContext ctx) {
     PostCreateEventRegistrations requestData =
         RestFunctions.getJsonBodyAsClass(ctx, PostCreateEventRegistrations.class);
     JWTData userData = ctx.get("jwt_data");
 
-    processor.createEventRegistration(requestData, userData);
+    Optional<String> checkoutSessionID = processor.createEventRegistration(requestData, userData);
 
-    end(ctx.response(), 200, "Successfully registered!");
-  }
-
-  private void handleCreateCheckoutSessionAndEventRegistration(RoutingContext ctx) {
-    PostCreateEventRegistrations requestData =
-        RestFunctions.getJsonBodyAsClass(ctx, PostCreateEventRegistrations.class);
-    JWTData userData = ctx.get("jwt_data");
-
-    String checkoutSessionID =
-        processor.createCheckoutSessionAndEventRegistration(requestData, userData);
-
-    end(ctx.response(), 200, checkoutSessionID);
+    if (checkoutSessionID.isPresent()) {
+      end(ctx.response(), 202, checkoutSessionID.get());
+    } else {
+      end(ctx.response(), 200, "Successfully registered!");
+    }
   }
 }

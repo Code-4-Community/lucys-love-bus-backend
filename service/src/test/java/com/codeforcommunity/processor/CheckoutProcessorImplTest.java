@@ -1,7 +1,6 @@
 package com.codeforcommunity.processor;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import com.codeforcommunity.JooqMock;
@@ -11,9 +10,6 @@ import com.codeforcommunity.dto.checkout.PostCreateEventRegistrations;
 import com.codeforcommunity.enums.EventRegistrationStatus;
 import com.codeforcommunity.enums.PrivilegeLevel;
 import com.codeforcommunity.exceptions.InsufficientEventCapacityException;
-import com.codeforcommunity.exceptions.StripeExternalException;
-import com.codeforcommunity.exceptions.WrongPrivilegeException;
-import com.stripe.exception.StripeException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,52 +30,9 @@ public class CheckoutProcessorImplTest {
 
   // set up all the mocks
   @BeforeEach
-  public void setup() throws StripeException {
+  public void setup() {
     this.myJooqMock = new JooqMock();
     this.myCheckoutProcessorImpl = new CheckoutProcessorImpl(myJooqMock.getContext());
-  }
-
-  // test creating checkout session and event registration fails if not a general user
-  @Test
-  public void testCreateCheckoutSessionAndEventRegistration1() {
-    JWTData myUser1 = new JWTData(1, PrivilegeLevel.PF);
-    JWTData myUser2 = new JWTData(2, PrivilegeLevel.ADMIN);
-
-    PostCreateEventRegistrations req = new PostCreateEventRegistrations(new ArrayList<>());
-
-    myJooqMock.addEmptyReturn("SELECT");
-
-    try {
-      myCheckoutProcessorImpl.createCheckoutSessionAndEventRegistration(req, myUser1);
-      fail();
-    } catch (WrongPrivilegeException e) {
-      assertEquals(PrivilegeLevel.GP, e.getRequiredPrivilegeLevel());
-    }
-
-    try {
-      myCheckoutProcessorImpl.createCheckoutSessionAndEventRegistration(req, myUser2);
-      fail();
-    } catch (WrongPrivilegeException e) {
-      assertEquals(PrivilegeLevel.GP, e.getRequiredPrivilegeLevel());
-    }
-  }
-
-  // test creating checkout session and event registration fails if params are malformed
-  @Test
-  public void testCreateCheckoutSessionAndEventRegistration2() {
-    JWTData myUser1 = new JWTData(0, PrivilegeLevel.GP);
-
-    List<LineItemRequest> lineItemRequests = new ArrayList<>();
-
-    myJooqMock.addEmptyReturn("SELECT");
-    PostCreateEventRegistrations req = new PostCreateEventRegistrations(lineItemRequests);
-
-    try {
-      myCheckoutProcessorImpl.createCheckoutSessionAndEventRegistration(req, myUser1);
-      fail();
-    } catch (StripeExternalException e) {
-      assertTrue(e.getMessage().contains("Invalid API Key provided: "));
-    }
   }
 
   // test that creating an event registration if the list of registrations is empty does nothing

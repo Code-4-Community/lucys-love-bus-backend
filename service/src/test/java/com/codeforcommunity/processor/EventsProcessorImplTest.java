@@ -30,6 +30,7 @@ import com.codeforcommunity.exceptions.EventDoesNotExistException;
 import com.codeforcommunity.exceptions.MalformedParameterException;
 import com.codeforcommunity.requester.S3Requester;
 import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -39,7 +40,6 @@ import org.jooq.Record4;
 import org.jooq.Result;
 import org.jooq.generated.Tables;
 import org.jooq.generated.tables.records.EventsRecord;
-import org.jooq.impl.UpdatableRecordImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -143,11 +143,12 @@ public class EventsProcessorImplTest {
   @Test
   public void testGetSingleEvent1() {
     // mock the DB
-    List<UpdatableRecordImpl> emptySelectStatement = new ArrayList<UpdatableRecordImpl>();
-    myJooqMock.addReturn("SELECT", emptySelectStatement);
+    myJooqMock.addEmptyReturn("SELECT");
+
+    JWTData userData = new JWTData(0, PrivilegeLevel.GP);
 
     try {
-      myEventsProcessorImpl.getSingleEvent(5);
+      myEventsProcessorImpl.getSingleEvent(5, userData);
       fail();
     } catch (EventDoesNotExistException e) {
       assertEquals(e.getEventId(), 5);
@@ -197,7 +198,8 @@ public class EventsProcessorImplTest {
     myJooqMock.addReturn("SELECT", myTicketsRecord);
     myJooqMock.addReturn("SELECT", myEventRegistration);
 
-    SingleEventResponse res = myEventsProcessorImpl.getSingleEvent(1);
+    JWTData userData = new JWTData(0, PrivilegeLevel.GP);
+    SingleEventResponse res = myEventsProcessorImpl.getSingleEvent(1, userData);
 
     assertEquals(res.getId(), 1);
     assertEquals(res.getSpotsAvailable(), 4);
@@ -219,7 +221,8 @@ public class EventsProcessorImplTest {
 
     myJooqMock.addEmptyReturn("SELECT");
 
-    GetEventsResponse res = myEventsProcessorImpl.getEvents(eventIds);
+    JWTData userData = new JWTData(0, PrivilegeLevel.GP);
+    GetEventsResponse res = myEventsProcessorImpl.getEvents(eventIds, userData);
     assertEquals(0, res.getEvents().size());
     assertEquals(0, res.getTotalCount());
   }
@@ -236,7 +239,9 @@ public class EventsProcessorImplTest {
     event1.setCapacity(10);
     myJooqMock.addReturn("SELECT", event1);
 
-    GetEventsResponse res = myEventsProcessorImpl.getEvents(eventIds);
+    JWTData userData = new JWTData(0, PrivilegeLevel.GP);
+    GetEventsResponse res = myEventsProcessorImpl.getEvents(eventIds, userData);
+
     assertEquals(event1.getId(), res.getEvents().get(0).getId());
     assertEquals(event1.getTitle(), res.getEvents().get(0).getTitle());
     assertEquals(1, res.getTotalCount());
@@ -278,7 +283,9 @@ public class EventsProcessorImplTest {
     List<Integer> eventIds = new ArrayList<>();
     eventIds.add(0);
     eventIds.add(1);
-    GetEventsResponse res = myEventsProcessorImpl.getEvents(eventIds);
+
+    JWTData userData = new JWTData(0, PrivilegeLevel.GP);
+    GetEventsResponse res = myEventsProcessorImpl.getEvents(eventIds, userData);
 
     assertEquals(event1.getId(), res.getEvents().get(0).getId());
     assertEquals(event1.getTitle(), res.getEvents().get(0).getTitle());
@@ -944,5 +951,59 @@ public class EventsProcessorImplTest {
       assertEquals("connernilsen@gmail.com" + i, reg.getEmail());
       assertEquals(i, reg.getTicketCount());
     }
+  }
+
+  private void prepSignedUp(int count) {
+    EventsRecord eventResult = myJooqMock.getContext().newRecord(EVENTS);
+    eventResult.setStartTime(Timestamp.from(Instant.now()));
+    eventResult.setEndTime(Timestamp.from(Instant.now()));
+    eventResult.setLocation("HERE");
+    eventResult.setCapacity(5);
+    eventResult.setDescription("DESC");
+    eventResult.setTitle("TITLE");
+    eventResult.setId(1);
+    myJooqMock.addReturn("SELECT", eventResult);
+    if (count >= 0) {
+      Record2<Integer, Integer> record =
+          myJooqMock.getContext().newRecord(EVENTS.ID, EVENT_REGISTRATIONS.TICKET_QUANTITY);
+      record.values(1, count);
+      myJooqMock.addReturn("SELECT", record);
+    } else {
+      myJooqMock.addEmptyReturn("SELECT");
+    }
+  }
+
+  @ParameterizedTest
+  @ValueSource(ints = {-1, 0, 1, 2, 3})
+  public void testGetEventsSignedUpUserSignedUp(int ticketCount) {
+    prepSignedUp(ticketCount);
+
+    GetUserEventsRequest req =
+        new GetUserEventsRequest(Optional.empty(), Optional.empty(), Optional.empty());
+    JWTData data = new JWTData(1, PrivilegeLevel.GP);
+    GetEventsResponse resp = myEventsProcessorImpl.getEventsSignedUp(req, data);
+
+    assertEquals(ticketCount == -1 ? 0 : ticketCount, resp.getEvents().get(0).getTicketCount());
+  }
+
+  @ParameterizedTest
+  @ValueSource(ints = {-1, 0, 1, 2})
+  public void testGetEventsQualifiedUserSignedUp(int count) {
+    JWTData data = new JWTData(1, PrivilegeLevel.GP);
+
+    prepSignedUp(count);
+
+    GetEventsResponse resp = myEventsProcessorImpl.getEventsQualified(data);
+    assertEquals(count == -1 ? 0 : count, resp.getEvents().get(0).getTicketCount());
+  }
+
+  @ParameterizedTest
+  @ValueSource(ints = {-1, 0, 1, 2})
+  public void testGetSingleEventUserSignedUp(int count) {
+    JWTData data = new JWTData(1, PrivilegeLevel.GP);
+
+    prepSignedUp(count);
+    GetEventsResponse resp = myEventsProcessorImpl.getEventsQualified(data);
+    assertEquals(count == -1 ? 0 : count, resp.getEvents().get(0).getTicketCount());
   }
 }

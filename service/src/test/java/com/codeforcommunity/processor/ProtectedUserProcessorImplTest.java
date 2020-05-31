@@ -121,7 +121,8 @@ public class ProtectedUserProcessorImplTest {
     JWTData myUser = new JWTData(1, PrivilegeLevel.ADMIN);
 
     // mock four associated tables with the user
-    EventRegistrationsRecord erRecord = myJooqMock.getContext().newRecord(Tables.EVENT_REGISTRATIONS);
+    EventRegistrationsRecord erRecord =
+        myJooqMock.getContext().newRecord(Tables.EVENT_REGISTRATIONS);
     erRecord.setUserId(0);
     erRecord.setId(1);
     VerificationKeysRecord vkRecord = myJooqMock.getContext().newRecord(Tables.VERIFICATION_KEYS);

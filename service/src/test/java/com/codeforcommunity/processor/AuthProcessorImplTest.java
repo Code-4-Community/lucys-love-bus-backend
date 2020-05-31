@@ -76,8 +76,7 @@ public class AuthProcessorImplTest {
 
     when(mockJWTCreator.getNewAccessToken(anyString())).thenReturn(accessToken);
 
-    NewUserRequest myNewUserRequest = new NewUserRequest(
-        null, null, null, null, null, null, null);
+    NewUserRequest myNewUserRequest = new NewUserRequest(null, null, null, null, null, null, null);
 
     // TODO: this is a bug, because it throws a NPE
     try {
