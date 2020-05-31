@@ -16,7 +16,6 @@ import com.codeforcommunity.dto.userEvents.requests.ModifyEventRequest;
 import com.codeforcommunity.dto.userEvents.responses.EventRegistrations;
 import com.codeforcommunity.dto.userEvents.responses.GetEventsResponse;
 import com.codeforcommunity.dto.userEvents.responses.SingleEventResponse;
-import com.codeforcommunity.enums.EventRegistrationStatus;
 import com.codeforcommunity.enums.PrivilegeLevel;
 import com.codeforcommunity.exceptions.AdminOnlyRouteException;
 import com.codeforcommunity.exceptions.BadRequestImageException;
@@ -163,7 +162,6 @@ public class EventsProcessorImpl implements IEventsProcessor {
                 .ID
                 .in(ids)
                 .and(EVENT_REGISTRATIONS.USER_ID.eq(userId))
-                .and(EVENT_REGISTRATIONS.REGISTRATION_STATUS.eq(EventRegistrationStatus.ACTIVE))
                 .and(EVENT_REGISTRATIONS.TICKET_QUANTITY.notEqual(0)))
         .fetchSet(EVENTS.ID);
   }

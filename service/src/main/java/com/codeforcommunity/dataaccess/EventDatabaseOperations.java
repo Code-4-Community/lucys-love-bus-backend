@@ -32,11 +32,11 @@ public class EventDatabaseOperations {
             .orElse(0);
     Integer sumPendingRegistrations =
         Optional.ofNullable(
-            db.select(sum(PENDING_REGISTRATIONS.TICKET_QUANTITY_DELTA))
-                .from(PENDING_REGISTRATIONS)
-                .where(PENDING_REGISTRATIONS.EVENT_ID.eq(eventId))
-                .fetchOneInto(Integer.class)
-        ).orElse(0);
+                db.select(sum(PENDING_REGISTRATIONS.TICKET_QUANTITY_DELTA))
+                    .from(PENDING_REGISTRATIONS)
+                    .where(PENDING_REGISTRATIONS.EVENT_ID.eq(eventId))
+                    .fetchOneInto(Integer.class))
+            .orElse(0);
     Integer capacity =
         Optional.ofNullable(
                 db.select(EVENTS.CAPACITY)

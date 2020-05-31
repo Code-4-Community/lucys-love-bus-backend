@@ -11,7 +11,6 @@ import com.codeforcommunity.dto.checkout.CreateCheckoutSessionData;
 import com.codeforcommunity.dto.checkout.LineItem;
 import com.codeforcommunity.dto.checkout.LineItemRequest;
 import com.codeforcommunity.dto.checkout.PostCreateEventRegistrations;
-import com.codeforcommunity.enums.EventRegistrationStatus;
 import com.codeforcommunity.enums.PrivilegeLevel;
 import com.codeforcommunity.exceptions.EventDoesNotExistException;
 import com.codeforcommunity.exceptions.InsufficientEventCapacityException;
@@ -56,8 +55,8 @@ public class CheckoutProcessorImpl implements ICheckoutProcessor {
     this.stripeWebhookSigningSecret = stripeProperties.getProperty("stripe_webhook_signing_secret");
   }
 
-  private String createCheckoutSessionAndEventRegistration(
-      List<LineItem> lineItems, JWTData user) throws StripeExternalException {
+  private String createCheckoutSessionAndEventRegistration(List<LineItem> lineItems, JWTData user)
+      throws StripeExternalException {
     CreateCheckoutSessionData checkoutRequest =
         new CreateCheckoutSessionData(lineItems, CANCEL_URL, SUCCESS_URL);
 
@@ -101,15 +100,18 @@ public class CheckoutProcessorImpl implements ICheckoutProcessor {
           && event.getDataObjectDeserializer().getObject().isPresent()) {
         Session session = (Session) event.getDataObjectDeserializer().getObject().get();
         String checkoutSessionId = session.getId();
-        List<PendingRegistrations> pendingRegistrations = db.selectFrom(PENDING_REGISTRATIONS)
-            .where(PENDING_REGISTRATIONS.STRIPE_CHECKOUT_SESSION_ID.eq(checkoutSessionId))
-            .fetchInto(PendingRegistrations.class);
+        List<PendingRegistrations> pendingRegistrations =
+            db.selectFrom(PENDING_REGISTRATIONS)
+                .where(PENDING_REGISTRATIONS.STRIPE_CHECKOUT_SESSION_ID.eq(checkoutSessionId))
+                .fetchInto(PendingRegistrations.class);
         for (PendingRegistrations registration : pendingRegistrations) {
           int userId = registration.getUserId();
           int eventId = registration.getEventId();
-          EventRegistrationsRecord currentRegistration = db.selectFrom(EVENT_REGISTRATIONS)
-              .where(EVENT_REGISTRATIONS.EVENT_ID.eq(eventId))
-              .and(EVENT_REGISTRATIONS.USER_ID.eq(userId)).fetchOneInto(EventRegistrationsRecord.class);
+          EventRegistrationsRecord currentRegistration =
+              db.selectFrom(EVENT_REGISTRATIONS)
+                  .where(EVENT_REGISTRATIONS.EVENT_ID.eq(eventId))
+                  .and(EVENT_REGISTRATIONS.USER_ID.eq(userId))
+                  .fetchOneInto(EventRegistrationsRecord.class);
           if (currentRegistration != null) {
             currentRegistration.setTicketQuantity(
                 currentRegistration.getTicketQuantity() + registration.getTicketQuantityDelta());
@@ -151,22 +153,24 @@ public class CheckoutProcessorImpl implements ICheckoutProcessor {
   }
 
   /**
-   * Create pending event registration for GP. Will be marked as active once the Stripe
-   * payment is complete.
+   * Create pending event registration for GP. Will be marked as active once the Stripe payment is
+   * complete.
    *
    * @param lineItems list of line items to write to database
    * @param user the user's privilege level
    * @param checkoutSessionId A checkoutSessionId to associate with registrations which require
    *     payment
    */
-  private void createPendingEventRegistration(List<LineItem> lineItems, JWTData user,
-      String checkoutSessionId) {
+  private void createPendingEventRegistration(
+      List<LineItem> lineItems, JWTData user, String checkoutSessionId) {
     int userId = user.getUserId();
     List<Integer> eventIds = lineItems.stream().map(LineItem::getId).collect(Collectors.toList());
 
     // deletes any pre-existing pending event registration for this user/event
-    db.delete(PENDING_REGISTRATIONS).where(PENDING_REGISTRATIONS.EVENT_ID.in(eventIds))
-        .and(PENDING_REGISTRATIONS.USER_ID.eq(userId)).execute();
+    db.delete(PENDING_REGISTRATIONS)
+        .where(PENDING_REGISTRATIONS.EVENT_ID.in(eventIds))
+        .and(PENDING_REGISTRATIONS.USER_ID.eq(userId))
+        .execute();
 
     for (LineItem lineItem : lineItems) {
       int eventId = lineItem.getId();
