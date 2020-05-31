@@ -20,7 +20,11 @@ import com.codeforcommunity.exceptions.NotRegisteredException;
 import com.codeforcommunity.exceptions.StripeExternalException;
 import com.codeforcommunity.propertiesLoader.PropertiesLoader;
 import com.stripe.Stripe;
+import com.stripe.exception.SignatureVerificationException;
 import com.stripe.exception.StripeException;
+import com.stripe.model.Event;
+import com.stripe.model.checkout.Session;
+import com.stripe.net.Webhook;
 import com.stripe.param.checkout.SessionCreateParams;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -70,14 +74,10 @@ public class CheckoutProcessorImpl implements ICheckoutProcessor {
             .setCancelUrl(checkoutRequest.getCancelUrl())
             .build();
     try {
-      // TODO: fix this when done testing
-      //      Session session = Session.create(params);
-      //      String checkoutSessionId = session.getId();
-      //      session.setSuccessUrl(String.format(checkoutRequest.getSuccessUrl(),
-      // checkoutSessionId));
-      MockSession session = MockSession.create(params, this);
-
+      Session session = Session.create(params);
       String checkoutSessionId = session.getId();
+      session.setSuccessUrl(String.format(checkoutRequest.getSuccessUrl(),
+          checkoutSessionId));
       createPendingEventRegistration(lineItems, user, checkoutSessionId);
       return session.getId();
     } catch (StripeException e) {
@@ -184,24 +184,21 @@ public class CheckoutProcessorImpl implements ICheckoutProcessor {
 
   @Override
   public void handleStripeCheckoutEventComplete(String payload, String sigHeader) {
-    // TODO: fix this when done testing
-    handleCheckoutComplete(payload);
-    //    try {
-    //      Event event = Webhook.constructEvent(payload, sigHeader,
-    // this.stripeWebhookSigningSecret);
-    //      if (event.getType().equals("checkout.session.completed")
-    //          && event.getDataObjectDeserializer().getObject().isPresent()) {
-    //        Session session = (Session) event.getDataObjectDeserializer().getObject().get();
-    //        String checkoutSessionId = session.getId();
-    //        handleCheckoutComplete(checkoutSessionId);
-    //      }
-    //    } catch (SignatureVerificationException e) {
-    //      throw new StripeExternalException("Error verifying signature of incoming webhook");
-    //    }
+    try {
+      Event event = Webhook.constructEvent(payload, sigHeader,
+          this.stripeWebhookSigningSecret);
+      if (event.getType().equals("checkout.session.completed")
+          && event.getDataObjectDeserializer().getObject().isPresent()) {
+        Session session = (Session) event.getDataObjectDeserializer().getObject().get();
+        String checkoutSessionId = session.getId();
+        handleCheckoutComplete(checkoutSessionId);
+      }
+    } catch (SignatureVerificationException e) {
+      throw new StripeExternalException("Error verifying signature of incoming webhook");
+    }
   }
 
-  // TODO: make this private once done testing
-  public void handleCheckoutComplete(String checkoutSessionId) {
+  private void handleCheckoutComplete(String checkoutSessionId) {
     List<PendingRegistrations> pendingRegistrations =
         db.selectFrom(PENDING_REGISTRATIONS)
             .where(PENDING_REGISTRATIONS.STRIPE_CHECKOUT_SESSION_ID.eq(checkoutSessionId))

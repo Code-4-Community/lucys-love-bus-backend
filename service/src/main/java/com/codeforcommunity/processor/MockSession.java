@@ -5,6 +5,9 @@ import com.stripe.model.HasId;
 import com.stripe.param.checkout.SessionCreateParams;
 import java.util.UUID;
 
+/**
+ * Mocks a Stripe session for testing purposes.
+ */
 public class MockSession implements HasId {
 
   private final String id;
