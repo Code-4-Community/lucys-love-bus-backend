@@ -25,7 +25,7 @@ import com.codeforcommunity.exceptions.S3FailedUploadException;
 import com.codeforcommunity.requester.S3Requester;
 import java.sql.Timestamp;
 import java.time.Instant;
-import java.time.Period;
+import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -34,7 +34,6 @@ import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.SelectConditionStep;
 import org.jooq.SelectSeekStep1;
-import org.jooq.SelectWhereStep;
 import org.jooq.generated.tables.pojos.Events;
 import org.jooq.generated.tables.records.EventsRecord;
 
@@ -63,7 +62,7 @@ public class EventsProcessorImpl implements IEventsProcessor {
 
     EventsRecord newEventRecord = eventRequestToRecord(request);
     newEventRecord.store();
-    return eventPojoToResponse(newEventRecord.into(Events.class), userData.getUserId());
+    return eventPojoToResponse(newEventRecord.into(Events.class), userData);
   }
 
   @Override
@@ -74,14 +73,13 @@ public class EventsProcessorImpl implements IEventsProcessor {
       throw new EventDoesNotExistException(eventId);
     }
 
-    return eventPojoToResponse(event, userData.getUserId());
+    return eventPojoToResponse(event, userData);
   }
 
   @Override
   public GetEventsResponse getEvents(List<Integer> eventIds, JWTData userData) {
     List<Events> e = db.selectFrom(EVENTS).where(EVENTS.ID.in(eventIds)).fetchInto(Events.class);
-    return new GetEventsResponse(
-        listOfEventsToListOfSingleEventResponse(e, userData.getUserId()), e.size());
+    return new GetEventsResponse(listOfEventsToListOfSingleEventResponse(e, userData), e.size());
   }
 
   @Override
@@ -123,31 +121,21 @@ public class EventsProcessorImpl implements IEventsProcessor {
       eventPojos = s.fetchInto(Events.class);
     }
 
-    List<SingleEventResponse> res =
-        listOfEventsToListOfSingleEventResponse(eventPojos, userData.getUserId());
+    List<SingleEventResponse> res = listOfEventsToListOfSingleEventResponse(eventPojos, userData);
     return new GetEventsResponse(res, res.size());
   }
 
   @Override
   public GetEventsResponse getEventsQualified(JWTData userData) {
+    Timestamp startDate = Timestamp.from(Instant.now().minus(12, ChronoUnit.HOURS));
 
-    Timestamp startDate = Timestamp.from(Instant.now());
-    Timestamp fiveDays = Timestamp.from(Instant.now().plus(Period.ofDays(5)));
-    boolean limitedToFiveDays = userData.getPrivilegeLevel().equals(PrivilegeLevel.GP);
-
-    SelectWhereStep<EventsRecord> select = db.selectFrom(EVENTS);
-    SelectConditionStep<EventsRecord> afterDateFilter;
-
-    if (limitedToFiveDays) {
-      afterDateFilter = select.where(EVENTS.START_TIME.between(startDate, fiveDays));
-    } else {
-      afterDateFilter = select.where(EVENTS.START_TIME.greaterOrEqual(startDate));
-    }
     List<Events> eventsList =
-        afterDateFilter.orderBy(EVENTS.START_TIME.asc()).fetchInto(Events.class);
+        db.selectFrom(EVENTS)
+            .where(EVENTS.START_TIME.greaterOrEqual(startDate))
+            .orderBy(EVENTS.START_TIME.asc())
+            .fetchInto(Events.class);
 
-    List<SingleEventResponse> res =
-        listOfEventsToListOfSingleEventResponse(eventsList, userData.getUserId());
+    List<SingleEventResponse> res = listOfEventsToListOfSingleEventResponse(eventsList, userData);
 
     return new GetEventsResponse(res, res.size());
   }
@@ -242,8 +230,8 @@ public class EventsProcessorImpl implements IEventsProcessor {
    * @return List of our Event data object.
    */
   private List<SingleEventResponse> listOfEventsToListOfSingleEventResponse(
-      List<Events> events, int userId) {
-    Map<Integer, Integer> ticketCounts = getTicketCounts(events, userId);
+      List<Events> events, JWTData userData) {
+    Map<Integer, Integer> ticketCounts = getTicketCounts(events, userData.getUserId());
     return events.stream()
         .map(
             event -> {
@@ -260,14 +248,16 @@ public class EventsProcessorImpl implements IEventsProcessor {
                   event.getCapacity(),
                   event.getThumbnail(),
                   details,
-                  ticketCounts.getOrDefault(event.getId(), 0));
+                  ticketCounts.getOrDefault(event.getId(), 0),
+                  canUserRegister(event, userData));
             })
         .collect(Collectors.toList());
   }
 
   /** Takes a database representation of a single event and returns the dto representation. */
-  private SingleEventResponse eventPojoToResponse(Events event, int userId) {
-    int signedUp = getTicketCounts(Arrays.asList(event), userId).getOrDefault(event.getId(), 0);
+  private SingleEventResponse eventPojoToResponse(Events event, JWTData userData) {
+    int ticketsBought =
+        getTicketCounts(Arrays.asList(event), userData.getUserId()).getOrDefault(event.getId(), 0);
 
     EventDetails details =
         new EventDetails(
@@ -279,7 +269,8 @@ public class EventsProcessorImpl implements IEventsProcessor {
         event.getCapacity(),
         event.getThumbnail(),
         details,
-        signedUp);
+        ticketsBought,
+        canUserRegister(event, userData));
   }
 
   /** Takes a dto representation of an event and returns the database record representation. */
@@ -293,5 +284,22 @@ public class EventsProcessorImpl implements IEventsProcessor {
     newRecord.setStartTime(request.getDetails().getStart());
     newRecord.setEndTime(request.getDetails().getEnd());
     return newRecord;
+  }
+
+  /**
+   * Returns true if the given user is qualified for the event.
+   *
+   * <p>- No user can register for an event that has already ended - GP users can only register for
+   * events in the next 5 days
+   */
+  private boolean canUserRegister(Events event, JWTData userData) {
+    if (event.getEndTime().before(Timestamp.from(Instant.now()))) {
+      return false;
+    }
+    if (userData.getPrivilegeLevel().equals(PrivilegeLevel.GP)) {
+      Timestamp fiveDays = Timestamp.from(Instant.now().plus(5, ChronoUnit.DAYS));
+      return event.getStartTime().before(fiveDays);
+    }
+    return true;
   }
 }
