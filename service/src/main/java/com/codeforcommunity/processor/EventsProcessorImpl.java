@@ -42,6 +42,11 @@ public class EventsProcessorImpl implements IEventsProcessor {
   private final DSLContext db;
   private final EventDatabaseOperations eventDatabaseOperations;
 
+  /** Hours after the start of an event that the event will still show on upcoming pages */
+  private final int registerLeniencyHours = 12;
+  /** The number of days before an event a GP can register */
+  private final int daysGpCanRegister = 5;
+
   public EventsProcessorImpl(DSLContext db) {
     this.db = db;
     this.eventDatabaseOperations = new EventDatabaseOperations(db);
@@ -127,7 +132,8 @@ public class EventsProcessorImpl implements IEventsProcessor {
 
   @Override
   public GetEventsResponse getEventsQualified(JWTData userData) {
-    Timestamp startDate = Timestamp.from(Instant.now().minus(12, ChronoUnit.HOURS));
+    Timestamp startDate =
+        Timestamp.from(Instant.now().minus(registerLeniencyHours, ChronoUnit.HOURS));
 
     List<Events> eventsList =
         db.selectFrom(EVENTS)
@@ -297,7 +303,7 @@ public class EventsProcessorImpl implements IEventsProcessor {
       return false;
     }
     if (userData.getPrivilegeLevel().equals(PrivilegeLevel.GP)) {
-      Timestamp fiveDays = Timestamp.from(Instant.now().plus(5, ChronoUnit.DAYS));
+      Timestamp fiveDays = Timestamp.from(Instant.now().plus(daysGpCanRegister, ChronoUnit.DAYS));
       return event.getStartTime().before(fiveDays);
     }
     return true;
