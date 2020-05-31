@@ -254,13 +254,12 @@ public class ProtectedUserProcessorImplTest {
 
     myProtectedUserProcessorImpl.setContactsAndChildren(myUser, req);
 
-    Object bindings = myJooqMock.getSqlBindings();
     List<Object[]> insertBindings = myJooqMock.getSqlBindings().get("INSERT");
     List<Object[]> updateBindings = myJooqMock.getSqlBindings().get("UPDATE");
 
     assertEquals(2, insertBindings.size());
     assertEquals(2, updateBindings.size());
-    assertEquals("Brandon", updateBindings.get(0)[1]);
+    assertEquals("Brandon", updateBindings.get(0)[2]);
     assertEquals("brandon@example.com", updateBindings.get(0)[0]);
     assertEquals("Kazuto", insertBindings.get(0)[2]);
     assertEquals("Chad", insertBindings.get(1)[2]);
@@ -292,8 +291,8 @@ public class ProtectedUserProcessorImplTest {
 
     assertEquals(2, insertBindings.size());
     assertEquals(2, updateBindings.size());
-    assertEquals("Brandon", updateBindings.get(0)[1]);
-    assertEquals("brandon@example.com", updateBindings.get(0)[0]);
+    assertEquals("Brandon", updateBindings.get(0)[2]);
+    assertEquals("brandon@example.com", updateBindings.get(1)[0]);
     assertEquals("Conner", insertBindings.get(0)[4]);
     assertEquals("Ada", insertBindings.get(1)[4]);
   }
@@ -329,11 +328,11 @@ public class ProtectedUserProcessorImplTest {
 
     assertEquals(2, updateBindings.size());
     assertEquals(4, insertBindings.size());
-    assertEquals("Brandon", updateBindings.get(0)[1]);
-    assertEquals("brandon@example.com", updateBindings.get(0)[0]);
     assertEquals("Kazuto", insertBindings.get(0)[2]);
     assertEquals("Chad", insertBindings.get(1)[2]);
     assertEquals("Conner", insertBindings.get(2)[4]);
     assertEquals("Ada", insertBindings.get(3)[4]);
+    assertEquals("Brandon", updateBindings.get(0)[2]);
+    assertEquals("brandon@example.com", updateBindings.get(1)[0]);
   }
 }
