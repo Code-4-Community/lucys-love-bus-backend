@@ -38,7 +38,7 @@ public class CheckoutProcessorImplTest {
   // test that creating an event registration if the list of registrations is empty does nothing
   @Test
   public void testCreateEventRegistration1() {
-    JWTData myUserData = new JWTData(0, PrivilegeLevel.GP);
+    JWTData myUserData = new JWTData(0, PrivilegeLevel.ADMIN);
 
     List<LineItemRequest> lineItems = new ArrayList<>();
 
@@ -56,7 +56,7 @@ public class CheckoutProcessorImplTest {
   // test creating an event registration a line item's quantity is beyond capacity
   @Test
   public void testCreateEventRegistration2() {
-    JWTData myUserData = new JWTData(0, PrivilegeLevel.GP);
+    JWTData myUserData = new JWTData(0, PrivilegeLevel.ADMIN);
 
     LineItemRequest lineItem1 = new LineItemRequest(0, 50);
 
@@ -81,7 +81,7 @@ public class CheckoutProcessorImplTest {
   // test creating an event registration with proper line items
   @Test
   public void testCreateEventRegistration3() {
-    JWTData myUserData = new JWTData(0, PrivilegeLevel.GP);
+    JWTData myUserData = new JWTData(0, PrivilegeLevel.ADMIN);
 
     LineItemRequest lineItem1 = new LineItemRequest(0, 1);
 
@@ -137,7 +137,7 @@ public class CheckoutProcessorImplTest {
   // test for adding multiple line items
   @Test
   public void testCreateEventRegistration4() {
-    JWTData myUserData = new JWTData(0, PrivilegeLevel.GP);
+    JWTData myUserData = new JWTData(0, PrivilegeLevel.ADMIN);
 
     // for mocking the events
     EventsRecord myEvent1 = myJooqMock.getContext().newRecord(Tables.EVENTS);
