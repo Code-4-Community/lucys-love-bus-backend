@@ -161,7 +161,6 @@ public class AuthDatabaseOperationsTest {
     myJooqMock.addEmptyReturn("SELECT");
     myJooqMock.addEmptyReturn("UPDATE");
 
-    // TODO: fix JooqMock to be able to set ID (this gives a NPE)
     myAuthDatabaseOperations.createNewUser(req);
 
     List<Object[]> insertBindings = myJooqMock.getSqlBindings().get("INSERT");
