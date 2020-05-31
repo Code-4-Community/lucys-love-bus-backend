@@ -2,6 +2,7 @@ package com.codeforcommunity.dataaccess;
 
 import static org.jooq.generated.Tables.EVENTS;
 import static org.jooq.generated.Tables.EVENT_REGISTRATIONS;
+import static org.jooq.generated.Tables.PENDING_REGISTRATIONS;
 import static org.jooq.impl.DSL.sum;
 
 import java.util.Optional;
@@ -29,6 +30,13 @@ public class EventDatabaseOperations {
                     .where(EVENT_REGISTRATIONS.EVENT_ID.eq(eventId))
                     .fetchOneInto(Integer.class))
             .orElse(0);
+    Integer sumPendingRegistrations =
+        Optional.ofNullable(
+                db.select(sum(PENDING_REGISTRATIONS.TICKET_QUANTITY_DELTA))
+                    .from(PENDING_REGISTRATIONS)
+                    .where(PENDING_REGISTRATIONS.EVENT_ID.eq(eventId))
+                    .fetchOneInto(Integer.class))
+            .orElse(0);
     Integer capacity =
         Optional.ofNullable(
                 db.select(EVENTS.CAPACITY)
@@ -36,6 +44,6 @@ public class EventDatabaseOperations {
                     .where(EVENTS.ID.eq(eventId))
                     .fetchOneInto(Integer.class))
             .orElse(0);
-    return Math.max(capacity - sumRegistrations, 0);
+    return Math.max(capacity - (sumRegistrations + sumPendingRegistrations), 0);
   }
 }
