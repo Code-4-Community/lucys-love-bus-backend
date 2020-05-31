@@ -68,8 +68,6 @@ public class EventDatabaseOperationsTest {
     myJooqMock.addReturn("SELECT", myTicketsRecord);
     myJooqMock.addReturn("SELECT", myEventRegistration);
 
-    // TODO: @ dev team, please address this
-    // it actually returns -6, though it should realistically just be 0
     assertEquals(0, myEventDatabaseOperations.getSpotsLeft(0));
   }
 
@@ -87,8 +85,6 @@ public class EventDatabaseOperationsTest {
     myJooqMock.addReturn("SELECT", myTicketsRecord);
     myJooqMock.addReturn("SELECT", myEventRegistration);
 
-    // TODO: @ dev team, please address this
-    // it actually returns -6, are you sure you want this behavior?
     assertEquals(0, myEventDatabaseOperations.getSpotsLeft(0));
   }
 

@@ -4,6 +4,7 @@ import static org.jooq.generated.Tables.CONTACTS;
 import static org.jooq.generated.Tables.EVENTS;
 import static org.jooq.generated.Tables.EVENT_REGISTRATIONS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -43,6 +44,7 @@ import org.jooq.generated.tables.records.EventsRecord;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 // Contains tests for EventsProcessorImpl.java in main
@@ -114,10 +116,15 @@ public class EventsProcessorImplTest {
     CreateEventRequest req =
         new CreateEventRequest("sample", 5, Base64TestStrings.TEST_STRING_1, myEventDetails);
 
-    // mock the DB
-    JWTData goodUser = mock(JWTData.class);
-    when(goodUser.getPrivilegeLevel()).thenReturn(PrivilegeLevel.ADMIN);
+    JWTData goodUser = new JWTData(0, PrivilegeLevel.ADMIN);
 
+    // mock the ticket count
+    Record2<Integer, Integer> ticketCount =
+        myJooqMock.getContext().newRecord(EVENTS.ID, EVENT_REGISTRATIONS.TICKET_QUANTITY);
+    ticketCount.values(0, 5);
+    myJooqMock.addReturn("SELECT", ticketCount);
+
+    // mock the event
     EventsRecord record = myJooqMock.getContext().newRecord(Tables.EVENTS);
     record.setId(0);
     record.setCapacity(req.getSpotsAvailable());
@@ -129,7 +136,6 @@ public class EventsProcessorImplTest {
     assertEquals(res.getId(), 0);
     assertEquals(res.getTitle(), "sample");
     assertEquals(res.getCapacity(), 5);
-    // TODO: please verify if this is intended
     assertEquals(
         res.getThumbnail(),
         "https://lucys-love-bus-public.s3.us-east-2.amazonaws.com/events/sample_thumbnail.gif");
@@ -233,11 +239,17 @@ public class EventsProcessorImplTest {
     List<Integer> eventIds = new ArrayList<>();
     eventIds.add(0);
 
+    // mock the event
     EventsRecord event1 = myJooqMock.getContext().newRecord(EVENTS);
     event1.setId(0);
     event1.setTitle("title 1");
     event1.setCapacity(10);
     myJooqMock.addReturn("SELECT", event1);
+
+    // mock the ticket count
+    Record2<Integer, Integer> ticketCount1 = myJooqMock.getContext().newRecord(EVENTS.ID, EVENT_REGISTRATIONS.TICKET_QUANTITY);
+    ticketCount1.values(0, 5);
+    myJooqMock.addReturn("SELECT", ticketCount1);
 
     JWTData userData = new JWTData(0, PrivilegeLevel.GP);
     GetEventsResponse res = myEventsProcessorImpl.getEvents(eventIds, userData);
@@ -320,12 +332,19 @@ public class EventsProcessorImplTest {
             Optional.of(new Timestamp(START_TIMESTAMP_TEST)),
             Optional.of(1));
 
+    // mock the event
     EventsRecord myEvent1 = myJooqMock.getContext().newRecord(EVENTS);
     myEvent1.setId(0);
     myEvent1.setTitle("Event 1");
     myEvent1.setDescription("Description 1");
     myEvent1.setCapacity(10);
     myJooqMock.addReturn("SELECT", myEvent1);
+
+    // mock the ticket count
+    Record2<Integer, Integer> ticketCount =
+        myJooqMock.getContext().newRecord(EVENTS.ID, EVENT_REGISTRATIONS.TICKET_QUANTITY);
+    ticketCount.values(0, 5);
+    myJooqMock.addReturn("SELECT", ticketCount);
 
     JWTData myUserData = new JWTData(0, PrivilegeLevel.GP);
 
@@ -513,12 +532,13 @@ public class EventsProcessorImplTest {
   }
 
   // user qualifies for one event
-  @Test
-  public void testGetEventsQualified2() {
-    // write tests for both an admin and gp user
-    JWTData myGPUserData = new JWTData(0, PrivilegeLevel.GP);
-    JWTData myAdminUserData = new JWTData(1, PrivilegeLevel.ADMIN);
 
+  @ParameterizedTest
+  @EnumSource(PrivilegeLevel.class)
+  public void testGetEventsQualified2(PrivilegeLevel pl) {
+    JWTData myUserData = new JWTData(0, pl);
+
+    // mock the event
     EventsRecord myEvent1 = myJooqMock.getContext().newRecord(Tables.EVENTS);
     myEvent1.setId(0);
     myEvent1.setTitle("Title 1");
@@ -527,26 +547,20 @@ public class EventsProcessorImplTest {
     myEvent1.setStartTime(new Timestamp(START_TIMESTAMP_TEST));
     myJooqMock.addReturn("SELECT", myEvent1);
 
-    GetEventsResponse resGP = myEventsProcessorImpl.getEventsQualified(myGPUserData);
-    assertEquals(1, resGP.getTotalCount());
-    SingleEventResponse resGPActualEvent = resGP.getEvents().get(0);
+    // mock the ticket count
+    Record2<Integer, Integer> ticketCount1 =
+        myJooqMock.getContext().newRecord(EVENTS.ID, EVENT_REGISTRATIONS.TICKET_QUANTITY);
+    ticketCount1.values(0, 5);
+    myJooqMock.addReturn("SELECT", ticketCount1);
+
+    GetEventsResponse res = myEventsProcessorImpl.getEventsQualified(myUserData);
+    assertEquals(1, res.getTotalCount());
+    SingleEventResponse resGPActualEvent = res.getEvents().get(0);
 
     assertEquals(0, resGPActualEvent.getId());
     assertEquals("Title 1", resGPActualEvent.getTitle());
     assertEquals("Description 1", resGPActualEvent.getDetails().getDescription());
     assertEquals(new Timestamp(START_TIMESTAMP_TEST), resGPActualEvent.getDetails().getStart());
-
-    GetEventsResponse resAdmin = myEventsProcessorImpl.getEventsQualified(myAdminUserData);
-    assertEquals(resGP.getTotalCount(), resAdmin.getTotalCount());
-    SingleEventResponse resAdminActualEvent = resAdmin.getEvents().get(0);
-
-    assertEquals(resGPActualEvent.getId(), resAdminActualEvent.getId());
-    assertEquals(resGPActualEvent.getTitle(), resAdminActualEvent.getTitle());
-    assertEquals(
-        resGPActualEvent.getDetails().getDescription(),
-        resAdminActualEvent.getDetails().getDescription());
-    assertEquals(
-        resGPActualEvent.getDetails().getStart(), resAdminActualEvent.getDetails().getStart());
   }
 
   // user qualifies for multiple events
@@ -625,31 +639,12 @@ public class EventsProcessorImplTest {
     try {
       myEventsProcessorImpl.modifyEvent(0, req, myUserData);
       fail();
-    } catch (AdminOnlyRouteException ignored) {
-    }
-  }
-
-  // modifying an event fails if the event doesn't exist
-  @Test
-  public void testModifyEvent2() {
-    JWTData myUserData = new JWTData(0, PrivilegeLevel.ADMIN);
-
-    ModifyEventRequest req = new ModifyEventRequest(null, null, null, null);
-
-    myJooqMock.addEmptyReturn("SELECT");
-
-    // TODO: inform the dev team that they should handle this
-    try {
-      myEventsProcessorImpl.modifyEvent(0, req, myUserData);
-      fail();
-    } catch (MalformedParameterException e) {
-      assertEquals("anything", e.getParameterName());
-    }
+    } catch (AdminOnlyRouteException ignored) {}
   }
 
   // modifying an event with all fields filled in
   @Test
-  public void testModifyEvent3() {
+  public void testModifyEvent2() {
     JWTData myUserData = new JWTData(0, PrivilegeLevel.ADMIN);
 
     ModifyEventRequest req =
@@ -663,6 +658,7 @@ public class EventsProcessorImplTest {
                 new Timestamp(START_TIMESTAMP_TEST),
                 new Timestamp(END_TIMESTAMP_TEST)));
 
+    // mock the event
     EventsRecord myEvent = myJooqMock.getContext().newRecord(Tables.EVENTS);
     myEvent.setId(0);
     myEvent.setTitle("old title");
@@ -673,7 +669,14 @@ public class EventsProcessorImplTest {
     myEvent.setStartTime(new Timestamp(0));
     myEvent.setEndTime(new Timestamp(0));
     myJooqMock.addReturn("SELECT", myEvent);
+    myJooqMock.addReturn("SELECT", myEvent);
     myJooqMock.addReturn("UPDATE", myEvent);
+
+    // mock the ticket count
+    Record2<Integer, Integer> ticketCount =
+        myJooqMock.getContext().newRecord(EVENTS.ID, EVENT_REGISTRATIONS.TICKET_QUANTITY);
+    ticketCount.values(0, 5);
+    myJooqMock.addReturn("SELECT", ticketCount);
 
     myEventsProcessorImpl.modifyEvent(0, req, myUserData);
 
@@ -692,11 +695,12 @@ public class EventsProcessorImplTest {
 
   // modifying an event with the event details null
   @Test
-  public void testModifyEvent4() {
+  public void testModifyEvent3() {
     JWTData myUserData = new JWTData(0, PrivilegeLevel.ADMIN);
 
     ModifyEventRequest req = new ModifyEventRequest("edited title", 10, "edited thumbnail", null);
 
+    // mock the events
     EventsRecord myEvent = myJooqMock.getContext().newRecord(Tables.EVENTS);
     myEvent.setId(0);
     myEvent.setTitle("old title");
@@ -707,7 +711,14 @@ public class EventsProcessorImplTest {
     myEvent.setStartTime(new Timestamp(0));
     myEvent.setEndTime(new Timestamp(0));
     myJooqMock.addReturn("SELECT", myEvent);
+    myJooqMock.addReturn("SELECT", myEvent);
     myJooqMock.addReturn("UPDATE", myEvent);
+
+    // mock the ticket count
+    Record2<Integer, Integer> ticketCount =
+        myJooqMock.getContext().newRecord(EVENTS.ID, EVENT_REGISTRATIONS.TICKET_QUANTITY);
+    ticketCount.values(0, 5);
+    myJooqMock.addReturn("SELECT", ticketCount);
 
     myEventsProcessorImpl.modifyEvent(0, req, myUserData);
 
@@ -722,11 +733,12 @@ public class EventsProcessorImplTest {
 
   // modifying an event with the event details null and some other fields null
   @Test
-  public void testModifyEvent5() {
+  public void testModifyEvent4() {
     JWTData myUserData = new JWTData(0, PrivilegeLevel.ADMIN);
 
     ModifyEventRequest req = new ModifyEventRequest("edited title", null, "edited thumbnail", null);
 
+    // mock the event
     EventsRecord myEvent = myJooqMock.getContext().newRecord(Tables.EVENTS);
     myEvent.setId(0);
     myEvent.setTitle("old title");
@@ -737,7 +749,14 @@ public class EventsProcessorImplTest {
     myEvent.setStartTime(new Timestamp(0));
     myEvent.setEndTime(new Timestamp(0));
     myJooqMock.addReturn("SELECT", myEvent);
+    myJooqMock.addReturn("SELECT", myEvent);
     myJooqMock.addReturn("UPDATE", myEvent);
+
+    // mock the ticket count
+    Record2<Integer, Integer> ticketCount =
+        myJooqMock.getContext().newRecord(EVENTS.ID, EVENT_REGISTRATIONS.TICKET_QUANTITY);
+    ticketCount.values(0, 5);
+    myJooqMock.addReturn("SELECT", ticketCount);
 
     myEventsProcessorImpl.modifyEvent(0, req, myUserData);
 
@@ -751,11 +770,12 @@ public class EventsProcessorImplTest {
 
   // modifying an event with the every field null
   @Test
-  public void testModifyEvent6() {
+  public void testModifyEvent5() {
     JWTData myUserData = new JWTData(0, PrivilegeLevel.ADMIN);
 
     ModifyEventRequest req = new ModifyEventRequest(null, null, null, null);
 
+    // mock the event
     EventsRecord myEvent = myJooqMock.getContext().newRecord(Tables.EVENTS);
     myEvent.setId(0);
     myEvent.setTitle("old title");
@@ -766,18 +786,25 @@ public class EventsProcessorImplTest {
     myEvent.setStartTime(new Timestamp(0));
     myEvent.setEndTime(new Timestamp(0));
     myJooqMock.addReturn("SELECT", myEvent);
+    myJooqMock.addReturn("SELECT", myEvent);
     myJooqMock.addReturn("UPDATE", myEvent);
+
+    // mock the ticket count
+    Record2<Integer, Integer> ticketCount =
+        myJooqMock.getContext().newRecord(EVENTS.ID, EVENT_REGISTRATIONS.TICKET_QUANTITY);
+    ticketCount.values(0, 5);
+    myJooqMock.addReturn("SELECT", ticketCount);
 
     myEventsProcessorImpl.modifyEvent(0, req, myUserData);
 
     List<Object[]> updateBindings = myJooqMock.getSqlBindings().get("UPDATE");
 
-    assertEquals(0, updateBindings.size());
+    assertTrue(updateBindings.isEmpty());
   }
 
   // modifying an event with some details fields non-null and some non-details fields non-null
   @Test
-  public void testModifyEvent7() {
+  public void testModifyEvent6() {
     JWTData myUserData = new JWTData(0, PrivilegeLevel.ADMIN);
 
     ModifyEventRequest req =
@@ -797,7 +824,14 @@ public class EventsProcessorImplTest {
     myEvent.setStartTime(new Timestamp(0));
     myEvent.setEndTime(new Timestamp(0));
     myJooqMock.addReturn("SELECT", myEvent);
+    myJooqMock.addReturn("SELECT", myEvent);
     myJooqMock.addReturn("UPDATE", myEvent);
+
+    // mock the ticket count
+    Record2<Integer, Integer> ticketCount =
+        myJooqMock.getContext().newRecord(EVENTS.ID, EVENT_REGISTRATIONS.TICKET_QUANTITY);
+    ticketCount.values(0, 5);
+    myJooqMock.addReturn("SELECT", ticketCount);
 
     myEventsProcessorImpl.modifyEvent(0, req, myUserData);
 

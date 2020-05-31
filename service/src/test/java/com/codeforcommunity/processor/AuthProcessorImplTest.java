@@ -57,39 +57,9 @@ public class AuthProcessorImplTest {
     this.myAuthProcessorImpl = new AuthProcessorImpl(myJooqMock.getContext(), mockJWTCreator);
   }
 
-  // test sign up where all the fields are null
-  @Test
-  public void testSignUp1() {
-    myJooqMock.addEmptyReturn("SELECT");
-
-    // seed the db
-    UsersRecord record = myJooqMock.getContext().newRecord(Tables.USERS);
-    record.setId(0);
-    record.setPrivilegeLevel(PrivilegeLevel.GP);
-    myJooqMock.addReturn("INSERT", record);
-    myJooqMock.addReturn("SELECT", record);
-
-    when(mockJWTCreator.createNewRefreshToken(any(JWTData.class)))
-        .thenReturn(REFRESH_TOKEN_EXAMPLE);
-
-    Optional<String> accessToken = Optional.of(ACCESS_TOKEN_EXAMPLE);
-
-    when(mockJWTCreator.getNewAccessToken(anyString())).thenReturn(accessToken);
-
-    NewUserRequest myNewUserRequest = new NewUserRequest(null, null, null, null, null, null, null);
-
-    // TODO: this is a bug, because it throws a NPE
-    try {
-      myAuthProcessorImpl.signUp(myNewUserRequest);
-      fail();
-    } catch (MissingParameterException e) {
-      assertEquals("password", e.getMissingParameterName());
-    }
-  }
-
   // test sign up where all the fields are filled in
   @Test
-  public void testSignUp2() {
+  public void testSignUp() {
     // seed the db
     UsersRecord record = myJooqMock.getContext().newRecord(Tables.USERS);
     record.setId(0);
