@@ -261,7 +261,6 @@ public class EventsProcessorImpl implements IEventsProcessor {
             .join(USERS)
             .on(EVENT_REGISTRATIONS.USER_ID.eq(USERS.ID))
             .where(EVENT_REGISTRATIONS.EVENT_ID.eq(eventId))
-            .and(EVENT_REGISTRATIONS.REGISTRATION_STATUS.eq(EventRegistrationStatus.ACTIVE))
             .fetchInto(RSVP.class);
 
     List<RSVP> rsvpContacts =
@@ -282,7 +281,6 @@ public class EventsProcessorImpl implements IEventsProcessor {
             .join(CONTACTS)
             .on(EVENT_REGISTRATIONS.USER_ID.eq(CONTACTS.USER_ID))
             .where(EVENT_REGISTRATIONS.EVENT_ID.eq(eventId))
-            .and(EVENT_REGISTRATIONS.REGISTRATION_STATUS.eq(EventRegistrationStatus.ACTIVE))
             .fetchInto(RSVP.class);
 
     List<RSVP> rsvpChildren =
@@ -302,7 +300,6 @@ public class EventsProcessorImpl implements IEventsProcessor {
             .join(CHILDREN)
             .on(EVENT_REGISTRATIONS.USER_ID.eq(CHILDREN.USER_ID))
             .where(EVENT_REGISTRATIONS.EVENT_ID.eq(eventId))
-            .and(EVENT_REGISTRATIONS.REGISTRATION_STATUS.eq(EventRegistrationStatus.ACTIVE))
             .fetchInto(RSVP.class);
 
     rsvpUsers.addAll(rsvpContacts);
