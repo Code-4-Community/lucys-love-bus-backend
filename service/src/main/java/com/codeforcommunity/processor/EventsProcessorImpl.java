@@ -263,7 +263,7 @@ public class EventsProcessorImpl implements IEventsProcessor {
                   event.getCapacity(),
                   event.getThumbnail(),
                   details,
-                  signedUp.get(event.getId()));
+                  signedUp.getOrDefault(event.getId(), false));
             })
         .collect(Collectors.toList());
   }

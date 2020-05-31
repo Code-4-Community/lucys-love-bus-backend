@@ -25,6 +25,7 @@ import com.codeforcommunity.enums.PrivilegeLevel;
 import com.codeforcommunity.enums.VerificationKeyType;
 import com.codeforcommunity.exceptions.AuthException;
 import com.codeforcommunity.exceptions.InvalidPasswordException;
+import com.codeforcommunity.exceptions.MissingParameterException;
 import com.codeforcommunity.exceptions.UserDoesNotExistException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -75,13 +76,15 @@ public class AuthProcessorImplTest {
 
     when(mockJWTCreator.getNewAccessToken(anyString())).thenReturn(accessToken);
 
-    NewUserRequest myNewUserRequest = new NewUserRequest(null, null, null, null, null, null, null);
+    NewUserRequest myNewUserRequest = new NewUserRequest(
+        null, null, null, null, null, null, null);
 
+    // TODO: this is a bug, because it throws a NPE
     try {
       myAuthProcessorImpl.signUp(myNewUserRequest);
       fail();
-    } catch (NullPointerException e) {
-      // TODO: are you certain this is what you want?
+    } catch (MissingParameterException e) {
+      assertEquals("password", e.getMissingParameterName());
     }
   }
 
@@ -93,7 +96,9 @@ public class AuthProcessorImplTest {
     record.setId(0);
     record.setPrivilegeLevel(PrivilegeLevel.GP);
     myJooqMock.addReturn("INSERT", record);
+    myJooqMock.addEmptyReturn("SELECT");
     myJooqMock.addReturn("SELECT", record);
+    myJooqMock.addEmptyReturn("UPDATE");
 
     when(mockJWTCreator.createNewRefreshToken(any(JWTData.class)))
         .thenReturn(REFRESH_TOKEN_EXAMPLE);
@@ -112,7 +117,6 @@ public class AuthProcessorImplTest {
             "555-555-5555",
             "Peanuts");
 
-    // TODO: it throws a EmailAlreadyInUseException, not sure what to make of this
     SessionResponse res = myAuthProcessorImpl.signUp(req);
 
     assertEquals(res.getAccessToken(), ACCESS_TOKEN_EXAMPLE);

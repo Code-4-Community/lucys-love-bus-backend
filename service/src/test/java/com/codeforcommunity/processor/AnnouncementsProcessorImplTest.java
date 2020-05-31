@@ -150,13 +150,6 @@ public class AnnouncementsProcessorImplTest {
     announcement1.setDescription("the first announcement description");
     myJooqMock.addReturn("SELECT", announcement1);
 
-    AnnouncementsRecord announcement2 = myJooqMock.getContext().newRecord(Tables.ANNOUNCEMENTS);
-    announcement2.setId(1);
-    announcement2.setTitle("the second announcement title");
-    announcement2.setCreated(new Timestamp(START_TIMESTAMP_TEST2));
-    announcement2.setDescription("the second announcement description");
-    myJooqMock.addReturn("SELECT", announcement2);
-
     GetAnnouncementsResponse res = myAnnouncementsProcessorImpl.getAnnouncements(req);
 
     assertEquals(res.getTotalCount(), 1);
@@ -328,6 +321,8 @@ public class AnnouncementsProcessorImplTest {
   @Test
   public void testGetEventSpecificAnnouncements2() {
     GetEventSpecificAnnouncementsRequest req = new GetEventSpecificAnnouncementsRequest(3);
+
+    myJooqMock.addEmptyReturn("SELECT");
 
     try {
       myAnnouncementsProcessorImpl.getEventSpecificAnnouncements(req);

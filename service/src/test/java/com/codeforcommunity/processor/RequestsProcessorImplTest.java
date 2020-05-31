@@ -1,6 +1,8 @@
 package com.codeforcommunity.processor;
 
+import static org.jooq.generated.Tables.PF_REQUESTS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -8,14 +10,16 @@ import static org.mockito.Mockito.when;
 import com.codeforcommunity.JooqMock;
 import com.codeforcommunity.auth.JWTData;
 import com.codeforcommunity.dto.pfrequests.RequestData;
+import com.codeforcommunity.dto.pfrequests.RequestStatusData;
 import com.codeforcommunity.enums.PrivilegeLevel;
 import com.codeforcommunity.enums.RequestStatus;
 import com.codeforcommunity.exceptions.AdminOnlyRouteException;
 import com.codeforcommunity.exceptions.OutstandingRequestException;
-import com.codeforcommunity.exceptions.ResourceNotOwnedException;
 import com.codeforcommunity.exceptions.WrongPrivilegeException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+import org.jooq.Record3;
 import org.jooq.Record6;
 import org.jooq.generated.Tables;
 import org.jooq.generated.tables.records.PfRequestsRecord;
@@ -26,6 +30,7 @@ import org.junit.jupiter.api.Test;
 
 // Contains tests for RequestsProcessorImpl.java in main
 public class RequestsProcessorImplTest {
+
   private JooqMock myJooqMock;
   private RequestsProcessorImpl myRequestsProcessorImpl;
 
@@ -292,98 +297,61 @@ public class RequestsProcessorImplTest {
     assertEquals(myJooqMock.getSqlBindings().get("UPDATE").get(0)[1], myPFReqRecord.getUserId());
   }
 
-  // test for exception when getting request status from an unauthorized user
+  // test getting request statuses when there are none
   @Test
   public void testGetRequestStatus1() {
-    // mock a general user
-    JWTData myUserData = mock(JWTData.class);
-    when(myUserData.getPrivilegeLevel()).thenReturn(PrivilegeLevel.GP);
-    when(myUserData.getUserId()).thenReturn(1);
+    JWTData myUserData = new JWTData(1, PrivilegeLevel.GP);
 
-    // mock the DB for PF requests
-    PfRequestsRecord myPFReqRecord = myJooqMock.getContext().newRecord(Tables.PF_REQUESTS);
-    myPFReqRecord.setId(0);
-    myPFReqRecord.setUserId(0);
-    myJooqMock.addReturn("SELECT", myPFReqRecord);
+    myJooqMock.addEmptyReturn("SELECT");
 
-    // seed the db with a user
-    UsersRecord record = myJooqMock.getContext().newRecord(Tables.USERS);
-    record.setId(0);
-    myJooqMock.addReturn("SELECT", record);
-
-    int testRequestID = 0;
-
-    try {
-      myRequestsProcessorImpl.getRequestStatus(testRequestID, myUserData);
-      fail();
-    } catch (ResourceNotOwnedException e) {
-      assertEquals(e.getResource(), "request " + testRequestID);
-    }
+    List<RequestStatusData> statuses = myRequestsProcessorImpl.getRequestStatuses(myUserData);
+    assertTrue(statuses.isEmpty());
   }
 
-  // test for pending request status
+  // test getting request statuses when there is one
   @Test
   public void testGetRequestStatus2() {
-    // mock a general user
-    JWTData myUserData = mock(JWTData.class);
-    when(myUserData.getPrivilegeLevel()).thenReturn(PrivilegeLevel.GP);
-    when(myUserData.getUserId()).thenReturn(0);
+    JWTData myUserData = new JWTData(1, PrivilegeLevel.GP);
 
     // mock the DB for PF requests
-    PfRequestsRecord myPFReqRecord = myJooqMock.getContext().newRecord(Tables.PF_REQUESTS);
-    myPFReqRecord.setId(0);
-    myPFReqRecord.setUserId(0);
-    myPFReqRecord.setStatus(RequestStatus.PENDING);
+    Record3<Integer, RequestStatus, Timestamp> myPFReqRecord =
+        myJooqMock.getContext().newRecord(PF_REQUESTS.ID, PF_REQUESTS.STATUS, PF_REQUESTS.CREATED);
+    myPFReqRecord.values(1, RequestStatus.PENDING, new Timestamp(0));
     myJooqMock.addReturn("SELECT", myPFReqRecord);
 
-    // seed the db with a user
-    UsersRecord record = myJooqMock.getContext().newRecord(Tables.USERS);
-    record.setId(0);
-    myJooqMock.addReturn("SELECT", record);
-
-    int testRequestID = 0;
-
-    assertEquals(
-        myRequestsProcessorImpl.getRequestStatus(testRequestID, myUserData), RequestStatus.PENDING);
+    List<RequestStatusData> statuses = myRequestsProcessorImpl.getRequestStatuses(myUserData);
+    assertEquals(1, statuses.size());
+    assertEquals(1, statuses.get(0).getId());
+    assertEquals(RequestStatus.PENDING, statuses.get(0).getStatus());
+    assertEquals(new Timestamp(0), statuses.get(0).getCreated());
   }
 
-  // test for approved request status
+  // test getting request statuses when there are multiple
   @Test
   public void testGetRequestStatus3() {
-    // mock an admin user
-    JWTData myUserData = mock(JWTData.class);
-    when(myUserData.getPrivilegeLevel()).thenReturn(PrivilegeLevel.ADMIN);
+    JWTData myUserData = new JWTData(1, PrivilegeLevel.GP);
 
     // mock the DB for PF requests
-    PfRequestsRecord myPFReqRecord = myJooqMock.getContext().newRecord(Tables.PF_REQUESTS);
-    myPFReqRecord.setId(0);
-    myPFReqRecord.setStatus(RequestStatus.APPROVED);
-    myJooqMock.addReturn("SELECT", myPFReqRecord);
+    Record3<Integer, RequestStatus, Timestamp> myPFReqRecord1 =
+        myJooqMock.getContext().newRecord(PF_REQUESTS.ID, PF_REQUESTS.STATUS, PF_REQUESTS.CREATED);
+    myPFReqRecord1.values(1, RequestStatus.APPROVED, new Timestamp(0));
 
-    int testRequestID = 0;
+    Record3<Integer, RequestStatus, Timestamp> myPFReqRecord2 =
+        myJooqMock.getContext().newRecord(PF_REQUESTS.ID, PF_REQUESTS.STATUS, PF_REQUESTS.CREATED);
+    myPFReqRecord2.values(2, RequestStatus.REJECTED, new Timestamp(1000));
 
-    assertEquals(
-        myRequestsProcessorImpl.getRequestStatus(testRequestID, myUserData),
-        RequestStatus.APPROVED);
-  }
+    List<Record3<Integer, RequestStatus, Timestamp>> myPFReqRecords = new ArrayList<>();
+    myPFReqRecords.add(myPFReqRecord1);
+    myPFReqRecords.add(myPFReqRecord2);
+    myJooqMock.addReturn("SELECT", myPFReqRecords);
 
-  // test for rejected request status
-  @Test
-  public void testGetRequestStatus4() {
-    // mock an admin user
-    JWTData myUserData = mock(JWTData.class);
-    when(myUserData.getPrivilegeLevel()).thenReturn(PrivilegeLevel.ADMIN);
-
-    // mock the DB for PF requests
-    PfRequestsRecord myPFReqRecord = myJooqMock.getContext().newRecord(Tables.PF_REQUESTS);
-    myPFReqRecord.setId(0);
-    myPFReqRecord.setStatus(RequestStatus.REJECTED);
-    myJooqMock.addReturn("SELECT", myPFReqRecord);
-
-    int testRequestID = 0;
-
-    assertEquals(
-        myRequestsProcessorImpl.getRequestStatus(testRequestID, myUserData),
-        RequestStatus.REJECTED);
+    List<RequestStatusData> statuses = myRequestsProcessorImpl.getRequestStatuses(myUserData);
+    assertEquals(2, statuses.size());
+    assertEquals(1, statuses.get(0).getId());
+    assertEquals(RequestStatus.APPROVED, statuses.get(0).getStatus());
+    assertEquals(new Timestamp(0), statuses.get(0).getCreated());
+    assertEquals(2, statuses.get(1).getId());
+    assertEquals(RequestStatus.REJECTED, statuses.get(1).getStatus());
+    assertEquals(new Timestamp(1000), statuses.get(1).getCreated());
   }
 }

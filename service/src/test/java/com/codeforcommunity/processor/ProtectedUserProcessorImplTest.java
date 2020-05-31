@@ -17,6 +17,7 @@ import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
 import org.jooq.generated.Tables;
+import org.jooq.generated.tables.records.ChildrenRecord;
 import org.jooq.generated.tables.records.ContactsRecord;
 import org.jooq.generated.tables.records.EventRegistrationsRecord;
 import org.jooq.generated.tables.records.PfRequestsRecord;
@@ -117,32 +118,44 @@ public class ProtectedUserProcessorImplTest {
   // test properly deleting a user
   @Test
   public void testDeleteUser() {
-    JWTData myUser = new JWTData(0, PrivilegeLevel.ADMIN);
+    JWTData myUser = new JWTData(1, PrivilegeLevel.ADMIN);
 
     // mock four associated tables with the user
-    EventRegistrationsRecord erRecord = new EventRegistrationsRecord();
+    EventRegistrationsRecord erRecord = myJooqMock.getContext().newRecord(Tables.EVENT_REGISTRATIONS);
     erRecord.setUserId(0);
-    VerificationKeysRecord vkRecord = new VerificationKeysRecord();
+    erRecord.setId(1);
+    VerificationKeysRecord vkRecord = myJooqMock.getContext().newRecord(Tables.VERIFICATION_KEYS);
     vkRecord.setUserId(0);
-    PfRequestsRecord pfRecord = new PfRequestsRecord();
+    vkRecord.setId("2");
+    PfRequestsRecord pfRecord = myJooqMock.getContext().newRecord(Tables.PF_REQUESTS);
     pfRecord.setUserId(0);
-    UsersRecord usersRecord = new UsersRecord();
+    pfRecord.setId(3);
+    ChildrenRecord childrenRecord = myJooqMock.getContext().newRecord(Tables.CHILDREN);
+    childrenRecord.setUserId(0);
+    childrenRecord.setId(4);
+    ContactsRecord contactsRecord = myJooqMock.getContext().newRecord(Tables.CONTACTS);
+    contactsRecord.setUserId(0);
+    contactsRecord.setId(5);
+    UsersRecord usersRecord = myJooqMock.getContext().newRecord(Tables.USERS);
     usersRecord.setId(0);
 
-    myJooqMock.addReturn("SELECT", erRecord);
-    myJooqMock.addReturn("SELECT", vkRecord);
-    myJooqMock.addReturn("SELECT", pfRecord);
-    myJooqMock.addReturn("SELECT", usersRecord);
     myJooqMock.addReturn("DELETE", erRecord);
     myJooqMock.addReturn("DELETE", vkRecord);
     myJooqMock.addReturn("DELETE", pfRecord);
+    myJooqMock.addReturn("DELETE", childrenRecord);
+    myJooqMock.addReturn("DELETE", contactsRecord);
     myJooqMock.addReturn("DELETE", usersRecord);
 
     myProtectedUserProcessorImpl.deleteUser(myUser);
-    Object bindings = myJooqMock.getSqlStrings();
+    List<Object[]> bindings = myJooqMock.getSqlBindings().get("DELETE");
 
-    // TODO: add a feature in JooqMock to help with executeAsync()
-    fail("TODO!!!");
+    assertEquals(6, bindings.size());
+    assertEquals(myUser.getUserId(), bindings.get(0)[0]);
+    assertEquals(myUser.getUserId(), bindings.get(1)[0]);
+    assertEquals(myUser.getUserId(), bindings.get(2)[0]);
+    assertEquals(myUser.getUserId(), bindings.get(3)[0]);
+    assertEquals(myUser.getUserId(), bindings.get(4)[0]);
+    assertEquals(myUser.getUserId(), bindings.get(5)[0]);
   }
 
   // test changing the password if the user is nulll

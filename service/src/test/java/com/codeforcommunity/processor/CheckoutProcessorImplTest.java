@@ -1,7 +1,6 @@
 package com.codeforcommunity.processor;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -136,17 +135,7 @@ public class CheckoutProcessorImplTest {
     List<LineItemRequest> lineItems = new ArrayList<>();
     lineItems.add(lineItem1);
 
-    // for mocking getting spots left
-    Record1<Integer> myTicketsRecord =
-        myJooqMock.getContext().newRecord(Tables.EVENT_REGISTRATIONS.TICKET_QUANTITY);
-    myTicketsRecord.values(1);
-    myJooqMock.addReturn("SELECT", myTicketsRecord);
-
-    Record1<Integer> myEventRegistration =
-        myJooqMock.getContext().newRecord(Tables.EVENTS.CAPACITY);
-    myEventRegistration.values(5);
-    myJooqMock.addReturn("SELECT", myEventRegistration);
-
+    // for mocking the event
     EventsRecord myEvent = myJooqMock.getContext().newRecord(Tables.EVENTS);
     myEvent.setId(0);
     myEvent.setTitle("Example title");
@@ -158,13 +147,23 @@ public class CheckoutProcessorImplTest {
     myEvent.setThumbnail("random url");
     myJooqMock.addReturn("SELECT", myEvent);
 
+    // for mocking getting spots left
+    Record1<Integer> myTicketsRecord =
+        myJooqMock.getContext().newRecord(Tables.EVENT_REGISTRATIONS.TICKET_QUANTITY);
+    myTicketsRecord.values(1);
+    myJooqMock.addReturn("SELECT", myTicketsRecord);
+
+    Record1<Integer> myEventRegistration =
+        myJooqMock.getContext().newRecord(Tables.EVENTS.CAPACITY);
+    myEventRegistration.values(5);
+    myJooqMock.addReturn("SELECT", myEventRegistration);
+
     // for mocking the stored event
     EventRegistrationsRecord eventRegistrationFromLineItem =
         myJooqMock.getContext().newRecord(Tables.EVENT_REGISTRATIONS);
     eventRegistrationFromLineItem.setUserId(myUserData.getUserId());
-    // eventRegistrationFromLineItem.setEventId(lineItem1.getId());
     eventRegistrationFromLineItem.setRegistrationStatus(EventRegistrationStatus.PAYMENT_INCOMPLETE);
-    eventRegistrationFromLineItem.setTicketQuantity(lineItem1.getQuantity().intValue());
+    eventRegistrationFromLineItem.setTicketQuantity(lineItem1.getQuantity());
     eventRegistrationFromLineItem.setStripeCheckoutSessionId(null);
     myJooqMock.addReturn("INSERT", eventRegistrationFromLineItem);
 
@@ -172,15 +171,95 @@ public class CheckoutProcessorImplTest {
 
     myCheckoutProcessorImpl.createEventRegistration(req, myUserData);
 
-    Object[] insertBindings = myJooqMock.getSqlBindings().get("INSERT").get(0);
+    List<Object[]> insertBindings = myJooqMock.getSqlBindings().get("INSERT");
+    List<Object[]> selectBindings = myJooqMock.getSqlBindings().get("SELECT");
 
-    assertEquals(5, insertBindings.length);
-    assertEquals(myUserData.getUserId(), insertBindings[0]);
-    // assertEquals(lineItem1.getId(), insertBindings[1]);
-    assertEquals(lineItem1.getQuantity(), Long.valueOf((int) insertBindings[2]));
-    assertEquals(2, insertBindings[3]);
-    assertNull(insertBindings[4]);
+    assertEquals(1, insertBindings.size());
+    assertEquals(3, selectBindings.size());
+    assertEquals(myEvent.getId(), selectBindings.get(0)[0]);
+    assertEquals(myEvent.getId(), selectBindings.get(1)[0]);
+    assertEquals(myEvent.getId(), selectBindings.get(2)[0]);
   }
 
-  // TODO: test for adding multiple line items, figure out how to resolve the TooManyRowsException
+  // test for adding multiple line items
+  @Test
+  public void testCreateEventRegistration4() {
+    JWTData myUserData = new JWTData(0, PrivilegeLevel.GP);
+
+    // for mocking the events
+    EventsRecord myEvent1 = myJooqMock.getContext().newRecord(Tables.EVENTS);
+    myEvent1.setId(0);
+    myEvent1.setTitle("Example title");
+    myEvent1.setDescription("Example description");
+    myEvent1.setCapacity(10);
+    myEvent1.setLocation("Boston");
+    myEvent1.setStartTime(new Timestamp(0));
+    myEvent1.setEndTime(new Timestamp(10000));
+    myEvent1.setThumbnail("random url");
+
+    EventsRecord myEvent2 = myJooqMock.getContext().newRecord(Tables.EVENTS);
+    myEvent2.setId(1);
+    myEvent2.setTitle("Join us for community outreach");
+    myEvent2.setDescription("Community outreach");
+    myEvent2.setCapacity(15);
+    myEvent2.setLocation("Los Angeles");
+
+    List<EventsRecord> myEvents = new ArrayList<>();
+    myEvents.add(myEvent1);
+    myEvents.add(myEvent2);
+    myJooqMock.addReturn("SELECT", myEvents);
+
+    // for mocking getting spots left
+    Record1<Integer> myTicketsRecord1 =
+        myJooqMock.getContext().newRecord(Tables.EVENT_REGISTRATIONS.TICKET_QUANTITY);
+    myTicketsRecord1.values(1);
+    myJooqMock.addReturn("SELECT", myTicketsRecord1);
+
+    Record1<Integer> myEventRegistration1 =
+        myJooqMock.getContext().newRecord(Tables.EVENTS.CAPACITY);
+    myEventRegistration1.values(6);
+    myJooqMock.addReturn("SELECT", myEventRegistration1);
+
+    Record1<Integer> myTicketsRecord2 =
+        myJooqMock.getContext().newRecord(Tables.EVENT_REGISTRATIONS.TICKET_QUANTITY);
+    myTicketsRecord2.values(1);
+    myJooqMock.addReturn("SELECT", myTicketsRecord2);
+
+    Record1<Integer> myEventRegistration2 =
+        myJooqMock.getContext().newRecord(Tables.EVENTS.CAPACITY);
+    myEventRegistration2.values(5);
+    myJooqMock.addReturn("SELECT", myEventRegistration2);
+
+    LineItemRequest lineItem1 = new LineItemRequest(0, 1);
+    LineItemRequest lineItem2 = new LineItemRequest(1, 3);
+
+    List<LineItemRequest> lineItems = new ArrayList<>();
+    lineItems.add(lineItem1);
+    lineItems.add(lineItem2);
+
+    // for mocking the stored event
+    EventRegistrationsRecord eventRegistrationFromLineItem =
+        myJooqMock.getContext().newRecord(Tables.EVENT_REGISTRATIONS);
+    eventRegistrationFromLineItem.setUserId(myUserData.getUserId());
+    eventRegistrationFromLineItem.setRegistrationStatus(EventRegistrationStatus.PAYMENT_INCOMPLETE);
+    eventRegistrationFromLineItem.setTicketQuantity(lineItem1.getQuantity());
+    eventRegistrationFromLineItem.setStripeCheckoutSessionId(null);
+    myJooqMock.addReturn("INSERT", eventRegistrationFromLineItem);
+
+    PostCreateEventRegistrations req = new PostCreateEventRegistrations(lineItems);
+
+    myCheckoutProcessorImpl.createEventRegistration(req, myUserData);
+
+    List<Object[]> insertBindings = myJooqMock.getSqlBindings().get("INSERT");
+    List<Object[]> selectBindings = myJooqMock.getSqlBindings().get("SELECT");
+
+    assertEquals(2, insertBindings.size());
+    assertEquals(5, selectBindings.size());
+    assertEquals(myEvent1.getId(), selectBindings.get(0)[0]);
+    assertEquals(myEvent2.getId(), selectBindings.get(0)[1]);
+    assertEquals(myEvent1.getId(), selectBindings.get(1)[0]);
+    assertEquals(myEvent1.getId(), selectBindings.get(2)[0]);
+    assertEquals(myEvent2.getId(), selectBindings.get(3)[0]);
+    assertEquals(myEvent2.getId(), selectBindings.get(4)[0]);
+  }
 }

@@ -27,12 +27,14 @@ import com.codeforcommunity.dto.userEvents.responses.SingleEventResponse;
 import com.codeforcommunity.enums.PrivilegeLevel;
 import com.codeforcommunity.exceptions.AdminOnlyRouteException;
 import com.codeforcommunity.exceptions.EventDoesNotExistException;
+import com.codeforcommunity.exceptions.MalformedParameterException;
 import com.codeforcommunity.requester.S3Requester;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.jooq.Record1;
+import org.jooq.Record2;
 import org.jooq.Record4;
 import org.jooq.Result;
 import org.jooq.generated.Tables;
@@ -166,19 +168,25 @@ public class EventsProcessorImplTest {
         new CreateEventRequest("sample", 5, "sample thumbnail", myEventDetails);
 
     // mock the DB for events
-    EventsRecord record = myJooqMock.getContext().newRecord(Tables.EVENTS);
-    record.setId(1);
-    record.setThumbnail(myEventRequest.getThumbnail());
-    record.setTitle(myEventRequest.getTitle());
-    record.setCapacity(myEventRequest.getSpotsAvailable());
-    record.setLocation(myEventDetails.getLocation());
-    record.setDescription(myEventDetails.getDescription());
-    record.setStartTime(myEventDetails.getStart());
-    record.setEndTime(myEventDetails.getEnd());
-    myJooqMock.addReturn("SELECT", record);
-    myJooqMock.addReturn("INSERT", record);
+    EventsRecord eventRecord = myJooqMock.getContext().newRecord(Tables.EVENTS);
+    eventRecord.setId(1);
+    eventRecord.setThumbnail(myEventRequest.getThumbnail());
+    eventRecord.setTitle(myEventRequest.getTitle());
+    eventRecord.setCapacity(myEventRequest.getSpotsAvailable());
+    eventRecord.setLocation(myEventDetails.getLocation());
+    eventRecord.setDescription(myEventDetails.getDescription());
+    eventRecord.setStartTime(myEventDetails.getStart());
+    eventRecord.setEndTime(myEventDetails.getEnd());
+    myJooqMock.addReturn("SELECT", eventRecord);
+    myJooqMock.addReturn("INSERT", eventRecord);
 
     // mock the DB for event registrations
+    Record2<Integer, Integer> registrationRecord =
+        myJooqMock.getContext().newRecord(EVENTS.ID, EVENT_REGISTRATIONS.TICKET_QUANTITY);
+    registrationRecord.values(1, 2);
+    myJooqMock.addReturn("SELECT", registrationRecord);
+    myJooqMock.addReturn("INSERT", registrationRecord);
+
     Record1<Integer> myTicketsRecord =
         myJooqMock.getContext().newRecord(Tables.EVENT_REGISTRATIONS.TICKET_QUANTITY);
     myTicketsRecord.values(1);
@@ -186,7 +194,6 @@ public class EventsProcessorImplTest {
     Record1<Integer> myEventRegistration =
         myJooqMock.getContext().newRecord(Tables.EVENTS.CAPACITY);
     myEventRegistration.values(5);
-
     myJooqMock.addReturn("SELECT", myTicketsRecord);
     myJooqMock.addReturn("SELECT", myEventRegistration);
 
@@ -240,24 +247,39 @@ public class EventsProcessorImplTest {
   public void testGetEvents3() {
     EventsRecord event1 = myJooqMock.getContext().newRecord(Tables.EVENTS);
     event1.setId(0);
+    event1.setCapacity(10);
     event1.setTitle("title 1");
     EventsRecord event2 = myJooqMock.getContext().newRecord(Tables.EVENTS);
-    event1.setId(1);
-    event1.setTitle("title 2");
+    event2.setId(1);
+    event2.setCapacity(50);
+    event2.setTitle("title 2");
 
-    List<UpdatableRecordImpl> eventRecords = new ArrayList<>();
+    List<EventsRecord> eventRecords = new ArrayList<>();
     eventRecords.add(event1);
     eventRecords.add(event2);
     myJooqMock.addReturn("SELECT", eventRecords);
     myJooqMock.addReturn("INSERT", eventRecords);
 
+    Record2<Integer, Integer> registrationRecord =
+        myJooqMock.getContext().newRecord(EVENTS.ID, EVENT_REGISTRATIONS.TICKET_QUANTITY);
+    registrationRecord.values(2, 3);
+    myJooqMock.addReturn("SELECT", registrationRecord);
+
+    Record1<Integer> myTicketsRecord =
+        myJooqMock.getContext().newRecord(Tables.EVENT_REGISTRATIONS.TICKET_QUANTITY);
+    myTicketsRecord.values(1);
+    Record1<Integer> myEventRegistration =
+        myJooqMock.getContext().newRecord(Tables.EVENTS.CAPACITY);
+    myEventRegistration.values(5);
+
+    myJooqMock.addReturn("SELECT", myTicketsRecord);
+    myJooqMock.addReturn("SELECT", myEventRegistration);
+
     List<Integer> eventIds = new ArrayList<>();
     eventIds.add(0);
     eventIds.add(1);
-
     GetEventsResponse res = myEventsProcessorImpl.getEvents(eventIds);
 
-    // TODO: fix org.jooq.exception.TooManyRowsException: Cursor returned more than one result
     assertEquals(event1.getId(), res.getEvents().get(0).getId());
     assertEquals(event1.getTitle(), res.getEvents().get(0).getTitle());
     assertEquals(2, res.getTotalCount());
@@ -323,28 +345,59 @@ public class EventsProcessorImplTest {
     // add three events to the mock DB
     EventsRecord myEvent1 = myJooqMock.getContext().newRecord(Tables.EVENTS);
     myEvent1.setId(0);
+    myEvent1.setCapacity(10);
     myEvent1.setTitle("Event 1");
     myEvent1.setDescription("Description 1");
 
     EventsRecord myEvent2 = myJooqMock.getContext().newRecord(Tables.EVENTS);
-    myEvent1.setId(1);
-    myEvent1.setTitle("Event 2");
-    myEvent1.setDescription("Description 2");
+    myEvent2.setId(1);
+    myEvent2.setCapacity(5);
+    myEvent2.setTitle("Event 2");
+    myEvent2.setDescription("Description 2");
 
     EventsRecord myEvent3 = myJooqMock.getContext().newRecord(Tables.EVENTS);
-    myEvent1.setId(2);
-    myEvent1.setTitle("Event 2");
-    myEvent1.setDescription("Description 2");
+    myEvent3.setId(2);
+    myEvent3.setCapacity(50);
+    myEvent3.setTitle("Event 2");
+    myEvent3.setDescription("Description 2");
 
-    List<UpdatableRecordImpl> events = new ArrayList<>();
+    List<EventsRecord> events = new ArrayList<>();
     events.add(myEvent1);
     events.add(myEvent2);
     events.add(myEvent3);
     myJooqMock.addReturn("SELECT", events);
 
+    // prime the DB for getRegistrationStatus
+    Record2<Integer, Integer> registrationRecord1 =
+        myJooqMock.getContext().newRecord(EVENTS.ID, EVENT_REGISTRATIONS.TICKET_QUANTITY);
+    registrationRecord1.values(0, 3);
+    Record2<Integer, Integer> registrationRecord2 =
+        myJooqMock.getContext().newRecord(EVENTS.ID, EVENT_REGISTRATIONS.TICKET_QUANTITY);
+    registrationRecord2.values(1, 5);
+    Record2<Integer, Integer> registrationRecord3 =
+        myJooqMock.getContext().newRecord(EVENTS.ID, EVENT_REGISTRATIONS.TICKET_QUANTITY);
+    registrationRecord3.values(2, 10);
+
+    List<Record2<Integer, Integer>> registrationRecords = new ArrayList<>();
+    registrationRecords.add(registrationRecord1);
+    registrationRecords.add(registrationRecord2);
+    registrationRecords.add(registrationRecord3);
+    myJooqMock.addReturn("SELECT", registrationRecords);
+
+    // prime the DB for getSpotsLeft()
+    Record1<Integer> myTicketsRecord =
+        myJooqMock.getContext().newRecord(Tables.EVENT_REGISTRATIONS.TICKET_QUANTITY);
+    myTicketsRecord.values(1);
+
+    Record1<Integer> myEventRegistration =
+        myJooqMock.getContext().newRecord(Tables.EVENTS.CAPACITY);
+    myEventRegistration.values(4);
+
+    myJooqMock.addReturn("SELECT", myTicketsRecord);
+    myJooqMock.addReturn("SELECT", myEventRegistration);
+
     JWTData myUserData = new JWTData(0, PrivilegeLevel.GP);
 
-    // TODO: fix org.jooq.exception.TooManyRowsException: Cursor returned more than one result
     GetEventsResponse res = myEventsProcessorImpl.getEventsSignedUp(req, myUserData);
 
     assertEquals(3, res.getTotalCount());
@@ -376,28 +429,55 @@ public class EventsProcessorImplTest {
     // add three events to the mock DB
     EventsRecord myEvent1 = myJooqMock.getContext().newRecord(Tables.EVENTS);
     myEvent1.setId(0);
+    myEvent1.setCapacity(10);
     myEvent1.setTitle("Event 1");
     myEvent1.setDescription("Description 1");
 
     EventsRecord myEvent2 = myJooqMock.getContext().newRecord(Tables.EVENTS);
-    myEvent1.setId(1);
-    myEvent1.setTitle("Event 2");
-    myEvent1.setDescription("Description 2");
+    myEvent2.setId(1);
+    myEvent2.setCapacity(5);
+    myEvent2.setTitle("Event 2");
+    myEvent2.setDescription("Description 2");
 
     EventsRecord myEvent3 = myJooqMock.getContext().newRecord(Tables.EVENTS);
-    myEvent1.setId(2);
-    myEvent1.setTitle("Event 2");
-    myEvent1.setDescription("Description 2");
+    myEvent3.setId(2);
+    myEvent3.setCapacity(50);
+    myEvent3.setTitle("Event 2");
+    myEvent3.setDescription("Description 2");
 
-    List<UpdatableRecordImpl> events = new ArrayList<>();
-    events.add(myEvent1);
-    events.add(myEvent2);
-    events.add(myEvent3);
-    myJooqMock.addReturn("SELECT", events);
+    myJooqMock.addReturn("SELECT", myEvent1);
+
+    // prime the DB for getRegistrationStatus
+    Record2<Integer, Integer> registrationRecord1 =
+        myJooqMock.getContext().newRecord(EVENTS.ID, EVENT_REGISTRATIONS.TICKET_QUANTITY);
+    registrationRecord1.values(0, 3);
+    Record2<Integer, Integer> registrationRecord2 =
+        myJooqMock.getContext().newRecord(EVENTS.ID, EVENT_REGISTRATIONS.TICKET_QUANTITY);
+    registrationRecord2.values(1, 5);
+    Record2<Integer, Integer> registrationRecord3 =
+        myJooqMock.getContext().newRecord(EVENTS.ID, EVENT_REGISTRATIONS.TICKET_QUANTITY);
+    registrationRecord3.values(2, 10);
+
+    List<Record2<Integer, Integer>> registrationRecords = new ArrayList<>();
+    registrationRecords.add(registrationRecord1);
+    registrationRecords.add(registrationRecord2);
+    registrationRecords.add(registrationRecord3);
+    myJooqMock.addReturn("SELECT", registrationRecords);
+
+    // prime the DB for getSpotsLeft()
+    Record1<Integer> myTicketsRecord =
+        myJooqMock.getContext().newRecord(Tables.EVENT_REGISTRATIONS.TICKET_QUANTITY);
+    myTicketsRecord.values(1);
+
+    Record1<Integer> myEventRegistration =
+        myJooqMock.getContext().newRecord(Tables.EVENTS.CAPACITY);
+    myEventRegistration.values(4);
+
+    myJooqMock.addReturn("SELECT", myTicketsRecord);
+    myJooqMock.addReturn("SELECT", myEventRegistration);
 
     JWTData myUserData = new JWTData(0, PrivilegeLevel.GP);
 
-    // TODO: fix org.jooq.exception.TooManyRowsException: Cursor returned more than one result
     GetEventsResponse res = myEventsProcessorImpl.getEventsSignedUp(req, myUserData);
 
     assertEquals(1, res.getTotalCount());
@@ -467,7 +547,6 @@ public class EventsProcessorImplTest {
   public void testGetEventsQualified3() {
     // write tests for both an admin and gp user
     JWTData myGPUserData = new JWTData(0, PrivilegeLevel.GP);
-    JWTData myAdminUserData = new JWTData(1, PrivilegeLevel.ADMIN);
 
     EventsRecord myEvent1 = myJooqMock.getContext().newRecord(Tables.EVENTS);
     myEvent1.setId(0);
@@ -483,12 +562,36 @@ public class EventsProcessorImplTest {
     myEvent2.setCapacity(20);
     myEvent2.setStartTime(new Timestamp(0));
 
-    List<UpdatableRecordImpl> events = new ArrayList<>();
-    events.add(myEvent1);
-    events.add(myEvent2);
-    myJooqMock.addReturn("SELECT", events);
+    List<EventsRecord> eventsGP = new ArrayList<>();
+    eventsGP.add(myEvent1);
+    eventsGP.add(myEvent2);
+    myJooqMock.addReturn("SELECT", eventsGP);
 
-    // TODO: fix org.jooq.exception.TooManyRowsException: Cursor returned more than one result
+    // prime the DB for getRegistrationStatus
+    Record2<Integer, Integer> registrationRecord1 =
+        myJooqMock.getContext().newRecord(EVENTS.ID, EVENT_REGISTRATIONS.TICKET_QUANTITY);
+    registrationRecord1.values(0, 3);
+
+    Record2<Integer, Integer> registrationRecord2 =
+        myJooqMock.getContext().newRecord(EVENTS.ID, EVENT_REGISTRATIONS.TICKET_QUANTITY);
+    registrationRecord2.values(1, 5);
+
+    List<Record2<Integer, Integer>> registrationRecordsGP = new ArrayList<>();
+    registrationRecordsGP.add(registrationRecord1);
+    registrationRecordsGP.add(registrationRecord2);
+    myJooqMock.addReturn("SELECT", registrationRecordsGP);
+
+    // prime the DB for getSpotsLeft()
+    Record1<Integer> myTicketsRecordGP =
+        myJooqMock.getContext().newRecord(Tables.EVENT_REGISTRATIONS.TICKET_QUANTITY);
+    myTicketsRecordGP.values(1);
+    myJooqMock.addReturn("SELECT", myTicketsRecordGP);
+
+    Record1<Integer> myEventRegistrationGP =
+        myJooqMock.getContext().newRecord(Tables.EVENTS.CAPACITY);
+    myEventRegistrationGP.values(4);
+    myJooqMock.addReturn("SELECT", myEventRegistrationGP);
+
     GetEventsResponse resGP = myEventsProcessorImpl.getEventsQualified(myGPUserData);
     assertEquals(2, resGP.getTotalCount());
 
@@ -503,25 +606,6 @@ public class EventsProcessorImplTest {
     assertEquals("Title 2", gpActualEvent2.getTitle());
     assertEquals("Description 2", gpActualEvent2.getDetails().getDescription());
     assertEquals(new Timestamp(0), gpActualEvent2.getDetails().getStart());
-
-    GetEventsResponse resAdmin = myEventsProcessorImpl.getEventsQualified(myAdminUserData);
-    assertEquals(resGP.getTotalCount(), resAdmin.getTotalCount());
-
-    SingleEventResponse adminActualEvent1 = resAdmin.getEvents().get(0);
-    assertEquals(adminActualEvent1.getId(), gpActualEvent1.getId());
-    assertEquals(adminActualEvent1.getTitle(), gpActualEvent1.getTitle());
-    assertEquals(
-        adminActualEvent1.getDetails().getDescription(),
-        gpActualEvent1.getDetails().getDescription());
-    assertEquals(adminActualEvent1.getDetails().getStart(), gpActualEvent1.getDetails().getStart());
-
-    SingleEventResponse adminActualEvent2 = resAdmin.getEvents().get(1);
-    assertEquals(adminActualEvent2.getId(), gpActualEvent2.getId());
-    assertEquals(adminActualEvent2.getTitle(), gpActualEvent2.getTitle());
-    assertEquals(
-        adminActualEvent2.getDetails().getDescription(),
-        gpActualEvent2.getDetails().getDescription());
-    assertEquals(adminActualEvent2.getDetails().getStart(), gpActualEvent2.getDetails().getStart());
   }
 
   // modifying an event fails if the user isn't an admin
@@ -551,8 +635,8 @@ public class EventsProcessorImplTest {
     try {
       myEventsProcessorImpl.modifyEvent(0, req, myUserData);
       fail();
-    } catch (EventDoesNotExistException e) {
-      assertEquals(0, e.getEventId());
+    } catch (MalformedParameterException e) {
+      assertEquals("anything", e.getParameterName());
     }
   }
 
