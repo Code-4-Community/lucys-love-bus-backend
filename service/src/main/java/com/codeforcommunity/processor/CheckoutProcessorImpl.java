@@ -76,8 +76,7 @@ public class CheckoutProcessorImpl implements ICheckoutProcessor {
     try {
       Session session = Session.create(params);
       String checkoutSessionId = session.getId();
-      session.setSuccessUrl(String.format(checkoutRequest.getSuccessUrl(),
-          checkoutSessionId));
+      session.setSuccessUrl(String.format(checkoutRequest.getSuccessUrl(), checkoutSessionId));
       createPendingEventRegistration(lineItems, user, checkoutSessionId);
       return session.getId();
     } catch (StripeException e) {
@@ -93,11 +92,13 @@ public class CheckoutProcessorImpl implements ICheckoutProcessor {
     return db.selectFrom(EVENTS).where(EVENTS.ID.in(eventIds)).fetchMap(EVENTS.ID);
   }
 
-  private void assertNotRegistered(List<Integer> eventIds, int userId,
-      Map<Integer, EventsRecord> eventsRecordMap) {
+  private void assertNotRegistered(
+      List<Integer> eventIds, int userId, Map<Integer, EventsRecord> eventsRecordMap) {
     List<EventRegistrationsRecord> retrievedRegistrations =
-        db.selectFrom(EVENT_REGISTRATIONS).where(EVENT_REGISTRATIONS.EVENT_ID.in(eventIds))
-            .and(EVENT_REGISTRATIONS.USER_ID.eq(userId)).fetchInto(EventRegistrationsRecord.class);
+        db.selectFrom(EVENT_REGISTRATIONS)
+            .where(EVENT_REGISTRATIONS.EVENT_ID.in(eventIds))
+            .and(EVENT_REGISTRATIONS.USER_ID.eq(userId))
+            .fetchInto(EventRegistrationsRecord.class);
     if (!retrievedRegistrations.isEmpty()) {
       throw new AlreadyRegisteredException(
           eventsRecordMap.get(retrievedRegistrations.get(0).getEventId()).getTitle());
@@ -137,8 +138,8 @@ public class CheckoutProcessorImpl implements ICheckoutProcessor {
       throw new MalformedParameterException("Quantity");
     }
     System.out.println("Quantity is " + quantity);
-    if ((quantity - registration.getTicketQuantity()) > eventDatabaseOperations
-        .getSpotsLeft(eventId)) {
+    if ((quantity - registration.getTicketQuantity())
+        > eventDatabaseOperations.getSpotsLeft(eventId)) {
       throw new InsufficientEventCapacityException(event.getTitle());
     }
   }
@@ -157,10 +158,10 @@ public class CheckoutProcessorImpl implements ICheckoutProcessor {
     int currentQuantity = registration.getTicketQuantity();
     if (quantity > currentQuantity) {
       if (userData.getPrivilegeLevel() == PrivilegeLevel.GP) {
-        List<LineItemRequest> requests = Collections.singletonList(
-            new LineItemRequest(eventId, quantity - currentQuantity));
-        Map<Integer, EventsRecord> retrievedEvents = getEventsRecordMap(
-            Collections.singletonList(eventId));
+        List<LineItemRequest> requests =
+            Collections.singletonList(new LineItemRequest(eventId, quantity - currentQuantity));
+        Map<Integer, EventsRecord> retrievedEvents =
+            getEventsRecordMap(Collections.singletonList(eventId));
         List<LineItem> lineItems = convertLineItems(requests, retrievedEvents);
         return Optional.of(createCheckoutSessionAndEventRegistration(lineItems, userData));
       } else {
@@ -185,8 +186,7 @@ public class CheckoutProcessorImpl implements ICheckoutProcessor {
   @Override
   public void handleStripeCheckoutEventComplete(String payload, String sigHeader) {
     try {
-      Event event = Webhook.constructEvent(payload, sigHeader,
-          this.stripeWebhookSigningSecret);
+      Event event = Webhook.constructEvent(payload, sigHeader, this.stripeWebhookSigningSecret);
       if (event.getType().equals("checkout.session.completed")
           && event.getDataObjectDeserializer().getObject().isPresent()) {
         Session session = (Session) event.getDataObjectDeserializer().getObject().get();
@@ -294,8 +294,8 @@ public class CheckoutProcessorImpl implements ICheckoutProcessor {
    *
    * @throws EventDoesNotExistException if any of the events do not exist
    */
-  private List<LineItem> convertLineItems(List<LineItemRequest> lineItemRequests,
-      Map<Integer, EventsRecord> retrievedEvents) {
+  private List<LineItem> convertLineItems(
+      List<LineItemRequest> lineItemRequests, Map<Integer, EventsRecord> retrievedEvents) {
 
     List<LineItem> lineItems = new ArrayList<>();
 
