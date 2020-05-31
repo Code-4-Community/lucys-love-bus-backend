@@ -29,4 +29,6 @@ public interface IEventsProcessor {
   void deleteEvent(int eventId, JWTData userData);
 
   EventRegistrations getEventRegisteredUsers(int eventId, JWTData userData);
+
+  String getEventRSVPs(int eventId, JWTData userData);
 }
