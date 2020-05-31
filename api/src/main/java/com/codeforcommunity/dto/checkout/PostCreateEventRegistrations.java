@@ -4,15 +4,15 @@ import java.util.List;
 
 public class PostCreateEventRegistrations {
 
-  private List<LineItemRequest> lineItemRequests;
+  private List<LineItemRequest> lineItems;
 
   public PostCreateEventRegistrations() {}
 
-  public PostCreateEventRegistrations(List<LineItemRequest> lineItemRequests) {
-    this.lineItemRequests = lineItemRequests;
+  public PostCreateEventRegistrations(List<LineItemRequest> lineItems) {
+    this.lineItems = lineItems;
   }
 
-  public List<LineItemRequest> getLineItemRequests() {
-    return lineItemRequests;
+  public List<LineItemRequest> getLineItems() {
+    return lineItems;
   }
 }

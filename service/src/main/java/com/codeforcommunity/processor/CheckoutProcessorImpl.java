@@ -86,7 +86,10 @@ public class CheckoutProcessorImpl implements ICheckoutProcessor {
   @Override
   public Optional<String> createEventRegistration(
       PostCreateEventRegistrations request, JWTData user) throws StripeExternalException {
-    List<LineItem> lineItems = convertLineItems(request.getLineItemRequests());
+    if (request.getLineItems().isEmpty()) {
+      throw new MalformedParameterException("lineItems");
+    }
+    List<LineItem> lineItems = convertLineItems(request.getLineItems());
     assertLineItems(lineItems); // assert that quantities are within event capacity
     if (user.getPrivilegeLevel() == PrivilegeLevel.GP) {
       return Optional.of(createCheckoutSessionAndEventRegistration(lineItems, user));
