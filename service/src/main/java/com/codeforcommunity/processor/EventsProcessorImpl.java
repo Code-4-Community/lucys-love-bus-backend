@@ -295,7 +295,7 @@ public class EventsProcessorImpl implements IEventsProcessor {
   /**
    * Returns true if the given user is qualified for the event.
    *
-   * No user can register for an event that has already ended - GP users can only register for
+   * <p>No user can register for an event that has already ended - GP users can only register for
    * events in the next 5 days
    */
   private boolean canUserRegister(Events event, JWTData userData) {
