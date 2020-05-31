@@ -19,11 +19,7 @@ import com.codeforcommunity.exceptions.NotRegisteredException;
 import com.codeforcommunity.exceptions.StripeExternalException;
 import com.codeforcommunity.propertiesLoader.PropertiesLoader;
 import com.stripe.Stripe;
-import com.stripe.exception.SignatureVerificationException;
 import com.stripe.exception.StripeException;
-import com.stripe.model.Event;
-import com.stripe.model.checkout.Session;
-import com.stripe.net.Webhook;
 import com.stripe.param.checkout.SessionCreateParams;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -73,9 +69,14 @@ public class CheckoutProcessorImpl implements ICheckoutProcessor {
             .setCancelUrl(checkoutRequest.getCancelUrl())
             .build();
     try {
-      Session session = Session.create(params);
+      // TODO: fix this when done testing
+      //      Session session = Session.create(params);
+      //      String checkoutSessionId = session.getId();
+      //      session.setSuccessUrl(String.format(checkoutRequest.getSuccessUrl(),
+      // checkoutSessionId));
+      MockSession session = MockSession.create(params, this);
+
       String checkoutSessionId = session.getId();
-      session.setSuccessUrl(String.format(checkoutRequest.getSuccessUrl(), checkoutSessionId));
       createPendingEventRegistration(lineItems, user, checkoutSessionId);
       return session.getId();
     } catch (StripeException e) {
@@ -86,10 +87,10 @@ public class CheckoutProcessorImpl implements ICheckoutProcessor {
   @Override
   public Optional<String> createEventRegistration(
       PostCreateEventRegistrations request, JWTData user) throws StripeExternalException {
-    if (request.getLineItems().isEmpty()) {
+    if (request.getLineItemRequests().isEmpty()) {
       throw new MalformedParameterException("lineItems");
     }
-    List<LineItem> lineItems = convertLineItems(request.getLineItems());
+    List<LineItem> lineItems = convertLineItems(request.getLineItemRequests());
     assertLineItems(lineItems); // assert that quantities are within event capacity
     if (user.getPrivilegeLevel() == PrivilegeLevel.GP) {
       return Optional.of(createCheckoutSessionAndEventRegistration(lineItems, user));
@@ -155,45 +156,53 @@ public class CheckoutProcessorImpl implements ICheckoutProcessor {
 
   @Override
   public void handleStripeCheckoutEventComplete(String payload, String sigHeader) {
-    try {
-      Event event = Webhook.constructEvent(payload, sigHeader, this.stripeWebhookSigningSecret);
-      if (event.getType().equals("checkout.session.completed")
-          && event.getDataObjectDeserializer().getObject().isPresent()) {
-        Session session = (Session) event.getDataObjectDeserializer().getObject().get();
-        String checkoutSessionId = session.getId();
-        List<PendingRegistrations> pendingRegistrations =
-            db.selectFrom(PENDING_REGISTRATIONS)
-                .where(PENDING_REGISTRATIONS.STRIPE_CHECKOUT_SESSION_ID.eq(checkoutSessionId))
-                .fetchInto(PendingRegistrations.class);
-        for (PendingRegistrations registration : pendingRegistrations) {
-          int userId = registration.getUserId();
-          int eventId = registration.getEventId();
-          EventRegistrationsRecord currentRegistration =
-              db.selectFrom(EVENT_REGISTRATIONS)
-                  .where(EVENT_REGISTRATIONS.EVENT_ID.eq(eventId))
-                  .and(EVENT_REGISTRATIONS.USER_ID.eq(userId))
-                  .fetchOneInto(EventRegistrationsRecord.class);
-          if (currentRegistration != null) {
-            currentRegistration.setTicketQuantity(
-                currentRegistration.getTicketQuantity() + registration.getTicketQuantityDelta());
-            currentRegistration.setPaid(true);
-            currentRegistration.store();
-          } else {
-            EventRegistrationsRecord record = db.newRecord(EVENT_REGISTRATIONS);
-            record.setUserId(userId);
-            record.setEventId(eventId);
-            record.setTicketQuantity(registration.getTicketQuantityDelta());
-            record.setPaid(true);
-            record.store();
-          }
-        }
-        db.delete(PENDING_REGISTRATIONS)
+    // TODO: fix this when done testing
+    handleCheckoutComplete(payload);
+    //    try {
+    //      Event event = Webhook.constructEvent(payload, sigHeader,
+    // this.stripeWebhookSigningSecret);
+    //      if (event.getType().equals("checkout.session.completed")
+    //          && event.getDataObjectDeserializer().getObject().isPresent()) {
+    //        Session session = (Session) event.getDataObjectDeserializer().getObject().get();
+    //        String checkoutSessionId = session.getId();
+    //        handleCheckoutComplete(checkoutSessionId);
+    //      }
+    //    } catch (SignatureVerificationException e) {
+    //      throw new StripeExternalException("Error verifying signature of incoming webhook");
+    //    }
+  }
+
+  // TODO: make this private once done testing
+  public void handleCheckoutComplete(String checkoutSessionId) {
+    List<PendingRegistrations> pendingRegistrations =
+        db.selectFrom(PENDING_REGISTRATIONS)
             .where(PENDING_REGISTRATIONS.STRIPE_CHECKOUT_SESSION_ID.eq(checkoutSessionId))
-            .execute();
+            .fetchInto(PendingRegistrations.class);
+    for (PendingRegistrations registration : pendingRegistrations) {
+      int userId = registration.getUserId();
+      int eventId = registration.getEventId();
+      EventRegistrationsRecord currentRegistration =
+          db.selectFrom(EVENT_REGISTRATIONS)
+              .where(EVENT_REGISTRATIONS.EVENT_ID.eq(eventId))
+              .and(EVENT_REGISTRATIONS.USER_ID.eq(userId))
+              .fetchOneInto(EventRegistrationsRecord.class);
+      if (currentRegistration != null) {
+        currentRegistration.setTicketQuantity(
+            currentRegistration.getTicketQuantity() + registration.getTicketQuantityDelta());
+        currentRegistration.setPaid(true);
+        currentRegistration.store();
+      } else {
+        EventRegistrationsRecord record = db.newRecord(EVENT_REGISTRATIONS);
+        record.setUserId(userId);
+        record.setEventId(eventId);
+        record.setTicketQuantity(registration.getTicketQuantityDelta());
+        record.setPaid(true);
+        record.store();
       }
-    } catch (SignatureVerificationException e) {
-      throw new StripeExternalException("Error verifying signature of incoming webhook");
     }
+    db.delete(PENDING_REGISTRATIONS)
+        .where(PENDING_REGISTRATIONS.STRIPE_CHECKOUT_SESSION_ID.eq(checkoutSessionId))
+        .execute();
   }
 
   /**
