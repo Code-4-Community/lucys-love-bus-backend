@@ -22,7 +22,6 @@ import com.codeforcommunity.enums.PrivilegeLevel;
 import com.codeforcommunity.exceptions.AdminOnlyRouteException;
 import com.codeforcommunity.exceptions.BadRequestImageException;
 import com.codeforcommunity.exceptions.EventDoesNotExistException;
-import com.codeforcommunity.exceptions.InsufficientEventCapacityException;
 import com.codeforcommunity.exceptions.InvalidEventCapacityException;
 import com.codeforcommunity.exceptions.S3FailedUploadException;
 import com.codeforcommunity.requester.S3Requester;

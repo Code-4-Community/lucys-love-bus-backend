@@ -160,8 +160,12 @@ public class FailureHandler {
     end(ctx, message, 409);
   }
 
-  public void handleInvalidEventCapacityException(RoutingContext ctx, InvalidEventCapacityException e) {
-    String message = String.format("Cannot change the event capacity to %d because there are currently %d users signed up", e.getDesiredCapacity(), e.getCurrentParticipants());
+  public void handleInvalidEventCapacityException(
+      RoutingContext ctx, InvalidEventCapacityException e) {
+    String message =
+        String.format(
+            "Cannot change the event capacity to %d because there are currently %d users signed up",
+            e.getDesiredCapacity(), e.getCurrentParticipants());
     end(ctx, message, 409);
   }
 

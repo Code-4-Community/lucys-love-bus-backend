@@ -17,35 +17,34 @@ public class EventDatabaseOperations {
   }
 
   /**
-   * Gets the number of users registered for the event with the given ID. Includes pending registrations.
+   * Gets the number of users registered for the event with the given ID. Includes pending
+   * registrations.
    */
   public int getSumRegistrationRequests(int eventId) {
     Integer sumRegistrations =
         Optional.ofNullable(
-            db.select(sum(EVENT_REGISTRATIONS.TICKET_QUANTITY))
-                .from(EVENT_REGISTRATIONS)
-                .where(EVENT_REGISTRATIONS.EVENT_ID.eq(eventId))
-                .fetchOneInto(Integer.class))
+                db.select(sum(EVENT_REGISTRATIONS.TICKET_QUANTITY))
+                    .from(EVENT_REGISTRATIONS)
+                    .where(EVENT_REGISTRATIONS.EVENT_ID.eq(eventId))
+                    .fetchOneInto(Integer.class))
             .orElse(0);
     Integer sumPendingRegistrations =
         Optional.ofNullable(
-            db.select(sum(PENDING_REGISTRATIONS.TICKET_QUANTITY_DELTA))
-                .from(PENDING_REGISTRATIONS)
-                .where(PENDING_REGISTRATIONS.EVENT_ID.eq(eventId))
-                .fetchOneInto(Integer.class))
+                db.select(sum(PENDING_REGISTRATIONS.TICKET_QUANTITY_DELTA))
+                    .from(PENDING_REGISTRATIONS)
+                    .where(PENDING_REGISTRATIONS.EVENT_ID.eq(eventId))
+                    .fetchOneInto(Integer.class))
             .orElse(0);
     return sumRegistrations + sumPendingRegistrations;
   }
 
-  /**
-   * Gets the capacity of the event with the given ID.
-   */
+  /** Gets the capacity of the event with the given ID. */
   public int getCapacity(int eventId) {
     return Optional.ofNullable(
-        db.select(EVENTS.CAPACITY)
-            .from(EVENTS)
-            .where(EVENTS.ID.eq(eventId))
-            .fetchOneInto(Integer.class))
+            db.select(EVENTS.CAPACITY)
+                .from(EVENTS)
+                .where(EVENTS.ID.eq(eventId))
+                .fetchOneInto(Integer.class))
         .orElse(0);
   }
 
