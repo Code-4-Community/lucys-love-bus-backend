@@ -6,6 +6,7 @@ import com.codeforcommunity.exceptions.EventDoesNotExistException;
 import com.codeforcommunity.exceptions.ExpiredSecretKeyException;
 import com.codeforcommunity.exceptions.HandledException;
 import com.codeforcommunity.exceptions.InsufficientEventCapacityException;
+import com.codeforcommunity.exceptions.InvalidEventCapacityException;
 import com.codeforcommunity.exceptions.InvalidSecretKeyException;
 import com.codeforcommunity.exceptions.MalformedParameterException;
 import com.codeforcommunity.exceptions.MissingHeaderException;
@@ -156,6 +157,11 @@ public class FailureHandler {
 
   public void handleNotRegisteredException(RoutingContext ctx, NotRegisteredException e) {
     String message = "You are not registered for the event " + e.getEventTitle();
+    end(ctx, message, 409);
+  }
+
+  public void handleInvalidEventCapacityException(RoutingContext ctx, InvalidEventCapacityException e) {
+    String message = String.format("Cannot change the event capacity to %d because there are currently %d users signed up", e.getDesiredCapacity(), e.getCurrentParticipants());
     end(ctx, message, 409);
   }
 

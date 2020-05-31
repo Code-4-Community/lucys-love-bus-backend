@@ -22,6 +22,8 @@ import com.codeforcommunity.enums.PrivilegeLevel;
 import com.codeforcommunity.exceptions.AdminOnlyRouteException;
 import com.codeforcommunity.exceptions.BadRequestImageException;
 import com.codeforcommunity.exceptions.EventDoesNotExistException;
+import com.codeforcommunity.exceptions.InsufficientEventCapacityException;
+import com.codeforcommunity.exceptions.InvalidEventCapacityException;
 import com.codeforcommunity.exceptions.S3FailedUploadException;
 import com.codeforcommunity.requester.S3Requester;
 import java.sql.Timestamp;
@@ -177,6 +179,10 @@ public class EventsProcessorImpl implements IEventsProcessor {
       record.setTitle(request.getTitle());
     }
     if (request.getSpotsAvailable() != null) {
+      int currentRegistered = eventDatabaseOperations.getSumRegistrationRequests(eventId);
+      if (currentRegistered > request.getSpotsAvailable()) {
+        throw new InvalidEventCapacityException(request.getSpotsAvailable(), currentRegistered);
+      }
       record.setCapacity(request.getSpotsAvailable());
     }
     if (request.getThumbnail() != null) {
@@ -267,7 +273,6 @@ public class EventsProcessorImpl implements IEventsProcessor {
             .join(USERS)
             .on(EVENT_REGISTRATIONS.USER_ID.eq(USERS.ID))
             .where(EVENT_REGISTRATIONS.EVENT_ID.eq(eventId))
-            .and(EVENT_REGISTRATIONS.REGISTRATION_STATUS.eq(EventRegistrationStatus.ACTIVE))
             .fetchInto(RSVP.class);
 
     List<RSVP> rsvpContacts =
@@ -288,7 +293,6 @@ public class EventsProcessorImpl implements IEventsProcessor {
             .join(CONTACTS)
             .on(EVENT_REGISTRATIONS.USER_ID.eq(CONTACTS.USER_ID))
             .where(EVENT_REGISTRATIONS.EVENT_ID.eq(eventId))
-            .and(EVENT_REGISTRATIONS.REGISTRATION_STATUS.eq(EventRegistrationStatus.ACTIVE))
             .fetchInto(RSVP.class);
 
     List<RSVP> rsvpChildren =
@@ -308,7 +312,6 @@ public class EventsProcessorImpl implements IEventsProcessor {
             .join(CHILDREN)
             .on(EVENT_REGISTRATIONS.USER_ID.eq(CHILDREN.USER_ID))
             .where(EVENT_REGISTRATIONS.EVENT_ID.eq(eventId))
-            .and(EVENT_REGISTRATIONS.REGISTRATION_STATUS.eq(EventRegistrationStatus.ACTIVE))
             .fetchInto(RSVP.class);
 
     rsvpUsers.addAll(rsvpContacts);
