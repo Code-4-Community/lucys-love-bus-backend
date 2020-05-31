@@ -14,6 +14,8 @@ import com.codeforcommunity.dto.checkout.PostCreateEventRegistrations;
 import com.codeforcommunity.enums.PrivilegeLevel;
 import com.codeforcommunity.exceptions.EventDoesNotExistException;
 import com.codeforcommunity.exceptions.InsufficientEventCapacityException;
+import com.codeforcommunity.exceptions.MalformedParameterException;
+import com.codeforcommunity.exceptions.NotRegisteredException;
 import com.codeforcommunity.exceptions.StripeExternalException;
 import com.codeforcommunity.propertiesLoader.PropertiesLoader;
 import com.stripe.Stripe;
@@ -24,12 +26,14 @@ import com.stripe.model.checkout.Session;
 import com.stripe.net.Webhook;
 import com.stripe.param.checkout.SessionCreateParams;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.stream.Collectors;
 import org.jooq.DSLContext;
+import org.jooq.generated.tables.pojos.Events;
 import org.jooq.generated.tables.pojos.PendingRegistrations;
 import org.jooq.generated.tables.records.EventRegistrationsRecord;
 import org.jooq.generated.tables.records.EventsRecord;
@@ -90,6 +94,53 @@ public class CheckoutProcessorImpl implements ICheckoutProcessor {
       this.createEventRegistration(lineItems, user);
       return Optional.empty();
     }
+  }
+
+  private void validateUpdateEventRegistration(Events event, EventRegistrationsRecord registration, int quantity, int eventId) {
+    if (event == null) {
+      throw new EventDoesNotExistException(eventId);
+    }
+    if (registration == null) {
+      throw new NotRegisteredException(event.getTitle());
+    }
+    if (quantity < 0) { // allow 0 so that users can un-signup
+      throw new MalformedParameterException("Quantity");
+    }
+    if (quantity > eventDatabaseOperations.getSpotsLeft(eventId)) {
+      throw new InsufficientEventCapacityException(event.getTitle());
+    }
+  }
+
+  @Override
+  public Optional<String> updateEventRegistration(int eventId, int quantity, JWTData userData)
+      throws StripeExternalException {
+    Events event = db.selectFrom(EVENTS).where(EVENTS.ID.eq(eventId)).fetchOneInto(Events.class);
+    int userId = userData.getUserId();
+    EventRegistrationsRecord registration = db.selectFrom(EVENT_REGISTRATIONS)
+        .where(EVENT_REGISTRATIONS.EVENT_ID.eq(eventId)).and(EVENT_REGISTRATIONS.USER_ID.eq(userId))
+        .fetchOneInto(EventRegistrationsRecord.class);
+    validateUpdateEventRegistration(event, registration, quantity, eventId);
+    int currentQuantity = registration.getTicketQuantity();
+    if (quantity > currentQuantity) {
+      if (userData.getPrivilegeLevel() == PrivilegeLevel.GP) {
+        List<LineItem> lineItems = convertLineItems(
+            Collections.singletonList(new LineItemRequest(eventId, quantity - currentQuantity)));
+        return Optional.of(createCheckoutSessionAndEventRegistration(lineItems, userData));
+      } else {
+        registration.setPaid(false);
+      }
+    } else if (quantity == 0) {
+      db.delete(EVENT_REGISTRATIONS).where(EVENT_REGISTRATIONS.EVENT_ID.eq(eventId))
+          .and(EVENT_REGISTRATIONS.USER_ID.eq(userId)).execute();
+    } else {
+      if (registration.getPaid()) {
+        int refundedTickets = currentQuantity - quantity;
+        // give back amount
+      }
+    }
+    registration.setTicketQuantity(quantity);
+    registration.store();
+    return Optional.empty();
   }
 
   @Override
@@ -185,6 +236,9 @@ public class CheckoutProcessorImpl implements ICheckoutProcessor {
 
   private void assertLineItems(List<LineItem> lineItems) {
     for (LineItem lineItem : lineItems) {
+      if (lineItem.getQuantity() < 1) {
+        throw new MalformedParameterException("Quantity");
+      }
       if (lineItem.getQuantity() > eventDatabaseOperations.getSpotsLeft(lineItem.getId())) {
         throw new InsufficientEventCapacityException(lineItem.getName());
       }
@@ -211,8 +265,8 @@ public class CheckoutProcessorImpl implements ICheckoutProcessor {
         int ticketQuantity = request.getQuantity();
         lineItems.add(
             new LineItem(
-                event.get(EVENTS.TITLE),
-                event.get(EVENTS.DESCRIPTION),
+                event.getTitle(),
+                event.getDescription(),
                 ticketQuantity * TICKET_PRICE_CENTS,
                 ticketQuantity,
                 request.getEventId()));

@@ -9,6 +9,7 @@ import com.codeforcommunity.exceptions.InvalidSecretKeyException;
 import com.codeforcommunity.exceptions.MalformedParameterException;
 import com.codeforcommunity.exceptions.MissingHeaderException;
 import com.codeforcommunity.exceptions.MissingParameterException;
+import com.codeforcommunity.exceptions.NotRegisteredException;
 import com.codeforcommunity.exceptions.RequestDoesNotExistException;
 import com.codeforcommunity.exceptions.ResourceNotOwnedException;
 import com.codeforcommunity.exceptions.StripeExternalException;
@@ -149,6 +150,11 @@ public class FailureHandler {
     String message =
         "The user requested more tickets than are available for the event: "
             + exception.getEventTitle();
+    end(ctx, message, 409);
+  }
+
+  public void handleNotRegisteredException(RoutingContext ctx, NotRegisteredException e) {
+    String message = "You are not registered for the event " + e.getEventTitle();
     end(ctx, message, 409);
   }
 
