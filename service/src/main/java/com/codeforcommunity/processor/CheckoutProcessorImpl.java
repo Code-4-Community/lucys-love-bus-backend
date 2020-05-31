@@ -137,7 +137,6 @@ public class CheckoutProcessorImpl implements ICheckoutProcessor {
     if (quantity < 0) { // allow 0 so that users can un-signup
       throw new MalformedParameterException("Quantity");
     }
-    System.out.println("Quantity is " + quantity);
     if ((quantity - registration.getTicketQuantity())
         > eventDatabaseOperations.getSpotsLeft(eventId)) {
       throw new InsufficientEventCapacityException(event.getTitle());
@@ -172,6 +171,7 @@ public class CheckoutProcessorImpl implements ICheckoutProcessor {
           .where(EVENT_REGISTRATIONS.EVENT_ID.eq(eventId))
           .and(EVENT_REGISTRATIONS.USER_ID.eq(userId))
           .execute();
+      return Optional.empty();
     } else {
       if (registration.getPaid()) {
         int refundedTickets = currentQuantity - quantity;
