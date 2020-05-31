@@ -28,7 +28,6 @@ import com.codeforcommunity.dto.userEvents.responses.SingleEventResponse;
 import com.codeforcommunity.enums.PrivilegeLevel;
 import com.codeforcommunity.exceptions.AdminOnlyRouteException;
 import com.codeforcommunity.exceptions.EventDoesNotExistException;
-import com.codeforcommunity.exceptions.MalformedParameterException;
 import com.codeforcommunity.requester.S3Requester;
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -247,7 +246,8 @@ public class EventsProcessorImplTest {
     myJooqMock.addReturn("SELECT", event1);
 
     // mock the ticket count
-    Record2<Integer, Integer> ticketCount1 = myJooqMock.getContext().newRecord(EVENTS.ID, EVENT_REGISTRATIONS.TICKET_QUANTITY);
+    Record2<Integer, Integer> ticketCount1 =
+        myJooqMock.getContext().newRecord(EVENTS.ID, EVENT_REGISTRATIONS.TICKET_QUANTITY);
     ticketCount1.values(0, 5);
     myJooqMock.addReturn("SELECT", ticketCount1);
 
@@ -639,7 +639,8 @@ public class EventsProcessorImplTest {
     try {
       myEventsProcessorImpl.modifyEvent(0, req, myUserData);
       fail();
-    } catch (AdminOnlyRouteException ignored) {}
+    } catch (AdminOnlyRouteException ignored) {
+    }
   }
 
   // modifying an event with all fields filled in

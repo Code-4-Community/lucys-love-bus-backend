@@ -25,7 +25,6 @@ import com.codeforcommunity.enums.PrivilegeLevel;
 import com.codeforcommunity.enums.VerificationKeyType;
 import com.codeforcommunity.exceptions.AuthException;
 import com.codeforcommunity.exceptions.InvalidPasswordException;
-import com.codeforcommunity.exceptions.MissingParameterException;
 import com.codeforcommunity.exceptions.UserDoesNotExistException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
