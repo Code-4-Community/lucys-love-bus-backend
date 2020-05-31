@@ -2,6 +2,7 @@ package com.codeforcommunity.processor;
 
 import static org.jooq.generated.Tables.EVENTS;
 import static org.jooq.generated.Tables.EVENT_REGISTRATIONS;
+import static org.jooq.generated.Tables.PENDING_REGISTRATIONS;
 
 import com.codeforcommunity.api.ICheckoutProcessor;
 import com.codeforcommunity.auth.JWTData;
@@ -30,8 +31,10 @@ import java.util.Optional;
 import java.util.Properties;
 import java.util.stream.Collectors;
 import org.jooq.DSLContext;
+import org.jooq.generated.tables.pojos.PendingRegistrations;
 import org.jooq.generated.tables.records.EventRegistrationsRecord;
 import org.jooq.generated.tables.records.EventsRecord;
+import org.jooq.generated.tables.records.PendingRegistrationsRecord;
 
 public class CheckoutProcessorImpl implements ICheckoutProcessor {
 
@@ -70,7 +73,7 @@ public class CheckoutProcessorImpl implements ICheckoutProcessor {
       Session session = Session.create(params);
       String checkoutSessionId = session.getId();
       session.setSuccessUrl(String.format(checkoutRequest.getSuccessUrl(), checkoutSessionId));
-      this.createEventRegistrationUtil(checkoutRequest.getLineItems(), user, checkoutSessionId);
+      createPendingEventRegistration(lineItems, user, checkoutSessionId);
       return session.getId();
     } catch (StripeException e) {
       throw new StripeExternalException(e.getMessage());
@@ -85,7 +88,7 @@ public class CheckoutProcessorImpl implements ICheckoutProcessor {
     if (user.getPrivilegeLevel() == PrivilegeLevel.GP) {
       return Optional.of(createCheckoutSessionAndEventRegistration(lineItems, user));
     } else {
-      this.createEventRegistrationUtil(lineItems, user, null);
+      this.createEventRegistration(lineItems, user);
       return Optional.empty();
     }
   }
@@ -98,10 +101,31 @@ public class CheckoutProcessorImpl implements ICheckoutProcessor {
           && event.getDataObjectDeserializer().getObject().isPresent()) {
         Session session = (Session) event.getDataObjectDeserializer().getObject().get();
         String checkoutSessionId = session.getId();
-        this.db
-            .update(EVENT_REGISTRATIONS)
-            .set(EVENT_REGISTRATIONS.REGISTRATION_STATUS, EventRegistrationStatus.ACTIVE)
-            .where(EVENT_REGISTRATIONS.STRIPE_CHECKOUT_SESSION_ID.eq(checkoutSessionId))
+        List<PendingRegistrations> pendingRegistrations = db.selectFrom(PENDING_REGISTRATIONS)
+            .where(PENDING_REGISTRATIONS.STRIPE_CHECKOUT_SESSION_ID.eq(checkoutSessionId))
+            .fetchInto(PendingRegistrations.class);
+        for (PendingRegistrations registration : pendingRegistrations) {
+          int userId = registration.getUserId();
+          int eventId = registration.getEventId();
+          EventRegistrationsRecord currentRegistration = db.selectFrom(EVENT_REGISTRATIONS)
+              .where(EVENT_REGISTRATIONS.EVENT_ID.eq(eventId))
+              .and(EVENT_REGISTRATIONS.USER_ID.eq(userId)).fetchOneInto(EventRegistrationsRecord.class);
+          if (currentRegistration != null) {
+            currentRegistration.setTicketQuantity(
+                currentRegistration.getTicketQuantity() + registration.getTicketQuantityDelta());
+            currentRegistration.setPaid(true);
+            currentRegistration.store();
+          } else {
+            EventRegistrationsRecord record = db.newRecord(EVENT_REGISTRATIONS);
+            record.setUserId(userId);
+            record.setEventId(eventId);
+            record.setTicketQuantity(registration.getTicketQuantityDelta());
+            record.setPaid(true);
+            record.store();
+          }
+        }
+        db.delete(PENDING_REGISTRATIONS)
+            .where(PENDING_REGISTRATIONS.STRIPE_CHECKOUT_SESSION_ID.eq(checkoutSessionId))
             .execute();
       }
     } catch (SignatureVerificationException e) {
@@ -110,27 +134,48 @@ public class CheckoutProcessorImpl implements ICheckoutProcessor {
   }
 
   /**
-   * A common utility function used to write a list of events to the database.
+   * Create event registration for a PF or admin.
    *
    * @param lineItems A list of {@link LineItem} objects to write to database
    * @param user The {@link JWTData} containing the user's privilege level
-   * @param checkoutSessionId A checkoutSessionId to associate with registrations which require
-   *     payment
    */
-  private void createEventRegistrationUtil(
-      List<LineItem> lineItems, JWTData user, String checkoutSessionId) {
+  private void createEventRegistration(List<LineItem> lineItems, JWTData user) {
     for (LineItem lineItem : lineItems) {
-      if (lineItem.getQuantity() > eventDatabaseOperations.getSpotsLeft(lineItem.getId())) {
-        throw new InsufficientEventCapacityException(lineItem.getName());
-      }
       EventRegistrationsRecord newRecord = db.newRecord(EVENT_REGISTRATIONS);
       newRecord.setEventId(lineItem.getId());
       newRecord.setUserId(user.getUserId());
-      newRecord.setRegistrationStatus(
-          this.getInitialEventRegistrationStatus(user.getPrivilegeLevel()));
-      newRecord.setTicketQuantity(lineItem.getQuantity().intValue());
-      newRecord.setStripeCheckoutSessionId(checkoutSessionId);
+      newRecord.setTicketQuantity(lineItem.getQuantity());
+      newRecord.setPaid(false);
       newRecord.store();
+    }
+  }
+
+  /**
+   * Create pending event registration for GP. Will be marked as active once the Stripe
+   * payment is complete.
+   *
+   * @param lineItems list of line items to write to database
+   * @param user the user's privilege level
+   * @param checkoutSessionId A checkoutSessionId to associate with registrations which require
+   *     payment
+   */
+  private void createPendingEventRegistration(List<LineItem> lineItems, JWTData user,
+      String checkoutSessionId) {
+    int userId = user.getUserId();
+    List<Integer> eventIds = lineItems.stream().map(LineItem::getId).collect(Collectors.toList());
+
+    // deletes any pre-existing pending event registration for this user/event
+    db.delete(PENDING_REGISTRATIONS).where(PENDING_REGISTRATIONS.EVENT_ID.in(eventIds))
+        .and(PENDING_REGISTRATIONS.USER_ID.eq(userId)).execute();
+
+    for (LineItem lineItem : lineItems) {
+      int eventId = lineItem.getId();
+      PendingRegistrationsRecord record = db.newRecord(PENDING_REGISTRATIONS);
+      record.setUserId(userId);
+      record.setEventId(eventId);
+      record.setTicketQuantityDelta(lineItem.getQuantity());
+      record.setStripeCheckoutSessionId(checkoutSessionId);
+      record.store();
     }
   }
 
@@ -172,25 +217,5 @@ public class CheckoutProcessorImpl implements ICheckoutProcessor {
       }
     }
     return lineItems;
-  }
-
-  /**
-   * For ADMIN and PF users, their Event Registrations are initially Active, because they don't have
-   * to pay for events. For GP users, the Event Registration is marked as PAYMENT_INCOMPLETE until
-   * we receive a checkout.session.completed event from Stripe in our webhook.
-   *
-   * @param privilegeLevel The privilege level of the user
-   * @return EventRegistrationStatus for the PrivilegeLevel
-   */
-  private EventRegistrationStatus getInitialEventRegistrationStatus(PrivilegeLevel privilegeLevel) {
-    switch (privilegeLevel) {
-      case GP:
-        return EventRegistrationStatus.PAYMENT_INCOMPLETE;
-      case ADMIN:
-      case PF:
-        return EventRegistrationStatus.ACTIVE;
-      default:
-        throw new IllegalArgumentException("Unrecognized PrivilegeLevel: " + privilegeLevel.name());
-    }
   }
 }

@@ -38,9 +38,9 @@ public class CreateCheckoutSessionData {
       SessionCreateParams.LineItem stripe_line_item =
           new SessionCreateParams.LineItem.Builder()
               .setName(item.getName())
-              .setAmount(item.getCents())
+              .setAmount(Long.valueOf(item.getCents()))
               .setCurrency(CURRENCY_UNITS)
-              .setQuantity(item.getQuantity())
+              .setQuantity(Long.valueOf(item.getQuantity()))
               .setDescription(item.getDescription())
               .build();
       out.add(stripe_line_item);
