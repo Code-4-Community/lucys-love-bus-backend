@@ -1,5 +1,6 @@
 package com.codeforcommunity.rest.subrouter;
 
+import com.codeforcommunity.exceptions.AlreadyRegisteredException;
 import com.codeforcommunity.exceptions.EmailAlreadyInUseException;
 import com.codeforcommunity.exceptions.EventDoesNotExistException;
 import com.codeforcommunity.exceptions.ExpiredSecretKeyException;
@@ -155,6 +156,11 @@ public class FailureHandler {
 
   public void handleNotRegisteredException(RoutingContext ctx, NotRegisteredException e) {
     String message = "You are not registered for the event " + e.getEventTitle();
+    end(ctx, message, 409);
+  }
+
+  public void handleAlreadyRegisteredException(RoutingContext ctx, AlreadyRegisteredException e) {
+    String message = "You are already registered for the event " + e.getEventTitle();
     end(ctx, message, 409);
   }
 

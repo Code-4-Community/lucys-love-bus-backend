@@ -12,6 +12,7 @@ import com.codeforcommunity.dto.checkout.LineItem;
 import com.codeforcommunity.dto.checkout.LineItemRequest;
 import com.codeforcommunity.dto.checkout.PostCreateEventRegistrations;
 import com.codeforcommunity.enums.PrivilegeLevel;
+import com.codeforcommunity.exceptions.AlreadyRegisteredException;
 import com.codeforcommunity.exceptions.EventDoesNotExistException;
 import com.codeforcommunity.exceptions.InsufficientEventCapacityException;
 import com.codeforcommunity.exceptions.MalformedParameterException;
@@ -29,6 +30,7 @@ import java.util.Optional;
 import java.util.Properties;
 import java.util.stream.Collectors;
 import org.jooq.DSLContext;
+import org.jooq.generated.tables.pojos.EventRegistrations;
 import org.jooq.generated.tables.pojos.Events;
 import org.jooq.generated.tables.pojos.PendingRegistrations;
 import org.jooq.generated.tables.records.EventRegistrationsRecord;
@@ -90,7 +92,7 @@ public class CheckoutProcessorImpl implements ICheckoutProcessor {
     if (request.getLineItemRequests().isEmpty()) {
       throw new MalformedParameterException("lineItems");
     }
-    List<LineItem> lineItems = convertLineItems(request.getLineItemRequests());
+    List<LineItem> lineItems = convertLineItems(request.getLineItemRequests(), user.getUserId());
     assertLineItems(lineItems); // assert that quantities are within event capacity
     if (user.getPrivilegeLevel() == PrivilegeLevel.GP) {
       return Optional.of(createCheckoutSessionAndEventRegistration(lineItems, user));
@@ -133,7 +135,8 @@ public class CheckoutProcessorImpl implements ICheckoutProcessor {
         List<LineItem> lineItems =
             convertLineItems(
                 Collections.singletonList(
-                    new LineItemRequest(eventId, quantity - currentQuantity)));
+                    new LineItemRequest(eventId, quantity - currentQuantity)),
+                userData.getUserId());
         return Optional.of(createCheckoutSessionAndEventRegistration(lineItems, userData));
       } else {
         registration.setPaid(false);
@@ -269,12 +272,21 @@ public class CheckoutProcessorImpl implements ICheckoutProcessor {
    *
    * @throws EventDoesNotExistException if any of the events do not exist
    */
-  private List<LineItem> convertLineItems(List<LineItemRequest> lineItemRequests) {
+  private List<LineItem> convertLineItems(List<LineItemRequest> lineItemRequests, int userId) {
     List<Integer> eventIds =
         lineItemRequests.stream().map(LineItemRequest::getEventId).collect(Collectors.toList());
 
     Map<Integer, EventsRecord> retrievedEvents =
         db.selectFrom(EVENTS).where(EVENTS.ID.in(eventIds)).fetchMap(EVENTS.ID);
+
+    // shouldn't already be registered for any of the events
+    List<EventRegistrationsRecord> retrievedRegistrations =
+        db.selectFrom(EVENT_REGISTRATIONS).where(EVENT_REGISTRATIONS.EVENT_ID.in(eventIds))
+            .and(EVENT_REGISTRATIONS.USER_ID.eq(userId)).fetchInto(EventRegistrationsRecord.class);
+    if (!retrievedRegistrations.isEmpty()) {
+      throw new AlreadyRegisteredException(
+          retrievedEvents.get(retrievedRegistrations.get(0).getEventId()).getTitle());
+    }
 
     List<LineItem> lineItems = new ArrayList<>();
 
