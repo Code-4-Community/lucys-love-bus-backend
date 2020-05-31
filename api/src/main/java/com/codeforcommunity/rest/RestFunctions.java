@@ -5,6 +5,7 @@ import com.codeforcommunity.exceptions.MissingHeaderException;
 import com.codeforcommunity.exceptions.MissingParameterException;
 import com.codeforcommunity.exceptions.RequestBodyMappingException;
 import io.vertx.core.http.HttpServerRequest;
+import io.vertx.core.json.DecodeException;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
 import java.util.List;
@@ -23,15 +24,19 @@ public interface RestFunctions {
    *     parsed.
    */
   static <T> T getJsonBodyAsClass(RoutingContext ctx, Class<T> clazz) {
-    Optional<JsonObject> body = Optional.ofNullable(ctx.getBodyAsJson());
-    if (body.isPresent()) {
-      try {
-        return body.get().mapTo(clazz);
-      } catch (IllegalArgumentException e) {
-        e.printStackTrace();
+    try {
+      Optional<JsonObject> body = Optional.ofNullable(ctx.getBodyAsJson());
+      if (body.isPresent()) {
+        try {
+          return body.get().mapTo(clazz);
+        } catch (IllegalArgumentException e) {
+          e.printStackTrace();
+          throw new RequestBodyMappingException();
+        }
+      } else {
         throw new RequestBodyMappingException();
       }
-    } else {
+    } catch (DecodeException e) {
       throw new RequestBodyMappingException();
     }
   }

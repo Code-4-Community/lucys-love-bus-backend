@@ -30,7 +30,6 @@ import java.util.Optional;
 import java.util.Properties;
 import java.util.stream.Collectors;
 import org.jooq.DSLContext;
-import org.jooq.generated.tables.pojos.EventRegistrations;
 import org.jooq.generated.tables.pojos.Events;
 import org.jooq.generated.tables.pojos.PendingRegistrations;
 import org.jooq.generated.tables.records.EventRegistrationsRecord;
@@ -86,13 +85,37 @@ public class CheckoutProcessorImpl implements ICheckoutProcessor {
     }
   }
 
+  private List<Integer> getEventIds(List<LineItemRequest> requests) {
+    return requests.stream().map(LineItemRequest::getEventId).collect(Collectors.toList());
+  }
+
+  private Map<Integer, EventsRecord> getEventsRecordMap(List<Integer> eventIds) {
+    return db.selectFrom(EVENTS).where(EVENTS.ID.in(eventIds)).fetchMap(EVENTS.ID);
+  }
+
+  private void assertNotRegistered(List<Integer> eventIds, int userId,
+      Map<Integer, EventsRecord> eventsRecordMap) {
+    List<EventRegistrationsRecord> retrievedRegistrations =
+        db.selectFrom(EVENT_REGISTRATIONS).where(EVENT_REGISTRATIONS.EVENT_ID.in(eventIds))
+            .and(EVENT_REGISTRATIONS.USER_ID.eq(userId)).fetchInto(EventRegistrationsRecord.class);
+    if (!retrievedRegistrations.isEmpty()) {
+      throw new AlreadyRegisteredException(
+          eventsRecordMap.get(retrievedRegistrations.get(0).getEventId()).getTitle());
+    }
+  }
+
   @Override
   public Optional<String> createEventRegistration(
       PostCreateEventRegistrations request, JWTData user) throws StripeExternalException {
     if (request.getLineItemRequests().isEmpty()) {
       throw new MalformedParameterException("lineItems");
     }
-    List<LineItem> lineItems = convertLineItems(request.getLineItemRequests(), user.getUserId());
+    List<Integer> eventIds = getEventIds(request.getLineItemRequests());
+    Map<Integer, EventsRecord> retrievedEvents = getEventsRecordMap(eventIds);
+    // shouldn't already be registered for any of the events
+    assertNotRegistered(eventIds, user.getUserId(), retrievedEvents);
+
+    List<LineItem> lineItems = convertLineItems(request.getLineItemRequests(), retrievedEvents);
     assertLineItems(lineItems); // assert that quantities are within event capacity
     if (user.getPrivilegeLevel() == PrivilegeLevel.GP) {
       return Optional.of(createCheckoutSessionAndEventRegistration(lineItems, user));
@@ -113,7 +136,9 @@ public class CheckoutProcessorImpl implements ICheckoutProcessor {
     if (quantity < 0) { // allow 0 so that users can un-signup
       throw new MalformedParameterException("Quantity");
     }
-    if (quantity > eventDatabaseOperations.getSpotsLeft(eventId)) {
+    System.out.println("Quantity is " + quantity);
+    if ((quantity - registration.getTicketQuantity()) > eventDatabaseOperations
+        .getSpotsLeft(eventId)) {
       throw new InsufficientEventCapacityException(event.getTitle());
     }
   }
@@ -132,11 +157,11 @@ public class CheckoutProcessorImpl implements ICheckoutProcessor {
     int currentQuantity = registration.getTicketQuantity();
     if (quantity > currentQuantity) {
       if (userData.getPrivilegeLevel() == PrivilegeLevel.GP) {
-        List<LineItem> lineItems =
-            convertLineItems(
-                Collections.singletonList(
-                    new LineItemRequest(eventId, quantity - currentQuantity)),
-                userData.getUserId());
+        List<LineItemRequest> requests = Collections.singletonList(
+            new LineItemRequest(eventId, quantity - currentQuantity));
+        Map<Integer, EventsRecord> retrievedEvents = getEventsRecordMap(
+            Collections.singletonList(eventId));
+        List<LineItem> lineItems = convertLineItems(requests, retrievedEvents);
         return Optional.of(createCheckoutSessionAndEventRegistration(lineItems, userData));
       } else {
         registration.setPaid(false);
@@ -272,21 +297,8 @@ public class CheckoutProcessorImpl implements ICheckoutProcessor {
    *
    * @throws EventDoesNotExistException if any of the events do not exist
    */
-  private List<LineItem> convertLineItems(List<LineItemRequest> lineItemRequests, int userId) {
-    List<Integer> eventIds =
-        lineItemRequests.stream().map(LineItemRequest::getEventId).collect(Collectors.toList());
-
-    Map<Integer, EventsRecord> retrievedEvents =
-        db.selectFrom(EVENTS).where(EVENTS.ID.in(eventIds)).fetchMap(EVENTS.ID);
-
-    // shouldn't already be registered for any of the events
-    List<EventRegistrationsRecord> retrievedRegistrations =
-        db.selectFrom(EVENT_REGISTRATIONS).where(EVENT_REGISTRATIONS.EVENT_ID.in(eventIds))
-            .and(EVENT_REGISTRATIONS.USER_ID.eq(userId)).fetchInto(EventRegistrationsRecord.class);
-    if (!retrievedRegistrations.isEmpty()) {
-      throw new AlreadyRegisteredException(
-          retrievedEvents.get(retrievedRegistrations.get(0).getEventId()).getTitle());
-    }
+  private List<LineItem> convertLineItems(List<LineItemRequest> lineItemRequests,
+      Map<Integer, EventsRecord> retrievedEvents) {
 
     List<LineItem> lineItems = new ArrayList<>();
 
