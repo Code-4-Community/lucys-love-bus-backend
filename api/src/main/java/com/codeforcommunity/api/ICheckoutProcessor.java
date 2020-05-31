@@ -30,9 +30,9 @@ public interface ICheckoutProcessor {
   void handleStripeCheckoutEventComplete(String payload, String sigHeader);
 
   /**
-   * Updates an event registration. If the user is a GP and the number of tickets is higher
-   * than what they were previously registered for, this route will create a Stripe checkout
-   * session. Otherwise, the registration will be completed automatically.
+   * Updates an event registration. If the user is a GP and the number of tickets is higher than
+   * what they were previously registered for, this route will create a Stripe checkout session.
+   * Otherwise, the registration will be completed automatically.
    *
    * @param eventId the event ID
    * @param quantity the new quantity of tickets

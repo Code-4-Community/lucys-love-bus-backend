@@ -58,12 +58,13 @@ public class CheckoutRouter implements IRouter {
   }
 
   private void handleUpdateEventRegistration(RoutingContext ctx) {
-    UpdateEventRegistration requestData = RestFunctions.getJsonBodyAsClass(ctx,
-        UpdateEventRegistration.class);
+    UpdateEventRegistration requestData =
+        RestFunctions.getJsonBodyAsClass(ctx, UpdateEventRegistration.class);
     JWTData userData = ctx.get("jwt_data");
     int eventId = getRequestParameterAsInt(ctx.request(), "event_id");
 
-    Optional<String> checkoutSessionID = processor.updateEventRegistration(eventId, requestData.getQuantity(), userData);
+    Optional<String> checkoutSessionID =
+        processor.updateEventRegistration(eventId, requestData.getQuantity(), userData);
 
     if (checkoutSessionID.isPresent()) {
       end(ctx.response(), 202, checkoutSessionID.get());

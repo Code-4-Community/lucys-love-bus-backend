@@ -19,5 +19,4 @@ public class NotRegisteredException extends RuntimeException implements HandledE
   public String getEventTitle() {
     return this.eventTitle;
   }
-
 }

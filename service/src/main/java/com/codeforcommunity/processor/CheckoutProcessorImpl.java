@@ -96,7 +96,8 @@ public class CheckoutProcessorImpl implements ICheckoutProcessor {
     }
   }
 
-  private void validateUpdateEventRegistration(Events event, EventRegistrationsRecord registration, int quantity, int eventId) {
+  private void validateUpdateEventRegistration(
+      Events event, EventRegistrationsRecord registration, int quantity, int eventId) {
     if (event == null) {
       throw new EventDoesNotExistException(eventId);
     }
@@ -116,22 +117,28 @@ public class CheckoutProcessorImpl implements ICheckoutProcessor {
       throws StripeExternalException {
     Events event = db.selectFrom(EVENTS).where(EVENTS.ID.eq(eventId)).fetchOneInto(Events.class);
     int userId = userData.getUserId();
-    EventRegistrationsRecord registration = db.selectFrom(EVENT_REGISTRATIONS)
-        .where(EVENT_REGISTRATIONS.EVENT_ID.eq(eventId)).and(EVENT_REGISTRATIONS.USER_ID.eq(userId))
-        .fetchOneInto(EventRegistrationsRecord.class);
+    EventRegistrationsRecord registration =
+        db.selectFrom(EVENT_REGISTRATIONS)
+            .where(EVENT_REGISTRATIONS.EVENT_ID.eq(eventId))
+            .and(EVENT_REGISTRATIONS.USER_ID.eq(userId))
+            .fetchOneInto(EventRegistrationsRecord.class);
     validateUpdateEventRegistration(event, registration, quantity, eventId);
     int currentQuantity = registration.getTicketQuantity();
     if (quantity > currentQuantity) {
       if (userData.getPrivilegeLevel() == PrivilegeLevel.GP) {
-        List<LineItem> lineItems = convertLineItems(
-            Collections.singletonList(new LineItemRequest(eventId, quantity - currentQuantity)));
+        List<LineItem> lineItems =
+            convertLineItems(
+                Collections.singletonList(
+                    new LineItemRequest(eventId, quantity - currentQuantity)));
         return Optional.of(createCheckoutSessionAndEventRegistration(lineItems, userData));
       } else {
         registration.setPaid(false);
       }
     } else if (quantity == 0) {
-      db.delete(EVENT_REGISTRATIONS).where(EVENT_REGISTRATIONS.EVENT_ID.eq(eventId))
-          .and(EVENT_REGISTRATIONS.USER_ID.eq(userId)).execute();
+      db.delete(EVENT_REGISTRATIONS)
+          .where(EVENT_REGISTRATIONS.EVENT_ID.eq(eventId))
+          .and(EVENT_REGISTRATIONS.USER_ID.eq(userId))
+          .execute();
     } else {
       if (registration.getPaid()) {
         int refundedTickets = currentQuantity - quantity;
