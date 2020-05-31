@@ -149,7 +149,7 @@ public class FailureHandler {
     String message =
         "The user requested more tickets than are available for the event: "
             + exception.getEventTitle();
-    end(ctx, message, 400);
+    end(ctx, message, 409);
   }
 
   public void handleStripeExternalException(RoutingContext ctx, StripeExternalException exception) {
@@ -171,7 +171,7 @@ public class FailureHandler {
   public void handleEventDoesNotExistException(
       RoutingContext ctx, EventDoesNotExistException exception) {
     String message = "There is no event with id: " + exception.getEventId();
-    end(ctx, message, 400);
+    end(ctx, message, 404);
   }
 
   private void handleUncaughtError(RoutingContext ctx, Throwable throwable) {

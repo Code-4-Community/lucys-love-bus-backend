@@ -54,8 +54,7 @@ public class CheckoutProcessorImpl implements ICheckoutProcessor {
   }
 
   private String createCheckoutSessionAndEventRegistration(
-      PostCreateEventRegistrations request, JWTData user) throws StripeExternalException {
-    List<LineItem> lineItems = convertLineItems(request.getLineItemRequests());
+      List<LineItem> lineItems, JWTData user) throws StripeExternalException {
     CreateCheckoutSessionData checkoutRequest =
         new CreateCheckoutSessionData(lineItems, CANCEL_URL, SUCCESS_URL);
 
@@ -81,10 +80,12 @@ public class CheckoutProcessorImpl implements ICheckoutProcessor {
   @Override
   public Optional<String> createEventRegistration(
       PostCreateEventRegistrations request, JWTData user) throws StripeExternalException {
+    List<LineItem> lineItems = convertLineItems(request.getLineItemRequests());
+    assertLineItems(lineItems); // assert that quantities are within event capacity
     if (user.getPrivilegeLevel() == PrivilegeLevel.GP) {
-      return Optional.of(createCheckoutSessionAndEventRegistration(request, user));
+      return Optional.of(createCheckoutSessionAndEventRegistration(lineItems, user));
     } else {
-      this.createEventRegistrationUtil(convertLineItems(request.getLineItemRequests()), user, null);
+      this.createEventRegistrationUtil(lineItems, user, null);
       return Optional.empty();
     }
   }
@@ -133,6 +134,19 @@ public class CheckoutProcessorImpl implements ICheckoutProcessor {
     }
   }
 
+  private void assertLineItems(List<LineItem> lineItems) {
+    for (LineItem lineItem : lineItems) {
+      if (lineItem.getQuantity() > eventDatabaseOperations.getSpotsLeft(lineItem.getId())) {
+        throw new InsufficientEventCapacityException(lineItem.getName());
+      }
+    }
+  }
+
+  /**
+   * Converts the line item requests into line items.
+   *
+   * @throws EventDoesNotExistException if any of the events do not exist
+   */
   private List<LineItem> convertLineItems(List<LineItemRequest> lineItemRequests) {
     List<Integer> eventIds =
         lineItemRequests.stream().map(LineItemRequest::getEventId).collect(Collectors.toList());
