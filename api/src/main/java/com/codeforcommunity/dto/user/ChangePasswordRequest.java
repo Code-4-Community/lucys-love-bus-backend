@@ -39,7 +39,7 @@ public class ChangePasswordRequest extends ApiDto {
     if (currentPassword == null) {
       fields.add(fieldName + "current_password");
     }
-    if (newPassword == null) {
+    if (passwordInvalid(newPassword)) {
       fields.add(fieldName + "new_password");
     }
     return fields;

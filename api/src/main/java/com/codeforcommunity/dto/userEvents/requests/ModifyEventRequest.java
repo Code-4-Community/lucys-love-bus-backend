@@ -47,7 +47,9 @@ public class ModifyEventRequest extends ApiDto {
     if (spotsAvailable != null && spotsAvailable < 1) {
       fields.add(fieldName + "spots_available");
     }
-    fields.addAll(details.validateFields(fieldName, true));
+    if (details != null) {
+      fields.addAll(details.validateFields(fieldName, true));
+    }
     return fields;
   }
 }

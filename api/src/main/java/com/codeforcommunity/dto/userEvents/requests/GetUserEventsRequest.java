@@ -49,7 +49,7 @@ public class GetUserEventsRequest extends ApiDto {
     if (count.isPresent() && count.get() < 0) {
       fields.add(fieldName + "count");
     }
-    if (startDate.isPresent() && endDate.isPresent() && startDate.get().before(endDate.get())) {
+    if (startDate.isPresent() && endDate.isPresent() && startDate.get().after(endDate.get())) {
       fields.add(fieldName + "start/end");
     }
     return fields;
