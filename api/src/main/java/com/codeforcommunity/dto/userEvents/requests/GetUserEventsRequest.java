@@ -44,18 +44,14 @@ public class GetUserEventsRequest extends ApiDto {
 
   @Override
   public List<String> validateFields(String fieldPrefix) {
+    String fieldName = fieldPrefix + "get_user_events_request.";
     List<String> fields = new ArrayList<>();
     if (count.isPresent() && count.get() < 0) {
-      fields.add(fieldPrefix + "count");
+      fields.add(fieldName + "count");
     }
     if (startDate.isPresent() && endDate.isPresent() && startDate.get().before(endDate.get())) {
-      fields.add(fieldPrefix + "start/end");
+      fields.add(fieldName + "start/end");
     }
     return fields;
-  }
-
-  @Override
-  public String fieldName() {
-    return "get_user_events_request.";
   }
 }

@@ -34,18 +34,14 @@ public class ChangeEmailRequest extends ApiDto {
 
   @Override
   public List<String> validateFields(String fieldPrefix) {
+    String fieldName = fieldPrefix + "change_email_request.";
     List<String> fields = new ArrayList<>();
     if (emailInvalid(newEmail)) {
-      fields.add(fieldPrefix + "new_email");
+      fields.add(fieldName + "new_email");
     }
     if (password == null) {
-      fields.add(fieldPrefix + "password");
+      fields.add(fieldName + "password");
     }
     return fields;
-  }
-
-  @Override
-  public String fieldName() {
-    return "change_email_request.";
   }
 }

@@ -25,11 +25,6 @@ public class AddressData extends ApiDto {
     return new ArrayList<>();
   }
 
-  @Override
-  public String fieldName() {
-    return "address_data.";
-  }
-
   public String getAddress() {
     return address;
   }

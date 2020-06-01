@@ -4,20 +4,14 @@ import com.codeforcommunity.api.ApiDto;
 import java.util.ArrayList;
 import java.util.List;
 
-public class LineItemRequest extends ApiDto {
+public class UpdateEventRegistration extends ApiDto {
 
-  private Integer eventId;
   private Integer quantity;
 
-  public LineItemRequest() {}
+  public UpdateEventRegistration() {}
 
-  public LineItemRequest(Integer eventId, Integer quantity) {
-    this.eventId = eventId;
+  public UpdateEventRegistration(Integer quantity) {
     this.quantity = quantity;
-  }
-
-  public Integer getEventId() {
-    return eventId;
   }
 
   public Integer getQuantity() {
@@ -26,12 +20,9 @@ public class LineItemRequest extends ApiDto {
 
   @Override
   public List<String> validateFields(String fieldPrefix) {
-    String fieldName = fieldPrefix + "line_item_request.";
+    String fieldName = fieldPrefix + "update_event_registration.";
     List<String> fields = new ArrayList<>();
-    if (eventId == null || eventId < 1) {
-      fields.add(fieldName + "event_id");
-    }
-    if (quantity == null || quantity < 1) {
+    if (quantity == null || quantity < 0) {
       fields.add(fieldName + "quantity");
     }
     return fields;

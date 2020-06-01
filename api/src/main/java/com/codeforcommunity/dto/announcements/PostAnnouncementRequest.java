@@ -26,18 +26,14 @@ public class PostAnnouncementRequest extends ApiDto {
 
   @Override
   public List<String> validateFields(String fieldPrefix) {
+    String fieldName = fieldPrefix + "post_announcement_request.";
     List<String> fields = new ArrayList<>();
     if (isEmpty(title)) {
-      fields.add(fieldPrefix + "title");
+      fields.add(fieldName + "title");
     }
     if (isEmpty(description)) {
-      fields.add(fieldPrefix + "description");
+      fields.add(fieldName + "description");
     }
     return fields;
-  }
-
-  @Override
-  public String fieldName() {
-    return "post_announcement_request.";
   }
 }

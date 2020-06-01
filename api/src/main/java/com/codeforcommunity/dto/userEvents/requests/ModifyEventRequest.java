@@ -39,19 +39,15 @@ public class ModifyEventRequest extends ApiDto {
 
   @Override
   public List<String> validateFields(String fieldPrefix) {
+    String fieldName = fieldPrefix + "modify_event_request.";
     List<String> fields = new ArrayList<>();
     if (title != null && title.trim().isEmpty()) {
-      fields.add(fieldPrefix + "title");
+      fields.add(fieldName + "title");
     }
     if (spotsAvailable != null && spotsAvailable < 1) {
-      fields.add(fieldPrefix + "spots_available");
+      fields.add(fieldName + "spots_available");
     }
-    fields.addAll(details.validateFields(fieldPrefix + details.fieldName(), true));
+    fields.addAll(details.validateFields(fieldName, true));
     return fields;
-  }
-
-  @Override
-  public String fieldName() {
-    return "modify_event_request.";
   }
 }

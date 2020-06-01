@@ -34,25 +34,21 @@ public class GetAnnouncementsRequest extends ApiDto {
 
   @Override
   public List<String> validateFields(String fieldPrefix) {
+    String fieldName = fieldPrefix + "get_announcements_request.";
     List<String> fields = new ArrayList<>();
     if (count == null || count < 1) {
-      fields.add(fieldPrefix + "count");
+      fields.add(fieldName + "count");
     }
     if (startDate == null) {
-      fields.add(fieldPrefix + "start");
+      fields.add(fieldName + "start");
     }
     if (endDate == null) {
-      fields.add(fieldPrefix + "end");
+      fields.add(fieldName + "end");
     }
     if (endDate.before(startDate) || endDate.after(new Date())) {
-      fields.add(fieldPrefix + "start/end");
+      fields.add(fieldName + "start/end");
     }
 
     return fields;
-  }
-
-  @Override
-  public String fieldName() {
-    return "get_announcements_request.";
   }
 }

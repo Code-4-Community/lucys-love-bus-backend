@@ -35,29 +35,26 @@ public class NewUserRequest extends ApiDto {
 
   @Override
   public List<String> validateFields(String fieldPrefix) {
+    String fieldName = fieldPrefix + "new_user_request.";
     List<String> fields = new ArrayList<>();
     if (emailInvalid(email)) {
-      fields.add(fieldPrefix + "email");
+      fields.add(fieldName + "email");
     }
-    if (password == null) {
-      fields.add(fieldPrefix + "password");
+    if (passwordInvalid(password)) {
+      fields.add(fieldName + "password");
     }
     if (isEmpty(firstName)) {
-      fields.add(fieldPrefix + "first_name");
+      fields.add(fieldName + "first_name");
     }
     if (isEmpty(lastName)) {
-      fields.add(fieldPrefix + "last_name");
+      fields.add(fieldName + "last_name");
     }
     if (location == null) {
-      fields.add(fieldPrefix + "location");
+      fields.add(fieldName + "location");
+    } else {
+      fields.addAll(location.validateFields(fieldName));
     }
-    fields.addAll(location.validateFields(fieldPrefix + location.fieldName()));
     return fields;
-  }
-
-  @Override
-  public String fieldName() {
-    return "new_user_request.";
   }
 
   public String getEmail() {

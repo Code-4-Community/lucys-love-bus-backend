@@ -43,22 +43,19 @@ public class CreateEventRequest extends ApiDto {
 
   @Override
   public List<String> validateFields(String fieldPrefix) {
+    String fieldName = fieldPrefix + "create_event_request.";
     List<String> fields = new ArrayList<>();
     if (isEmpty(title)) {
-      fields.add(fieldPrefix + "title");
+      fields.add(fieldName + "title");
     }
     if (spotsAvailable == null || spotsAvailable < 1) {
-      fields.add(fieldPrefix + "spots_available");
+      fields.add(fieldName + "spots_available");
     }
     if (details == null) {
-      fields.add(fieldPrefix + "details");
+      fields.add(fieldName + "details");
+    } else {
+      fields.addAll(details.validateFields(fieldName));
     }
-    fields.addAll(details.validateFields(fieldPrefix + details.fieldName()));
     return fields;
-  }
-
-  @Override
-  public String fieldName() {
-    return "create_event_request.";
   }
 }

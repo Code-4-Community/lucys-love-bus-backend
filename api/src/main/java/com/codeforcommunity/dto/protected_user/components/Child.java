@@ -54,31 +54,27 @@ public class Child extends ApiDto {
 
   @Override
   public List<String> validateFields(String fieldPrefix) {
+    String fieldName = fieldPrefix + "child.";
     List<String> fields = new ArrayList<>();
     if (isEmpty(firstName)) {
-      fields.add(fieldPrefix + "first_name");
+      fields.add(fieldName + "first_name");
     }
     if (isEmpty(lastName)) {
-      fields.add(fieldPrefix + "last_name");
+      fields.add(fieldName + "last_name");
     }
     if (dateOfBirth == null || dateOfBirth.after(new java.util.Date())) {
-      fields.add(fieldPrefix + "date_of_birth");
+      fields.add(fieldName + "date_of_birth");
     }
     if (isEmpty(pronouns)) {
-      fields.add(fieldPrefix + "pronouns");
+      fields.add(fieldName + "pronouns");
     }
     if (isEmpty(schoolYear)) {
-      fields.add(fieldPrefix + "school_year");
+      fields.add(fieldName + "school_year");
     }
     if (isEmpty(school)) {
-      fields.add(fieldPrefix + "school");
+      fields.add(fieldName + "school");
     }
     return fields;
-  }
-
-  @Override
-  public String fieldName() {
-    return "child.";
   }
 
   public Integer getId() {

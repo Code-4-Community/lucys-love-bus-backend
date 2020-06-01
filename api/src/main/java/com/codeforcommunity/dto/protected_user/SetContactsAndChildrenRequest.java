@@ -47,31 +47,27 @@ public class SetContactsAndChildrenRequest extends ApiDto {
 
   @Override
   public List<String> validateFields(String fieldPrefx) {
+    String fieldName = fieldPrefx + "set_contacts_and_children_request.";
     List<String> fields = new ArrayList<>();
     if (mainContact == null) {
       fields.add(fieldPrefx + "main_contact");
     } else {
-      fields.addAll(mainContact.validateFields(fieldPrefx + mainContact.fieldName()));
+      fields.addAll(mainContact.validateFields(fieldPrefx));
     }
     if (children == null) {
       fields.add(fieldPrefx + "children");
     } else {
       for (Child child : children) {
-        fields.addAll(child.validateFields(fieldPrefx + child.fieldName()));
+        fields.addAll(child.validateFields(fieldPrefx));
       }
     }
     if (additionalContacts == null) {
       fields.add(fieldPrefx + "additional_contacts");
     } else {
       for (Contact ac : additionalContacts) {
-        fields.addAll(ac.validateFields(fieldPrefx + ac.fieldName()));
+        fields.addAll(ac.validateFields(fieldPrefx));
       }
     }
     return fields;
-  }
-
-  @Override
-  public String fieldName() {
-    return "set_contacts_and_children_request.";
   }
 }

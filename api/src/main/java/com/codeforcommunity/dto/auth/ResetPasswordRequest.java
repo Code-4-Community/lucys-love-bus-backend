@@ -34,18 +34,14 @@ public class ResetPasswordRequest extends ApiDto {
 
   @Override
   public List<String> validateFields(String fieldPrefix) {
+    String fieldName = fieldPrefix + "reset_password_request.";
     List<String> fields = new ArrayList<>();
-    if (secretKey == null) {
-      fields.add(fieldPrefix + "secret_key");
+    if (isEmpty(secretKey)) {
+      fields.add(fieldName + "secret_key");
     }
-    if (newPassword == null) {
-      fields.add(fieldPrefix + "new_password");
+    if (passwordInvalid(newPassword)) {
+      fields.add(fieldName + "new_password");
     }
     return fields;
-  }
-
-  @Override
-  public String fieldName() {
-    return "reset_password_request.";
   }
 }

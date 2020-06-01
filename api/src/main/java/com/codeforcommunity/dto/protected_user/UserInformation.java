@@ -61,36 +61,32 @@ public class UserInformation extends ApiDto {
 
   @Override
   public List<String> validateFields(String fieldPrefix) {
+    String fieldName = fieldPrefix + "user_information.";
     List<String> fields = new ArrayList<>();
     if (mainContact == null) {
-      fields.add(fieldPrefix + "main_contact");
+      fields.add(fieldName + "main_contact");
     } else {
-      fields.addAll(mainContact.validateFields(fieldPrefix + mainContact.fieldName()));
+      fields.addAll(mainContact.validateFields(fieldName));
     }
     if (location == null) {
-      fields.add(fieldPrefix + "location");
+      fields.add(fieldName + "location");
     } else {
-      fields.addAll(location.validateFields(fieldPrefix + location.fieldName()));
+      fields.addAll(location.validateFields(fieldName));
     }
     if (additionalContacts == null) {
-      fields.add(fieldPrefix + "additional_contacts");
+      fields.add(fieldName + "additional_contacts");
     } else {
       for (Contact contact : additionalContacts) {
-        fields.addAll(contact.validateFields(fieldPrefix + contact.fieldName()));
+        fields.addAll(contact.validateFields(fieldName));
       }
     }
     if (children == null) {
-      fields.add(fieldPrefix + "children");
+      fields.add(fieldName + "children");
     } else {
       for (Child child : children) {
-        fields.addAll(child.validateFields(fieldPrefix + child.fieldName()));
+        fields.addAll(child.validateFields(fieldName));
       }
     }
     return fields;
-  }
-
-  @Override
-  public String fieldName() {
-    return "user_information.";
   }
 }

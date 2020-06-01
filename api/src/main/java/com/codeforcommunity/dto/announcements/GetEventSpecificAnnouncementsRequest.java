@@ -20,15 +20,11 @@ public class GetEventSpecificAnnouncementsRequest extends ApiDto {
 
   @Override
   public List<String> validateFields(String fieldPrefix) {
+    String fieldName = fieldPrefix + "get_event_specific_announcement_request.";
     List<String> fields = new ArrayList<>();
     if (eventId == null || eventId < 1) {
-      fields.add(fieldPrefix + "event_id");
+      fields.add(fieldName + "event_id");
     }
     return fields;
-  }
-
-  @Override
-  public String fieldName() {
-    return "get_event_specific_annoucnements_request.";
   }
 }

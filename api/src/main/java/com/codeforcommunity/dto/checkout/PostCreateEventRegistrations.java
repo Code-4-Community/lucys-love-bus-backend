@@ -20,19 +20,15 @@ public class PostCreateEventRegistrations extends ApiDto {
 
   @Override
   public List<String> validateFields(String fieldPrefix) {
+    String fieldName = fieldPrefix + "post_create_event_registrations.";
     List<String> fields = new ArrayList<>();
     if (lineItemRequests == null) {
-      fields.add(fieldPrefix + "line_item_requests");
+      fields.add(fieldName + "line_item_requests");
       return fields;
     }
     for (LineItemRequest req : lineItemRequests) {
-      fields.addAll(req.validateFields(fieldPrefix + req.fieldName()));
+      fields.addAll(req.validateFields(fieldName));
     }
     return fields;
-  }
-
-  @Override
-  public String fieldName() {
-    return "post_create_event_registrations.";
   }
 }

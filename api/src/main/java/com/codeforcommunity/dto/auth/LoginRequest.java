@@ -27,18 +27,14 @@ public class LoginRequest extends ApiDto {
 
   @Override
   public List<String> validateFields(String fieldPrefix) {
+    String fieldName = fieldPrefix + "login_request.";
     List<String> fields = new ArrayList<>();
     if (emailInvalid(email)) {
-      fields.add(fieldPrefix + "email");
+      fields.add(fieldName + "email");
     }
     if (password == null) {
-      fields.add(fieldPrefix + "password");
+      fields.add(fieldName + "password");
     }
     return fields;
-  }
-
-  @Override
-  public String fieldName() {
-    return "login_request.";
   }
 }

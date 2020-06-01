@@ -21,15 +21,11 @@ public class RefreshSessionRequest extends ApiDto {
 
   @Override
   public List<String> validateFields(String fieldPrefix) {
+    String fieldName = fieldPrefix + "refresh_session_request.";
     List<String> fields = new ArrayList<>();
     if (isEmpty(refreshToken) || refreshToken.split("\\.").length < 3) {
-      fields.add(fieldPrefix + "refresh_token");
+      fields.add(fieldName + "refresh_token");
     }
     return fields;
-  }
-
-  @Override
-  public String fieldName() {
-    return "refresh_session_request.";
   }
 }

@@ -2,9 +2,14 @@ package com.codeforcommunity.api;
 
 import com.codeforcommunity.exceptions.HandledException;
 import com.codeforcommunity.exceptions.MalformedParameterException;
+import com.codeforcommunity.propertiesLoader.PropertiesLoader;
 import java.util.List;
 
 public abstract class ApiDto {
+  // Seconds representing the cutoff for how much earlier than now an event can be created
+  protected static final long secondsLateEventCreation =
+      Long.parseLong(
+          PropertiesLoader.getExpirationProperties().getProperty("seconds_late_event_creation"));
 
   /**
    * Verify if the extending DTO is a valid object.
@@ -12,8 +17,8 @@ public abstract class ApiDto {
    * @return A list of strings containing the fields that are invalid. Return a non-null an empty
    *     list if all fields are valid.
    */
-  private final List<String> validateFields() {
-    return validateFields(this.fieldName());
+  private List<String> validateFields() {
+    return validateFields("");
   }
 
   /**
@@ -75,7 +80,7 @@ public abstract class ApiDto {
    * @return a boolean representing whether this email is not valid.
    */
   public boolean emailInvalid(String email) {
-    return email == null || email.matches("^/S+@/S+\\./S+$");
+    return email == null || !email.matches("^\\S+@\\S+\\.\\S{2,}$");
   }
 
   /**
@@ -88,10 +93,7 @@ public abstract class ApiDto {
     return str == null || str.trim().isEmpty();
   }
 
-  /**
-   * Returns the name of the field. Used to start validate with a field prefix.
-   *
-   * @return A string representing the name of the field.
-   */
-  public abstract String fieldName();
+  public boolean passwordInvalid(String pass) {
+    return pass == null || pass.trim().length() < 8;
+  }
 }

@@ -57,28 +57,24 @@ public class Contact extends ApiDto {
 
   @Override
   public List<String> validateFields(String fieldPrefix) {
+    String fieldName = fieldPrefix + "contact.";
     List<String> fields = new ArrayList<>();
     if (emailInvalid(email)) {
-      fields.add(fieldPrefix + "email");
+      fields.add(fieldName + "email");
     }
     if (isEmpty(firstName)) {
-      fields.add(fieldPrefix + "first_name");
+      fields.add(fieldName + "first_name");
     }
     if (isEmpty(lastName)) {
-      fields.add(fieldPrefix + "last_name");
+      fields.add(fieldName + "last_name");
     }
     if (shouldSendEmails == null) {
-      fields.add(fieldPrefix + "should_send_emails");
+      fields.add(fieldName + "should_send_emails");
     }
     if (dateOfBirth != null && dateOfBirth.after(new java.util.Date())) {
-      fields.add(fieldPrefix + "date_of_birth");
+      fields.add(fieldName + "date_of_birth");
     }
     return fields;
-  }
-
-  @Override
-  public String fieldName() {
-    return "contact.";
   }
 
   public Integer getId() {

@@ -34,18 +34,14 @@ public class ChangePasswordRequest extends ApiDto {
 
   @Override
   public List<String> validateFields(String fieldPrefix) {
+    String fieldName = fieldPrefix + "change_password_request.";
     List<String> fields = new ArrayList<>();
     if (currentPassword == null) {
-      fields.add(fieldPrefix + "current_password");
+      fields.add(fieldName + "current_password");
     }
     if (newPassword == null) {
-      fields.add(fieldPrefix + "new_password");
+      fields.add(fieldName + "new_password");
     }
     return fields;
-  }
-
-  @Override
-  public String fieldName() {
-    return "change_password_request.";
   }
 }
