@@ -7,9 +7,9 @@ import com.codeforcommunity.JooqMock;
 import com.codeforcommunity.auth.JWTData;
 import com.codeforcommunity.dto.checkout.LineItemRequest;
 import com.codeforcommunity.dto.checkout.PostCreateEventRegistrations;
-import com.codeforcommunity.enums.EventRegistrationStatus;
 import com.codeforcommunity.enums.PrivilegeLevel;
 import com.codeforcommunity.exceptions.InsufficientEventCapacityException;
+import com.codeforcommunity.exceptions.MalformedParameterException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Test;
 
 // Contains unit tests for CheckoutProcessorImpl.java in the service module
 public class CheckoutProcessorImplTest {
+
   private JooqMock myJooqMock;
   private CheckoutProcessorImpl myCheckoutProcessorImpl;
 
@@ -115,9 +116,7 @@ public class CheckoutProcessorImplTest {
     EventRegistrationsRecord eventRegistrationFromLineItem =
         myJooqMock.getContext().newRecord(Tables.EVENT_REGISTRATIONS);
     eventRegistrationFromLineItem.setUserId(myUserData.getUserId());
-    eventRegistrationFromLineItem.setRegistrationStatus(EventRegistrationStatus.PAYMENT_INCOMPLETE);
     eventRegistrationFromLineItem.setTicketQuantity(lineItem1.getQuantity());
-    eventRegistrationFromLineItem.setStripeCheckoutSessionId(null);
     myJooqMock.addReturn("INSERT", eventRegistrationFromLineItem);
 
     PostCreateEventRegistrations req = new PostCreateEventRegistrations(lineItems);
@@ -194,9 +193,7 @@ public class CheckoutProcessorImplTest {
     EventRegistrationsRecord eventRegistrationFromLineItem =
         myJooqMock.getContext().newRecord(Tables.EVENT_REGISTRATIONS);
     eventRegistrationFromLineItem.setUserId(myUserData.getUserId());
-    eventRegistrationFromLineItem.setRegistrationStatus(EventRegistrationStatus.PAYMENT_INCOMPLETE);
     eventRegistrationFromLineItem.setTicketQuantity(lineItem1.getQuantity());
-    eventRegistrationFromLineItem.setStripeCheckoutSessionId(null);
     myJooqMock.addReturn("INSERT", eventRegistrationFromLineItem);
 
     PostCreateEventRegistrations req = new PostCreateEventRegistrations(lineItems);
@@ -214,5 +211,19 @@ public class CheckoutProcessorImplTest {
     assertEquals(myEvent1.getId(), selectBindings.get(2)[0]);
     assertEquals(myEvent2.getId(), selectBindings.get(3)[0]);
     assertEquals(myEvent2.getId(), selectBindings.get(4)[0]);
+  }
+
+  // test for MalformedParameterException
+  @Test
+  void createEventRegistrationException() {
+    JWTData jwtData = new JWTData(0, PrivilegeLevel.ADMIN);
+    List<LineItemRequest> requests = new ArrayList<>();
+    try {
+      myCheckoutProcessorImpl.createEventRegistration(
+          new PostCreateEventRegistrations(requests), jwtData);
+      fail();
+    } catch (MalformedParameterException e) {
+      assertEquals(e.getParameterName(), "lineItems");
+    }
   }
 }

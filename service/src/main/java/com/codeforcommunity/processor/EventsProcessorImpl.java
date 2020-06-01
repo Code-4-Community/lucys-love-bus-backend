@@ -18,16 +18,16 @@ import com.codeforcommunity.dto.userEvents.requests.ModifyEventRequest;
 import com.codeforcommunity.dto.userEvents.responses.EventRegistrations;
 import com.codeforcommunity.dto.userEvents.responses.GetEventsResponse;
 import com.codeforcommunity.dto.userEvents.responses.SingleEventResponse;
-import com.codeforcommunity.enums.EventRegistrationStatus;
 import com.codeforcommunity.enums.PrivilegeLevel;
 import com.codeforcommunity.exceptions.AdminOnlyRouteException;
 import com.codeforcommunity.exceptions.BadRequestImageException;
 import com.codeforcommunity.exceptions.EventDoesNotExistException;
+import com.codeforcommunity.exceptions.InvalidEventCapacityException;
 import com.codeforcommunity.exceptions.S3FailedUploadException;
 import com.codeforcommunity.requester.S3Requester;
 import java.sql.Timestamp;
 import java.time.Instant;
-import java.time.Period;
+import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
@@ -37,7 +37,6 @@ import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.SelectConditionStep;
 import org.jooq.SelectSeekStep1;
-import org.jooq.SelectWhereStep;
 import org.jooq.generated.tables.pojos.Events;
 import org.jooq.generated.tables.records.EventsRecord;
 
@@ -45,6 +44,11 @@ public class EventsProcessorImpl implements IEventsProcessor {
 
   private final DSLContext db;
   private final EventDatabaseOperations eventDatabaseOperations;
+
+  /** Hours after the start of an event that the event will still show on upcoming pages */
+  private final int registerLeniencyHours = 12;
+  /** The number of days before an event a GP can register */
+  private final int daysGpCanRegister = 5;
 
   public EventsProcessorImpl(DSLContext db) {
     this.db = db;
@@ -66,7 +70,7 @@ public class EventsProcessorImpl implements IEventsProcessor {
 
     EventsRecord newEventRecord = eventRequestToRecord(request);
     newEventRecord.store();
-    return eventPojoToResponse(newEventRecord.into(Events.class), userData.getUserId());
+    return eventPojoToResponse(newEventRecord.into(Events.class), userData);
   }
 
   @Override
@@ -77,14 +81,13 @@ public class EventsProcessorImpl implements IEventsProcessor {
       throw new EventDoesNotExistException(eventId);
     }
 
-    return eventPojoToResponse(event, userData.getUserId());
+    return eventPojoToResponse(event, userData);
   }
 
   @Override
   public GetEventsResponse getEvents(List<Integer> eventIds, JWTData userData) {
     List<Events> e = db.selectFrom(EVENTS).where(EVENTS.ID.in(eventIds)).fetchInto(Events.class);
-    return new GetEventsResponse(
-        listOfEventsToListOfSingleEventResponse(e, userData.getUserId()), e.size());
+    return new GetEventsResponse(listOfEventsToListOfSingleEventResponse(e, userData), e.size());
   }
 
   @Override
@@ -126,31 +129,22 @@ public class EventsProcessorImpl implements IEventsProcessor {
       eventPojos = s.fetchInto(Events.class);
     }
 
-    List<SingleEventResponse> res =
-        listOfEventsToListOfSingleEventResponse(eventPojos, userData.getUserId());
+    List<SingleEventResponse> res = listOfEventsToListOfSingleEventResponse(eventPojos, userData);
     return new GetEventsResponse(res, res.size());
   }
 
   @Override
   public GetEventsResponse getEventsQualified(JWTData userData) {
+    Timestamp startDate =
+        Timestamp.from(Instant.now().minus(registerLeniencyHours, ChronoUnit.HOURS));
 
-    Timestamp startDate = Timestamp.from(Instant.now());
-    Timestamp fiveDays = Timestamp.from(Instant.now().plus(Period.ofDays(5)));
-    boolean limitedToFiveDays = userData.getPrivilegeLevel().equals(PrivilegeLevel.GP);
-
-    SelectWhereStep<EventsRecord> select = db.selectFrom(EVENTS);
-    SelectConditionStep<EventsRecord> afterDateFilter;
-
-    if (limitedToFiveDays) {
-      afterDateFilter = select.where(EVENTS.START_TIME.between(startDate, fiveDays));
-    } else {
-      afterDateFilter = select.where(EVENTS.START_TIME.greaterOrEqual(startDate));
-    }
     List<Events> eventsList =
-        afterDateFilter.orderBy(EVENTS.START_TIME.asc()).fetchInto(Events.class);
+        db.selectFrom(EVENTS)
+            .where(EVENTS.START_TIME.greaterOrEqual(startDate))
+            .orderBy(EVENTS.START_TIME.asc())
+            .fetchInto(Events.class);
 
-    List<SingleEventResponse> res =
-        listOfEventsToListOfSingleEventResponse(eventsList, userData.getUserId());
+    List<SingleEventResponse> res = listOfEventsToListOfSingleEventResponse(eventsList, userData);
 
     return new GetEventsResponse(res, res.size());
   }
@@ -163,7 +157,6 @@ public class EventsProcessorImpl implements IEventsProcessor {
         .on(EVENTS.ID.eq(EVENT_REGISTRATIONS.EVENT_ID))
         .where(EVENTS.ID.in(ids))
         .and(EVENT_REGISTRATIONS.USER_ID.eq(userId))
-        .and(EVENT_REGISTRATIONS.REGISTRATION_STATUS.eq(EventRegistrationStatus.ACTIVE))
         .and(EVENT_REGISTRATIONS.TICKET_QUANTITY.gt(0))
         .fetchMap(EVENTS.ID, EVENT_REGISTRATIONS.TICKET_QUANTITY);
   }
@@ -179,6 +172,10 @@ public class EventsProcessorImpl implements IEventsProcessor {
       record.setTitle(request.getTitle());
     }
     if (request.getSpotsAvailable() != null) {
+      int currentRegistered = eventDatabaseOperations.getSumRegistrationRequests(eventId);
+      if (currentRegistered > request.getSpotsAvailable()) {
+        throw new InvalidEventCapacityException(request.getSpotsAvailable(), currentRegistered);
+      }
       record.setCapacity(request.getSpotsAvailable());
     }
     if (request.getThumbnail() != null) {
@@ -269,7 +266,6 @@ public class EventsProcessorImpl implements IEventsProcessor {
             .join(USERS)
             .on(EVENT_REGISTRATIONS.USER_ID.eq(USERS.ID))
             .where(EVENT_REGISTRATIONS.EVENT_ID.eq(eventId))
-            .and(EVENT_REGISTRATIONS.REGISTRATION_STATUS.eq(EventRegistrationStatus.ACTIVE))
             .fetchInto(RSVP.class);
 
     List<RSVP> rsvpContacts =
@@ -290,7 +286,6 @@ public class EventsProcessorImpl implements IEventsProcessor {
             .join(CONTACTS)
             .on(EVENT_REGISTRATIONS.USER_ID.eq(CONTACTS.USER_ID))
             .where(EVENT_REGISTRATIONS.EVENT_ID.eq(eventId))
-            .and(EVENT_REGISTRATIONS.REGISTRATION_STATUS.eq(EventRegistrationStatus.ACTIVE))
             .fetchInto(RSVP.class);
 
     List<RSVP> rsvpChildren =
@@ -310,7 +305,6 @@ public class EventsProcessorImpl implements IEventsProcessor {
             .join(CHILDREN)
             .on(EVENT_REGISTRATIONS.USER_ID.eq(CHILDREN.USER_ID))
             .where(EVENT_REGISTRATIONS.EVENT_ID.eq(eventId))
-            .and(EVENT_REGISTRATIONS.REGISTRATION_STATUS.eq(EventRegistrationStatus.ACTIVE))
             .fetchInto(RSVP.class);
 
     rsvpUsers.addAll(rsvpContacts);
@@ -333,8 +327,8 @@ public class EventsProcessorImpl implements IEventsProcessor {
    * @return List of our Event data object.
    */
   private List<SingleEventResponse> listOfEventsToListOfSingleEventResponse(
-      List<Events> events, int userId) {
-    Map<Integer, Integer> ticketCounts = getTicketCounts(events, userId);
+      List<Events> events, JWTData userData) {
+    Map<Integer, Integer> ticketCounts = getTicketCounts(events, userData.getUserId());
     return events.stream()
         .map(
             event -> {
@@ -351,14 +345,16 @@ public class EventsProcessorImpl implements IEventsProcessor {
                   event.getCapacity(),
                   event.getThumbnail(),
                   details,
-                  ticketCounts.getOrDefault(event.getId(), 0));
+                  ticketCounts.getOrDefault(event.getId(), 0),
+                  canUserRegister(event, userData));
             })
         .collect(Collectors.toList());
   }
 
   /** Takes a database representation of a single event and returns the dto representation. */
-  private SingleEventResponse eventPojoToResponse(Events event, int userId) {
-    int signedUp = getTicketCounts(Arrays.asList(event), userId).getOrDefault(event.getId(), 0);
+  private SingleEventResponse eventPojoToResponse(Events event, JWTData userData) {
+    int ticketsBought =
+        getTicketCounts(Arrays.asList(event), userData.getUserId()).getOrDefault(event.getId(), 0);
 
     EventDetails details =
         new EventDetails(
@@ -370,7 +366,8 @@ public class EventsProcessorImpl implements IEventsProcessor {
         event.getCapacity(),
         event.getThumbnail(),
         details,
-        signedUp);
+        ticketsBought,
+        canUserRegister(event, userData));
   }
 
   /** Takes a dto representation of an event and returns the database record representation. */
@@ -384,5 +381,22 @@ public class EventsProcessorImpl implements IEventsProcessor {
     newRecord.setStartTime(request.getDetails().getStart());
     newRecord.setEndTime(request.getDetails().getEnd());
     return newRecord;
+  }
+
+  /**
+   * Returns true if the given user is qualified for the event.
+   *
+   * <p>No user can register for an event that has already ended - GP users can only register for
+   * events in the next 5 days
+   */
+  private boolean canUserRegister(Events event, JWTData userData) {
+    if (event.getEndTime().before(Timestamp.from(Instant.now()))) {
+      return false;
+    }
+    if (userData.getPrivilegeLevel().equals(PrivilegeLevel.GP)) {
+      Timestamp fiveDays = Timestamp.from(Instant.now().plus(daysGpCanRegister, ChronoUnit.DAYS));
+      return event.getStartTime().before(fiveDays);
+    }
+    return true;
   }
 }

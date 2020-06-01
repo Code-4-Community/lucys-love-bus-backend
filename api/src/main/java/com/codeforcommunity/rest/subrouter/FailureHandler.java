@@ -1,14 +1,17 @@
 package com.codeforcommunity.rest.subrouter;
 
+import com.codeforcommunity.exceptions.AlreadyRegisteredException;
 import com.codeforcommunity.exceptions.EmailAlreadyInUseException;
 import com.codeforcommunity.exceptions.EventDoesNotExistException;
 import com.codeforcommunity.exceptions.ExpiredSecretKeyException;
 import com.codeforcommunity.exceptions.HandledException;
 import com.codeforcommunity.exceptions.InsufficientEventCapacityException;
+import com.codeforcommunity.exceptions.InvalidEventCapacityException;
 import com.codeforcommunity.exceptions.InvalidSecretKeyException;
 import com.codeforcommunity.exceptions.MalformedParameterException;
 import com.codeforcommunity.exceptions.MissingHeaderException;
 import com.codeforcommunity.exceptions.MissingParameterException;
+import com.codeforcommunity.exceptions.NotRegisteredException;
 import com.codeforcommunity.exceptions.RequestDoesNotExistException;
 import com.codeforcommunity.exceptions.ResourceNotOwnedException;
 import com.codeforcommunity.exceptions.StripeExternalException;
@@ -149,7 +152,26 @@ public class FailureHandler {
     String message =
         "The user requested more tickets than are available for the event: "
             + exception.getEventTitle();
-    end(ctx, message, 400);
+    end(ctx, message, 409);
+  }
+
+  public void handleNotRegisteredException(RoutingContext ctx, NotRegisteredException e) {
+    String message = "You are not registered for the event " + e.getEventTitle();
+    end(ctx, message, 409);
+  }
+
+  public void handleInvalidEventCapacityException(
+      RoutingContext ctx, InvalidEventCapacityException e) {
+    String message =
+        String.format(
+            "Cannot change the event capacity to %d because there are currently %d users signed up",
+            e.getDesiredCapacity(), e.getCurrentParticipants());
+    end(ctx, message, 409);
+  }
+
+  public void handleAlreadyRegisteredException(RoutingContext ctx, AlreadyRegisteredException e) {
+    String message = "You are already registered for the event " + e.getEventTitle();
+    end(ctx, message, 409);
   }
 
   public void handleStripeExternalException(RoutingContext ctx, StripeExternalException exception) {
@@ -171,7 +193,7 @@ public class FailureHandler {
   public void handleEventDoesNotExistException(
       RoutingContext ctx, EventDoesNotExistException exception) {
     String message = "There is no event with id: " + exception.getEventId();
-    end(ctx, message, 400);
+    end(ctx, message, 404);
   }
 
   private void handleUncaughtError(RoutingContext ctx, Throwable throwable) {
