@@ -79,7 +79,7 @@ public abstract class ApiDto {
    * @param email the email to check.
    * @return a boolean representing whether this email is not valid.
    */
-  public boolean emailInvalid(String email) {
+  protected boolean emailInvalid(String email) {
     return email == null || !email.matches("^\\S+@\\S+\\.\\S{2,}$");
   }
 
@@ -89,11 +89,17 @@ public abstract class ApiDto {
    * @param str the string to check.
    * @return a boolean representing whether this string is empty.
    */
-  public boolean isEmpty(String str) {
+  protected boolean isEmpty(String str) {
     return str == null || str.trim().isEmpty();
   }
 
-  public boolean passwordInvalid(String pass) {
+  /**
+   * Checks to see if a password isn't null and it's length with whitespace trimmed is at least 8.
+   *
+   * @param pass the password to check.
+   * @return a boolean representing whether the given password is invalid or not.
+   */
+  protected boolean passwordInvalid(String pass) {
     return pass == null || pass.trim().length() < 8;
   }
 }

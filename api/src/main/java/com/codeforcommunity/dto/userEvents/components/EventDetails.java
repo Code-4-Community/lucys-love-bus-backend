@@ -58,7 +58,7 @@ public class EventDetails extends ApiDto {
   public List<String> validateFields(String fieldPrefix) {
     String fieldName = fieldPrefix + "event_details.";
     List<String> fields = new ArrayList<>();
-    if (isEmpty(description)) {
+    if (description == null) {
       fields.add(fieldName + "description");
     }
     if (isEmpty(location)) {
@@ -84,9 +84,6 @@ public class EventDetails extends ApiDto {
     String fieldName = fieldPrefix + "event_details.";
 
     List<String> fields = new ArrayList<>();
-    if (description != null && description.trim().isEmpty()) {
-      fields.add(fieldName + "description");
-    }
     if (location != null && location.trim().isEmpty()) {
       fields.add(fieldName + "location");
     }

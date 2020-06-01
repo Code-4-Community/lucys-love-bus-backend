@@ -24,8 +24,7 @@ public class PostCreateEventRegistrations extends ApiDto {
     List<String> fields = new ArrayList<>();
     if (lineItemRequests == null) {
       fields.add(fieldName + "line_item_requests");
-    }
-    else {
+    } else {
       for (LineItemRequest req : lineItemRequests) {
         fields.addAll(req.validateFields(fieldName));
       }

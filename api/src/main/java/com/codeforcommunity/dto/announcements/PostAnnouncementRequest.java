@@ -31,7 +31,7 @@ public class PostAnnouncementRequest extends ApiDto {
     if (isEmpty(title)) {
       fields.add(fieldName + "title");
     }
-    if (isEmpty(description)) {
+    if (description == null) {
       fields.add(fieldName + "description");
     }
     return fields;

@@ -1,9 +1,6 @@
 package com.codeforcommunity.dto.userEvents.requests;
 
-import com.codeforcommunity.api.ApiDto;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 public class GetUserEventsRequest {
