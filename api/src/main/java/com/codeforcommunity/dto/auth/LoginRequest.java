@@ -1,10 +1,10 @@
 package com.codeforcommunity.dto.auth;
 
 import com.codeforcommunity.api.ApiDto;
-import com.codeforcommunity.exceptions.HandledException;
-import com.codeforcommunity.exceptions.MalformedParameterException;
+import java.util.ArrayList;
+import java.util.List;
 
-public class LoginRequest implements ApiDto {
+public class LoginRequest extends ApiDto {
 
   private String email;
   private String password;
@@ -26,12 +26,19 @@ public class LoginRequest implements ApiDto {
   }
 
   @Override
-  public void validate() throws HandledException {
-    if (email == null) {
-      throw new MalformedParameterException("Email");
+  public List<String> validateFields(String fieldPrefix) {
+    List<String> fields = new ArrayList<>();
+    if (emailInvalid(email)) {
+      fields.add(fieldPrefix + "email");
     }
     if (password == null) {
-      throw new MalformedParameterException("Password");
+      fields.add(fieldPrefix + "password");
     }
+    return fields;
+  }
+
+  @Override
+  public String fieldName() {
+    return "login_request.";
   }
 }

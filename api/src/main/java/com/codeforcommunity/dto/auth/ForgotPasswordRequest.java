@@ -1,9 +1,10 @@
 package com.codeforcommunity.dto.auth;
 
 import com.codeforcommunity.api.ApiDto;
-import com.codeforcommunity.exceptions.MalformedParameterException;
+import java.util.ArrayList;
+import java.util.List;
 
-public class ForgotPasswordRequest implements ApiDto {
+public class ForgotPasswordRequest extends ApiDto {
 
   private String email;
 
@@ -22,9 +23,16 @@ public class ForgotPasswordRequest implements ApiDto {
   }
 
   @Override
-  public void validate() {
-    if (email == null) {
-      throw new MalformedParameterException("Email");
+  public List<String> validateFields(String fieldPrefix) {
+    List<String> fields = new ArrayList<>();
+    if (emailInvalid(email)) {
+      fields.add(fieldPrefix + "email");
     }
+    return fields;
+  }
+
+  @Override
+  public String fieldName() {
+    return "forgot_password_request.";
   }
 }

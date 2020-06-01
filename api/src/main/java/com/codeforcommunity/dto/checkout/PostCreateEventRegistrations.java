@@ -1,9 +1,10 @@
 package com.codeforcommunity.dto.checkout;
 
 import com.codeforcommunity.api.ApiDto;
+import java.util.ArrayList;
 import java.util.List;
 
-public class PostCreateEventRegistrations implements ApiDto {
+public class PostCreateEventRegistrations extends ApiDto {
 
   private List<LineItemRequest> lineItemRequests;
 
@@ -18,5 +19,20 @@ public class PostCreateEventRegistrations implements ApiDto {
   }
 
   @Override
-  public void validate() {}
+  public List<String> validateFields(String fieldPrefix) {
+    List<String> fields = new ArrayList<>();
+    if (lineItemRequests == null) {
+      fields.add(fieldPrefix + "line_item_requests");
+      return fields;
+    }
+    for (LineItemRequest req : lineItemRequests) {
+      fields.addAll(req.validateFields(fieldPrefix + req.fieldName()));
+    }
+    return fields;
+  }
+
+  @Override
+  public String fieldName() {
+    return "post_create_event_registrations.";
+  }
 }

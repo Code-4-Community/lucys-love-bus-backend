@@ -1,9 +1,10 @@
 package com.codeforcommunity.dto.user;
 
 import com.codeforcommunity.api.ApiDto;
-import com.codeforcommunity.exceptions.MalformedParameterException;
+import java.util.ArrayList;
+import java.util.List;
 
-public class ChangePasswordRequest implements ApiDto {
+public class ChangePasswordRequest extends ApiDto {
 
   private String currentPassword;
   private String newPassword;
@@ -32,12 +33,19 @@ public class ChangePasswordRequest implements ApiDto {
   }
 
   @Override
-  public void validate() {
+  public List<String> validateFields(String fieldPrefix) {
+    List<String> fields = new ArrayList<>();
     if (currentPassword == null) {
-      throw new MalformedParameterException("Current password");
+      fields.add(fieldPrefix + "current_password");
     }
     if (newPassword == null) {
-      throw new MalformedParameterException("New password");
+      fields.add(fieldPrefix + "new_password");
     }
+    return fields;
+  }
+
+  @Override
+  public String fieldName() {
+    return "change_password_request.";
   }
 }

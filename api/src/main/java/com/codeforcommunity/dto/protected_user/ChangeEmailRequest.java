@@ -1,9 +1,10 @@
 package com.codeforcommunity.dto.protected_user;
 
 import com.codeforcommunity.api.ApiDto;
-import com.codeforcommunity.exceptions.MalformedParameterException;
+import java.util.ArrayList;
+import java.util.List;
 
-public class ChangeEmailRequest implements ApiDto {
+public class ChangeEmailRequest extends ApiDto {
 
   private String newEmail;
   private String password;
@@ -32,12 +33,19 @@ public class ChangeEmailRequest implements ApiDto {
   }
 
   @Override
-  public void validate() {
-    if (newEmail == null) {
-      throw new MalformedParameterException("New email");
+  public List<String> validateFields(String fieldPrefix) {
+    List<String> fields = new ArrayList<>();
+    if (emailInvalid(newEmail)) {
+      fields.add(fieldPrefix + "new_email");
     }
     if (password == null) {
-      throw new MalformedParameterException("Password");
+      fields.add(fieldPrefix + "password");
     }
+    return fields;
+  }
+
+  @Override
+  public String fieldName() {
+    return "change_email_request.";
   }
 }

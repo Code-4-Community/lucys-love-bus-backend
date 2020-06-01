@@ -1,9 +1,12 @@
 package com.codeforcommunity.dto.userEvents.requests;
 
+import com.codeforcommunity.api.ApiDto;
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
-public class GetUserEventsRequest {
+public class GetUserEventsRequest extends ApiDto {
   private Optional<Timestamp> endDate; // optional
   private Optional<Timestamp> startDate; // optional
   private Optional<Integer> count; // optional
@@ -37,5 +40,22 @@ public class GetUserEventsRequest {
 
   public void setCount(Optional<Integer> count) {
     this.count = count;
+  }
+
+  @Override
+  public List<String> validateFields(String fieldPrefix) {
+    List<String> fields = new ArrayList<>();
+    if (count.isPresent() && count.get() < 0) {
+      fields.add(fieldPrefix + "count");
+    }
+    if (startDate.isPresent() && endDate.isPresent() && startDate.get().before(endDate.get())) {
+      fields.add(fieldPrefix + "start/end");
+    }
+    return fields;
+  }
+
+  @Override
+  public String fieldName() {
+    return "get_user_events_request.";
   }
 }

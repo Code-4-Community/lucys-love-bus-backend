@@ -2,8 +2,10 @@ package com.codeforcommunity.dto.userEvents.requests;
 
 import com.codeforcommunity.api.ApiDto;
 import com.codeforcommunity.dto.userEvents.components.EventDetails;
+import java.util.ArrayList;
+import java.util.List;
 
-public class ModifyEventRequest implements ApiDto {
+public class ModifyEventRequest extends ApiDto {
   private String title;
   private Integer spotsAvailable;
   private String thumbnail;
@@ -36,5 +38,20 @@ public class ModifyEventRequest implements ApiDto {
   }
 
   @Override
-  public void validate() {}
+  public List<String> validateFields(String fieldPrefix) {
+    List<String> fields = new ArrayList<>();
+    if (title != null && title.trim().isEmpty()) {
+      fields.add(fieldPrefix + "title");
+    }
+    if (spotsAvailable != null && spotsAvailable < 1) {
+      fields.add(fieldPrefix + "spots_available");
+    }
+    fields.addAll(details.validateFields(fieldPrefix + details.fieldName(), true));
+    return fields;
+  }
+
+  @Override
+  public String fieldName() {
+    return "modify_event_request.";
+  }
 }

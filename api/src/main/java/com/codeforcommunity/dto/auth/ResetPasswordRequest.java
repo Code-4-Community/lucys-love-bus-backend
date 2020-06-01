@@ -1,10 +1,10 @@
 package com.codeforcommunity.dto.auth;
 
 import com.codeforcommunity.api.ApiDto;
-import com.codeforcommunity.exceptions.HandledException;
-import com.codeforcommunity.exceptions.MalformedParameterException;
+import java.util.ArrayList;
+import java.util.List;
 
-public class ResetPasswordRequest implements ApiDto {
+public class ResetPasswordRequest extends ApiDto {
 
   private String secretKey;
   private String newPassword;
@@ -33,12 +33,19 @@ public class ResetPasswordRequest implements ApiDto {
   }
 
   @Override
-  public void validate() throws HandledException {
+  public List<String> validateFields(String fieldPrefix) {
+    List<String> fields = new ArrayList<>();
     if (secretKey == null) {
-      throw new MalformedParameterException("Secret key");
+      fields.add(fieldPrefix + "secret_key");
     }
     if (newPassword == null) {
-      throw new MalformedParameterException("New password");
+      fields.add(fieldPrefix + "new_password");
     }
+    return fields;
+  }
+
+  @Override
+  public String fieldName() {
+    return "reset_password_request.";
   }
 }

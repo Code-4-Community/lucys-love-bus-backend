@@ -1,9 +1,10 @@
 package com.codeforcommunity.dto.auth;
 
 import com.codeforcommunity.api.ApiDto;
-import com.codeforcommunity.exceptions.MalformedParameterException;
+import java.util.ArrayList;
+import java.util.List;
 
-public class NewUserRequest implements ApiDto {
+public class NewUserRequest extends ApiDto {
 
   private String email;
   private String password;
@@ -33,26 +34,30 @@ public class NewUserRequest implements ApiDto {
   private NewUserRequest() {}
 
   @Override
-  public void validate() {
-    if (email == null) {
-      throw new MalformedParameterException("Email");
+  public List<String> validateFields(String fieldPrefix) {
+    List<String> fields = new ArrayList<>();
+    if (emailInvalid(email)) {
+      fields.add(fieldPrefix + "email");
     }
     if (password == null) {
-      throw new MalformedParameterException("Password");
+      fields.add(fieldPrefix + "password");
     }
-    if (firstName == null) {
-      throw new MalformedParameterException("First name");
+    if (isEmpty(firstName)) {
+      fields.add(fieldPrefix + "first_name");
     }
-    if (lastName == null) {
-      throw new MalformedParameterException("Last name");
-    }
-    if (phoneNumber == null) {
-      throw new MalformedParameterException("Phone number");
+    if (isEmpty(lastName)) {
+      fields.add(fieldPrefix + "last_name");
     }
     if (location == null) {
-      throw new MalformedParameterException("Location");
+      fields.add(fieldPrefix + "location");
     }
-    location.validate();
+    fields.addAll(location.validateFields(fieldPrefix + location.fieldName()));
+    return fields;
+  }
+
+  @Override
+  public String fieldName() {
+    return "new_user_request.";
   }
 
   public String getEmail() {

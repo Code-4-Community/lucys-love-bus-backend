@@ -3,9 +3,10 @@ package com.codeforcommunity.dto.protected_user;
 import com.codeforcommunity.api.ApiDto;
 import com.codeforcommunity.dto.protected_user.components.Child;
 import com.codeforcommunity.dto.protected_user.components.Contact;
+import java.util.ArrayList;
 import java.util.List;
 
-public class SetContactsAndChildrenRequest implements ApiDto {
+public class SetContactsAndChildrenRequest extends ApiDto {
 
   private Contact mainContact;
   private List<Contact> additionalContacts;
@@ -45,5 +46,32 @@ public class SetContactsAndChildrenRequest implements ApiDto {
   }
 
   @Override
-  public void validate() {}
+  public List<String> validateFields(String fieldPrefx) {
+    List<String> fields = new ArrayList<>();
+    if (mainContact == null) {
+      fields.add(fieldPrefx + "main_contact");
+    } else {
+      fields.addAll(mainContact.validateFields(fieldPrefx + mainContact.fieldName()));
+    }
+    if (children == null) {
+      fields.add(fieldPrefx + "children");
+    } else {
+      for (Child child : children) {
+        fields.addAll(child.validateFields(fieldPrefx + child.fieldName()));
+      }
+    }
+    if (additionalContacts == null) {
+      fields.add(fieldPrefx + "additional_contacts");
+    } else {
+      for (Contact ac : additionalContacts) {
+        fields.addAll(ac.validateFields(fieldPrefx + ac.fieldName()));
+      }
+    }
+    return fields;
+  }
+
+  @Override
+  public String fieldName() {
+    return "set_contacts_and_children_request.";
+  }
 }

@@ -2,8 +2,10 @@ package com.codeforcommunity.dto.userEvents.components;
 
 import com.codeforcommunity.api.ApiDto;
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
 
-public class EventDetails implements ApiDto {
+public class EventDetails extends ApiDto {
   private String description;
   private String location;
   private Timestamp start;
@@ -51,5 +53,48 @@ public class EventDetails implements ApiDto {
   }
 
   @Override
-  public void validate() {}
+  public List<String> validateFields(String fieldPrefix) {
+    List<String> fields = new ArrayList<>();
+    if (isEmpty(description)) {
+      fields.add(fieldPrefix + "description");
+    }
+    if (isEmpty(location)) {
+      fields.add(fieldPrefix + "location");
+    }
+    if (start == null || start.before(new java.util.Date())) {
+      fields.add(fieldPrefix + "start");
+    }
+    if (end == null) {
+      fields.add(fieldPrefix + "end");
+    }
+    if (start != null && end != null && start.after(end)) {
+      fields.add(fieldPrefix + "start/end");
+    }
+    return fields;
+  }
+
+  @Override
+  public List<String> validateFields(String fieldPrefix, boolean isNullable) {
+    if (!isNullable) {
+      return this.validateFields(fieldPrefix);
+    }
+
+    List<String> fields = new ArrayList<>();
+    if (description != null && description.trim().isEmpty()) {
+      fields.add(fieldPrefix + "description");
+    }
+    if (location != null && location.trim().isEmpty()) {
+      fields.add(fieldPrefix + "location");
+    }
+    if (start != null && end != null && start.after(end)) {
+      fields.add(fieldPrefix + "start/end");
+    }
+
+    return fields;
+  }
+
+  @Override
+  public String fieldName() {
+    return "event_details.";
+  }
 }

@@ -1,8 +1,10 @@
 package com.codeforcommunity.dto.auth;
 
 import com.codeforcommunity.api.ApiDto;
+import java.util.ArrayList;
+import java.util.List;
 
-public class AddressData implements ApiDto {
+public class AddressData extends ApiDto {
 
   private String address;
   private String city;
@@ -19,7 +21,14 @@ public class AddressData implements ApiDto {
   private AddressData() {}
 
   @Override
-  public void validate() {}
+  public List<String> validateFields(String fieldPrefix) {
+    return new ArrayList<>();
+  }
+
+  @Override
+  public String fieldName() {
+    return "address_data.";
+  }
 
   public String getAddress() {
     return address;

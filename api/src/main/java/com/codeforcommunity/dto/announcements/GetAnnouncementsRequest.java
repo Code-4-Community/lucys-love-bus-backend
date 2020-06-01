@@ -1,19 +1,20 @@
 package com.codeforcommunity.dto.announcements;
 
 import com.codeforcommunity.api.ApiDto;
-import com.codeforcommunity.exceptions.MalformedParameterException;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
-public class GetAnnouncementsRequest implements ApiDto {
+public class GetAnnouncementsRequest extends ApiDto {
 
   private Timestamp startDate; // optional
   private Timestamp endDate; // optional
-  private int count; // optional
+  private Integer count; // optional
 
   private GetAnnouncementsRequest() {}
 
-  public GetAnnouncementsRequest(Timestamp startDate, Timestamp endDate, int count) {
+  public GetAnnouncementsRequest(Timestamp startDate, Timestamp endDate, Integer count) {
     this.startDate = startDate;
     this.endDate = endDate;
     this.count = count;
@@ -27,22 +28,31 @@ public class GetAnnouncementsRequest implements ApiDto {
     return endDate;
   }
 
-  public int getCount() {
+  public Integer getCount() {
     return count;
   }
 
-  /**
-   * Validates the request.
-   *
-   * @throws MalformedParameterException if any of the request parameters are invalid
-   */
   @Override
-  public void validate() {
-    if (count < 1) {
-      throw new MalformedParameterException("count");
+  public List<String> validateFields(String fieldPrefix) {
+    List<String> fields = new ArrayList<>();
+    if (count == null || count < 1) {
+      fields.add(fieldPrefix + "count");
+    }
+    if (startDate == null) {
+      fields.add(fieldPrefix + "start");
+    }
+    if (endDate == null) {
+      fields.add(fieldPrefix + "end");
     }
     if (endDate.before(startDate) || endDate.after(new Date())) {
-      throw new MalformedParameterException("end");
+      fields.add(fieldPrefix + "start/end");
     }
+
+    return fields;
+  }
+
+  @Override
+  public String fieldName() {
+    return "get_announcements_request.";
   }
 }

@@ -1,9 +1,10 @@
 package com.codeforcommunity.dto.announcements;
 
 import com.codeforcommunity.api.ApiDto;
-import com.codeforcommunity.exceptions.MalformedParameterException;
+import java.util.ArrayList;
+import java.util.List;
 
-public class PostAnnouncementRequest implements ApiDto {
+public class PostAnnouncementRequest extends ApiDto {
 
   private String title;
   private String description;
@@ -24,12 +25,19 @@ public class PostAnnouncementRequest implements ApiDto {
   }
 
   @Override
-  public void validate() {
-    if (title == null) {
-      throw new MalformedParameterException("Title");
+  public List<String> validateFields(String fieldPrefix) {
+    List<String> fields = new ArrayList<>();
+    if (isEmpty(title)) {
+      fields.add(fieldPrefix + "title");
     }
-    if (description == null) {
-      throw new MalformedParameterException("Description");
+    if (isEmpty(description)) {
+      fields.add(fieldPrefix + "description");
     }
+    return fields;
+  }
+
+  @Override
+  public String fieldName() {
+    return "post_announcement_request.";
   }
 }

@@ -2,9 +2,10 @@ package com.codeforcommunity.dto.userEvents.requests;
 
 import com.codeforcommunity.api.ApiDto;
 import com.codeforcommunity.dto.userEvents.components.EventDetails;
-import com.codeforcommunity.exceptions.MalformedParameterException;
+import java.util.ArrayList;
+import java.util.List;
 
-public class CreateEventRequest implements ApiDto {
+public class CreateEventRequest extends ApiDto {
   private String title;
   private Integer spotsAvailable;
   private String thumbnail;
@@ -41,17 +42,23 @@ public class CreateEventRequest implements ApiDto {
   }
 
   @Override
-  public void validate() {
-    if (title == null) {
-      throw new MalformedParameterException("Title");
+  public List<String> validateFields(String fieldPrefix) {
+    List<String> fields = new ArrayList<>();
+    if (isEmpty(title)) {
+      fields.add(fieldPrefix + "title");
     }
-    if (spotsAvailable == null) {
-      throw new MalformedParameterException("Spots available");
+    if (spotsAvailable == null || spotsAvailable < 1) {
+      fields.add(fieldPrefix + "spots_available");
     }
-    // TODO: can the thumbnail be null?
     if (details == null) {
-      throw new MalformedParameterException("Details");
+      fields.add(fieldPrefix + "details");
     }
-    details.validate();
+    fields.addAll(details.validateFields(fieldPrefix + details.fieldName()));
+    return fields;
+  }
+
+  @Override
+  public String fieldName() {
+    return "create_event_request.";
   }
 }

@@ -1,9 +1,12 @@
 package com.codeforcommunity.dto.protected_user.components;
 
+import com.codeforcommunity.api.ApiDto;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import java.sql.Date;
+import java.util.ArrayList;
+import java.util.List;
 
-public class Child {
+public class Child extends ApiDto {
 
   /** Used on PUT requests, ignored on POST */
   private Integer id;
@@ -47,6 +50,35 @@ public class Child {
     this.diagnosis = diagnosis;
     this.medications = medications;
     this.notes = notes;
+  }
+
+  @Override
+  public List<String> validateFields(String fieldPrefix) {
+    List<String> fields = new ArrayList<>();
+    if (isEmpty(firstName)) {
+      fields.add(fieldPrefix + "first_name");
+    }
+    if (isEmpty(lastName)) {
+      fields.add(fieldPrefix + "last_name");
+    }
+    if (dateOfBirth == null || dateOfBirth.after(new java.util.Date())) {
+      fields.add(fieldPrefix + "date_of_birth");
+    }
+    if (isEmpty(pronouns)) {
+      fields.add(fieldPrefix + "pronouns");
+    }
+    if (isEmpty(schoolYear)) {
+      fields.add(fieldPrefix + "school_year");
+    }
+    if (isEmpty(school)) {
+      fields.add(fieldPrefix + "school");
+    }
+    return fields;
+  }
+
+  @Override
+  public String fieldName() {
+    return "child.";
   }
 
   public Integer getId() {
