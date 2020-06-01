@@ -1,6 +1,10 @@
 package com.codeforcommunity.dto.auth;
 
-public class NewUserRequest {
+import com.codeforcommunity.api.ApiDto;
+import java.util.ArrayList;
+import java.util.List;
+
+public class NewUserRequest extends ApiDto {
 
   private String email;
   private String password;
@@ -29,14 +33,28 @@ public class NewUserRequest {
 
   private NewUserRequest() {}
 
-  public boolean validate() {
-    return email != null
-        && password != null
-        && firstName != null
-        && lastName != null
-        && phoneNumber != null
-        && location != null
-        && location.validate();
+  @Override
+  public List<String> validateFields(String fieldPrefix) {
+    String fieldName = fieldPrefix + "new_user_request.";
+    List<String> fields = new ArrayList<>();
+    if (emailInvalid(email)) {
+      fields.add(fieldName + "email");
+    }
+    if (passwordInvalid(password)) {
+      fields.add(fieldName + "password");
+    }
+    if (isEmpty(firstName)) {
+      fields.add(fieldName + "first_name");
+    }
+    if (isEmpty(lastName)) {
+      fields.add(fieldName + "last_name");
+    }
+    if (location == null) {
+      fields.add(fieldName + "location");
+    } else {
+      fields.addAll(location.validateFields(fieldName));
+    }
+    return fields;
   }
 
   public String getEmail() {

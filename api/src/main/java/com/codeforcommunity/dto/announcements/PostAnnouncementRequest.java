@@ -1,6 +1,10 @@
 package com.codeforcommunity.dto.announcements;
 
-public class PostAnnouncementRequest {
+import com.codeforcommunity.api.ApiDto;
+import java.util.ArrayList;
+import java.util.List;
+
+public class PostAnnouncementRequest extends ApiDto {
 
   private String title;
   private String description;
@@ -18,5 +22,18 @@ public class PostAnnouncementRequest {
 
   public String getDescription() {
     return description;
+  }
+
+  @Override
+  public List<String> validateFields(String fieldPrefix) {
+    String fieldName = fieldPrefix + "post_announcement_request.";
+    List<String> fields = new ArrayList<>();
+    if (isEmpty(title)) {
+      fields.add(fieldName + "title");
+    }
+    if (description == null) {
+      fields.add(fieldName + "description");
+    }
+    return fields;
   }
 }

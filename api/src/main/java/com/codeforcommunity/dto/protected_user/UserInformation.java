@@ -1,11 +1,13 @@
 package com.codeforcommunity.dto.protected_user;
 
+import com.codeforcommunity.api.ApiDto;
 import com.codeforcommunity.dto.auth.AddressData;
 import com.codeforcommunity.dto.protected_user.components.Child;
 import com.codeforcommunity.dto.protected_user.components.Contact;
+import java.util.ArrayList;
 import java.util.List;
 
-public class UserInformation {
+public class UserInformation extends ApiDto {
 
   private Contact mainContact;
   private List<Contact> additionalContacts;
@@ -55,5 +57,36 @@ public class UserInformation {
 
   public void setLocation(AddressData location) {
     this.location = location;
+  }
+
+  @Override
+  public List<String> validateFields(String fieldPrefix) {
+    String fieldName = fieldPrefix + "user_information.";
+    List<String> fields = new ArrayList<>();
+    if (mainContact == null) {
+      fields.add(fieldName + "main_contact");
+    } else {
+      fields.addAll(mainContact.validateFields(fieldName));
+    }
+    if (location == null) {
+      fields.add(fieldName + "location");
+    } else {
+      fields.addAll(location.validateFields(fieldName));
+    }
+    if (additionalContacts == null) {
+      fields.add(fieldName + "additional_contacts");
+    } else {
+      for (Contact contact : additionalContacts) {
+        fields.addAll(contact.validateFields(fieldName));
+      }
+    }
+    if (children == null) {
+      fields.add(fieldName + "children");
+    } else {
+      for (Child child : children) {
+        fields.addAll(child.validateFields(fieldName));
+      }
+    }
+    return fields;
   }
 }

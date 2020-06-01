@@ -1,10 +1,13 @@
 package com.codeforcommunity.dto.userEvents.requests;
 
+import com.codeforcommunity.api.ApiDto;
 import com.codeforcommunity.dto.userEvents.components.EventDetails;
+import java.util.ArrayList;
+import java.util.List;
 
-public class CreateEventRequest {
+public class CreateEventRequest extends ApiDto {
   private String title;
-  private int spotsAvailable;
+  private Integer spotsAvailable;
   private String thumbnail;
   private EventDetails details;
 
@@ -36,5 +39,23 @@ public class CreateEventRequest {
 
   public EventDetails getDetails() {
     return details;
+  }
+
+  @Override
+  public List<String> validateFields(String fieldPrefix) {
+    String fieldName = fieldPrefix + "create_event_request.";
+    List<String> fields = new ArrayList<>();
+    if (isEmpty(title)) {
+      fields.add(fieldName + "title");
+    }
+    if (spotsAvailable == null || spotsAvailable < 1) {
+      fields.add(fieldName + "spots_available");
+    }
+    if (details == null) {
+      fields.add(fieldName + "details");
+    } else {
+      fields.addAll(details.validateFields(fieldName));
+    }
+    return fields;
   }
 }

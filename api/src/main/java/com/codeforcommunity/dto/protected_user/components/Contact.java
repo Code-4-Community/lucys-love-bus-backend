@@ -1,9 +1,12 @@
 package com.codeforcommunity.dto.protected_user.components;
 
+import com.codeforcommunity.api.ApiDto;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import java.sql.Date;
+import java.util.ArrayList;
+import java.util.List;
 
-public class Contact {
+public class Contact extends ApiDto {
 
   /** Used on PUT requests, ignored on POST */
   private Integer id;
@@ -50,6 +53,28 @@ public class Contact {
     this.notes = notes;
     this.pronouns = pronouns;
     this.shouldSendEmails = shouldSendEmails;
+  }
+
+  @Override
+  public List<String> validateFields(String fieldPrefix) {
+    String fieldName = fieldPrefix + "contact.";
+    List<String> fields = new ArrayList<>();
+    if (emailInvalid(email)) {
+      fields.add(fieldName + "email");
+    }
+    if (isEmpty(firstName)) {
+      fields.add(fieldName + "first_name");
+    }
+    if (isEmpty(lastName)) {
+      fields.add(fieldName + "last_name");
+    }
+    if (shouldSendEmails == null) {
+      fields.add(fieldName + "should_send_emails");
+    }
+    if (dateOfBirth != null && dateOfBirth.after(new java.util.Date())) {
+      fields.add(fieldName + "date_of_birth");
+    }
+    return fields;
   }
 
   public Integer getId() {

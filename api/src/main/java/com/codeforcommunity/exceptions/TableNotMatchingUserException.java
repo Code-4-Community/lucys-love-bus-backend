@@ -3,7 +3,7 @@ package com.codeforcommunity.exceptions;
 import com.codeforcommunity.rest.subrouter.FailureHandler;
 import io.vertx.ext.web.RoutingContext;
 
-public class TableNotMatchingUserException extends RuntimeException implements HandledException {
+public class TableNotMatchingUserException extends HandledException {
 
   private String tableName;
   private int tableId;

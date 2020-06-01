@@ -1,6 +1,10 @@
 package com.codeforcommunity.dto.auth;
 
-public class ResetPasswordRequest {
+import com.codeforcommunity.api.ApiDto;
+import java.util.ArrayList;
+import java.util.List;
+
+public class ResetPasswordRequest extends ApiDto {
 
   private String secretKey;
   private String newPassword;
@@ -26,5 +30,18 @@ public class ResetPasswordRequest {
 
   public void setNewPassword(String newPassword) {
     this.newPassword = newPassword;
+  }
+
+  @Override
+  public List<String> validateFields(String fieldPrefix) {
+    String fieldName = fieldPrefix + "reset_password_request.";
+    List<String> fields = new ArrayList<>();
+    if (isEmpty(secretKey)) {
+      fields.add(fieldName + "secret_key");
+    }
+    if (passwordInvalid(newPassword)) {
+      fields.add(fieldName + "new_password");
+    }
+    return fields;
   }
 }

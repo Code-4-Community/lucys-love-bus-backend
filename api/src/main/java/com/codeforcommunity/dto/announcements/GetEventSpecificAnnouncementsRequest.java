@@ -1,29 +1,16 @@
 package com.codeforcommunity.dto.announcements;
 
-import com.codeforcommunity.exceptions.MalformedParameterException;
-
 public class GetEventSpecificAnnouncementsRequest {
 
-  private int eventId;
+  private Integer eventId;
 
   private GetEventSpecificAnnouncementsRequest() {}
 
-  public GetEventSpecificAnnouncementsRequest(int eventId) {
+  public GetEventSpecificAnnouncementsRequest(Integer eventId) {
     this.eventId = eventId;
   }
 
-  public int getEventId() {
+  public Integer getEventId() {
     return eventId;
-  }
-
-  /**
-   * Validates the request.
-   *
-   * @throws MalformedParameterException if any of the request parameters are invalid
-   */
-  public void validate() {
-    if (eventId < 1) {
-      throw new MalformedParameterException("event_id");
-    }
   }
 }
