@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class GetUserEventsRequest extends ApiDto {
+public class GetUserEventsRequest {
   private Optional<Timestamp> endDate; // optional
   private Optional<Timestamp> startDate; // optional
   private Optional<Integer> count; // optional
@@ -40,18 +40,5 @@ public class GetUserEventsRequest extends ApiDto {
 
   public void setCount(Optional<Integer> count) {
     this.count = count;
-  }
-
-  @Override
-  public List<String> validateFields(String fieldPrefix) {
-    String fieldName = fieldPrefix + "get_user_events_request.";
-    List<String> fields = new ArrayList<>();
-    if (count.isPresent() && count.get() < 0) {
-      fields.add(fieldName + "count");
-    }
-    if (startDate.isPresent() && endDate.isPresent() && startDate.get().after(endDate.get())) {
-      fields.add(fieldName + "start/end");
-    }
-    return fields;
   }
 }

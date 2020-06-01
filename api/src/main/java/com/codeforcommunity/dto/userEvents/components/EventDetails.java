@@ -59,20 +59,19 @@ public class EventDetails extends ApiDto {
     String fieldName = fieldPrefix + "event_details.";
     List<String> fields = new ArrayList<>();
     if (isEmpty(description)) {
-      fields.add(fieldPrefix + "description");
+      fields.add(fieldName + "description");
     }
     if (isEmpty(location)) {
-      fields.add(fieldPrefix + "location");
+      fields.add(fieldName + "location");
     }
-    if (start == null
-        || start.before(Date.from(Instant.now().minusSeconds(ApiDto.secondsLateEventCreation)))) {
-      fields.add(fieldPrefix + "start");
+    if (start == null || isStartInvalid(start)) {
+      fields.add(fieldName + "start");
     }
     if (end == null) {
-      fields.add(fieldPrefix + "end");
+      fields.add(fieldName + "end");
     }
     if (start != null && end != null && start.after(end)) {
-      fields.add(fieldPrefix + "start/end");
+      fields.add(fieldName + "start/end");
     }
     return fields;
   }
@@ -91,10 +90,17 @@ public class EventDetails extends ApiDto {
     if (location != null && location.trim().isEmpty()) {
       fields.add(fieldName + "location");
     }
+    if (start != null && isStartInvalid(start)) {
+      fields.add(fieldName + "start");
+    }
     if (start != null && end != null && start.after(end)) {
       fields.add(fieldName + "start/end");
     }
 
     return fields;
+  }
+
+  private boolean isStartInvalid(Timestamp start) {
+    return start.before(Date.from(Instant.now().minusSeconds(ApiDto.secondsLateEventCreation)));
   }
 }
