@@ -68,9 +68,6 @@ public class Contact extends ApiDto {
     if (isEmpty(lastName)) {
       fields.add(fieldName + "last_name");
     }
-    if (shouldSendEmails == null) {
-      fields.add(fieldName + "should_send_emails");
-    }
     if (dateOfBirth != null && dateOfBirth.after(new java.util.Date())) {
       fields.add(fieldName + "date_of_birth");
     }
