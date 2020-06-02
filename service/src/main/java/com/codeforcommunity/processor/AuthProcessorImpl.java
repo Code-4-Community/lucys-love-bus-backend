@@ -16,9 +16,8 @@ import com.codeforcommunity.enums.VerificationKeyType;
 import com.codeforcommunity.exceptions.AuthException;
 import com.codeforcommunity.exceptions.EmailAlreadyInUseException;
 import com.codeforcommunity.exceptions.InvalidPasswordException;
-import java.util.Optional;
-
 import com.codeforcommunity.exceptions.UserDoesNotExistException;
+import java.util.Optional;
 import org.jooq.DSLContext;
 import org.jooq.generated.tables.records.UsersRecord;
 
