@@ -38,6 +38,8 @@ import org.jooq.generated.tables.records.VerificationKeysRecord;
 import org.jooq.impl.UpdatableRecordImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 // Contains tests for AuthProcessorImpl.java in main
 public class AuthProcessorImplTest {
@@ -238,7 +240,7 @@ public class AuthProcessorImplTest {
   @Test
   public void testLogout() {
     // mock the blacklisted refresh token table
-    myJooqMock.addReturn("INSERT", new ArrayList<BlacklistedRefreshesRecord>());
+    myJooqMock.addEmptyReturn("INSERT");
     myAuthProcessorImpl.logout("sample.refresh.token");
 
     // is the binding correct
@@ -248,8 +250,7 @@ public class AuthProcessorImplTest {
   // test session refresh with correctly refreshed token
   @Test
   public void testRefreshSession1() {
-    List<UpdatableRecordImpl> emptySelectStatement = new ArrayList<UpdatableRecordImpl>();
-    myJooqMock.addReturn("SELECT", emptySelectStatement);
+    myJooqMock.addEmptyReturn("SELECT");
 
     Optional<String> accessToken = Optional.of(ACCESS_TOKEN_EXAMPLE);
 
@@ -266,8 +267,7 @@ public class AuthProcessorImplTest {
   // test session refresh with invalid refresh token
   @Test
   public void testRefreshSession2() {
-    List<UpdatableRecordImpl> emptySelectStatement = new ArrayList<UpdatableRecordImpl>();
-    myJooqMock.addReturn("SELECT", emptySelectStatement);
+    myJooqMock.addEmptyReturn("SELECT");
 
     Optional<String> accessToken = Optional.empty();
 
@@ -351,24 +351,14 @@ public class AuthProcessorImplTest {
   }
 
   // test that resetting the password fails if it's too short
-  @Test
-  public void testResetPassword1() {
+  @ParameterizedTest
+  @ValueSource(strings = { "bad", "poor"})
+  public void testResetPassword1(String badPassword) {
     String sk = "secret key";
-    String badPassword1 = "bad";
-    String badPassword2 = "poor";
-
-    ResetPasswordRequest req1 = new ResetPasswordRequest(sk, badPassword1);
-    ResetPasswordRequest req2 = new ResetPasswordRequest(sk, badPassword2);
+    ResetPasswordRequest req = new ResetPasswordRequest(sk, badPassword);
 
     try {
-      myAuthProcessorImpl.resetPassword(req1);
-      fail();
-    } catch (InvalidPasswordException e) {
-      // we're good
-    }
-
-    try {
-      myAuthProcessorImpl.resetPassword(req2);
+      myAuthProcessorImpl.resetPassword(req);
       fail();
     } catch (InvalidPasswordException e) {
       // we're good

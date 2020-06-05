@@ -121,8 +121,7 @@ public class RequestsProcessorImplTest {
     when(myUserData.getUserId()).thenReturn(0);
 
     // mock the DB
-    List<UpdatableRecordImpl> emptySelectStatement = new ArrayList<UpdatableRecordImpl>();
-    myJooqMock.addReturn("SELECT", emptySelectStatement);
+    myJooqMock.addEmptyReturn("SELECT");
 
     assertEquals(myRequestsProcessorImpl.getRequests(myUserData).size(), 0);
   }

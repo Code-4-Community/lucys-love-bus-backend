@@ -516,23 +516,19 @@ public class EventsProcessorImplTest {
   }
 
   // method gives the correct response if user doesn't qualify for any events
-  @Test
-  public void testGetEventsQualified1() {
+  @ParameterizedTest
+  @EnumSource(PrivilegeLevel.class)
+  public void testGetEventsQualified1(PrivilegeLevel pl) {
     // write tests for both an admin and gp user
-    JWTData myGPUserData = new JWTData(0, PrivilegeLevel.GP);
-    JWTData myAdminUserData = new JWTData(1, PrivilegeLevel.ADMIN);
+    JWTData myUserData = new JWTData(0, pl);
 
     myJooqMock.addEmptyReturn("SELECT");
 
-    GetEventsResponse resGP = myEventsProcessorImpl.getEventsQualified(myGPUserData);
+    GetEventsResponse resGP = myEventsProcessorImpl.getEventsQualified(myUserData);
     assertEquals(0, resGP.getTotalCount());
-
-    GetEventsResponse resAdmin = myEventsProcessorImpl.getEventsQualified(myAdminUserData);
-    assertEquals(resAdmin.getTotalCount(), resGP.getTotalCount());
   }
 
   // user qualifies for one event
-
   @ParameterizedTest
   @EnumSource(PrivilegeLevel.class)
   public void testGetEventsQualified2(PrivilegeLevel pl) {

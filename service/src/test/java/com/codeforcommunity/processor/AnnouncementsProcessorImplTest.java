@@ -120,7 +120,7 @@ public class AnnouncementsProcessorImplTest {
     announcement2.setCreated(new Timestamp(START_TIMESTAMP_TEST2));
     announcement2.setDescription("the second announcement description");
 
-    List<UpdatableRecordImpl> announcements = new ArrayList<>();
+    List<AnnouncementsRecord> announcements = new ArrayList<>();
     announcements.add(announcement1);
     announcements.add(announcement2);
     myJooqMock.addReturn("SELECT", announcements);
@@ -224,7 +224,7 @@ public class AnnouncementsProcessorImplTest {
     JWTData myUserData = new JWTData(0, PrivilegeLevel.ADMIN);
 
     // return no events
-    myJooqMock.addReturn("SELECT", new ArrayList<EventsRecord>());
+    myJooqMock.addEmptyReturn("SELECT");
 
     try {
       myAnnouncementsProcessorImpl.postEventSpecificAnnouncement(req, myUserData, -1);

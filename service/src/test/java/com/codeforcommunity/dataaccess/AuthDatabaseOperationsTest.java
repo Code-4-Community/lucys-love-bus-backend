@@ -50,7 +50,7 @@ public class AuthDatabaseOperationsTest {
     String myEmail = "brandon@example.com";
 
     // no users in DB
-    myJooqMock.addReturn("SELECT", new ArrayList<UsersRecord>());
+    myJooqMock.addEmptyReturn("SELECT");
 
     try {
       myAuthDatabaseOperations.getUserJWTData(myEmail);
@@ -138,7 +138,7 @@ public class AuthDatabaseOperationsTest {
   @Test
   public void testCreateNewUser2() {
     // no users in DB
-    myJooqMock.addReturn("INSERT", new ArrayList<UsersRecord>());
+    myJooqMock.addEmptyReturn("INSERT");
 
     String sampleEmail = "conner@example.com";
     String samplePassword = "letmeout";
@@ -174,7 +174,7 @@ public class AuthDatabaseOperationsTest {
   @Test
   public void testAddToBlackList() {
     // set up mock DB for inserting blacklisted refreshes
-    myJooqMock.addReturn("INSERT", new ArrayList<BlacklistedRefreshesRecord>());
+    myJooqMock.addEmptyReturn("INSERT");
 
     myAuthDatabaseOperations.addToBlackList("sample signature");
 
@@ -187,7 +187,7 @@ public class AuthDatabaseOperationsTest {
   @Test
   public void testIsOnBlackList1() {
     // set up mock DB for selecting blacklisted refreshes
-    myJooqMock.addReturn("SELECT", new ArrayList<BlacklistedRefreshesRecord>());
+    myJooqMock.addEmptyReturn("SELECT");
 
     assertFalse(myAuthDatabaseOperations.isOnBlackList("sample signature"));
   }
@@ -207,7 +207,7 @@ public class AuthDatabaseOperationsTest {
   @Test
   public void testValidateSecretKey1() {
     // set up mock DB for selecting no verification keys
-    myJooqMock.addReturn("SELECT", new ArrayList<VerificationKeysRecord>());
+    myJooqMock.addEmptyReturn("SELECT");
 
     try {
       myAuthDatabaseOperations.validateSecretKey(
@@ -283,8 +283,8 @@ public class AuthDatabaseOperationsTest {
   // test that createSecretKey returns a token of correct length and the correct SQL bindings
   @Test
   public void testCreateSecretKey() {
-    myJooqMock.addReturn("UPDATE", new ArrayList<VerificationKeysRecord>());
-    myJooqMock.addReturn("INSERT", new ArrayList<VerificationKeysRecord>());
+    myJooqMock.addEmptyReturn("UPDATE");
+    myJooqMock.addEmptyReturn("INSERT");
 
     String token = myAuthDatabaseOperations.createSecretKey(0, VerificationKeyType.FORGOT_PASSWORD);
 
