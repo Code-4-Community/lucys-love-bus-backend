@@ -1,5 +1,6 @@
 package com.codeforcommunity.rest;
 
+import com.codeforcommunity.api.ApiDto;
 import com.codeforcommunity.exceptions.MalformedParameterException;
 import com.codeforcommunity.exceptions.MissingHeaderException;
 import com.codeforcommunity.exceptions.MissingParameterException;
@@ -16,27 +17,22 @@ import java.util.stream.Collectors;
 public interface RestFunctions {
 
   /**
-   * Gets the JSON body from the given routing context and parses it into the given class.
+   * Gets the JSON body from the given routing context, validates it, and parses it into the given
+   * class.
    *
    * @throws RequestBodyMappingException if the given request cannot be successfully mapped into the
    *     given class.
    * @throws RequestBodyMappingException if the given request does not have a body that can be
    *     parsed.
    */
-  static <T> T getJsonBodyAsClass(RoutingContext ctx, Class<T> clazz) {
+  static <T extends ApiDto> T getJsonBodyAsClass(RoutingContext ctx, Class<T> clazz) {
     try {
       Optional<JsonObject> body = Optional.ofNullable(ctx.getBodyAsJson());
-      if (body.isPresent()) {
-        try {
-          return body.get().mapTo(clazz);
-        } catch (IllegalArgumentException e) {
-          e.printStackTrace();
-          throw new RequestBodyMappingException();
-        }
-      } else {
-        throw new RequestBodyMappingException();
-      }
-    } catch (DecodeException e) {
+      T value = body.orElseThrow(RequestBodyMappingException::new).mapTo(clazz);
+      value.validate();
+      return value;
+    } catch (IllegalArgumentException | DecodeException e) {
+      e.printStackTrace();
       throw new RequestBodyMappingException();
     }
   }

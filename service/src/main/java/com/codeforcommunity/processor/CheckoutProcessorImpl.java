@@ -134,9 +134,6 @@ public class CheckoutProcessorImpl implements ICheckoutProcessor {
     if (registration == null) {
       throw new NotRegisteredException(event.getTitle());
     }
-    if (quantity < 0) { // allow 0 so that users can un-signup
-      throw new MalformedParameterException("Quantity");
-    }
     if ((quantity - registration.getTicketQuantity())
         > eventDatabaseOperations.getSpotsLeft(eventId)) {
       throw new InsufficientEventCapacityException(event.getTitle());

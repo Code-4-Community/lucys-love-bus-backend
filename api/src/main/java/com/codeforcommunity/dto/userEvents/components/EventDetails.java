@@ -1,8 +1,13 @@
 package com.codeforcommunity.dto.userEvents.components;
 
+import com.codeforcommunity.api.ApiDto;
 import java.sql.Timestamp;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
-public class EventDetails {
+public class EventDetails extends ApiDto {
   private String description;
   private String location;
   private Timestamp start;
@@ -47,5 +52,52 @@ public class EventDetails {
 
   public void setEnd(Timestamp end) {
     this.end = end;
+  }
+
+  @Override
+  public List<String> validateFields(String fieldPrefix) {
+    String fieldName = fieldPrefix + "event_details.";
+    List<String> fields = new ArrayList<>();
+    if (description == null) {
+      fields.add(fieldName + "description");
+    }
+    if (isEmpty(location)) {
+      fields.add(fieldName + "location");
+    }
+    if (start == null || isStartInvalid(start)) {
+      fields.add(fieldName + "start");
+    }
+    if (end == null) {
+      fields.add(fieldName + "end");
+    }
+    if (start != null && end != null && start.after(end)) {
+      fields.add(fieldName + "start/end");
+    }
+    return fields;
+  }
+
+  @Override
+  public List<String> validateFields(String fieldPrefix, boolean isNullable) {
+    if (!isNullable) {
+      return this.validateFields(fieldPrefix);
+    }
+    String fieldName = fieldPrefix + "event_details.";
+
+    List<String> fields = new ArrayList<>();
+    if (location != null && location.trim().isEmpty()) {
+      fields.add(fieldName + "location");
+    }
+    if (start != null && isStartInvalid(start)) {
+      fields.add(fieldName + "start");
+    }
+    if (start != null && end != null && start.after(end)) {
+      fields.add(fieldName + "start/end");
+    }
+
+    return fields;
+  }
+
+  private boolean isStartInvalid(Timestamp start) {
+    return start.before(Date.from(Instant.now().minusSeconds(ApiDto.secondsLateEventCreation)));
   }
 }

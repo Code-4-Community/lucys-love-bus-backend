@@ -3,7 +3,7 @@ package com.codeforcommunity.exceptions;
 import com.codeforcommunity.rest.subrouter.FailureHandler;
 import io.vertx.ext.web.RoutingContext;
 
-public class S3FailedUploadException extends RuntimeException implements HandledException {
+public class S3FailedUploadException extends HandledException {
   private String message;
 
   public S3FailedUploadException(String message) {

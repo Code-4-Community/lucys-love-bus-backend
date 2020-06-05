@@ -3,7 +3,7 @@ package com.codeforcommunity.exceptions;
 import com.codeforcommunity.rest.subrouter.FailureHandler;
 import io.vertx.ext.web.RoutingContext;
 
-public class AlreadyRegisteredException extends RuntimeException implements HandledException {
+public class AlreadyRegisteredException extends HandledException {
 
   private String eventTitle;
 

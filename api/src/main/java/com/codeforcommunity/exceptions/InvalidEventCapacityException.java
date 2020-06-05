@@ -3,7 +3,7 @@ package com.codeforcommunity.exceptions;
 import com.codeforcommunity.rest.subrouter.FailureHandler;
 import io.vertx.ext.web.RoutingContext;
 
-public class InvalidEventCapacityException extends RuntimeException implements HandledException {
+public class InvalidEventCapacityException extends HandledException {
 
   private int desiredCapacity;
   private int currentParticipants;

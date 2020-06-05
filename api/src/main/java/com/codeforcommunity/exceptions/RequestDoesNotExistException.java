@@ -3,7 +3,7 @@ package com.codeforcommunity.exceptions;
 import com.codeforcommunity.rest.subrouter.FailureHandler;
 import io.vertx.ext.web.RoutingContext;
 
-public class RequestDoesNotExistException extends RuntimeException implements HandledException {
+public class RequestDoesNotExistException extends HandledException {
 
   private final int requestId;
 

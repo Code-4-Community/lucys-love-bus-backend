@@ -16,6 +16,7 @@ import com.codeforcommunity.enums.VerificationKeyType;
 import com.codeforcommunity.exceptions.AuthException;
 import com.codeforcommunity.exceptions.EmailAlreadyInUseException;
 import com.codeforcommunity.exceptions.InvalidPasswordException;
+import com.codeforcommunity.exceptions.UserDoesNotExistException;
 import java.util.Optional;
 import org.jooq.DSLContext;
 import org.jooq.generated.tables.records.UsersRecord;
@@ -96,7 +97,13 @@ public class AuthProcessorImpl implements IAuthProcessor {
   @Override
   public void requestPasswordReset(ForgotPasswordRequest request) {
     String email = request.getEmail();
-    JWTData userData = authDatabaseOperations.getUserJWTData(email);
+    JWTData userData;
+    try {
+      userData = authDatabaseOperations.getUserJWTData(email);
+    } catch (UserDoesNotExistException e) {
+      // Don't tell the client that the email doesn't exist
+      return;
+    }
 
     String token =
         authDatabaseOperations.createSecretKey(
