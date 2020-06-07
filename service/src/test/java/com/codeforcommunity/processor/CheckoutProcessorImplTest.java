@@ -8,6 +8,7 @@ import com.codeforcommunity.auth.JWTData;
 import com.codeforcommunity.dto.checkout.LineItemRequest;
 import com.codeforcommunity.dto.checkout.PostCreateEventRegistrations;
 import com.codeforcommunity.enums.PrivilegeLevel;
+import com.codeforcommunity.exceptions.AlreadyRegisteredException;
 import com.codeforcommunity.exceptions.InsufficientEventCapacityException;
 import com.codeforcommunity.exceptions.MalformedParameterException;
 import java.sql.Timestamp;
@@ -36,7 +37,7 @@ public class CheckoutProcessorImplTest {
     this.myCheckoutProcessorImpl = new CheckoutProcessorImpl(myJooqMock.getContext());
   }
 
-  // test that creating an event registration if the list of registrations is empty does nothing
+  // creating an event registration if the list of registrations is empty throws a MPE
   @Test
   public void testCreateEventRegistration1() {
     JWTData myUserData = new JWTData(0, PrivilegeLevel.ADMIN);
@@ -48,10 +49,12 @@ public class CheckoutProcessorImplTest {
     myJooqMock.addEmptyReturn("SELECT");
     myJooqMock.addEmptyReturn("INSERT");
 
-    myCheckoutProcessorImpl.createEventRegistration(req, myUserData);
-
-    assertEquals(0, myJooqMock.getSqlBindings().get("INSERT").size());
-    assertEquals(1, myJooqMock.getSqlBindings().get("SELECT").size());
+    try {
+      myCheckoutProcessorImpl.createEventRegistration(req, myUserData);
+      fail();
+    } catch (MalformedParameterException e) {
+      assertEquals("lineItems", e.getParameterName());
+    }
   }
 
   // test creating an event registration a line item's quantity is beyond capacity
@@ -66,10 +69,14 @@ public class CheckoutProcessorImplTest {
 
     PostCreateEventRegistrations req = new PostCreateEventRegistrations(lineItems);
 
+    // mock the event
     EventsRecord myEvent = myJooqMock.getContext().newRecord(Tables.EVENTS);
     myEvent.setId(0);
     myEvent.setTitle("Jellybeans");
     myJooqMock.addReturn("SELECT", myEvent);
+
+    // mock the event registration
+    myJooqMock.addEmptyReturn("SELECT");
 
     try {
       myCheckoutProcessorImpl.createEventRegistration(req, myUserData);
@@ -101,16 +108,19 @@ public class CheckoutProcessorImplTest {
     myEvent.setThumbnail("random url");
     myJooqMock.addReturn("SELECT", myEvent);
 
-    // for mocking getting spots left
-    Record1<Integer> myTicketsRecord =
-        myJooqMock.getContext().newRecord(Tables.EVENT_REGISTRATIONS.TICKET_QUANTITY);
-    myTicketsRecord.values(1);
-    myJooqMock.addReturn("SELECT", myTicketsRecord);
+    // mock event registrations
+    myJooqMock.addEmptyReturn("SELECT");
 
+    // for mocking getting spots left
     Record1<Integer> myEventRegistration =
         myJooqMock.getContext().newRecord(Tables.EVENTS.CAPACITY);
     myEventRegistration.values(5);
     myJooqMock.addReturn("SELECT", myEventRegistration);
+
+    Record1<Integer> myTicketsRecord =
+        myJooqMock.getContext().newRecord(Tables.EVENT_REGISTRATIONS.TICKET_QUANTITY);
+    myTicketsRecord.values(1);
+    myJooqMock.addReturn("SELECT", myTicketsRecord);
 
     // for mocking the stored event
     EventRegistrationsRecord eventRegistrationFromLineItem =
@@ -127,10 +137,13 @@ public class CheckoutProcessorImplTest {
     List<Object[]> selectBindings = myJooqMock.getSqlBindings().get("SELECT");
 
     assertEquals(1, insertBindings.size());
-    assertEquals(3, selectBindings.size());
+    assertEquals(5, selectBindings.size());
     assertEquals(myEvent.getId(), selectBindings.get(0)[0]);
     assertEquals(myEvent.getId(), selectBindings.get(1)[0]);
+    assertEquals(myEvent.getId(), selectBindings.get(1)[1]);
     assertEquals(myEvent.getId(), selectBindings.get(2)[0]);
+    assertEquals(myEvent.getId(), selectBindings.get(3)[0]);
+    assertEquals(myEvent.getId(), selectBindings.get(4)[0]);
   }
 
   // test for adding multiple line items
@@ -161,26 +174,31 @@ public class CheckoutProcessorImplTest {
     myEvents.add(myEvent2);
     myJooqMock.addReturn("SELECT", myEvents);
 
-    // for mocking getting spots left
-    Record1<Integer> myTicketsRecord1 =
-        myJooqMock.getContext().newRecord(Tables.EVENT_REGISTRATIONS.TICKET_QUANTITY);
-    myTicketsRecord1.values(1);
-    myJooqMock.addReturn("SELECT", myTicketsRecord1);
+    // for mocking event registrations
+    myJooqMock.addEmptyReturn("SELECT");
 
+    // for mocking getting spots left
     Record1<Integer> myEventRegistration1 =
         myJooqMock.getContext().newRecord(Tables.EVENTS.CAPACITY);
     myEventRegistration1.values(6);
     myJooqMock.addReturn("SELECT", myEventRegistration1);
 
-    Record1<Integer> myTicketsRecord2 =
+    Record1<Integer> myTicketsRecord1 =
         myJooqMock.getContext().newRecord(Tables.EVENT_REGISTRATIONS.TICKET_QUANTITY);
-    myTicketsRecord2.values(1);
-    myJooqMock.addReturn("SELECT", myTicketsRecord2);
+    myTicketsRecord1.values(1);
+    myJooqMock.addReturn("SELECT", myTicketsRecord1);
+    myJooqMock.addEmptyReturn("SELECT");
 
     Record1<Integer> myEventRegistration2 =
         myJooqMock.getContext().newRecord(Tables.EVENTS.CAPACITY);
     myEventRegistration2.values(5);
     myJooqMock.addReturn("SELECT", myEventRegistration2);
+
+    Record1<Integer> myTicketsRecord2 =
+        myJooqMock.getContext().newRecord(Tables.EVENT_REGISTRATIONS.TICKET_QUANTITY);
+    myTicketsRecord2.values(1);
+    myJooqMock.addReturn("SELECT", myTicketsRecord2);
+    myJooqMock.addEmptyReturn("SELECT");
 
     LineItemRequest lineItem1 = new LineItemRequest(0, 1);
     LineItemRequest lineItem2 = new LineItemRequest(1, 3);
@@ -204,26 +222,108 @@ public class CheckoutProcessorImplTest {
     List<Object[]> selectBindings = myJooqMock.getSqlBindings().get("SELECT");
 
     assertEquals(2, insertBindings.size());
-    assertEquals(5, selectBindings.size());
+    assertEquals(8, selectBindings.size());
+
+    assertEquals(myEvent1.getId(), insertBindings.get(0)[2]);
+    assertEquals(myEvent2.getId(), insertBindings.get(1)[2]);
+
     assertEquals(myEvent1.getId(), selectBindings.get(0)[0]);
     assertEquals(myEvent2.getId(), selectBindings.get(0)[1]);
     assertEquals(myEvent1.getId(), selectBindings.get(1)[0]);
+    assertEquals(myEvent2.getId(), selectBindings.get(1)[1]);
+    assertEquals(myUserData.getUserId(), selectBindings.get(1)[2]);
     assertEquals(myEvent1.getId(), selectBindings.get(2)[0]);
-    assertEquals(myEvent2.getId(), selectBindings.get(3)[0]);
-    assertEquals(myEvent2.getId(), selectBindings.get(4)[0]);
+    assertEquals(myEvent1.getId(), selectBindings.get(3)[0]);
+    assertEquals(myEvent1.getId(), selectBindings.get(4)[0]);
+    assertEquals(myEvent2.getId(), selectBindings.get(5)[0]);
+    assertEquals(myEvent2.getId(), selectBindings.get(6)[0]);
+    assertEquals(myEvent2.getId(), selectBindings.get(7)[0]);
   }
 
-  // test for MalformedParameterException
+  // test creating an event registration if already registered
   @Test
-  void createEventRegistrationException() {
-    JWTData jwtData = new JWTData(0, PrivilegeLevel.ADMIN);
-    List<LineItemRequest> requests = new ArrayList<>();
+  public void testCreateEventRegistration5() {
+    JWTData myUserData = new JWTData(0, PrivilegeLevel.ADMIN);
+
+    LineItemRequest lineItem1 = new LineItemRequest(0, 50);
+
+    List<LineItemRequest> lineItems = new ArrayList<>();
+    lineItems.add(lineItem1);
+
+    PostCreateEventRegistrations req = new PostCreateEventRegistrations(lineItems);
+
+    // mock the event
+    EventsRecord myEvent = myJooqMock.getContext().newRecord(Tables.EVENTS);
+    myEvent.setId(0);
+    myEvent.setTitle("Jellybeans");
+    myJooqMock.addReturn("SELECT", myEvent);
+
+    // mock the registration
+    EventRegistrationsRecord myEventRegistration =
+        myJooqMock.getContext().newRecord(Tables.EVENT_REGISTRATIONS);
+    myEventRegistration.setId(0);
+    myEventRegistration.setUserId(0);
+    myEventRegistration.setEventId(0);
+    myJooqMock.addReturn("SELECT", myEventRegistration);
+
     try {
-      myCheckoutProcessorImpl.createEventRegistration(
-          new PostCreateEventRegistrations(requests), jwtData);
+      myCheckoutProcessorImpl.createEventRegistration(req, myUserData);
+      fail();
+    } catch (AlreadyRegisteredException e) {
+      assertEquals("Jellybeans", e.getEventTitle());
+    }
+  }
+
+  // test creating an event registration with non-positive line item quantities
+  @Test
+  public void testCreateEventRegistration6() {
+    JWTData myUserData = new JWTData(0, PrivilegeLevel.ADMIN);
+
+    LineItemRequest lineItem1 = new LineItemRequest(0, -2);
+
+    List<LineItemRequest> lineItems = new ArrayList<>();
+    lineItems.add(lineItem1);
+
+    // for mocking the event
+    EventsRecord myEvent = myJooqMock.getContext().newRecord(Tables.EVENTS);
+    myEvent.setId(0);
+    myEvent.setTitle("Example title");
+    myEvent.setDescription("Example description");
+    myEvent.setCapacity(10);
+    myEvent.setLocation("Boston");
+    myEvent.setStartTime(new Timestamp(0));
+    myEvent.setEndTime(new Timestamp(10000));
+    myEvent.setThumbnail("random url");
+    myJooqMock.addReturn("SELECT", myEvent);
+
+    // mock event registrations
+    myJooqMock.addEmptyReturn("SELECT");
+
+    // for mocking getting spots left
+    Record1<Integer> myEventRegistration =
+        myJooqMock.getContext().newRecord(Tables.EVENTS.CAPACITY);
+    myEventRegistration.values(5);
+    myJooqMock.addReturn("SELECT", myEventRegistration);
+
+    Record1<Integer> myTicketsRecord =
+        myJooqMock.getContext().newRecord(Tables.EVENT_REGISTRATIONS.TICKET_QUANTITY);
+    myTicketsRecord.values(1);
+    myJooqMock.addReturn("SELECT", myTicketsRecord);
+
+    // for mocking the stored event
+    EventRegistrationsRecord eventRegistrationFromLineItem =
+        myJooqMock.getContext().newRecord(Tables.EVENT_REGISTRATIONS);
+    eventRegistrationFromLineItem.setUserId(myUserData.getUserId());
+    eventRegistrationFromLineItem.setTicketQuantity(lineItem1.getQuantity());
+    myJooqMock.addReturn("INSERT", eventRegistrationFromLineItem);
+
+    PostCreateEventRegistrations req = new PostCreateEventRegistrations(lineItems);
+
+    try {
+      myCheckoutProcessorImpl.createEventRegistration(req, myUserData);
       fail();
     } catch (MalformedParameterException e) {
-      assertEquals(e.getParameterName(), "lineItems");
+      assertEquals("Quantity", e.getParameterName());
     }
   }
 }

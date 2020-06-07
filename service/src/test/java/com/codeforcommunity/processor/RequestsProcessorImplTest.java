@@ -24,7 +24,6 @@ import org.jooq.Record6;
 import org.jooq.generated.Tables;
 import org.jooq.generated.tables.records.PfRequestsRecord;
 import org.jooq.generated.tables.records.UsersRecord;
-import org.jooq.impl.UpdatableRecordImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

@@ -25,9 +25,7 @@ import com.codeforcommunity.enums.PrivilegeLevel;
 import com.codeforcommunity.enums.VerificationKeyType;
 import com.codeforcommunity.exceptions.AuthException;
 import com.codeforcommunity.exceptions.InvalidPasswordException;
-import com.codeforcommunity.exceptions.UserDoesNotExistException;
 import java.sql.Timestamp;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -35,7 +33,6 @@ import org.jooq.generated.Tables;
 import org.jooq.generated.tables.records.BlacklistedRefreshesRecord;
 import org.jooq.generated.tables.records.UsersRecord;
 import org.jooq.generated.tables.records.VerificationKeysRecord;
-import org.jooq.impl.UpdatableRecordImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -307,7 +304,7 @@ public class AuthProcessorImplTest {
     }
   }
 
-  // test that requestPasswordReset throws proper exception if user doesn't exist
+  // test that requestPasswordReset exits gracefully if user doesn't exist
   @Test
   public void testRequestPasswordReset1() {
     String userEmail = "brandon@example.com";
@@ -317,14 +314,7 @@ public class AuthProcessorImplTest {
 
     myJooqMock.addEmptyReturn("SELECT");
 
-    try {
-      myAuthProcessorImpl.requestPasswordReset(mockReq);
-      fail();
-    } catch (UserDoesNotExistException e) {
-      assertEquals("email = " + userEmail, e.getIdentifierMessage());
-    }
-
-    verify(mockReq, times(1)).getEmail();
+    myAuthProcessorImpl.requestPasswordReset(mockReq);
   }
 
   // test that requestPasswordReset succeeds under normal circumstances
@@ -352,7 +342,7 @@ public class AuthProcessorImplTest {
 
   // test that resetting the password fails if it's too short
   @ParameterizedTest
-  @ValueSource(strings = { "bad", "poor"})
+  @ValueSource(strings = {"bad", "poor"})
   public void testResetPassword1(String badPassword) {
     String sk = "secret key";
     ResetPasswordRequest req = new ResetPasswordRequest(sk, badPassword);

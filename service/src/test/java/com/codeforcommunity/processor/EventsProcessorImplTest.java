@@ -184,24 +184,27 @@ public class EventsProcessorImplTest {
     eventRecord.setStartTime(myEventDetails.getStart());
     eventRecord.setEndTime(myEventDetails.getEnd());
     myJooqMock.addReturn("SELECT", eventRecord);
-    myJooqMock.addReturn("INSERT", eventRecord);
 
-    // mock the DB for event registrations
+    // mock the DB for getting ticket counts
     Record2<Integer, Integer> registrationRecord =
         myJooqMock.getContext().newRecord(EVENTS.ID, EVENT_REGISTRATIONS.TICKET_QUANTITY);
     registrationRecord.values(1, 2);
     myJooqMock.addReturn("SELECT", registrationRecord);
     myJooqMock.addReturn("INSERT", registrationRecord);
 
-    Record1<Integer> myTicketsRecord =
-        myJooqMock.getContext().newRecord(Tables.EVENT_REGISTRATIONS.TICKET_QUANTITY);
-    myTicketsRecord.values(1);
-
+    // mock the DB for getting spots left
     Record1<Integer> myEventRegistration =
         myJooqMock.getContext().newRecord(Tables.EVENTS.CAPACITY);
     myEventRegistration.values(5);
-    myJooqMock.addReturn("SELECT", myTicketsRecord);
     myJooqMock.addReturn("SELECT", myEventRegistration);
+
+    Record1<Integer> myTicketsRecord =
+        myJooqMock.getContext().newRecord(Tables.EVENT_REGISTRATIONS.TICKET_QUANTITY);
+    myTicketsRecord.values(1);
+    myJooqMock.addReturn("SELECT", myTicketsRecord);
+
+    // mock pending registrations
+    myJooqMock.addEmptyReturn("SELECT");
 
     JWTData userData = new JWTData(0, PrivilegeLevel.GP);
     SingleEventResponse res = myEventsProcessorImpl.getSingleEvent(1, userData);
@@ -243,6 +246,8 @@ public class EventsProcessorImplTest {
     event1.setId(0);
     event1.setTitle("title 1");
     event1.setCapacity(10);
+    event1.setEndTime(new Timestamp(System.currentTimeMillis() + 10000));
+    event1.setStartTime(new Timestamp(System.currentTimeMillis() - 10000));
     myJooqMock.addReturn("SELECT", event1);
 
     // mock the ticket count
@@ -250,6 +255,17 @@ public class EventsProcessorImplTest {
         myJooqMock.getContext().newRecord(EVENTS.ID, EVENT_REGISTRATIONS.TICKET_QUANTITY);
     ticketCount1.values(0, 5);
     myJooqMock.addReturn("SELECT", ticketCount1);
+
+    // prime the DB for getSpotsLeft()
+    Record1<Integer> myEventRegistration =
+        myJooqMock.getContext().newRecord(Tables.EVENTS.CAPACITY);
+    myEventRegistration.values(4);
+    myJooqMock.addReturn("SELECT", myEventRegistration);
+
+    Record1<Integer> myTicketsRecord =
+        myJooqMock.getContext().newRecord(Tables.EVENT_REGISTRATIONS.TICKET_QUANTITY);
+    myTicketsRecord.values(1);
+    myJooqMock.addReturn("SELECT", myTicketsRecord);
 
     JWTData userData = new JWTData(0, PrivilegeLevel.GP);
     GetEventsResponse res = myEventsProcessorImpl.getEvents(eventIds, userData);
@@ -266,10 +282,12 @@ public class EventsProcessorImplTest {
     event1.setId(0);
     event1.setCapacity(10);
     event1.setTitle("title 1");
+    event1.setEndTime(new Timestamp(END_TIMESTAMP_TEST));
     EventsRecord event2 = myJooqMock.getContext().newRecord(Tables.EVENTS);
     event2.setId(1);
     event2.setCapacity(50);
     event2.setTitle("title 2");
+    event2.setEndTime(new Timestamp(END_TIMESTAMP_TEST + 100000));
 
     List<EventsRecord> eventRecords = new ArrayList<>();
     eventRecords.add(event1);
@@ -338,6 +356,8 @@ public class EventsProcessorImplTest {
     myEvent1.setTitle("Event 1");
     myEvent1.setDescription("Description 1");
     myEvent1.setCapacity(10);
+    myEvent1.setStartTime(new Timestamp(START_TIMESTAMP_TEST));
+    myEvent1.setEndTime(new Timestamp(END_TIMESTAMP_TEST));
     myJooqMock.addReturn("SELECT", myEvent1);
 
     // mock the ticket count
@@ -374,18 +394,24 @@ public class EventsProcessorImplTest {
     myEvent1.setCapacity(10);
     myEvent1.setTitle("Event 1");
     myEvent1.setDescription("Description 1");
+    myEvent1.setStartTime(new Timestamp(START_TIMESTAMP_TEST));
+    myEvent1.setEndTime(new Timestamp(END_TIMESTAMP_TEST));
 
     EventsRecord myEvent2 = myJooqMock.getContext().newRecord(Tables.EVENTS);
     myEvent2.setId(1);
     myEvent2.setCapacity(5);
     myEvent2.setTitle("Event 2");
     myEvent2.setDescription("Description 2");
+    myEvent2.setStartTime(new Timestamp(START_TIMESTAMP_TEST - 100000));
+    myEvent2.setEndTime(new Timestamp(END_TIMESTAMP_TEST + 100000));
 
     EventsRecord myEvent3 = myJooqMock.getContext().newRecord(Tables.EVENTS);
     myEvent3.setId(2);
     myEvent3.setCapacity(50);
     myEvent3.setTitle("Event 2");
     myEvent3.setDescription("Description 2");
+    myEvent3.setStartTime(new Timestamp(0));
+    myEvent3.setEndTime(new Timestamp(100000));
 
     List<EventsRecord> events = new ArrayList<>();
     events.add(myEvent1);
@@ -411,16 +437,16 @@ public class EventsProcessorImplTest {
     myJooqMock.addReturn("SELECT", registrationRecords);
 
     // prime the DB for getSpotsLeft()
-    Record1<Integer> myTicketsRecord =
-        myJooqMock.getContext().newRecord(Tables.EVENT_REGISTRATIONS.TICKET_QUANTITY);
-    myTicketsRecord.values(1);
-
     Record1<Integer> myEventRegistration =
         myJooqMock.getContext().newRecord(Tables.EVENTS.CAPACITY);
     myEventRegistration.values(4);
-
-    myJooqMock.addReturn("SELECT", myTicketsRecord);
     myJooqMock.addReturn("SELECT", myEventRegistration);
+
+    Record1<Integer> myTicketsRecord =
+        myJooqMock.getContext().newRecord(Tables.EVENT_REGISTRATIONS.TICKET_QUANTITY);
+    myTicketsRecord.values(1);
+    myJooqMock.addReturn("SELECT", myTicketsRecord);
+    myJooqMock.addEmptyReturn("SELECT");
 
     JWTData myUserData = new JWTData(0, PrivilegeLevel.GP);
 
@@ -458,18 +484,24 @@ public class EventsProcessorImplTest {
     myEvent1.setCapacity(10);
     myEvent1.setTitle("Event 1");
     myEvent1.setDescription("Description 1");
+    myEvent1.setStartTime(new Timestamp(START_TIMESTAMP_TEST));
+    myEvent1.setEndTime(new Timestamp(END_TIMESTAMP_TEST));
 
     EventsRecord myEvent2 = myJooqMock.getContext().newRecord(Tables.EVENTS);
     myEvent2.setId(1);
     myEvent2.setCapacity(5);
     myEvent2.setTitle("Event 2");
     myEvent2.setDescription("Description 2");
+    myEvent2.setStartTime(new Timestamp(START_TIMESTAMP_TEST - 100000));
+    myEvent2.setEndTime(new Timestamp(END_TIMESTAMP_TEST + 100000));
 
     EventsRecord myEvent3 = myJooqMock.getContext().newRecord(Tables.EVENTS);
     myEvent3.setId(2);
     myEvent3.setCapacity(50);
     myEvent3.setTitle("Event 2");
     myEvent3.setDescription("Description 2");
+    myEvent3.setStartTime(new Timestamp(0));
+    myEvent3.setEndTime(new Timestamp(100000));
 
     myJooqMock.addReturn("SELECT", myEvent1);
 
@@ -541,6 +573,7 @@ public class EventsProcessorImplTest {
     myEvent1.setDescription("Description 1");
     myEvent1.setCapacity(10);
     myEvent1.setStartTime(new Timestamp(START_TIMESTAMP_TEST));
+    myEvent1.setEndTime(new Timestamp(END_TIMESTAMP_TEST));
     myJooqMock.addReturn("SELECT", myEvent1);
 
     // mock the ticket count
@@ -571,6 +604,7 @@ public class EventsProcessorImplTest {
     myEvent1.setDescription("Description 1");
     myEvent1.setCapacity(10);
     myEvent1.setStartTime(new Timestamp(START_TIMESTAMP_TEST));
+    myEvent1.setEndTime(new Timestamp(END_TIMESTAMP_TEST));
 
     EventsRecord myEvent2 = myJooqMock.getContext().newRecord(Tables.EVENTS);
     myEvent2.setId(1);
@@ -578,6 +612,7 @@ public class EventsProcessorImplTest {
     myEvent2.setDescription("Description 2");
     myEvent2.setCapacity(20);
     myEvent2.setStartTime(new Timestamp(0));
+    myEvent2.setEndTime(new Timestamp(100000));
 
     List<EventsRecord> eventsGP = new ArrayList<>();
     eventsGP.add(myEvent1);
@@ -599,15 +634,16 @@ public class EventsProcessorImplTest {
     myJooqMock.addReturn("SELECT", registrationRecordsGP);
 
     // prime the DB for getSpotsLeft()
-    Record1<Integer> myTicketsRecordGP =
-        myJooqMock.getContext().newRecord(Tables.EVENT_REGISTRATIONS.TICKET_QUANTITY);
-    myTicketsRecordGP.values(1);
-    myJooqMock.addReturn("SELECT", myTicketsRecordGP);
-
     Record1<Integer> myEventRegistrationGP =
         myJooqMock.getContext().newRecord(Tables.EVENTS.CAPACITY);
     myEventRegistrationGP.values(4);
     myJooqMock.addReturn("SELECT", myEventRegistrationGP);
+
+    Record1<Integer> myTicketsRecordGP =
+        myJooqMock.getContext().newRecord(Tables.EVENT_REGISTRATIONS.TICKET_QUANTITY);
+    myTicketsRecordGP.values(1);
+    myJooqMock.addReturn("SELECT", myTicketsRecordGP);
+    myJooqMock.addEmptyReturn("SELECT");
 
     GetEventsResponse resGP = myEventsProcessorImpl.getEventsQualified(myGPUserData);
     assertEquals(2, resGP.getTotalCount());
@@ -666,8 +702,21 @@ public class EventsProcessorImplTest {
     myEvent.setStartTime(new Timestamp(0));
     myEvent.setEndTime(new Timestamp(0));
     myJooqMock.addReturn("SELECT", myEvent);
-    myJooqMock.addReturn("SELECT", myEvent);
+
+    // mock event database operations
+    Record1<Integer> myEventRegistration =
+        myJooqMock.getContext().newRecord(Tables.EVENTS.CAPACITY);
+    myEventRegistration.values(4);
+
+    Record1<Integer> myTicketsRecord =
+        myJooqMock.getContext().newRecord(Tables.EVENT_REGISTRATIONS.TICKET_QUANTITY);
+    myTicketsRecord.values(1);
+
+    myJooqMock.addReturn("SELECT", myEventRegistration);
+    myJooqMock.addReturn("SELECT", myTicketsRecord);
+
     myJooqMock.addReturn("UPDATE", myEvent);
+    myJooqMock.addReturn("SELECT", myEvent);
 
     // mock the ticket count
     Record2<Integer, Integer> ticketCount =
@@ -708,8 +757,21 @@ public class EventsProcessorImplTest {
     myEvent.setStartTime(new Timestamp(0));
     myEvent.setEndTime(new Timestamp(0));
     myJooqMock.addReturn("SELECT", myEvent);
-    myJooqMock.addReturn("SELECT", myEvent);
+
+    // mock event database operations
+    Record1<Integer> myEventRegistration =
+        myJooqMock.getContext().newRecord(Tables.EVENTS.CAPACITY);
+    myEventRegistration.values(5);
+
+    Record1<Integer> myTicketsRecord =
+        myJooqMock.getContext().newRecord(Tables.EVENT_REGISTRATIONS.TICKET_QUANTITY);
+    myTicketsRecord.values(3);
+
+    myJooqMock.addReturn("SELECT", myEventRegistration);
+    myJooqMock.addReturn("SELECT", myTicketsRecord);
+
     myJooqMock.addReturn("UPDATE", myEvent);
+    myJooqMock.addReturn("SELECT", myEvent);
 
     // mock the ticket count
     Record2<Integer, Integer> ticketCount =

@@ -15,12 +15,10 @@ import com.codeforcommunity.exceptions.AdminOnlyRouteException;
 import com.codeforcommunity.exceptions.MalformedParameterException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import org.jooq.generated.Tables;
 import org.jooq.generated.tables.records.AnnouncementsRecord;
 import org.jooq.generated.tables.records.EventsRecord;
-import org.jooq.impl.UpdatableRecordImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -44,49 +42,9 @@ public class AnnouncementsProcessorImplTest {
     this.myAnnouncementsProcessorImpl = new AnnouncementsProcessorImpl(myJooqMock.getContext());
   }
 
-  // test getting announcements that fails validation due to non-positive count
-  @Test
-  public void testGetAnnouncements1() {
-    GetAnnouncementsRequest req =
-        new GetAnnouncementsRequest(
-            new Timestamp(START_TIMESTAMP_TEST), new Timestamp(END_TIMESTAMP_TEST), 0);
-
-    try {
-      myAnnouncementsProcessorImpl.getAnnouncements(req);
-      fail();
-    } catch (MalformedParameterException e) {
-      assertEquals(e.getParameterName(), "count");
-    }
-  }
-
-  // test getting announcements that fails validation due to invalid start/end dates
-  @Test
-  public void testGetAnnouncements2() {
-    GetAnnouncementsRequest req1 =
-        new GetAnnouncementsRequest(
-            new Timestamp(END_TIMESTAMP_TEST), new Timestamp(START_TIMESTAMP_TEST), 1);
-    GetAnnouncementsRequest req2 =
-        new GetAnnouncementsRequest(
-            new Timestamp(START_TIMESTAMP_TEST), new Timestamp((new Date()).getTime() + 100000), 1);
-
-    try {
-      myAnnouncementsProcessorImpl.getAnnouncements(req1);
-      fail();
-    } catch (MalformedParameterException e) {
-      assertEquals(e.getParameterName(), "end");
-    }
-
-    try {
-      myAnnouncementsProcessorImpl.getAnnouncements(req2);
-      fail();
-    } catch (MalformedParameterException e) {
-      assertEquals(e.getParameterName(), "end");
-    }
-  }
-
   // test getting announcements with range covering no events
   @Test
-  public void testGetAnnouncements3() {
+  public void testGetAnnouncements1() {
     // craft the get request
     GetAnnouncementsRequest req =
         new GetAnnouncementsRequest(new Timestamp(0), new Timestamp(1000), 2);
@@ -99,7 +57,7 @@ public class AnnouncementsProcessorImplTest {
 
   // test getting announcements with range covering all events
   @Test
-  public void testGetAnnouncements4() {
+  public void testGetAnnouncements2() {
     // craft the get request
     GetAnnouncementsRequest req =
         new GetAnnouncementsRequest(
@@ -134,7 +92,7 @@ public class AnnouncementsProcessorImplTest {
 
   // test getting announcements with range covering some events
   @Test
-  public void testGetAnnouncements5() {
+  public void testGetAnnouncements3() {
     // craft the get request
     GetAnnouncementsRequest req =
         new GetAnnouncementsRequest(
