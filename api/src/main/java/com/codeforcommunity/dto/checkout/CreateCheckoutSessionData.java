@@ -10,15 +10,14 @@ public class CreateCheckoutSessionData {
 
   private List<LineItem> lineItems;
   private String cancelUrl;
-  private String successUrlTemplate;
+  private String successUrl;
 
   public CreateCheckoutSessionData() {}
 
-  public CreateCheckoutSessionData(
-      List<LineItem> lineItems, String cancelUrl, String successUrlTemplate) {
+  public CreateCheckoutSessionData(List<LineItem> lineItems, String cancelUrl, String successUrl) {
     this.lineItems = lineItems;
     this.cancelUrl = cancelUrl;
-    this.successUrlTemplate = successUrlTemplate;
+    this.successUrl = successUrl;
   }
 
   public List<LineItem> getLineItems() {
@@ -29,8 +28,8 @@ public class CreateCheckoutSessionData {
     return this.cancelUrl;
   }
 
-  public String getSuccessUrlTemplate() {
-    return this.successUrlTemplate;
+  public String getSuccessUrl() {
+    return this.successUrl;
   }
 
   public List<SessionCreateParams.LineItem> getStripeLineItems() {

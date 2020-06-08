@@ -52,7 +52,7 @@ public class CheckoutProcessorImpl implements ICheckoutProcessor {
   private final String stripeAPISecretKey;
   private final String stripeWebhookSigningSecret;
   public final String cancelUrl;
-  public final String successUrlTemplate;
+  public final String successUrl;
 
   public CheckoutProcessorImpl(DSLContext db, Emailer emailer) {
     this.db = db;
@@ -69,7 +69,7 @@ public class CheckoutProcessorImpl implements ICheckoutProcessor {
             "%s%s",
             frontendProperties.getProperty("domain"),
             frontendProperties.getProperty("cancel_registration_route"));
-    this.successUrlTemplate =
+    this.successUrl =
         String.format(
             "%s%s",
             frontendProperties.getProperty("domain"),
@@ -79,7 +79,7 @@ public class CheckoutProcessorImpl implements ICheckoutProcessor {
   private String createCheckoutSessionAndEventRegistration(List<LineItem> lineItems, JWTData user)
       throws StripeExternalException {
     CreateCheckoutSessionData checkoutRequest =
-        new CreateCheckoutSessionData(lineItems, this.cancelUrl, this.successUrlTemplate);
+        new CreateCheckoutSessionData(lineItems, this.cancelUrl, this.successUrl);
 
     Stripe.apiKey = this.stripeAPISecretKey;
 
@@ -92,8 +92,7 @@ public class CheckoutProcessorImpl implements ICheckoutProcessor {
     try {
       Session session = Session.create(params);
       String checkoutSessionId = session.getId();
-      session.setSuccessUrl(
-          String.format(checkoutRequest.getSuccessUrlTemplate(), checkoutSessionId));
+      session.setSuccessUrl(checkoutRequest.getSuccessUrl());
       createPendingEventRegistration(lineItems, user, checkoutSessionId);
       return session.getId();
     } catch (StripeException e) {
