@@ -26,6 +26,8 @@ public class Emailer {
     String sendPassword = emailProperties.getProperty("sendPassword");
     String emailHost = emailProperties.getProperty("emailHost");
     int emailPort = Integer.parseInt(emailProperties.getProperty("emailPort"));
+    boolean shouldSendEmails =
+        Boolean.parseBoolean(emailProperties.getProperty("shouldSendEmails", "false"));
 
     Properties frontendProperties = PropertiesLoader.getFrontendProperties();
     this.MAIN_PAGE_URL =
@@ -40,7 +42,8 @@ public class Emailer {
 
     this.db = db;
     this.emailOperations =
-        new EmailOperations(senderName, sendEmail, sendPassword, emailHost, emailPort);
+        new EmailOperations(
+            shouldSendEmails, senderName, sendEmail, sendPassword, emailHost, emailPort);
   }
 
   /**
