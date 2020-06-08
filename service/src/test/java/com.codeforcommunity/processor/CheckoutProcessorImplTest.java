@@ -10,10 +10,9 @@ import com.codeforcommunity.dto.checkout.LineItemRequest;
 import com.codeforcommunity.dto.checkout.PostCreateEventRegistrations;
 import com.codeforcommunity.enums.PrivilegeLevel;
 import com.codeforcommunity.exceptions.MalformedParameterException;
+import com.codeforcommunity.requester.Emailer;
 import java.util.ArrayList;
 import java.util.List;
-
-import com.codeforcommunity.requester.Emailer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

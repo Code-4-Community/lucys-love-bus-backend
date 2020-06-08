@@ -67,10 +67,12 @@ public class ServiceMain {
     Emailer emailer = new Emailer(this.db);
 
     IAuthProcessor authProcessor = new AuthProcessorImpl(this.db, jwtCreator, emailer);
-    IProtectedUserProcessor protectedUserProcessor = new ProtectedUserProcessorImpl(this.db, emailer);
+    IProtectedUserProcessor protectedUserProcessor =
+        new ProtectedUserProcessorImpl(this.db, emailer);
     IRequestsProcessor requestsProcessor = new RequestsProcessorImpl(this.db, emailer);
     IEventsProcessor eventsProcessor = new EventsProcessorImpl(this.db);
-    IAnnouncementsProcessor announcementEventsProcessor = new AnnouncementsProcessorImpl(this.db, emailer);
+    IAnnouncementsProcessor announcementEventsProcessor =
+        new AnnouncementsProcessorImpl(this.db, emailer);
     ICheckoutProcessor checkoutProcessor = new CheckoutProcessorImpl(this.db, emailer);
 
     ApiRouter router =
