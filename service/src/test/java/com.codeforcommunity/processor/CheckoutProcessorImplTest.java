@@ -19,12 +19,13 @@ import org.junit.jupiter.api.Test;
 class CheckoutProcessorImplTest {
 
   private CheckoutProcessorImpl processor;
-  private Emailer emailMock = mock(Emailer.class);
+  private Emailer emailMock;
   private JooqMock mock;
 
   @BeforeEach
   private void setup() {
     this.mock = new JooqMock();
+    emailMock = mock(Emailer.class);
     this.processor = new CheckoutProcessorImpl(mock.getContext(), emailMock);
   }
 
