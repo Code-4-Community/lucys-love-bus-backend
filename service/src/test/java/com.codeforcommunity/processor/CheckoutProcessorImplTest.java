@@ -12,18 +12,21 @@ import com.codeforcommunity.enums.PrivilegeLevel;
 import com.codeforcommunity.exceptions.MalformedParameterException;
 import java.util.ArrayList;
 import java.util.List;
+
+import com.codeforcommunity.requester.Emailer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 class CheckoutProcessorImplTest {
 
   private CheckoutProcessorImpl processor;
+  private Emailer emailMock = mock(Emailer.class);
   private JooqMock mock;
 
   @BeforeEach
   private void setup() {
     this.mock = new JooqMock();
-    this.processor = new CheckoutProcessorImpl(mock.getContext());
+    this.processor = new CheckoutProcessorImpl(mock.getContext(), emailMock);
   }
 
   @Test
