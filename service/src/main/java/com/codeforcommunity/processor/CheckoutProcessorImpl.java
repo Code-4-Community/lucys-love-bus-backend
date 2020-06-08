@@ -19,6 +19,7 @@ import com.codeforcommunity.exceptions.MalformedParameterException;
 import com.codeforcommunity.exceptions.NotRegisteredException;
 import com.codeforcommunity.exceptions.StripeExternalException;
 import com.codeforcommunity.propertiesLoader.PropertiesLoader;
+import com.codeforcommunity.requester.Emailer;
 import com.stripe.Stripe;
 import com.stripe.exception.SignatureVerificationException;
 import com.stripe.exception.StripeException;
@@ -26,6 +27,7 @@ import com.stripe.model.Event;
 import com.stripe.model.checkout.Session;
 import com.stripe.net.Webhook;
 import com.stripe.param.checkout.SessionCreateParams;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -43,27 +45,41 @@ import org.jooq.generated.tables.records.PendingRegistrationsRecord;
 public class CheckoutProcessorImpl implements ICheckoutProcessor {
 
   public static final int TICKET_PRICE_CENTS = 500;
-  public static final String CANCEL_URL = "https://llb.c4cneu.com/checkout";
-  public static final String SUCCESS_URL = "https://llb.c4cneu.com/?session_id=%s";
 
   private final DSLContext db;
+  private final Emailer emailer;
   private final EventDatabaseOperations eventDatabaseOperations;
   private final String stripeAPISecretKey;
   private final String stripeWebhookSigningSecret;
+  public final String cancelUrl;
+  public final String successUrlTemplate;
 
-  public CheckoutProcessorImpl(DSLContext db) {
+  public CheckoutProcessorImpl(DSLContext db, Emailer emailer) {
     this.db = db;
+    this.emailer = emailer;
     this.eventDatabaseOperations = new EventDatabaseOperations(db);
 
     Properties stripeProperties = PropertiesLoader.getStripeProperties();
     this.stripeAPISecretKey = stripeProperties.getProperty("stripe_api_secret_key");
     this.stripeWebhookSigningSecret = stripeProperties.getProperty("stripe_webhook_signing_secret");
+
+    Properties frontendProperties = PropertiesLoader.getFrontendProperties();
+    this.cancelUrl =
+        String.format(
+            "%s%s",
+            frontendProperties.getProperty("domain"),
+            frontendProperties.getProperty("cancel_registration_route"));
+    this.successUrlTemplate =
+        String.format(
+            "%s%s",
+            frontendProperties.getProperty("domain"),
+            frontendProperties.getProperty("success_registration_route"));
   }
 
   private String createCheckoutSessionAndEventRegistration(List<LineItem> lineItems, JWTData user)
       throws StripeExternalException {
     CreateCheckoutSessionData checkoutRequest =
-        new CreateCheckoutSessionData(lineItems, CANCEL_URL, SUCCESS_URL);
+        new CreateCheckoutSessionData(lineItems, this.cancelUrl, this.successUrlTemplate);
 
     Stripe.apiKey = this.stripeAPISecretKey;
 
@@ -76,7 +92,8 @@ public class CheckoutProcessorImpl implements ICheckoutProcessor {
     try {
       Session session = Session.create(params);
       String checkoutSessionId = session.getId();
-      session.setSuccessUrl(String.format(checkoutRequest.getSuccessUrl(), checkoutSessionId));
+      session.setSuccessUrl(
+          String.format(checkoutRequest.getSuccessUrlTemplate(), checkoutSessionId));
       createPendingEventRegistration(lineItems, user, checkoutSessionId);
       return session.getId();
     } catch (StripeException e) {
@@ -209,10 +226,14 @@ public class CheckoutProcessorImpl implements ICheckoutProcessor {
               .and(EVENT_REGISTRATIONS.USER_ID.eq(userId))
               .fetchOneInto(EventRegistrationsRecord.class);
       if (currentRegistration != null) {
-        currentRegistration.setTicketQuantity(
-            currentRegistration.getTicketQuantity() + registration.getTicketQuantityDelta());
+        int ticketQuantity =
+            currentRegistration.getTicketQuantity() + registration.getTicketQuantityDelta();
+        currentRegistration.setTicketQuantity(ticketQuantity);
         currentRegistration.setPaid(true);
         currentRegistration.store();
+
+        // Send event registration confirmation
+        sendEventConfirmationEmail(eventId, userId, ticketQuantity);
       } else {
         EventRegistrationsRecord record = db.newRecord(EVENT_REGISTRATIONS);
         record.setUserId(userId);
@@ -220,6 +241,9 @@ public class CheckoutProcessorImpl implements ICheckoutProcessor {
         record.setTicketQuantity(registration.getTicketQuantityDelta());
         record.setPaid(true);
         record.store();
+
+        // Send event registration confirmation
+        sendEventConfirmationEmail(eventId, userId, registration.getTicketQuantityDelta());
       }
     }
     db.delete(PENDING_REGISTRATIONS)
@@ -241,6 +265,9 @@ public class CheckoutProcessorImpl implements ICheckoutProcessor {
       newRecord.setTicketQuantity(lineItem.getQuantity());
       newRecord.setPaid(false);
       newRecord.store();
+
+      // Send event registration confirmation
+      sendEventConfirmationEmail(lineItem.getId(), user.getUserId(), lineItem.getQuantity());
     }
   }
 
@@ -312,5 +339,16 @@ public class CheckoutProcessorImpl implements ICheckoutProcessor {
       }
     }
     return lineItems;
+  }
+
+  private void sendEventConfirmationEmail(int eventId, int userId, int ticketQuantity) {
+    String tickets = String.valueOf(ticketQuantity);
+    Events event = db.selectFrom(EVENTS).where(EVENTS.ID.eq(eventId)).fetchOneInto(Events.class);
+    String date = new SimpleDateFormat("MM/dd/yyyy").format(event.getStartTime());
+    String time = new SimpleDateFormat("HH:mm:ss").format(event.getStartTime());
+    emailer.sendEmailToAllContacts(
+        userId,
+        (e, n) ->
+            emailer.sendRegistrationConfirmation(e, n, tickets, event.getTitle(), date, time));
   }
 }

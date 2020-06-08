@@ -17,6 +17,7 @@ import com.codeforcommunity.exceptions.AuthException;
 import com.codeforcommunity.exceptions.EmailAlreadyInUseException;
 import com.codeforcommunity.exceptions.InvalidPasswordException;
 import com.codeforcommunity.exceptions.UserDoesNotExistException;
+import com.codeforcommunity.requester.Emailer;
 import java.util.Optional;
 import org.jooq.DSLContext;
 import org.jooq.generated.tables.records.UsersRecord;
@@ -25,10 +26,12 @@ public class AuthProcessorImpl implements IAuthProcessor {
 
   private final AuthDatabaseOperations authDatabaseOperations;
   private final JWTCreator jwtCreator;
+  private final Emailer emailer;
 
-  public AuthProcessorImpl(DSLContext db, JWTCreator jwtCreator) {
+  public AuthProcessorImpl(DSLContext db, JWTCreator jwtCreator, Emailer emailer) {
     this.authDatabaseOperations = new AuthDatabaseOperations(db);
     this.jwtCreator = jwtCreator;
+    this.emailer = emailer;
   }
 
   /**
@@ -109,7 +112,8 @@ public class AuthProcessorImpl implements IAuthProcessor {
         authDatabaseOperations.createSecretKey(
             userData.getUserId(), VerificationKeyType.FORGOT_PASSWORD);
 
-    // TODO: Send email
+    emailer.sendEmailToMainContact(
+        userData.getUserId(), (e, n) -> emailer.sendForgotPassword(e, n, token));
   }
 
   /**
