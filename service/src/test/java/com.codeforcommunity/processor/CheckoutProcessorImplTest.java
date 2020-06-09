@@ -10,6 +10,7 @@ import com.codeforcommunity.dto.checkout.LineItemRequest;
 import com.codeforcommunity.dto.checkout.PostCreateEventRegistrations;
 import com.codeforcommunity.enums.PrivilegeLevel;
 import com.codeforcommunity.exceptions.MalformedParameterException;
+import com.codeforcommunity.requester.Emailer;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,12 +19,14 @@ import org.junit.jupiter.api.Test;
 class CheckoutProcessorImplTest {
 
   private CheckoutProcessorImpl processor;
+  private Emailer emailMock;
   private JooqMock mock;
 
   @BeforeEach
   private void setup() {
     this.mock = new JooqMock();
-    this.processor = new CheckoutProcessorImpl(mock.getContext());
+    emailMock = mock(Emailer.class);
+    this.processor = new CheckoutProcessorImpl(mock.getContext(), emailMock);
   }
 
   @Test

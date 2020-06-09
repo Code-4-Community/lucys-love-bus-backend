@@ -1,7 +1,9 @@
 package com.codeforcommunity.processor;
 
 import static org.jooq.generated.Tables.ANNOUNCEMENTS;
+import static org.jooq.generated.Tables.CONTACTS;
 import static org.jooq.generated.Tables.EVENTS;
+import static org.jooq.generated.Tables.EVENT_REGISTRATIONS;
 
 import com.codeforcommunity.api.IAnnouncementsProcessor;
 import com.codeforcommunity.auth.JWTData;
@@ -14,10 +16,12 @@ import com.codeforcommunity.dto.announcements.PostAnnouncementResponse;
 import com.codeforcommunity.enums.PrivilegeLevel;
 import com.codeforcommunity.exceptions.AdminOnlyRouteException;
 import com.codeforcommunity.exceptions.MalformedParameterException;
+import com.codeforcommunity.requester.Emailer;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.jooq.DSLContext;
+import org.jooq.Record3;
 import org.jooq.generated.tables.pojos.Announcements;
 import org.jooq.generated.tables.pojos.Events;
 import org.jooq.generated.tables.records.AnnouncementsRecord;
@@ -25,9 +29,11 @@ import org.jooq.generated.tables.records.AnnouncementsRecord;
 public class AnnouncementsProcessorImpl implements IAnnouncementsProcessor {
 
   private final DSLContext db;
+  private final Emailer emailer;
 
-  public AnnouncementsProcessorImpl(DSLContext db) {
+  public AnnouncementsProcessorImpl(DSLContext db, Emailer emailer) {
     this.db = db;
+    this.emailer = emailer;
   }
 
   @Override
@@ -93,6 +99,25 @@ public class AnnouncementsProcessorImpl implements IAnnouncementsProcessor {
     AnnouncementsRecord newAnnouncementsRecord = announcementRequestToRecord(request);
     newAnnouncementsRecord.setEventId(eventId);
     newAnnouncementsRecord.store();
+
+    // Send event specific announcement email
+    List<Record3<String, String, String>> receivers =
+        db.select(CONTACTS.EMAIL, CONTACTS.FIRST_NAME, CONTACTS.LAST_NAME)
+            .from(
+                EVENT_REGISTRATIONS
+                    .join(CONTACTS)
+                    .on(EVENT_REGISTRATIONS.USER_ID.eq(CONTACTS.USER_ID)))
+            .where(EVENT_REGISTRATIONS.EVENT_ID.eq(eventId))
+            .and(CONTACTS.SHOULD_SEND_EMAILS.isTrue())
+            .fetch();
+    String eventName = db.selectFrom(EVENTS).where(EVENTS.ID.eq(eventId)).fetchOne(EVENTS.TITLE);
+    receivers.forEach(
+        record -> {
+          String email = record.component1();
+          String name = String.format("%s %s", record.component2(), record.component3());
+          emailer.sendEventSpecificAnnouncement(
+              email, name, eventName, request.getTitle(), request.getDescription());
+        });
 
     return announcementPojoToResponse(newAnnouncementsRecord.into(Announcements.class));
   }
