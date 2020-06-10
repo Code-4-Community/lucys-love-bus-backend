@@ -36,4 +36,8 @@ public class PropertiesLoader {
   public static Properties getStripeProperties() {
     return getProperties("properties/stripe.properties");
   }
+
+  public static Properties getFrontendProperties() {
+    return getProperties("properties/frontend.properties");
+  }
 }

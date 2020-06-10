@@ -18,6 +18,7 @@ import com.codeforcommunity.exceptions.EmailAlreadyInUseException;
 import com.codeforcommunity.exceptions.TableNotMatchingUserException;
 import com.codeforcommunity.exceptions.UserDoesNotExistException;
 import com.codeforcommunity.exceptions.WrongPasswordException;
+import com.codeforcommunity.requester.Emailer;
 import java.util.List;
 import java.util.Map;
 import org.jooq.DSLContext;
@@ -30,11 +31,13 @@ import org.jooq.impl.UpdatableRecordImpl;
 public class ProtectedUserProcessorImpl implements IProtectedUserProcessor {
 
   private final DSLContext db;
+  private final Emailer emailer;
   private final AuthDatabaseOperations authDatabaseOperations;
   private final UserInformationDatabaseOperations userInformationDbOps;
 
-  public ProtectedUserProcessorImpl(DSLContext db) {
+  public ProtectedUserProcessorImpl(DSLContext db, Emailer emailer) {
     this.db = db;
+    this.emailer = emailer;
     this.authDatabaseOperations = new AuthDatabaseOperations(db);
     this.userInformationDbOps = new UserInformationDatabaseOperations(db);
   }
@@ -42,6 +45,7 @@ public class ProtectedUserProcessorImpl implements IProtectedUserProcessor {
   @Override
   public void deleteUser(JWTData userData) {
     int userId = userData.getUserId();
+    emailer.sendEmailToAllContacts(userId, emailer::sendAccountDeactivated);
     userInformationDbOps.deleteUserRelatedTables(userId);
   }
 
@@ -57,6 +61,8 @@ public class ProtectedUserProcessorImpl implements IProtectedUserProcessor {
         changePasswordRequest.getCurrentPassword(), user.getPassHash())) {
       user.setPassHash(Passwords.createHash(changePasswordRequest.getNewPassword()));
       user.store();
+
+      emailer.sendEmailToMainContact(user.getId(), emailer::sendPasswordChange);
     } else {
       throw new WrongPasswordException();
     }
@@ -86,7 +92,13 @@ public class ProtectedUserProcessorImpl implements IProtectedUserProcessor {
         mainContact.store();
       }
 
+      emailer.sendEmailToAllContacts(
+          userData.getUserId(),
+          (e, n) -> emailer.sendEmailChange(e, n, changeEmailRequest.getNewEmail()));
       user.store();
+      emailer.sendEmailToMainContact(
+          userData.getUserId(),
+          (e, n) -> emailer.sendEmailChange(e, n, changeEmailRequest.getNewEmail()));
     } else {
       throw new WrongPasswordException();
     }

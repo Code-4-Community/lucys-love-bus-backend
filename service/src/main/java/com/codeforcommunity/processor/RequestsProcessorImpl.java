@@ -17,6 +17,7 @@ import com.codeforcommunity.exceptions.AdminOnlyRouteException;
 import com.codeforcommunity.exceptions.OutstandingRequestException;
 import com.codeforcommunity.exceptions.RequestDoesNotExistException;
 import com.codeforcommunity.exceptions.WrongPrivilegeException;
+import com.codeforcommunity.requester.Emailer;
 import java.util.List;
 import org.jooq.DSLContext;
 import org.jooq.generated.tables.pojos.Users;
@@ -24,10 +25,12 @@ import org.jooq.generated.tables.records.PfRequestsRecord;
 
 public class RequestsProcessorImpl implements IRequestsProcessor {
   private final DSLContext db;
+  private final Emailer emailer;
   private final AuthDatabaseOperations authDatabaseOperations;
 
-  public RequestsProcessorImpl(DSLContext db) {
+  public RequestsProcessorImpl(DSLContext db, Emailer emailer) {
     this.db = db;
+    this.emailer = emailer;
     this.authDatabaseOperations = new AuthDatabaseOperations(db);
   }
 
@@ -133,6 +136,8 @@ public class RequestsProcessorImpl implements IRequestsProcessor {
     requestsRecord.setStatus(RequestStatus.APPROVED);
     requestsRecord.store(PF_REQUESTS.STATUS);
 
+    emailer.sendEmailToAllContacts(requestsRecord.getUserId(), emailer::sendRequestApproved);
+
     db.update(USERS)
         .set(USERS.PRIVILEGE_LEVEL, PrivilegeLevel.PF)
         .where(USERS.ID.eq(requestsRecord.getUserId()))
@@ -155,6 +160,8 @@ public class RequestsProcessorImpl implements IRequestsProcessor {
     if (requestsRecord == null) {
       throw new RequestDoesNotExistException(requestId);
     }
+
+    emailer.sendEmailToAllContacts(requestsRecord.getUserId(), emailer::sendRequestDenied);
 
     requestsRecord.setStatus(RequestStatus.REJECTED);
     requestsRecord.store(PF_REQUESTS.STATUS);

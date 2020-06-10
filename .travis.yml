@@ -9,6 +9,7 @@ before_install:
   - cp expiration.properties.example expiration.properties
   - cp jwt.properties.example jwt.properties
   - cp stripe.properties.example stripe.properties
+  - cp frontend.properties.example frontend.properties
   - awk -F" = " -v updatedVal="= " '/database.password =/{$2=updatedVal}1' input.properties > db.properties
   - rm input.properties
   - cd /home/travis/build/Code-4-Community/lucys-love-bus-backend/
@@ -22,6 +23,7 @@ before_deploy:
   - rm user.properties
   - rm pass.properties
   - rm input.properties
+  - awk -F"=" -v updatedVal="=$CLIENT_DOMAIN" '/domain=/{$2=updatedVal}1' frontend.properties
   - cd /home/travis/build/Code-4-Community/lucys-love-bus-backend/
   - mvn clean install
   - zip build.zip Dockerfile service/target/service-1.0-SNAPSHOT-jar-with-dependencies.jar .ebextensions/size.config
