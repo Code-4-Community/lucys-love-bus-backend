@@ -18,8 +18,8 @@ import java.util.Base64;
 public class S3Requester {
 
   private static final String BUCKET_LLB_PUBLIC_URL =
-      "https://lucys-love-bus-public.s3.us-east-2.amazonaws.com";
-  private static final String BUCKET_LLB_PUBLIC = "lucys-love-bus-public";
+      "https://lucys-love-bus.s3.us-east-2.amazonaws.com";
+  private static final String BUCKET_LLB_PUBLIC = "lucys-love-bus";
   private static final String DIR_LLB_PUBLIC_EVENTS = "events";
 
   private static AmazonS3 s3Client;
