@@ -36,5 +36,5 @@ deploy:
   zip_file: "build.zip"
   on:
     repo: Code-4-Community/lucys-love-bus-backend
-    branch: deploy_to_LLB_AWS
+    branch: master
   skip_cleanup: true
