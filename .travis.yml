@@ -14,6 +14,7 @@ before_install:
   - rm input.properties
   - cd /home/travis/build/Code-4-Community/lucys-love-bus-backend/
   - psql -c 'create database "lucys-love-bus";' -U postgres
+install: mvn spotless:check install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
 before_deploy:
   - cd common/src/main/resources/properties/
   - cp db.properties input.properties
@@ -25,7 +26,7 @@ before_deploy:
   - rm input.properties
   - awk -F"=" -v updatedVal="=$CLIENT_DOMAIN" '/domain=/{$2=updatedVal}1' frontend.properties
   - cd /home/travis/build/Code-4-Community/lucys-love-bus-backend/
-  - mvn clean install
+  - mvn clean spotless:check install
   - zip build.zip Dockerfile service/target/service-1.0-SNAPSHOT-jar-with-dependencies.jar .ebextensions/size.config
 deploy:
   provider: elasticbeanstalk

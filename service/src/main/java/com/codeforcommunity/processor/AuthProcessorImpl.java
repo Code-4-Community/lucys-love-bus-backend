@@ -99,7 +99,7 @@ public class AuthProcessorImpl implements IAuthProcessor {
    */
   @Override
   public void requestPasswordReset(ForgotPasswordRequest request) {
-    String email = request.getEmail();
+        String email = request.getEmail();
     JWTData userData;
     try {
       userData = authDatabaseOperations.getUserJWTData(email);
