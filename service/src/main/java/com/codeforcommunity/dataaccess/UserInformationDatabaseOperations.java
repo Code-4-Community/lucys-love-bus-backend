@@ -55,8 +55,8 @@ public class UserInformationDatabaseOperations {
       throw new UserDoesNotExistException(userData.getUserId());
     }
 
-    updateStoreContactRecord(mainContact, newContactData);
     newContactData.setShouldSendEmails(true);
+    updateStoreContactRecord(mainContact, newContactData);
 
     UsersRecord usersRecord =
         db.selectFrom(USERS).where(USERS.ID.eq(userData.getUserId())).fetchOne();
