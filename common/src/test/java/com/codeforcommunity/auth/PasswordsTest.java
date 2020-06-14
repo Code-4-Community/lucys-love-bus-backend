@@ -9,8 +9,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.Arrays;
 import org.junit.jupiter.api.Test;
 
+// From Brandon: tests look good so I'm leaving alone for now
 class PasswordsTest {
-  private String pass = "Password";
+  private final String pass = "Password";
 
   @Test
   void testHashLength() {

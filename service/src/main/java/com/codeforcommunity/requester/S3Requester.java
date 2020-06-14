@@ -16,16 +16,29 @@ import java.io.IOException;
 import java.util.Base64;
 
 public class S3Requester {
+  // for testing purposes so we can mock this
+  public static class Externs {
+    private static final AmazonS3 s3Client =
+        AmazonS3ClientBuilder.standard().withRegion(Regions.US_EAST_2).build();
 
+    public AmazonS3 getS3Client() {
+      return s3Client;
+    }
+  }
+
+  private static Externs externs = new Externs();
   private static final String BUCKET_LLB_PUBLIC_URL =
       "https://lucys-love-bus.s3.us-east-2.amazonaws.com";
   private static final String BUCKET_LLB_PUBLIC = "lucys-love-bus";
   private static final String DIR_LLB_PUBLIC_EVENTS = "events";
 
-  private static AmazonS3 s3Client;
-
-  static {
-    s3Client = AmazonS3ClientBuilder.standard().withRegion(Regions.US_EAST_2).build();
+  /**
+   * This should only be used for testing purposes when we mock the s3Client.
+   *
+   * @param customExterns externs with a mocked s3Client
+   */
+  public static void setExterns(Externs customExterns) {
+    externs = customExterns;
   }
 
   /**
@@ -127,7 +140,7 @@ public class S3Requester {
 
     try {
       // Perform the upload to S3
-      s3Client.putObject(awsRequest);
+      externs.getS3Client().putObject(awsRequest);
     } catch (SdkClientException e) {
       // The AWS S3 upload failed
       throw new S3FailedUploadException(e.getMessage());

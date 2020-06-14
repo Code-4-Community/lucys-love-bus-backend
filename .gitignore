@@ -5,6 +5,7 @@
 *.log
 .classpath
 .project
-.settings
-.vscode
-*.factorypath
+.settings/
+.vscode/
+.factorypath
+.DS_Store
