@@ -13,6 +13,7 @@ import com.codeforcommunity.dto.user.ChangePasswordRequest;
 import com.codeforcommunity.enums.PrivilegeLevel;
 import com.codeforcommunity.exceptions.UserDoesNotExistException;
 import com.codeforcommunity.exceptions.WrongPasswordException;
+import com.codeforcommunity.requester.Emailer;
 import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,6 +29,7 @@ import org.junit.jupiter.api.Test;
 
 // Contains tests for ProtectedUserProcessorImpl.java in service
 public class ProtectedUserProcessorImplTest {
+
   private JooqMock myJooqMock;
   private ProtectedUserProcessorImpl myProtectedUserProcessorImpl;
 
@@ -112,7 +114,9 @@ public class ProtectedUserProcessorImplTest {
   @BeforeEach
   public void setup() {
     this.myJooqMock = new JooqMock();
-    this.myProtectedUserProcessorImpl = new ProtectedUserProcessorImpl(myJooqMock.getContext());
+    this.myProtectedUserProcessorImpl =
+        new ProtectedUserProcessorImpl(
+            myJooqMock.getContext(), new Emailer(myJooqMock.getContext()));
   }
 
   // test properly deleting a user

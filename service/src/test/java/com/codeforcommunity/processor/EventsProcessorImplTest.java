@@ -137,7 +137,7 @@ public class EventsProcessorImplTest {
     assertEquals(res.getCapacity(), 5);
     assertEquals(
         res.getThumbnail(),
-        "https://lucys-love-bus-public.s3.us-east-2.amazonaws.com/events/sample_thumbnail.gif");
+        "https://lucys-love-bus.s3.us-east-2.amazonaws.com/events/sample_thumbnail.gif");
     assertEquals(res.getDetails().getDescription(), myEventDetails.getDescription());
     assertEquals(res.getDetails().getLocation(), myEventDetails.getLocation());
     assertEquals(res.getDetails().getEnd(), myEventDetails.getEnd());

@@ -25,6 +25,7 @@ import com.codeforcommunity.enums.PrivilegeLevel;
 import com.codeforcommunity.enums.VerificationKeyType;
 import com.codeforcommunity.exceptions.AuthException;
 import com.codeforcommunity.exceptions.InvalidPasswordException;
+import com.codeforcommunity.requester.Emailer;
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
@@ -52,7 +53,9 @@ public class AuthProcessorImplTest {
   public void setup() {
     this.myJooqMock = new JooqMock();
     this.mockJWTCreator = mock(JWTCreator.class);
-    this.myAuthProcessorImpl = new AuthProcessorImpl(myJooqMock.getContext(), mockJWTCreator);
+    this.myAuthProcessorImpl =
+        new AuthProcessorImpl(
+            myJooqMock.getContext(), mockJWTCreator, new Emailer(myJooqMock.getContext()));
   }
 
   // test sign up where all the fields are filled in

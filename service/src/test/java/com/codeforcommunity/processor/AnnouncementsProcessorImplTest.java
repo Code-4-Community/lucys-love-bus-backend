@@ -13,6 +13,7 @@ import com.codeforcommunity.dto.announcements.PostAnnouncementResponse;
 import com.codeforcommunity.enums.PrivilegeLevel;
 import com.codeforcommunity.exceptions.AdminOnlyRouteException;
 import com.codeforcommunity.exceptions.MalformedParameterException;
+import com.codeforcommunity.requester.Emailer;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,6 +25,7 @@ import org.junit.jupiter.api.Test;
 
 // Contains tests for AnnouncementsProcessorImpl.java in main
 public class AnnouncementsProcessorImplTest {
+
   private JooqMock myJooqMock;
   private AnnouncementsProcessorImpl myAnnouncementsProcessorImpl;
 
@@ -39,7 +41,9 @@ public class AnnouncementsProcessorImplTest {
   @BeforeEach
   public void setup() {
     this.myJooqMock = new JooqMock();
-    this.myAnnouncementsProcessorImpl = new AnnouncementsProcessorImpl(myJooqMock.getContext());
+    this.myAnnouncementsProcessorImpl =
+        new AnnouncementsProcessorImpl(
+            myJooqMock.getContext(), new Emailer(myJooqMock.getContext()));
   }
 
   // test getting announcements with range covering no events
@@ -214,6 +218,9 @@ public class AnnouncementsProcessorImplTest {
     myJooqMock.addReturn("SELECT", announcement);
     myJooqMock.addReturn("INSERT", announcement);
 
+    // mock sending event specific announcement email
+    myJooqMock.addReturn("SELECT", event);
+
     PostAnnouncementResponse res =
         myAnnouncementsProcessorImpl.postEventSpecificAnnouncement(req, myUserData, 1);
     assertEquals(res.getAnnouncement().getEventId(), announcement.getEventId());
@@ -253,6 +260,9 @@ public class AnnouncementsProcessorImplTest {
     announcements.add(announcement2);
     myJooqMock.addReturn("SELECT", announcements);
     myJooqMock.addReturn("INSERT", announcements);
+
+    // mock sending event specific announcement email
+    myJooqMock.addReturn("SELECT", event);
 
     PostAnnouncementResponse res =
         myAnnouncementsProcessorImpl.postEventSpecificAnnouncement(req, myUserData, 1);

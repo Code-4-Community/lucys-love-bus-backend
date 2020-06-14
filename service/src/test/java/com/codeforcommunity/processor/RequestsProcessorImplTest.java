@@ -16,6 +16,7 @@ import com.codeforcommunity.enums.RequestStatus;
 import com.codeforcommunity.exceptions.AdminOnlyRouteException;
 import com.codeforcommunity.exceptions.OutstandingRequestException;
 import com.codeforcommunity.exceptions.WrongPrivilegeException;
+import com.codeforcommunity.requester.Emailer;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
@@ -37,7 +38,8 @@ public class RequestsProcessorImplTest {
   @BeforeEach
   public void setup() {
     this.myJooqMock = new JooqMock();
-    this.myRequestsProcessorImpl = new RequestsProcessorImpl(myJooqMock.getContext());
+    this.myRequestsProcessorImpl =
+        new RequestsProcessorImpl(myJooqMock.getContext(), new Emailer(myJooqMock.getContext()));
   }
 
   // test creating a request that fails because user isn't GP
