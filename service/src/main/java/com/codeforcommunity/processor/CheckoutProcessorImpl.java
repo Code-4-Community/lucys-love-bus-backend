@@ -87,6 +87,7 @@ public class CheckoutProcessorImpl implements ICheckoutProcessor {
         new SessionCreateParams.Builder()
             .addAllLineItem(checkoutRequest.getStripeLineItems())
             .addPaymentMethodType(SessionCreateParams.PaymentMethodType.CARD)
+            .setSuccessUrl(checkoutRequest.getSuccessUrl())
             .setCancelUrl(checkoutRequest.getCancelUrl())
             .build();
     try {
@@ -330,7 +331,7 @@ public class CheckoutProcessorImpl implements ICheckoutProcessor {
             new LineItem(
                 event.getTitle(),
                 event.getDescription(),
-                ticketQuantity * TICKET_PRICE_CENTS,
+                TICKET_PRICE_CENTS,
                 ticketQuantity,
                 request.getEventId()));
       } else {

@@ -1,4 +1,4 @@
-domain=https://localhost:8080
+domain=http://localhost:8080
 main_route=/
 forgot_password_route=/forgot-password-reset/%s/
 cancel_registration_route=/checkout
