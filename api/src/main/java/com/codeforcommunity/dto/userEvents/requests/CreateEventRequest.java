@@ -48,7 +48,7 @@ public class CreateEventRequest extends ApiDto {
     if (isEmpty(title)) {
       fields.add(fieldName + "title");
     }
-    if (spotsAvailable == null || spotsAvailable < 1) {
+    if (spotsAvailable == null || spotsAvailable < 0) {
       fields.add(fieldName + "spots_available");
     }
     if (details == null) {
