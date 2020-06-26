@@ -45,5 +45,5 @@ deploy:
   zip_file: "build.zip"
   on:
     repo: Code-4-Community/lucys-love-bus-backend
-    branch: master
+    branch: stripe_prod
   cleanup: false
