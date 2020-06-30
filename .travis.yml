@@ -5,13 +5,13 @@ services:
 - postgresql
 before_install:
   - cd common/src/main/resources/properties/
-  - cp db.properties.example input.properties
   - cp db.properties.example db.properties
   - cp emailer.properties.example emailer.properties
   - cp expiration.properties.example expiration.properties
   - cp jwt.properties.example jwt.properties
   - cp stripe.properties.example stripe.properties
   - cp frontend.properties.example frontend.properties
+  - cp db.properties input.properties
   - awk -F" = " -v updatedVal="= " '/database.password =/{$2=updatedVal}1' input.properties > db.properties
   - rm input.properties
   - cd /home/travis/build/Code-4-Community/lucys-love-bus-backend/
@@ -21,7 +21,7 @@ before_install:
 install: mvn spotless:check install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
 before_deploy:
   - cd common/src/main/resources/properties/
-  - cp db.properties input.properties
+  - cp db.properties.example input.properties
   - awk -F" = " -v updatedVal="= $DB_USERNAME" '/database.username =/{$2=updatedVal}1' input.properties > user.properties
   - awk -F" = " -v updatedVal="= $DB_PASSWORD" '/database.password =/{$2=updatedVal}1' user.properties > pass.properties
   - awk -F" = " -v updatedVal="= $DB_DOMAIN" '/database.url =/{$2=updatedVal}1' pass.properties > db.properties
@@ -32,8 +32,6 @@ before_deploy:
   - cp stripe.properties input.properties
   - awk -F" = " -v updatedVal="= $STRIPE_API_SECRET" '/stripe_api_secret_key =/{$2=updatedVal}1' input.properties > api.properties
   - awk -F" = " -v updatedVal="= $STRIPE_WEBHOOK_SECRET" '/stripe_webhook_signing_secret =/{$2=updatedVal}1' api.properties > stripe.properties
-  - cat stripe.properties
-  - cat db.properties
   - rm api.properties
   - rm input.properties
   - cd /home/travis/build/Code-4-Community/lucys-love-bus-backend/
