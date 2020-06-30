@@ -49,4 +49,4 @@ deploy:
   on:
     repo: Code-4-Community/lucys-love-bus-backend
     branch: master
-  cleanup: false
+  skip_cleanup: false
