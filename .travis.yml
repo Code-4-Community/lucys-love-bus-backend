@@ -3,7 +3,10 @@ os: linux
 language: java
 services:
 - postgresql
+
+# This stage prepares the branch to be built and tested
 before_install:
+    # property configuration
   - cd common/src/main/resources/properties/
   - cp db.properties.example db.properties
   - cp emailer.properties.example emailer.properties
@@ -11,14 +14,18 @@ before_install:
   - cp jwt.properties.example jwt.properties
   - cp stripe.properties.example stripe.properties
   - cp frontend.properties.example frontend.properties
-  - cp db.properties input.properties
-  - awk -F" = " -v updatedVal="= " '/database.password =/{$2=updatedVal}1' input.properties > db.properties
-  - rm input.properties
+  - awk -F" = " -v updatedVal="= " '/database.password =/{$2=updatedVal}1' db.properties
   - cd /home/travis/build/Code-4-Community/lucys-love-bus-backend/
+
+    # creates a local database which we use to run tests
   - psql -c 'create database "lucys-love-bus";' -U postgres
+
 # Default installation stage runs everything as below but without spotless:check
 # Tests are run as mvn test -B as part of the "script" stage
 install: mvn spotless:check install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
+
+# This stage reconfigures our property files for a production database, stripe, and emailer connection
+# It then builds a JAR which we zip with our Dockerfile and Elastic Beanstalk Config
 before_deploy:
   - cd common/src/main/resources/properties/
   - cp db.properties.example input.properties
@@ -28,15 +35,17 @@ before_deploy:
   - rm user.properties
   - rm pass.properties
   - rm input.properties
-  - awk -F"=" -v updatedVal="=$CLIENT_DOMAIN" '/domain=/{$2=updatedVal}1' frontend.properties
   - cp stripe.properties input.properties
   - awk -F" = " -v updatedVal="= $STRIPE_API_SECRET" '/stripe_api_secret_key =/{$2=updatedVal}1' input.properties > api.properties
   - awk -F" = " -v updatedVal="= $STRIPE_WEBHOOK_SECRET" '/stripe_webhook_signing_secret =/{$2=updatedVal}1' api.properties > stripe.properties
   - rm api.properties
   - rm input.properties
+  - awk -F" = " -v updatedVal="= $GMAIL_APP_PASSWORD" '/sendPassword =/{$2=updatedVal}1' emailer.properties
   - cd /home/travis/build/Code-4-Community/lucys-love-bus-backend/
   - mvn clean spotless:check install
   - zip build.zip Dockerfile service/target/service-1.0-SNAPSHOT-jar-with-dependencies.jar .ebextensions/size.config
+
+# The resulting build.zip is deployed to Lucy's Love Bus's Elastic Beanstalk instance
 deploy:
   provider: elasticbeanstalk
   access_key_id: AKIASDHWAM4JJDE3ZW47
