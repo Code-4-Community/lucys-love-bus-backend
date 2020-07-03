@@ -36,8 +36,7 @@ before_deploy:
   - cp stripe.properties input.properties
   - awk -F" = " -v updatedVal="= $STRIPE_API_SECRET" '/stripe_api_secret_key =/{$2=updatedVal}1' input.properties > api.properties
   - awk -F" = " -v updatedVal="= $STRIPE_WEBHOOK_SECRET" '/stripe_webhook_signing_secret =/{$2=updatedVal}1' api.properties > stripe.properties
-  - rm api.properties
-  - rm input.properties
+  - rm api.properties input.properties
   - cp emailer.properties.example input.properties
   - awk -F" = " -v updatedVal="= $GMAIL_APP_PASSWORD" '/sendPassword =/{$2=updatedVal}1' input.properties > on.properties
   - awk -F" = " -v updatedVal="= true" '/shouldSendEmails =/{$2=updatedVal}1' on.properties > emailer.properties
