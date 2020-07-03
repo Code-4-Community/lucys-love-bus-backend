@@ -61,7 +61,7 @@ public class EventDetails extends ApiDto {
     if (description == null) {
       fields.add(fieldName + "description");
     }
-    if (isEmpty(location)) {
+    if (isEmpty(location) || location.length() > 120) {
       fields.add(fieldName + "location");
     }
     if (start == null || isStartInvalid(start)) {
