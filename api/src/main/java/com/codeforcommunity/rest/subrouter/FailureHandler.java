@@ -14,7 +14,7 @@ import com.codeforcommunity.exceptions.MissingParameterException;
 import com.codeforcommunity.exceptions.NotRegisteredException;
 import com.codeforcommunity.exceptions.RequestDoesNotExistException;
 import com.codeforcommunity.exceptions.ResourceNotOwnedException;
-import com.codeforcommunity.exceptions.StripeExternalException;
+import com.codeforcommunity.exceptions.StripeException;
 import com.codeforcommunity.exceptions.TableNotMatchingUserException;
 import com.codeforcommunity.exceptions.UsedSecretKeyException;
 import com.codeforcommunity.exceptions.UserDoesNotExistException;
@@ -175,10 +175,10 @@ public class FailureHandler {
     end(ctx, message, 409);
   }
 
-  public void handleStripeExternalException(RoutingContext ctx, StripeExternalException exception) {
+  public void handleStripeExternalException(RoutingContext ctx, StripeException exception) {
     String message =
         "A call to Stripe's API returned an internal server error: " + exception.getMessage();
-    end(ctx, message, 502);
+    end(ctx, message, 400);
   }
 
   public void handleBadImageRequest(RoutingContext ctx) {
