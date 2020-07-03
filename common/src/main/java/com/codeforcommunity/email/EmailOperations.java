@@ -143,6 +143,7 @@ public class EmailOperations {
             logger.info("Successfully sent email subject " + subject);
           });
     } catch (MailException e) {
+      e.printStackTrace();
       logger
           .atError()
           .withThrowable(e)
