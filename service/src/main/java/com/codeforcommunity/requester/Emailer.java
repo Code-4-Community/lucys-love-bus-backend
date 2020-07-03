@@ -54,7 +54,7 @@ public class Emailer {
     Record3<String, String, String> receiver =
         db.select(CONTACTS.EMAIL, CONTACTS.FIRST_NAME, CONTACTS.LAST_NAME)
             .from(CONTACTS)
-            .where(CONTACTS.ID.eq(userId))
+            .where(CONTACTS.USER_ID.eq(userId))
             .and(CONTACTS.IS_MAIN_CONTACT.isTrue())
             .fetchOne();
     String sendToEmail = receiver.component1();
