@@ -32,17 +32,16 @@ before_deploy:
   - awk -F" = " -v updatedVal="= $DB_USERNAME" '/database.username =/{$2=updatedVal}1' input.properties > user.properties
   - awk -F" = " -v updatedVal="= $DB_PASSWORD" '/database.password =/{$2=updatedVal}1' user.properties > pass.properties
   - awk -F" = " -v updatedVal="= $DB_DOMAIN" '/database.url =/{$2=updatedVal}1' pass.properties > db.properties
-  - rm user.properties
-  - rm pass.properties
-  - rm input.properties
+  - rm user.properties pass.properties input.properties
   - cp stripe.properties input.properties
   - awk -F" = " -v updatedVal="= $STRIPE_API_SECRET" '/stripe_api_secret_key =/{$2=updatedVal}1' input.properties > api.properties
   - awk -F" = " -v updatedVal="= $STRIPE_WEBHOOK_SECRET" '/stripe_webhook_signing_secret =/{$2=updatedVal}1' api.properties > stripe.properties
   - rm api.properties
   - rm input.properties
   - cp emailer.properties.example input.properties
-  - awk -F" = " -v updatedVal="= $GMAIL_APP_PASSWORD" '/sendPassword =/{$2=updatedVal}1' input.properties > emailer.properties
-  - rm input.properties
+  - awk -F" = " -v updatedVal="= $GMAIL_APP_PASSWORD" '/sendPassword =/{$2=updatedVal}1' input.properties > on.properties
+  - awk -F" = " -v updatedVal="= true" '/shouldSendEmails =/{$2=updatedVal}1' on.properties > emailer.properties
+  - rm input.properties on.properties
   - cd /home/travis/build/Code-4-Community/lucys-love-bus-backend/
   - mvn clean spotless:check install
   - zip build.zip Dockerfile service/target/service-1.0-SNAPSHOT-jar-with-dependencies.jar .ebextensions/size.config
