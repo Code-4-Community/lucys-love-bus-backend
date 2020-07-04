@@ -136,7 +136,6 @@ public class EmailOperations {
       AsyncResponse mailResponse = mailer.sendMail(email, true);
       mailResponse.onException(
           (e) -> {
-            e.printStackTrace();
             logger
                 .atError()
                 .withThrowable(e)
