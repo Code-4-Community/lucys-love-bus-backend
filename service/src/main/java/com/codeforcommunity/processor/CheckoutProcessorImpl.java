@@ -17,7 +17,8 @@ import com.codeforcommunity.exceptions.EventDoesNotExistException;
 import com.codeforcommunity.exceptions.InsufficientEventCapacityException;
 import com.codeforcommunity.exceptions.MalformedParameterException;
 import com.codeforcommunity.exceptions.NotRegisteredException;
-import com.codeforcommunity.exceptions.StripeException;
+import com.codeforcommunity.exceptions.StripeExternalException;
+import com.codeforcommunity.exceptions.StripeInvalidWebhookSecretException;
 import com.codeforcommunity.propertiesLoader.PropertiesLoader;
 import com.codeforcommunity.requester.Emailer;
 import com.stripe.Stripe;
@@ -76,7 +77,7 @@ public class CheckoutProcessorImpl implements ICheckoutProcessor {
   }
 
   private String createCheckoutSessionAndEventRegistration(List<LineItem> lineItems, JWTData user)
-      throws StripeException {
+      throws StripeExternalException {
     CreateCheckoutSessionData checkoutRequest =
         new CreateCheckoutSessionData(lineItems, this.cancelUrl, this.successUrl);
 
@@ -96,7 +97,7 @@ public class CheckoutProcessorImpl implements ICheckoutProcessor {
       createPendingEventRegistration(lineItems, user, checkoutSessionId);
       return session.getId();
     } catch (com.stripe.exception.StripeException e) {
-      throw new StripeException(e.getMessage());
+      throw new StripeExternalException(e.getMessage());
     }
   }
 
@@ -123,7 +124,7 @@ public class CheckoutProcessorImpl implements ICheckoutProcessor {
 
   @Override
   public Optional<String> createEventRegistration(
-      PostCreateEventRegistrations request, JWTData user) throws StripeException {
+      PostCreateEventRegistrations request, JWTData user) throws StripeExternalException {
     if (request.getLineItemRequests().isEmpty()) {
       throw new MalformedParameterException("lineItems");
     }
@@ -158,7 +159,7 @@ public class CheckoutProcessorImpl implements ICheckoutProcessor {
 
   @Override
   public Optional<String> updateEventRegistration(int eventId, int quantity, JWTData userData)
-      throws StripeException {
+      throws StripeExternalException {
     Events event = db.selectFrom(EVENTS).where(EVENTS.ID.eq(eventId)).fetchOneInto(Events.class);
     int userId = userData.getUserId();
     EventRegistrationsRecord registration =
@@ -207,7 +208,7 @@ public class CheckoutProcessorImpl implements ICheckoutProcessor {
         handleCheckoutComplete(checkoutSessionId);
       }
     } catch (SignatureVerificationException e) {
-      throw new StripeException("Error verifying signature of incoming webhook");
+      throw new StripeInvalidWebhookSecretException(e.getMessage());
     }
   }
 

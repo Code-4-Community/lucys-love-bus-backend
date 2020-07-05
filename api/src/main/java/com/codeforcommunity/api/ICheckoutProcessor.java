@@ -2,7 +2,7 @@ package com.codeforcommunity.api;
 
 import com.codeforcommunity.auth.JWTData;
 import com.codeforcommunity.dto.checkout.PostCreateEventRegistrations;
-import com.codeforcommunity.exceptions.StripeException;
+import com.codeforcommunity.exceptions.StripeExternalException;
 import java.util.Optional;
 
 /** Processes routes related to registering for events and paying for event tickets. */
@@ -15,10 +15,10 @@ public interface ICheckoutProcessor {
    * @param request the request body
    * @param data the user's JWT authentication data
    * @return an Optional of the ID of the Stripe checkout session
-   * @throws StripeException if Stripe throws an exception while creating the session
+   * @throws StripeExternalException if Stripe throws an exception while creating the session
    */
   Optional<String> createEventRegistration(PostCreateEventRegistrations request, JWTData data)
-      throws StripeException;
+      throws StripeExternalException;
 
   /**
    * Updates the event registration database entry when Stripe has finished processing the payment.
@@ -38,8 +38,8 @@ public interface ICheckoutProcessor {
    * @param quantity the new quantity of tickets
    * @param userData the user's JWT authentication data
    * @return an Optional of the ID of the Stripe checkout session
-   * @throws StripeException if Stripe throws an exception while creating the session
+   * @throws StripeExternalException if Stripe throws an exception while creating the session
    */
   Optional<String> updateEventRegistration(int eventId, int quantity, JWTData userData)
-      throws StripeException;
+      throws StripeExternalException;
 }

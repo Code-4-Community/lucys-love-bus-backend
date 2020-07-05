@@ -3,11 +3,11 @@ package com.codeforcommunity.exceptions;
 import com.codeforcommunity.rest.subrouter.FailureHandler;
 import io.vertx.ext.web.RoutingContext;
 
-public class StripeException extends HandledException {
+public class StripeExternalException extends HandledException {
 
   private String message;
 
-  public StripeException(String message) {
+  public StripeExternalException(String message) {
     this.message = message;
   }
 
