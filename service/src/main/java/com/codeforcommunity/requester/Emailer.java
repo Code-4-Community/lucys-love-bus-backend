@@ -70,7 +70,7 @@ public class Emailer {
     List<Record3<String, String, String>> receivers =
         db.select(CONTACTS.EMAIL, CONTACTS.FIRST_NAME, CONTACTS.LAST_NAME)
             .from(CONTACTS)
-            .where(CONTACTS.ID.eq(userId))
+            .where(CONTACTS.USER_ID.eq(userId))
             .and(CONTACTS.SHOULD_SEND_EMAILS.isTrue())
             .fetch();
     receivers.forEach(
