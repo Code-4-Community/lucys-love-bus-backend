@@ -182,9 +182,10 @@ public class FailureHandler {
     end(ctx, message, 502);
   }
 
-  public void handleStripeInvalidWebhookSecretException(RoutingContext ctx, StripeInvalidWebhookSecretException exception) {
+  public void handleStripeInvalidWebhookSecretException(
+      RoutingContext ctx, StripeInvalidWebhookSecretException exception) {
     String message =
-            "Incoming Stripe webhook request could not be verified: " + exception.getMessage();
+        "Incoming Stripe webhook request could not be verified: " + exception.getMessage();
     end(ctx, message, 400);
   }
 

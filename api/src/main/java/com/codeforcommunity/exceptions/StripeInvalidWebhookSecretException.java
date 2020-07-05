@@ -5,18 +5,18 @@ import io.vertx.ext.web.RoutingContext;
 
 public class StripeInvalidWebhookSecretException extends HandledException {
 
-    private String message;
+  private String message;
 
-    public StripeInvalidWebhookSecretException(String message) {
-        this.message = message;
-    }
+  public StripeInvalidWebhookSecretException(String message) {
+    this.message = message;
+  }
 
-    @Override
-    public void callHandler(FailureHandler handler, RoutingContext ctx) {
-        handler.handleStripeInvalidWebhookSecretException(ctx, this);
-    }
+  @Override
+  public void callHandler(FailureHandler handler, RoutingContext ctx) {
+    handler.handleStripeInvalidWebhookSecretException(ctx, this);
+  }
 
-    public String getMessage() {
-        return this.message;
-    }
+  public String getMessage() {
+    return this.message;
+  }
 }
