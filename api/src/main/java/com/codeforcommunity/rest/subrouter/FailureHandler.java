@@ -15,6 +15,7 @@ import com.codeforcommunity.exceptions.NotRegisteredException;
 import com.codeforcommunity.exceptions.RequestDoesNotExistException;
 import com.codeforcommunity.exceptions.ResourceNotOwnedException;
 import com.codeforcommunity.exceptions.StripeExternalException;
+import com.codeforcommunity.exceptions.StripeInvalidWebhookSecretException;
 import com.codeforcommunity.exceptions.TableNotMatchingUserException;
 import com.codeforcommunity.exceptions.UsedSecretKeyException;
 import com.codeforcommunity.exceptions.UserDoesNotExistException;
@@ -179,6 +180,13 @@ public class FailureHandler {
     String message =
         "A call to Stripe's API returned an internal server error: " + exception.getMessage();
     end(ctx, message, 502);
+  }
+
+  public void handleStripeInvalidWebhookSecretException(
+      RoutingContext ctx, StripeInvalidWebhookSecretException exception) {
+    String message =
+        "Incoming Stripe webhook request could not be verified: " + exception.getMessage();
+    end(ctx, message, 400);
   }
 
   public void handleBadImageRequest(RoutingContext ctx) {

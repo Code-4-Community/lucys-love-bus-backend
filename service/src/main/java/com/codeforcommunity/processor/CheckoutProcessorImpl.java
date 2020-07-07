@@ -18,11 +18,11 @@ import com.codeforcommunity.exceptions.InsufficientEventCapacityException;
 import com.codeforcommunity.exceptions.MalformedParameterException;
 import com.codeforcommunity.exceptions.NotRegisteredException;
 import com.codeforcommunity.exceptions.StripeExternalException;
+import com.codeforcommunity.exceptions.StripeInvalidWebhookSecretException;
 import com.codeforcommunity.propertiesLoader.PropertiesLoader;
 import com.codeforcommunity.requester.Emailer;
 import com.stripe.Stripe;
 import com.stripe.exception.SignatureVerificationException;
-import com.stripe.exception.StripeException;
 import com.stripe.model.Event;
 import com.stripe.model.checkout.Session;
 import com.stripe.net.Webhook;
@@ -96,7 +96,7 @@ public class CheckoutProcessorImpl implements ICheckoutProcessor {
       session.setSuccessUrl(checkoutRequest.getSuccessUrl());
       createPendingEventRegistration(lineItems, user, checkoutSessionId);
       return session.getId();
-    } catch (StripeException e) {
+    } catch (com.stripe.exception.StripeException e) {
       throw new StripeExternalException(e.getMessage());
     }
   }
@@ -208,7 +208,7 @@ public class CheckoutProcessorImpl implements ICheckoutProcessor {
         handleCheckoutComplete(checkoutSessionId);
       }
     } catch (SignatureVerificationException e) {
-      throw new StripeExternalException("Error verifying signature of incoming webhook");
+      throw new StripeInvalidWebhookSecretException(e.getMessage());
     }
   }
 
