@@ -2,6 +2,11 @@
 
 This project is the Java backend api scaffold for lucys-love-bus.
 
+[![Build Status](https://travis-ci.org/Code-4-Community/speak-for-the-trees-backend.svg?branch=master)](https://travis-ci.org/Code-4-Community/speak-for-the-trees-backend)
+
+[![Coverage Status](https://coveralls.io/repos/github/Code-4-Community/speak-for-the-trees-backend/badge.svg?branch=master)](https://coveralls.io/github/Code-4-Community/speak-for-the-trees-backend?branch=master)
+
+
 #### Start a local postgres database
 1. Download postgres with pgAdmin4. https://www.postgresql.org/download/
 2. Start pgAdmin4, the database should start on localhost, port 5432 by default.
