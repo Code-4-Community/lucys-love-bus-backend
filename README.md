@@ -2,9 +2,9 @@
 
 This project is the Java backend api scaffold for lucys-love-bus.
 
-[![Build Status](https://travis-ci.org/Code-4-Community/speak-for-the-trees-backend.svg?branch=master)](https://travis-ci.org/Code-4-Community/speak-for-the-trees-backend)
+[![Build Status](https://travis-ci.org/Code-4-Community/lucys-love-bus-backend.svg?branch=master)](https://travis-ci.org/Code-4-Community/lucys-love-bus-backend)
 
-[![Coverage Status](https://coveralls.io/repos/github/Code-4-Community/speak-for-the-trees-backend/badge.svg?branch=master)](https://coveralls.io/github/Code-4-Community/speak-for-the-trees-backend?branch=master)
+[![Coverage Status](https://coveralls.io/repos/github/Code-4-Community/lucys-love-bus-backend/badge.svg?branch=master)](https://coveralls.io/github/Code-4-Community/lucys-love-bus-backend?branch=master)
 
 
 #### Start a local postgres database
