@@ -61,6 +61,11 @@ public class AnnouncementsRouter implements IRouter {
     postEventSpecificAnnouncementRoute.handler(this::handlePostEventSpecificAnnouncement);
   }
 
+  private void registerDeleteAnnouncement(Router router) {
+    Route deleteAnnouncementRoute = router.delete("/:announcement_id");
+    deleteAnnouncementRoute.handler(this::handleDeleteAnnouncement);
+  }
+
   private void handleGetAnnouncements(RoutingContext ctx) {
     Optional<Timestamp> start =
         RestFunctions.getOptionalQueryParam(ctx, "start", Timestamp::valueOf);
@@ -106,5 +111,13 @@ public class AnnouncementsRouter implements IRouter {
             userData,
             RestFunctions.getRequestParameterAsInt(ctx.request(), "event_id"));
     end(ctx.response(), 200, JsonObject.mapFrom(response).toString());
+  }
+
+  private void handleDeleteAnnouncement(RoutingContext ctx) {
+    int announcementId = RestFunctions.getRequestParameterAsInt(ctx.request(), "announcement_id");
+    JWTData userData = ctx.get("jwt_data");
+
+    processor.deleteAnnouncement(announcementId, userData);
+    end(ctx.response(), 200);
   }
 }
