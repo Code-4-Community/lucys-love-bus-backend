@@ -37,6 +37,7 @@ public class AnnouncementsRouter implements IRouter {
     registerPostAnnouncement(router);
     registerGetEventSpecificAnnouncements(router);
     registerPostEventSpecificAnnouncement(router);
+    registerDeleteAnnouncement(router);
 
     return router;
   }
