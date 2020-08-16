@@ -196,6 +196,9 @@ public class EventsProcessorImpl implements IEventsProcessor {
         record.setEndTime(details.getEnd());
       }
     }
+    if (request.getPrice() != null) {
+      record.setPrice(request.getPrice());
+    }
     record.store();
 
     return getSingleEvent(eventId, userData);
@@ -346,7 +349,8 @@ public class EventsProcessorImpl implements IEventsProcessor {
                   event.getThumbnail(),
                   details,
                   ticketCounts.getOrDefault(event.getId(), 0),
-                  canUserRegister(event, userData));
+                  canUserRegister(event, userData),
+                  event.getPrice());
             })
         .collect(Collectors.toList());
   }
@@ -358,7 +362,10 @@ public class EventsProcessorImpl implements IEventsProcessor {
 
     EventDetails details =
         new EventDetails(
-            event.getDescription(), event.getLocation(), event.getStartTime(), event.getEndTime());
+            event.getDescription(),
+            event.getLocation(),
+            event.getStartTime(),
+            event.getEndTime());
     return new SingleEventResponse(
         event.getId(),
         event.getTitle(),
@@ -367,7 +374,8 @@ public class EventsProcessorImpl implements IEventsProcessor {
         event.getThumbnail(),
         details,
         ticketsBought,
-        canUserRegister(event, userData));
+        canUserRegister(event, userData),
+        event.getPrice());
   }
 
   /** Takes a dto representation of an event and returns the database record representation. */
@@ -380,6 +388,7 @@ public class EventsProcessorImpl implements IEventsProcessor {
     newRecord.setLocation(request.getDetails().getLocation());
     newRecord.setStartTime(request.getDetails().getStart());
     newRecord.setEndTime(request.getDetails().getEnd());
+    newRecord.setPrice(request.getPrice());
     return newRecord;
   }
 

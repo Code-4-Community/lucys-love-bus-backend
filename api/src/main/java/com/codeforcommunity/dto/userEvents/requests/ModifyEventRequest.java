@@ -10,15 +10,17 @@ public class ModifyEventRequest extends ApiDto {
   private Integer spotsAvailable;
   private String thumbnail;
   private EventDetails details;
+  private Integer price; // price in cents
 
   private ModifyEventRequest() {}
 
   public ModifyEventRequest(
-      String title, Integer spotsAvailable, String thumbnail, EventDetails details) {
+      String title, Integer spotsAvailable, String thumbnail, EventDetails details, Integer price) {
     this.title = title;
     this.spotsAvailable = spotsAvailable;
     this.thumbnail = thumbnail;
     this.details = details;
+    this.price = price;
   }
 
   public String getTitle() {
@@ -35,6 +37,10 @@ public class ModifyEventRequest extends ApiDto {
 
   public EventDetails getDetails() {
     return details;
+  }
+
+  public Integer getPrice() {
+    return price;
   }
 
   @Override

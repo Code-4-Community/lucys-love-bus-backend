@@ -11,6 +11,7 @@ public class SingleEventResponse {
   private EventDetails details;
   private int ticketCount;
   private boolean canRegister;
+  private int price;
 
   public SingleEventResponse(
       int id,
@@ -20,7 +21,8 @@ public class SingleEventResponse {
       String thumbnail,
       EventDetails details,
       int ticketCount,
-      boolean canRegister) {
+      boolean canRegister,
+      int price) {
     this.id = id;
     this.title = title;
     this.spotsAvailable = spotsAvailable;
@@ -29,6 +31,7 @@ public class SingleEventResponse {
     this.details = details;
     this.ticketCount = ticketCount;
     this.canRegister = canRegister;
+    this.price = price;
   }
 
   private SingleEventResponse() {}
@@ -63,5 +66,9 @@ public class SingleEventResponse {
 
   public boolean isCanRegister() {
     return canRegister;
+  }
+
+  public int getPrice() {
+    return price;
   }
 }

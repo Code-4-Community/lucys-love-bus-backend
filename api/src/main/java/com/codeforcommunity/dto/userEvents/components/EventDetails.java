@@ -12,8 +12,10 @@ public class EventDetails extends ApiDto {
   private String location;
   private Timestamp start;
   private Timestamp end;
+  private Integer price; // price in cents
 
-  public EventDetails(String description, String location, Timestamp start, Timestamp end) {
+  public EventDetails(
+      String description, String location, Timestamp start, Timestamp end) {
     this.description = description;
     this.location = location;
     this.start = start;

@@ -52,6 +52,5 @@ public interface IAnnouncementsProcessor {
    * @param announcementId the ID of the announcement
    * @param userData the JWT data for the user making the request
    */
-  void deleteAnnouncement(
-      int announcementId, JWTData userData);
+  void deleteAnnouncement(int announcementId, JWTData userData);
 }
