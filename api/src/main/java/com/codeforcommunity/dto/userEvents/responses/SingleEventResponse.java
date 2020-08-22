@@ -68,7 +68,7 @@ public class SingleEventResponse {
     return canRegister;
   }
 
-  public int getPrice() {
-    return price;
+  public float getPrice() {
+    return price / 100;
   }
 }
