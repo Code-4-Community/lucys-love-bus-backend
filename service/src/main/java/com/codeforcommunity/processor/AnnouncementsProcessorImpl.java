@@ -140,9 +140,7 @@ public class AnnouncementsProcessorImpl implements IAnnouncementsProcessor {
   }
 
   @Override
-  public void deleteAnnouncement(
-      int announcementId, JWTData userData
-  ) {
+  public void deleteAnnouncement(int announcementId, JWTData userData) {
     if (userData.getPrivilegeLevel() != PrivilegeLevel.ADMIN) {
       throw new AdminOnlyRouteException();
     }
