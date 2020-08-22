@@ -37,8 +37,18 @@ public class ServiceMain {
 
   /** Start the server, get everything going. */
   public void initialize() {
+    setUpSystemProperties();
     connectDb();
     initializeServer();
+  }
+
+  /** Adds any necessary system properties. */
+  private void setUpSystemProperties() {
+    Properties systemProperties = System.getProperties();
+    systemProperties.setProperty(
+        "vertx.logger-delegate-factory-class-name",
+        "io.vertx.core.logging.SLF4JLogDelegateFactory");
+    System.setProperties(systemProperties);
   }
 
   /** Connect to the database and create a DSLContext so jOOQ can interact with it. */
