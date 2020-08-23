@@ -37,6 +37,7 @@ public class AnnouncementsRouter implements IRouter {
     registerPostAnnouncement(router);
     registerGetEventSpecificAnnouncements(router);
     registerPostEventSpecificAnnouncement(router);
+    registerDeleteAnnouncement(router);
 
     return router;
   }
@@ -59,6 +60,11 @@ public class AnnouncementsRouter implements IRouter {
   private void registerPostEventSpecificAnnouncement(Router router) {
     Route postEventSpecificAnnouncementRoute = router.post("/:event_id");
     postEventSpecificAnnouncementRoute.handler(this::handlePostEventSpecificAnnouncement);
+  }
+
+  private void registerDeleteAnnouncement(Router router) {
+    Route deleteAnnouncementRoute = router.delete("/:announcement_id");
+    deleteAnnouncementRoute.handler(this::handleDeleteAnnouncement);
   }
 
   private void handleGetAnnouncements(RoutingContext ctx) {
@@ -106,5 +112,13 @@ public class AnnouncementsRouter implements IRouter {
             userData,
             RestFunctions.getRequestParameterAsInt(ctx.request(), "event_id"));
     end(ctx.response(), 200, JsonObject.mapFrom(response).toString());
+  }
+
+  private void handleDeleteAnnouncement(RoutingContext ctx) {
+    int announcementId = RestFunctions.getRequestParameterAsInt(ctx.request(), "announcement_id");
+    JWTData userData = ctx.get("jwt_data");
+
+    processor.deleteAnnouncement(announcementId, userData);
+    end(ctx.response(), 200);
   }
 }

@@ -45,4 +45,12 @@ public interface IAnnouncementsProcessor {
    */
   PostAnnouncementResponse postEventSpecificAnnouncement(
       PostAnnouncementRequest request, JWTData userData, int eventId);
+
+  /**
+   * Deletes an announcement.
+   *
+   * @param announcementId the ID of the announcement
+   * @param userData the JWT data for the user making the request
+   */
+  void deleteAnnouncement(int announcementId, JWTData userData);
 }

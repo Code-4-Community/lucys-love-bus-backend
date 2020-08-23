@@ -139,6 +139,14 @@ public class AnnouncementsProcessorImpl implements IAnnouncementsProcessor {
         announcements.stream().map(this::convertAnnouncementObject).collect(Collectors.toList()));
   }
 
+  @Override
+  public void deleteAnnouncement(int announcementId, JWTData userData) {
+    if (userData.getPrivilegeLevel() != PrivilegeLevel.ADMIN) {
+      throw new AdminOnlyRouteException();
+    }
+    db.delete(ANNOUNCEMENTS).where(ANNOUNCEMENTS.ID.eq(announcementId)).execute();
+  }
+
   private PostAnnouncementResponse announcementPojoToResponse(Announcements announcements) {
     return new PostAnnouncementResponse(convertAnnouncementObject(announcements));
   }
