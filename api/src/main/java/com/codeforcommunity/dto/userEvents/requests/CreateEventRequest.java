@@ -10,10 +10,10 @@ public class CreateEventRequest extends ApiDto {
   private Integer spotsAvailable;
   private String thumbnail;
   private EventDetails details;
-  private float price; // price in cents
+  private int price; // price in cents
 
   public CreateEventRequest(
-      String title, int spotsAvailable, String thumbnail, EventDetails details, float price) {
+      String title, int spotsAvailable, String thumbnail, EventDetails details, int price) {
     this.title = title;
     this.spotsAvailable = spotsAvailable;
     this.thumbnail = thumbnail;
@@ -44,7 +44,7 @@ public class CreateEventRequest extends ApiDto {
   }
 
   public int getPrice() {
-    return Math.round(this.price * 100);
+    return price;
   }
 
   @Override
