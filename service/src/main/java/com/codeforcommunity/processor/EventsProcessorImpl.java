@@ -362,10 +362,7 @@ public class EventsProcessorImpl implements IEventsProcessor {
 
     EventDetails details =
         new EventDetails(
-            event.getDescription(),
-            event.getLocation(),
-            event.getStartTime(),
-            event.getEndTime());
+            event.getDescription(), event.getLocation(), event.getStartTime(), event.getEndTime());
     return new SingleEventResponse(
         event.getId(),
         event.getTitle(),

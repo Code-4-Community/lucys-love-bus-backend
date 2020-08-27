@@ -689,7 +689,8 @@ public class EventsProcessorImplTest {
                 "new description",
                 "new location",
                 new Timestamp(START_TIMESTAMP_TEST),
-                new Timestamp(END_TIMESTAMP_TEST)), 500);
+                new Timestamp(END_TIMESTAMP_TEST)),
+            500);
 
     // mock the event
     EventsRecord myEvent = myJooqMock.getContext().newRecord(Tables.EVENTS);
@@ -744,7 +745,8 @@ public class EventsProcessorImplTest {
   public void testModifyEvent3() {
     JWTData myUserData = new JWTData(0, PrivilegeLevel.ADMIN);
 
-    ModifyEventRequest req = new ModifyEventRequest("edited title", 10, "edited thumbnail", null, 10);
+    ModifyEventRequest req =
+        new ModifyEventRequest("edited title", 10, "edited thumbnail", null, 10);
 
     // mock the events
     EventsRecord myEvent = myJooqMock.getContext().newRecord(Tables.EVENTS);
@@ -795,7 +797,8 @@ public class EventsProcessorImplTest {
   public void testModifyEvent4() {
     JWTData myUserData = new JWTData(0, PrivilegeLevel.ADMIN);
 
-    ModifyEventRequest req = new ModifyEventRequest("edited title", null, "edited thumbnail", null, 20);
+    ModifyEventRequest req =
+        new ModifyEventRequest("edited title", null, "edited thumbnail", null, 20);
 
     // mock the event
     EventsRecord myEvent = myJooqMock.getContext().newRecord(Tables.EVENTS);
@@ -871,7 +874,8 @@ public class EventsProcessorImplTest {
             "edited title",
             null,
             "edited thumbnail",
-            new EventDetails("new description", "new location", null, null), 50);
+            new EventDetails("new description", "new location", null, null),
+            50);
 
     EventsRecord myEvent = myJooqMock.getContext().newRecord(Tables.EVENTS);
     myEvent.setId(0);
