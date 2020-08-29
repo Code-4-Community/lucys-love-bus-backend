@@ -18,6 +18,15 @@
     </dependency>
 
     <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-web-client</artifactId>
+    </dependency>
+
+    <dependency>
       <groupId>org.simplejavamail</groupId>
       <artifactId>simple-java-mail</artifactId>
     </dependency>
