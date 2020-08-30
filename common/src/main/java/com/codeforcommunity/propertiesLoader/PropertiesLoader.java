@@ -42,10 +42,10 @@ public class PropertiesLoader {
   }
 
   public static Properties getSlackProperties() {
-    return getProperties("slack.properties");
+    return getProperties("properties/slack.properties");
   }
 
   public static Properties getAwsProperties() {
-    return getProperties("aws.properties");
+    return getProperties("properties/aws.properties");
   }
 }
