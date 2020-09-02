@@ -11,9 +11,8 @@ addons:
 # This stage prepares the branch to be built and tested
 before_install:
   # property configuration
-  - ./copy_properties.sh
-  - awk -F" = " -v updatedVal="= " '/database.password =/{$2=updatedVal}1' db.properties
-  - cd /home/travis/build/Code-4-Community/lucys-love-bus-backend/
+  - export DIR_PROP='common/src/main/resources/properties/'
+  - ./copy_properties.sh $DIR_PROP
 
   # creates a local database which we use to run tests
   - psql -c 'create database "lucys-love-bus";' -U postgres
