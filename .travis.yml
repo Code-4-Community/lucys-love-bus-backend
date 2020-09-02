@@ -28,12 +28,12 @@ before_install:
 # Tests are run as mvn test -B as part of the "script" stage
 install:
   - pip install requests
-  - python3 deploy.py
   - mvn spotless:check install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
 
 # This stage reconfigures our property files for a production database, stripe, and emailer connection
 # It then builds a JAR which we zip with our Dockerfile and Elastic Beanstalk Config
 before_deploy:
+  - python3 deploy.py
   - cd /home/travis/build/Code-4-Community/lucys-love-bus-backend/
   - mvn clean spotless:check install
   - zip build.zip Dockerfile service/target/service-1.0-SNAPSHOT-jar-with-dependencies.jar .ebextensions/size.config
