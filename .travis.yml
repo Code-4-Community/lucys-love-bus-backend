@@ -20,7 +20,7 @@ before_install:
 # Default installation stage runs everything as below but without spotless:check
 # Tests are run as mvn test -B as part of the "script" stage
 install:
-  - pip install requests
+  - pip3 install requests
   - mvn spotless:check install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
 
 # This stage reconfigures our property files for a production database, stripe, and emailer connection
