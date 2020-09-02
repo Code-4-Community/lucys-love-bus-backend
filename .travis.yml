@@ -2,7 +2,7 @@ dist: xenial
 os: linux
 language: java
 jdk:
-  - oraclejdk8
+  - openjdk8
 services:
   - postgresql
 addons:
@@ -13,7 +13,7 @@ addons:
 # This stage prepares the branch to be built and tested
 before_install:
   # property configuration
-  - jdk_switcher use oraclejdk8
+  - jdk_switcher use openjdk8
   - cd common/src/main/resources/properties/
   - cp db.properties.example db.properties
   - cp emailer.properties.example emailer.properties
