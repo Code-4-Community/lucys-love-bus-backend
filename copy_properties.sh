@@ -9,6 +9,3 @@ for EX_FILE in *.properties.example; do
   echo "Copying $EX_FILE to $PROP_FILE"
   cp "$EX_FILE" "$PROP_FILE"
 done
-
-# Update `db.properties` password
-awk -F" = " -v updatedVal="= " '/database.password =/{$2=updatedVal}1' db.properties

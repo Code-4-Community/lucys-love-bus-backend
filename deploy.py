@@ -47,9 +47,12 @@ SLACK_WEBHOOK_ENV_VAR = "SLACK_WEBHOOK_URL"
 
 def main():
     global SEND_SLACK
-    SEND_SLACK = True if SLACK_WEBHOOK_ENV_VAR in os.environ else False
-    dir_contents = os.listdir(PROPERTIES_DIR)
 
+    # Enable logging deploy errors to Slack if the webhook url is set in the environment
+    SEND_SLACK = True if SLACK_WEBHOOK_ENV_VAR in os.environ else False
+
+    # Iterate through every item in the given directory
+    dir_contents = os.listdir(PROPERTIES_DIR)
     for file_name in dir_contents:
         # Only copy/modify .properties.example files
         if not file_name.endswith(".properties.example"):
@@ -57,7 +60,7 @@ def main():
 
         print("Reading:", file_name)
 
-        out_file_name = file_name[:-8]
+        out_file_name = file_name[:-8]  # Strips the ".example" from the file name
         print("Writing:", out_file_name)
 
         with open(PROPERTIES_DIR + out_file_name, "w") as file_properties:
