@@ -8,8 +8,8 @@ PROPERTIES_DIR = "common/src/main/resources/properties/"
 #   are the PROPERTIES (KEYS), and the values are ENVIRONMENT VARIABLES
 ENV_VALUES = {
     "aws.properties.example": {
-        "aws_access_key": "AWS_ACCESS_KEY",
-        "aws_secret_key": "AWS_SECRET_KEY",
+        "aws_access_key": "AWS_ACCESS_KEY_ID",
+        "aws_secret_key": "AWS_SECRET_ACCESS_KEY",
     },
 
     "db.properties.example": {
