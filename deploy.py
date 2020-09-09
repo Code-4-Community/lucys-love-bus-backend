@@ -113,11 +113,11 @@ def process_properties(example_file_name, file_example, file_properties):
 
             # Ensure the desired environment variable is actually set
             if out_value is None:
-                out_value = env_var  # Set value to environment variable name
+                out_value = "${}".format(env_var)  # Set value to environment variable name
                 error_msg = "`[{}]`: Replacing empty environment variable: `${}`".format(example_file_name, env_var)
                 handle_error(error_msg)
 
-            out_line = "{} = ${}\n".format(key_placeholder, out_value)
+            out_line = "{} = {}\n".format(key_placeholder, out_value)
             file_properties.write(out_line)
             continue
 
