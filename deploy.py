@@ -106,14 +106,18 @@ def process_properties(example_file_name, file_example, file_properties):
         # Else, copy the line and replace the placeholder
         if key_placeholder in replacement_dict:
             env_var = replacement_dict[key_placeholder]
+            env_var = env_var if not env_var.startswith("$") else env_var[1:]  # Strip leading "$"
 
-            # Ensure the desired environment variable is actually set (and strip leading "$")
-            env_var = env_var if not env_var.startswith("$") else env_var[1:]
-            if env_var not in os.environ:
+            # Get the value of the environment variable
+            out_value = os.environ.get(env_var)
+
+            # Ensure the desired environment variable is actually set
+            if out_value is None:
+                out_value = env_var  # Set value to environment variable name
                 error_msg = "`[{}]`: Replacing empty environment variable: `${}`".format(example_file_name, env_var)
                 handle_error(error_msg)
 
-            out_line = "{} = ${}\n".format(key_placeholder, env_var)
+            out_line = "{} = ${}\n".format(key_placeholder, out_value)
             file_properties.write(out_line)
             continue
 
