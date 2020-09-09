@@ -40,4 +40,12 @@ public class PropertiesLoader {
   public static Properties getFrontendProperties() {
     return getProperties("properties/frontend.properties");
   }
+
+  public static Properties getSlackProperties() {
+    return getProperties("properties/slack.properties");
+  }
+
+  public static Properties getAwsProperties() {
+    return getProperties("properties/aws.properties");
+  }
 }
