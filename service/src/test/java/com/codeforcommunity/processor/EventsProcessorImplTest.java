@@ -183,6 +183,7 @@ public class EventsProcessorImplTest {
     eventRecord.setDescription(myEventDetails.getDescription());
     eventRecord.setStartTime(myEventDetails.getStart());
     eventRecord.setEndTime(myEventDetails.getEnd());
+    eventRecord.setPrice(myEventRequest.getPrice());
     myJooqMock.addReturn("SELECT", eventRecord);
 
     // mock the DB for getting ticket counts
@@ -214,6 +215,7 @@ public class EventsProcessorImplTest {
     assertEquals(res.getCapacity(), 5);
     assertEquals(res.getThumbnail(), myEventRequest.getThumbnail());
     assertEquals(res.getTitle(), myEventRequest.getTitle());
+    assertEquals(res.getPrice(), myEventRequest.getPrice());
 
     assertEquals(res.getDetails().getStart(), myEventDetails.getStart());
     assertEquals(res.getDetails().getEnd(), myEventDetails.getEnd());
