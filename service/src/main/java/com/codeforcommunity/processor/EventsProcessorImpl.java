@@ -230,7 +230,7 @@ public class EventsProcessorImpl implements IEventsProcessor {
                 EVENT_REGISTRATIONS.TICKET_QUANTITY)
             .from(EVENT_REGISTRATIONS)
             .join(CONTACTS)
-            .on(EVENT_REGISTRATIONS.USER_ID.eq(USERS.ID))
+            .on(EVENT_REGISTRATIONS.USER_ID.eq(CONTACTS.USER_ID))
             .where(EVENT_REGISTRATIONS.EVENT_ID.eq(eventId))
             .and(CONTACTS.IS_MAIN_CONTACT.isTrue())
             .fetchInto(Registration.class);

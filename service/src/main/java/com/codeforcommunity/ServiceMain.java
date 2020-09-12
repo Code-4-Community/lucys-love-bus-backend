@@ -9,6 +9,7 @@ import com.codeforcommunity.api.IRequestsProcessor;
 import com.codeforcommunity.auth.JWTAuthorizer;
 import com.codeforcommunity.auth.JWTCreator;
 import com.codeforcommunity.auth.JWTHandler;
+import com.codeforcommunity.logger.SLogger;
 import com.codeforcommunity.processor.AnnouncementsProcessorImpl;
 import com.codeforcommunity.processor.AuthProcessorImpl;
 import com.codeforcommunity.processor.CheckoutProcessorImpl;
@@ -18,6 +19,7 @@ import com.codeforcommunity.processor.RequestsProcessorImpl;
 import com.codeforcommunity.propertiesLoader.PropertiesLoader;
 import com.codeforcommunity.requester.Emailer;
 import com.codeforcommunity.rest.ApiRouter;
+import io.vertx.core.Vertx;
 import java.util.Properties;
 import org.jooq.DSLContext;
 import org.jooq.impl.DSL;
@@ -73,6 +75,13 @@ public class ServiceMain {
         new JWTHandler(PropertiesLoader.getJwtProperties().getProperty("secret_key"));
     JWTAuthorizer jwtAuthorizer = new JWTAuthorizer(jwtHandler);
     JWTCreator jwtCreator = new JWTCreator(jwtHandler);
+
+    String productName = "LLB";
+    Vertx vertx = Vertx.vertx();
+    SLogger.initializeLogger(vertx, productName);
+
+    // Log uncaught exceptions to Slack
+    vertx.exceptionHandler(SLogger::logApplicationError);
 
     Emailer emailer = new Emailer(this.db);
 

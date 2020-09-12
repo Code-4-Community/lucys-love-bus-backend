@@ -2,45 +2,32 @@ dist: xenial
 os: linux
 language: java
 services:
-- postgresql
+  - postgresql
+addons:
+  apt:
+    packages:
+      - python3
+      - python3-pip
 
 # This stage prepares the branch to be built and tested
 before_install:
-    # property configuration
-  - cd common/src/main/resources/properties/
-  - cp db.properties.example db.properties
-  - cp emailer.properties.example emailer.properties
-  - cp expiration.properties.example expiration.properties
-  - cp jwt.properties.example jwt.properties
-  - cp stripe.properties.example stripe.properties
-  - cp frontend.properties.example frontend.properties
-  - awk -F" = " -v updatedVal="= " '/database.password =/{$2=updatedVal}1' db.properties
-  - cd /home/travis/build/Code-4-Community/lucys-love-bus-backend/
+  # property configuration
+  - export DIR_PROP='common/src/main/resources/properties/'
+  - ./copy_properties.sh $DIR_PROP
 
-    # creates a local database which we use to run tests
+  # creates a local database which we use to run tests
   - psql -c 'create database "lucys-love-bus";' -U postgres
 
 # Default installation stage runs everything as below but without spotless:check
 # Tests are run as mvn test -B as part of the "script" stage
-install: mvn spotless:check install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
+install:
+  - python3 -m pip install requests
+  - mvn spotless:check install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
 
 # This stage reconfigures our property files for a production database, stripe, and emailer connection
 # It then builds a JAR which we zip with our Dockerfile and Elastic Beanstalk Config
 before_deploy:
-  - cd common/src/main/resources/properties/
-  - cp db.properties.example input.properties
-  - awk -F" = " -v updatedVal="= $DB_USERNAME" '/database.username =/{$2=updatedVal}1' input.properties > user.properties
-  - awk -F" = " -v updatedVal="= $DB_PASSWORD" '/database.password =/{$2=updatedVal}1' user.properties > pass.properties
-  - awk -F" = " -v updatedVal="= $DB_DOMAIN" '/database.url =/{$2=updatedVal}1' pass.properties > db.properties
-  - rm user.properties pass.properties input.properties
-  - cp stripe.properties input.properties
-  - awk -F" = " -v updatedVal="= $STRIPE_API_SECRET" '/stripe_api_secret_key =/{$2=updatedVal}1' input.properties > api.properties
-  - awk -F" = " -v updatedVal="= $STRIPE_WEBHOOK_SECRET" '/stripe_webhook_signing_secret =/{$2=updatedVal}1' api.properties > stripe.properties
-  - rm api.properties input.properties
-  - cp emailer.properties.example input.properties
-  - awk -F" = " -v updatedVal="= $GMAIL_APP_PASSWORD" '/sendPassword =/{$2=updatedVal}1' input.properties > on.properties
-  - awk -F" = " -v updatedVal="= true" '/shouldSendEmails =/{$2=updatedVal}1' on.properties > emailer.properties
-  - rm input.properties on.properties
+  - python3 ./deploy.py
   - cd /home/travis/build/Code-4-Community/lucys-love-bus-backend/
   - mvn clean spotless:check install
   - zip build.zip Dockerfile service/target/service-1.0-SNAPSHOT-jar-with-dependencies.jar .ebextensions/size.config
