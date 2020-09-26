@@ -1,8 +1,6 @@
 package com.codeforcommunity.dto.auth;
 
-/**
- * Representing the RefreshSessionResponse portion of the Auth DTO
- */
+/** Representing the RefreshSessionResponse portion of the Auth DTO */
 public class RefreshSessionResponse {
 
   private String freshAccessToken;

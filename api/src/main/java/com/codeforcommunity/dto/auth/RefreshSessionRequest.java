@@ -4,9 +4,7 @@ import com.codeforcommunity.api.ApiDto;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Representing the RefreshSessionRequest portion of the Auth DTO
- */
+/** Representing the RefreshSessionRequest portion of the Auth DTO */
 public class RefreshSessionRequest extends ApiDto {
 
   private String refreshToken;

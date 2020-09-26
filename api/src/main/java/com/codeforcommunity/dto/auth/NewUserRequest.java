@@ -4,9 +4,7 @@ import com.codeforcommunity.api.ApiDto;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Representing the NewUserRequest portion of the Auth DTO
- */
+/** Representing the NewUserRequest portion of the Auth DTO */
 public class NewUserRequest extends ApiDto {
 
   private String email;

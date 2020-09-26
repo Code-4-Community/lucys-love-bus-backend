@@ -4,9 +4,7 @@ import com.codeforcommunity.api.ApiDto;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Representing the LoginRequest portion of the Auth DTO
- */
+/** Representing the LoginRequest portion of the Auth DTO */
 public class LoginRequest extends ApiDto {
 
   private String email;

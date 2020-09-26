@@ -4,9 +4,7 @@ import com.codeforcommunity.api.ApiDto;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Representing the ForgotPasswordRequest portion of the Auth DTO
- */
+/** Representing the ForgotPasswordRequest portion of the Auth DTO */
 public class ForgotPasswordRequest extends ApiDto {
 
   private String email;

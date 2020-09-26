@@ -1,8 +1,6 @@
 package com.codeforcommunity.dto.auth;
 
-/**
- * Representing the SessionResponse portion of the Auth DTO
- */
+/** Representing the SessionResponse portion of the Auth DTO */
 public class SessionResponse {
 
   private String accessToken;

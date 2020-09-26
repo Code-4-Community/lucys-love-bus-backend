@@ -4,9 +4,7 @@ import com.codeforcommunity.api.ApiDto;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Representing the location (AddressData) portion of the Auth DTO
- */
+/** Representing the location (AddressData) portion of the Auth DTO */
 public class AddressData extends ApiDto {
 
   private String address;

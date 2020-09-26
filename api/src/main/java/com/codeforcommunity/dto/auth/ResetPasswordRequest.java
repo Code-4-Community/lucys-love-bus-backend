@@ -4,9 +4,7 @@ import com.codeforcommunity.api.ApiDto;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Representing the ResetPasswordRequest portion of the Auth DTO
- */
+/** Representing the ResetPasswordRequest portion of the Auth DTO */
 public class ResetPasswordRequest extends ApiDto {
 
   private String secretKey;
