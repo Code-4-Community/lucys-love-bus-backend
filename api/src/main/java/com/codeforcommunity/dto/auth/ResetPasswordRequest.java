@@ -4,6 +4,9 @@ import com.codeforcommunity.api.ApiDto;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Representing the ResetPasswordRequest portion of the Auth DTO
+ */
 public class ResetPasswordRequest extends ApiDto {
 
   private String secretKey;
@@ -16,18 +19,38 @@ public class ResetPasswordRequest extends ApiDto {
 
   private ResetPasswordRequest() {}
 
+  /**
+   * Retrieves the secretKey field.
+   *
+   * @return the String secretKey field.
+   */
   public String getSecretKey() {
     return secretKey;
   }
 
+  /**
+   * Sets this ResetPasswordRequest's secretKey field to the provided secretKey.
+   *
+   * @param secretKey the value to set this secretKey field to.
+   */
   public void setSecretKey(String secretKey) {
     this.secretKey = secretKey;
   }
 
+  /**
+   * Retrieves the newPassword field.
+   *
+   * @return the String newPassword field.
+   */
   public String getNewPassword() {
     return newPassword;
   }
 
+  /**
+   * Sets this ResetPasswordRequest's newPassword field to the provided newPassword.
+   *
+   * @param newPassword the value to set this newPassword field to.
+   */
   public void setNewPassword(String newPassword) {
     this.newPassword = newPassword;
   }
