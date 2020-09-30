@@ -17,6 +17,7 @@ public class GetAnnouncementsRequest {
   /**
    * Constructs a GetAnnouncementsRequest with the given start and end dates to get announcements
    * between, and the number of announcements to get.
+   *
    * @param startDate start date of announcements to get
    * @param endDate end date of announcements to get
    * @param count number of announcements to get
@@ -29,6 +30,7 @@ public class GetAnnouncementsRequest {
 
   /**
    * Gets the start date of announcements request stored in this object.
+   *
    * @return start date of announcements request
    */
   public Timestamp getStartDate() {
@@ -37,6 +39,7 @@ public class GetAnnouncementsRequest {
 
   /**
    * Gets the end date of announcements request stored in this object.
+   *
    * @return end date of announcements request
    */
   public Timestamp getEndDate() {
@@ -45,6 +48,7 @@ public class GetAnnouncementsRequest {
 
   /**
    * Gets the number of announcements requested stored in this object.
+   *
    * @return number of announcements requested
    */
   public Integer getCount() {

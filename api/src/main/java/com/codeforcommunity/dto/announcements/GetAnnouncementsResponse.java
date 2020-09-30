@@ -13,6 +13,7 @@ public class GetAnnouncementsResponse {
 
   /**
    * Constructs a GetAnnouncementsResponse object containing the given data as the response.
+   *
    * @param totalCount the total number of announcements contained in this response object
    * @param announcements the list of announcements contained in this response object
    */
@@ -23,6 +24,7 @@ public class GetAnnouncementsResponse {
 
   /**
    * Gets the total number of announcements in this response object.
+   *
    * @return total number of announcements in this response object
    */
   public int getTotalCount() {
@@ -31,6 +33,7 @@ public class GetAnnouncementsResponse {
 
   /**
    * Gets the list of announcements contained in this response object.
+   *
    * @return list of announcements in this response object
    */
   public List<Announcement> getAnnouncements() {

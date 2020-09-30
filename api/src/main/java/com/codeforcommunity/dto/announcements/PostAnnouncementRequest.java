@@ -5,8 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Represents an object containing the information for an announcement post request,
- * including the title and description of the announcement.
+ * Represents an object containing the information for an announcement post request, including the
+ * title and description of the announcement.
  */
 public class PostAnnouncementRequest extends ApiDto {
 
@@ -17,6 +17,7 @@ public class PostAnnouncementRequest extends ApiDto {
 
   /**
    * Constructs a PostAnnouncementRequest object with the given title and description.
+   *
    * @param title title of the post request object to be created
    * @param description description of the post request object to be created
    */
@@ -27,6 +28,7 @@ public class PostAnnouncementRequest extends ApiDto {
 
   /**
    * Gets the title of the announcement in this post request object.
+   *
    * @return title of the announcement in this post request object
    */
   public String getTitle() {
@@ -35,6 +37,7 @@ public class PostAnnouncementRequest extends ApiDto {
 
   /**
    * Gets the description of the announcement in this post request object.
+   *
    * @return description of the announcement in this post request object
    */
   public String getDescription() {

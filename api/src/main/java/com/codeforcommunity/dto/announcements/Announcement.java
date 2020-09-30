@@ -4,8 +4,8 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import java.sql.Timestamp;
 
 /**
- * Represents the data about an announcement, including announcement's id, title, description,
- * id of relevant event, and timestamp of when the announcement was created.
+ * Represents the data about an announcement, including announcement's id, title, description, id of
+ * relevant event, and timestamp of when the announcement was created.
  */
 public class Announcement {
 
@@ -21,6 +21,7 @@ public class Announcement {
 
   /**
    * Constructs an announcement with the given data.
+   *
    * @param id id of the announcement being created
    * @param title title of the announcement
    * @param description description of the announcement
@@ -38,6 +39,7 @@ public class Announcement {
 
   /**
    * Gets the id of this announcement.
+   *
    * @return id of this announcement
    */
   public int getId() {
@@ -46,6 +48,7 @@ public class Announcement {
 
   /**
    * Gets the title of this announcement.
+   *
    * @return title of this announcement
    */
   public String getTitle() {
@@ -54,6 +57,7 @@ public class Announcement {
 
   /**
    * Gets the description of this announcement.
+   *
    * @return description of this announcement
    */
   public String getDescription() {
@@ -62,6 +66,7 @@ public class Announcement {
 
   /**
    * Gets the timestamp of when this announcement was created.
+   *
    * @return timestamp of when this announcement was created
    */
   public Timestamp getCreated() {
@@ -70,6 +75,7 @@ public class Announcement {
 
   /**
    * Gets the id of the event this announcement is relevant to.
+   *
    * @return id of the event this announcement is relevant to
    */
   public Integer getEventId() {

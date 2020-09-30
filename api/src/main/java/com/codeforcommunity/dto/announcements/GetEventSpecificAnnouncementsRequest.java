@@ -13,6 +13,7 @@ public class GetEventSpecificAnnouncementsRequest {
   /**
    * Constructs a GetEventSpecificAnnouncementsRequest object, with the eventId of the relevant
    * event for which the announcements are being requested.
+   *
    * @param eventId id of the event for which the announcements are being requested
    */
   public GetEventSpecificAnnouncementsRequest(Integer eventId) {
@@ -21,6 +22,7 @@ public class GetEventSpecificAnnouncementsRequest {
 
   /**
    * Gets the eventId being stored in this request object.
+   *
    * @return the eventId being stored in this request object
    */
   public Integer getEventId() {
