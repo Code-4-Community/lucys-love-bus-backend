@@ -7,7 +7,7 @@ import java.util.List;
 /** */
 public class CreateCheckoutSessionData {
 
-  /** The currency units being used in all checkout/payment logic, stored as a string. */
+  /** The currency units to be used for stripe checkout session. */
   public static final String CURRENCY_UNITS = "usd";
 
   private List<LineItem> lineItems;

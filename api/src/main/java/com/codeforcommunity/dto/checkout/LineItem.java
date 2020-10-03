@@ -6,6 +6,7 @@ package com.codeforcommunity.dto.checkout;
  * tickets to be purchased.
  */
 public class LineItem {
+
   private String name;
   private String description;
   private Integer cents;
@@ -15,8 +16,9 @@ public class LineItem {
   private LineItem() {}
 
   /**
-   * Constructs a item (event tickets) to be purchased at checkout with the given event name,
-   * description, amount (price in cents), id, and the quantity of tickets being purchased.
+   * Constructs an item (event ticket/set of event tickets) to be purchased at checkout with the
+   * given event name, description, amount (price in cents), id, and the quantity of tickets being
+   * purchased.
    *
    * @param name event name
    * @param description event description
