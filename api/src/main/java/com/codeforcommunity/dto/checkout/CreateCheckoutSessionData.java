@@ -4,7 +4,6 @@ import com.stripe.param.checkout.SessionCreateParams;
 import java.util.ArrayList;
 import java.util.List;
 
-/** */
 public class CreateCheckoutSessionData {
 
   /** The currency units to be used for stripe checkout session. */
