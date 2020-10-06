@@ -19,6 +19,7 @@ public class ChangePasswordRequest extends ApiDto {
 
   /**
    * Gets the user's current password
+   *
    * @return the current String password
    */
   public String getCurrentPassword() {
@@ -36,6 +37,7 @@ public class ChangePasswordRequest extends ApiDto {
 
   /**
    * Gets the user's new password
+   *
    * @return the new String password
    */
   public String getNewPassword() {
