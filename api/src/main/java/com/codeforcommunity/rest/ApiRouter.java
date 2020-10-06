@@ -54,6 +54,8 @@ public class ApiRouter implements IRouter {
 
     router.mountSubRouter("/user", authRouter.initializeRouter(vertx));
     router.mountSubRouter("/webhooks", webhooksRouter.initializeRouter(vertx));
+    router.mountSubRouter("/events", eventsRouter.initializeRouter(vertx));
+    router.mountSubRouter("/announcements", announcementsRouter.initializeRouter(vertx));
     router.mountSubRouter("/protected", defineProtectedRoutes(vertx));
 
     return router;
@@ -68,8 +70,6 @@ public class ApiRouter implements IRouter {
 
     router.mountSubRouter("/user", protectedUserRouter.initializeRouter(vertx));
     router.mountSubRouter("/requests", requestRouter.initializeRouter(vertx));
-    router.mountSubRouter("/events", eventsRouter.initializeRouter(vertx));
-    router.mountSubRouter("/announcements", announcementsRouter.initializeRouter(vertx));
     router.mountSubRouter("/checkout", checkoutRouter.initializeRouter(vertx));
 
     return router;
