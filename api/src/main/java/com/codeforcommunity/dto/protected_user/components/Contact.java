@@ -6,9 +6,7 @@ import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Representation of a child's contact.
- */
+/** Representation of a child's contact. */
 // TODO: modify the Contact Javadoc based on schema updates
 public class Contact extends ApiDto {
 
@@ -30,13 +28,12 @@ public class Contact extends ApiDto {
   private String pronouns;
   private Boolean shouldSendEmails;
 
-  /**
-   * Creates a contact with no information (all fields null).
-   */
+  /** Creates a contact with no information (all fields null). */
   public Contact() {}
 
   /**
    * Creates a contact with the given information.
+   *
    * @param id this contact's unique ID
    * @param firstName this contact's first name
    * @param lastName this contact's last name
@@ -79,6 +76,7 @@ public class Contact extends ApiDto {
 
   /**
    * Verify this Contact is valid by validating each of its fields.
+   *
    * @param fieldPrefix A string to prefix each field with (for use if this is a sub-field). Should
    *     be of the form "OBJECT.".
    * @return a list of strings with each string indicating one field that is invalid
@@ -104,6 +102,7 @@ public class Contact extends ApiDto {
 
   /**
    * Returns this contact's ID.
+   *
    * @return this contact's ID
    */
   public Integer getId() {
@@ -112,6 +111,7 @@ public class Contact extends ApiDto {
 
   /**
    * Updates this contact's ID
+   *
    * @param id the new ID
    */
   public void setId(Integer id) {
@@ -120,6 +120,7 @@ public class Contact extends ApiDto {
 
   /**
    * Returns this contact's first name
+   *
    * @return this contact's first name
    */
   public String getFirstName() {
@@ -128,6 +129,7 @@ public class Contact extends ApiDto {
 
   /**
    * Updates this contact's first name
+   *
    * @param firstName the new first name
    */
   public void setFirstName(String firstName) {
@@ -136,6 +138,7 @@ public class Contact extends ApiDto {
 
   /**
    * Returns this contact's last name
+   *
    * @return this contact's last name
    */
   public String getLastName() {
@@ -144,6 +147,7 @@ public class Contact extends ApiDto {
 
   /**
    * Updates this contact's last name
+   *
    * @param lastName the new last name
    */
   public void setLastName(String lastName) {
@@ -152,6 +156,7 @@ public class Contact extends ApiDto {
 
   /**
    * Returns this contact's DOB
+   *
    * @return this contact's DOB
    */
   public Date getDateOfBirth() {
@@ -160,6 +165,7 @@ public class Contact extends ApiDto {
 
   /**
    * Updates this contact's DOB
+   *
    * @param dateOfBirth the new DOB
    */
   public void setDateOfBirth(Date dateOfBirth) {
@@ -168,6 +174,7 @@ public class Contact extends ApiDto {
 
   /**
    * Returns this contact's email
+   *
    * @return this contact's email
    */
   public String getEmail() {
@@ -176,6 +183,7 @@ public class Contact extends ApiDto {
 
   /**
    * Updates this contact's email
+   *
    * @param email the new email
    */
   public void setEmail(String email) {
@@ -184,6 +192,7 @@ public class Contact extends ApiDto {
 
   /**
    * Returns this contact's phone number
+   *
    * @return this contact's phone number
    */
   public String getPhoneNumber() {
@@ -192,6 +201,7 @@ public class Contact extends ApiDto {
 
   /**
    * Updates this contact's phone number
+   *
    * @param phoneNumber the new phone number
    */
   public void setPhoneNumber(String phoneNumber) {
@@ -200,6 +210,7 @@ public class Contact extends ApiDto {
 
   /**
    * Returns this contact's child's allergies
+   *
    * @return this contact's child's allergies
    */
   public String getAllergies() {
@@ -208,6 +219,7 @@ public class Contact extends ApiDto {
 
   /**
    * Updates this contact's child's allergies
+   *
    * @param allergies the new allergies
    */
   public void setAllergies(String allergies) {
@@ -216,6 +228,7 @@ public class Contact extends ApiDto {
 
   /**
    * Returns this contact's child's diagnosis
+   *
    * @return this contact's child's diagnosis
    */
   public String getDiagnosis() {
@@ -224,6 +237,7 @@ public class Contact extends ApiDto {
 
   /**
    * Updates this contact's child's diagnosis
+   *
    * @param diagnosis the new diagnosis
    */
   public void setDiagnosis(String diagnosis) {
@@ -232,6 +246,7 @@ public class Contact extends ApiDto {
 
   /**
    * Returns this contact's child's medications
+   *
    * @return this contact's child's medications
    */
   public String getMedications() {
@@ -240,6 +255,7 @@ public class Contact extends ApiDto {
 
   /**
    * Updates this contact's child's medications
+   *
    * @param medications the new medications
    */
   public void setMedications(String medications) {
@@ -248,6 +264,7 @@ public class Contact extends ApiDto {
 
   /**
    * Returns the notes about this contact's child
+   *
    * @return the notes about this contact's child
    */
   public String getNotes() {
@@ -256,6 +273,7 @@ public class Contact extends ApiDto {
 
   /**
    * Updates the notes about this contact's child
+   *
    * @param notes the new notes
    */
   public void setNotes(String notes) {
@@ -264,6 +282,7 @@ public class Contact extends ApiDto {
 
   /**
    * Returns this contact's pronouns
+   *
    * @return this contact's pronouns
    */
   public String getPronouns() {
@@ -272,6 +291,7 @@ public class Contact extends ApiDto {
 
   /**
    * Updates this contact's pronouns
+   *
    * @param pronouns the new pronouns
    */
   public void setPronouns(String pronouns) {
@@ -280,6 +300,7 @@ public class Contact extends ApiDto {
 
   /**
    * Returns whether this contact should receive emails
+   *
    * @return whether this contact should receive emails
    */
   public Boolean getShouldSendEmails() {
@@ -288,6 +309,7 @@ public class Contact extends ApiDto {
 
   /**
    * Update whether this contact should receive emails
+   *
    * @param shouldSendEmails boolean representing the above
    */
   public void setShouldSendEmails(Boolean shouldSendEmails) {

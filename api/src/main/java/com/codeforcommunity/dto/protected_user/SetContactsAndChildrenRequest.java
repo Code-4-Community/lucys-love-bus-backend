@@ -6,22 +6,19 @@ import com.codeforcommunity.dto.protected_user.components.Contact;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * A request to set the main and additional contacts of a group of children.
- */
+/** A request to set the main and additional contacts of a group of children. */
 public class SetContactsAndChildrenRequest extends ApiDto {
 
   private Contact mainContact;
   private List<Contact> additionalContacts;
   private List<Child> children;
 
-  /**
-   * Creates a SetContactsAndChildrenRequest with no information (all fields are null)
-   */
+  /** Creates a SetContactsAndChildrenRequest with no information (all fields are null) */
   public SetContactsAndChildrenRequest() {}
 
   /**
    * Creates a new SetContactsAndChildrenRequest with the given information
+   *
    * @param mainContact the main contact for the children
    * @param additionalContacts the list of additional contacts for the children
    * @param children the list of children
@@ -35,6 +32,7 @@ public class SetContactsAndChildrenRequest extends ApiDto {
 
   /**
    * Returns the main contact
+   *
    * @return the main contact
    */
   public Contact getMainContact() {
@@ -43,6 +41,7 @@ public class SetContactsAndChildrenRequest extends ApiDto {
 
   /**
    * Updates the main contact
+   *
    * @param mainContact the new main contact
    */
   public void setMainContact(Contact mainContact) {
@@ -51,6 +50,7 @@ public class SetContactsAndChildrenRequest extends ApiDto {
 
   /**
    * Returns the additional contacts
+   *
    * @return the additional contacts
    */
   public List<Contact> getAdditionalContacts() {
@@ -59,6 +59,7 @@ public class SetContactsAndChildrenRequest extends ApiDto {
 
   /**
    * Updates the additional contacts
+   *
    * @param additionalContacts the new additional contacts
    */
   public void setAdditionalContacts(List<Contact> additionalContacts) {
@@ -67,6 +68,7 @@ public class SetContactsAndChildrenRequest extends ApiDto {
 
   /**
    * Returns the list of children
+   *
    * @return the list of children
    */
   public List<Child> getChildren() {
@@ -75,6 +77,7 @@ public class SetContactsAndChildrenRequest extends ApiDto {
 
   /**
    * Updates the list of children
+   *
    * @param children the new list of children
    */
   public void setChildren(List<Child> children) {
@@ -84,6 +87,7 @@ public class SetContactsAndChildrenRequest extends ApiDto {
   /**
    * Verify this SetContactsAndChildrenRequest is valid by checking the validity of the main
    * contact, additional contacts and children.
+   *
    * @param fieldPrefix A string to prefix each field with (for use if this is a sub-field). Should
    *     be of the form "OBJECT.".
    * @return a list of strings with each string indicating one field that is invalid

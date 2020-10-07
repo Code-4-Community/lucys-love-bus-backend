@@ -6,9 +6,7 @@ import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Representation of a child in the LLB Program.
- */
+/** Representation of a child in the LLB Program. */
 public class Child extends ApiDto {
 
   /** Used on PUT requests, ignored on POST */
@@ -28,13 +26,12 @@ public class Child extends ApiDto {
   private String medications;
   private String notes;
 
-  /**
-   * Creates a child with no information (all fields set to null).
-   */
+  /** Creates a child with no information (all fields set to null). */
   public Child() {}
 
   /**
    * Creates a child with the given information.
+   *
    * @param id this child's unique ID
    * @param firstName this child's first name
    * @param lastName this child's last name
@@ -99,6 +96,7 @@ public class Child extends ApiDto {
 
   /**
    * Returns this child's ID
+   *
    * @return the above
    */
   public Integer getId() {
@@ -107,6 +105,7 @@ public class Child extends ApiDto {
 
   /**
    * Updates this child's ID
+   *
    * @param id the new ID number
    */
   public void setId(Integer id) {
@@ -115,6 +114,7 @@ public class Child extends ApiDto {
 
   /**
    * Returns this child's ID
+   *
    * @return the above
    */
   public String getFirstName() {
@@ -123,6 +123,7 @@ public class Child extends ApiDto {
 
   /**
    * Updates this child's first name
+   *
    * @param firstName the new first name
    */
   public void setFirstName(String firstName) {
@@ -131,6 +132,7 @@ public class Child extends ApiDto {
 
   /**
    * Gets this child's last name
+   *
    * @return the above
    */
   public String getLastName() {
@@ -139,6 +141,7 @@ public class Child extends ApiDto {
 
   /**
    * Updates this child's last name
+   *
    * @param lastName the new last name
    */
   public void setLastName(String lastName) {
@@ -147,6 +150,7 @@ public class Child extends ApiDto {
 
   /**
    * Returns this child's DOB
+   *
    * @return the above
    */
   public Date getDateOfBirth() {
@@ -155,6 +159,7 @@ public class Child extends ApiDto {
 
   /**
    * Updates this child's DOB
+   *
    * @param dateOfBirth the new DOB
    */
   public void setDateOfBirth(Date dateOfBirth) {
@@ -163,6 +168,7 @@ public class Child extends ApiDto {
 
   /**
    * Returns this child's pronouns
+   *
    * @return the above
    */
   public String getPronouns() {
@@ -171,6 +177,7 @@ public class Child extends ApiDto {
 
   /**
    * Updates this child's pronouns
+   *
    * @param pronouns the new pronouns
    */
   public void setPronouns(String pronouns) {
@@ -179,6 +186,7 @@ public class Child extends ApiDto {
 
   /**
    * Returns this child's school year
+   *
    * @return the above
    */
   public String getSchoolYear() {
@@ -187,6 +195,7 @@ public class Child extends ApiDto {
 
   /**
    * Updates this child's school year
+   *
    * @param schoolYear the new school year
    */
   public void setSchoolYear(String schoolYear) {
@@ -195,6 +204,7 @@ public class Child extends ApiDto {
 
   /**
    * Returns the name of this child's school
+   *
    * @return the above
    */
   public String getSchool() {
@@ -203,6 +213,7 @@ public class Child extends ApiDto {
 
   /**
    * Updates the name of this child's school
+   *
    * @param school the school's new name
    */
   public void setSchool(String school) {
@@ -211,6 +222,7 @@ public class Child extends ApiDto {
 
   /**
    * Returns this child's allergies
+   *
    * @return the above
    */
   public String getAllergies() {
@@ -219,6 +231,7 @@ public class Child extends ApiDto {
 
   /**
    * Updates this child's allergies
+   *
    * @param allergies the new allergies
    */
   public void setAllergies(String allergies) {
@@ -227,6 +240,7 @@ public class Child extends ApiDto {
 
   /**
    * Returns this child's diagnosis
+   *
    * @return the above
    */
   public String getDiagnosis() {
@@ -235,6 +249,7 @@ public class Child extends ApiDto {
 
   /**
    * Updates this child's diagnosis
+   *
    * @param diagnosis the new diagnosis
    */
   public void setDiagnosis(String diagnosis) {
@@ -243,6 +258,7 @@ public class Child extends ApiDto {
 
   /**
    * Returns this child's medications
+   *
    * @return the above
    */
   public String getMedications() {
@@ -251,6 +267,7 @@ public class Child extends ApiDto {
 
   /**
    * Updates this child's medications
+   *
    * @param medications the new medications
    */
   public void setMedications(String medications) {
@@ -259,6 +276,7 @@ public class Child extends ApiDto {
 
   /**
    * Returns the notes about this child
+   *
    * @return the above
    */
   public String getNotes() {
@@ -267,6 +285,7 @@ public class Child extends ApiDto {
 
   /**
    * Updates the notes about this child
+   *
    * @param notes the new notes
    */
   public void setNotes(String notes) {

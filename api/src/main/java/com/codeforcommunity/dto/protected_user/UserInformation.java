@@ -7,9 +7,7 @@ import com.codeforcommunity.dto.protected_user.components.Contact;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * A representation of a user's information.
- */
+/** A representation of a user's information. */
 // TODO: what kind of a user does this information belong to?
 public class UserInformation extends ApiDto {
 
@@ -20,6 +18,7 @@ public class UserInformation extends ApiDto {
 
   /**
    * Creates a new UserInformation object with the given fields.
+   *
    * @param mainContact the main contact
    * @param additionalContacts the list of additional contacts
    * @param children the list of children
@@ -36,13 +35,12 @@ public class UserInformation extends ApiDto {
     this.location = location;
   }
 
-  /**
-   * Creates a UserInformation with no information (all fields are null)
-   */
+  /** Creates a UserInformation with no information (all fields are null) */
   private UserInformation() {}
 
   /**
    * Returns the main contact
+   *
    * @return the main contact
    */
   public Contact getMainContact() {
@@ -51,6 +49,7 @@ public class UserInformation extends ApiDto {
 
   /**
    * Updates the main contact
+   *
    * @param mainContact the new main contact
    */
   public void setMainContact(Contact mainContact) {
@@ -59,6 +58,7 @@ public class UserInformation extends ApiDto {
 
   /**
    * Returns the list of additional contacts
+   *
    * @return the list of additional contacts
    */
   public List<Contact> getAdditionalContacts() {
@@ -67,6 +67,7 @@ public class UserInformation extends ApiDto {
 
   /**
    * Updates the list of additional contacts
+   *
    * @param additionalContacts the new list of additional contacts
    */
   public void setAdditionalContacts(List<Contact> additionalContacts) {
@@ -75,6 +76,7 @@ public class UserInformation extends ApiDto {
 
   /**
    * Returns the list of children
+   *
    * @return the list of children
    */
   public List<Child> getChildren() {
@@ -83,6 +85,7 @@ public class UserInformation extends ApiDto {
 
   /**
    * Updates the list of children
+   *
    * @param children the new list of children
    */
   public void setChildren(List<Child> children) {
@@ -91,6 +94,7 @@ public class UserInformation extends ApiDto {
 
   /**
    * Returns this user's location
+   *
    * @return this user's location
    */
   public AddressData getLocation() {
@@ -99,6 +103,7 @@ public class UserInformation extends ApiDto {
 
   /**
    * Updates this user's location
+   *
    * @param location the new location
    */
   public void setLocation(AddressData location) {
@@ -106,8 +111,9 @@ public class UserInformation extends ApiDto {
   }
 
   /**
-   * Verify this UserInformation is valid by checking the validity of the main
-   * contact, additional contacts and children.
+   * Verify this UserInformation is valid by checking the validity of the main contact, additional
+   * contacts and children.
+   *
    * @param fieldPrefix A string to prefix each field with (for use if this is a sub-field). Should
    *     be of the form "OBJECT.".
    * @return a list of strings with each string indicating one field that is invalid
