@@ -15,6 +15,7 @@ public class ApiRouter implements IRouter {
   private final EventsRouter eventsRouter;
   private final ProtectedEventsRouter protectedEventsRouter;
   private final AnnouncementsRouter announcementsRouter;
+  private final ProtectedAnnouncementsRouter protectedAnnouncementsRouter;
   private final CheckoutRouter checkoutRouter;
   private final WebhooksRouter webhooksRouter;
 
@@ -25,6 +26,7 @@ public class ApiRouter implements IRouter {
       IEventsProcessor eventsProcessor,
       IProtectedEventsProcessor protectedEventsProcessor,
       IAnnouncementsProcessor announcementEventsProcessor,
+      IProtectedAnnouncementsProcessor protectedAnnouncementsProcessor,
       ICheckoutProcessor checkoutProcessor,
       JWTAuthorizer jwtAuthorizer) {
 
@@ -35,6 +37,7 @@ public class ApiRouter implements IRouter {
     this.eventsRouter = new EventsRouter(eventsProcessor);
     this.protectedEventsRouter = new ProtectedEventsRouter(protectedEventsProcessor);
     this.announcementsRouter = new AnnouncementsRouter(announcementEventsProcessor);
+    this.protectedAnnouncementsRouter = new ProtectedAnnouncementsRouter(protectedAnnouncementsProcessor);
     this.checkoutRouter = new CheckoutRouter(checkoutProcessor);
     this.webhooksRouter = new WebhooksRouter(checkoutProcessor);
   }
@@ -60,6 +63,7 @@ public class ApiRouter implements IRouter {
     Router router = Router.router(vertx);
 
     router.mountSubRouter("/events", protectedEventsRouter.initializeRouter(vertx));
+    router.mountSubRouter("announcements", protectedAnnouncementsRouter.initializeRouter(vertx));
     router.mountSubRouter("/user", protectedUserRouter.initializeRouter(vertx));
     router.mountSubRouter("/requests", requestRouter.initializeRouter(vertx));
     router.mountSubRouter("/checkout", checkoutRouter.initializeRouter(vertx));
