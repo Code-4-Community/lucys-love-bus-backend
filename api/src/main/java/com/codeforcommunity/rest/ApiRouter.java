@@ -37,7 +37,8 @@ public class ApiRouter implements IRouter {
     this.eventsRouter = new EventsRouter(eventsProcessor);
     this.protectedEventsRouter = new ProtectedEventsRouter(protectedEventsProcessor);
     this.announcementsRouter = new AnnouncementsRouter(announcementEventsProcessor);
-    this.protectedAnnouncementsRouter = new ProtectedAnnouncementsRouter(protectedAnnouncementsProcessor);
+    this.protectedAnnouncementsRouter =
+        new ProtectedAnnouncementsRouter(protectedAnnouncementsProcessor);
     this.checkoutRouter = new CheckoutRouter(checkoutProcessor);
     this.webhooksRouter = new WebhooksRouter(checkoutProcessor);
   }

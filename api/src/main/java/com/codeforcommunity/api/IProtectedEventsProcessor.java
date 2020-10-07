@@ -10,14 +10,14 @@ import com.codeforcommunity.exceptions.S3FailedUploadException;
 
 public interface IProtectedEventsProcessor extends IEventsProcessor {
 
-    SingleEventResponse createEvent(CreateEventRequest request, JWTData userData)
-            throws BadRequestImageException, S3FailedUploadException;
+  SingleEventResponse createEvent(CreateEventRequest request, JWTData userData)
+      throws BadRequestImageException, S3FailedUploadException;
 
-    SingleEventResponse modifyEvent(int eventId, ModifyEventRequest request, JWTData userData);
+  SingleEventResponse modifyEvent(int eventId, ModifyEventRequest request, JWTData userData);
 
-    void deleteEvent(int eventId, JWTData userData);
+  void deleteEvent(int eventId, JWTData userData);
 
-    EventRegistrations getEventRegisteredUsers(int eventId, JWTData userData);
+  EventRegistrations getEventRegisteredUsers(int eventId, JWTData userData);
 
-    String getEventRSVPs(int eventId, JWTData userData);
+  String getEventRSVPs(int eventId, JWTData userData);
 }

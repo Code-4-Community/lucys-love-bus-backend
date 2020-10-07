@@ -1,17 +1,13 @@
 package com.codeforcommunity.rest.subrouter;
 
 import static com.codeforcommunity.rest.ApiRouter.end;
-import static com.codeforcommunity.rest.RestFunctions.getJsonBodyAsClass;
 import static com.codeforcommunity.rest.RestFunctions.getMultipleQueryParams;
 import static com.codeforcommunity.rest.RestFunctions.getOptionalQueryParam;
 import static com.codeforcommunity.rest.RestFunctions.getRequestParameterAsInt;
 
 import com.codeforcommunity.api.IEventsProcessor;
 import com.codeforcommunity.auth.JWTData;
-import com.codeforcommunity.dto.userEvents.requests.CreateEventRequest;
 import com.codeforcommunity.dto.userEvents.requests.GetUserEventsRequest;
-import com.codeforcommunity.dto.userEvents.requests.ModifyEventRequest;
-import com.codeforcommunity.dto.userEvents.responses.EventRegistrations;
 import com.codeforcommunity.dto.userEvents.responses.GetEventsResponse;
 import com.codeforcommunity.dto.userEvents.responses.SingleEventResponse;
 import com.codeforcommunity.rest.IRouter;

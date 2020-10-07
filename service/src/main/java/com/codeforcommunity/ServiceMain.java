@@ -5,15 +5,15 @@ import com.codeforcommunity.auth.JWTAuthorizer;
 import com.codeforcommunity.auth.JWTCreator;
 import com.codeforcommunity.auth.JWTHandler;
 import com.codeforcommunity.logger.SLogger;
-import com.codeforcommunity.processor.AuthProcessorImpl;
 import com.codeforcommunity.processor.AnnouncementsProcessorImpl;
-import com.codeforcommunity.processor.EventsProcessorImpl;
-import com.codeforcommunity.processor.ProtectedEventsProcessorImpl;
-import com.codeforcommunity.propertiesLoader.PropertiesLoader;
-import com.codeforcommunity.processor.RequestsProcessorImpl;
-import com.codeforcommunity.processor.ProtectedAnnouncementsProcessorImpl;
+import com.codeforcommunity.processor.AuthProcessorImpl;
 import com.codeforcommunity.processor.CheckoutProcessorImpl;
+import com.codeforcommunity.processor.EventsProcessorImpl;
+import com.codeforcommunity.processor.ProtectedAnnouncementsProcessorImpl;
+import com.codeforcommunity.processor.ProtectedEventsProcessorImpl;
 import com.codeforcommunity.processor.ProtectedUserProcessorImpl;
+import com.codeforcommunity.processor.RequestsProcessorImpl;
+import com.codeforcommunity.propertiesLoader.PropertiesLoader;
 import com.codeforcommunity.requester.Emailer;
 import com.codeforcommunity.rest.ApiRouter;
 import io.vertx.core.Vertx;
@@ -91,7 +91,7 @@ public class ServiceMain {
     IAnnouncementsProcessor announcementEventsProcessor =
         new AnnouncementsProcessorImpl(this.db, emailer);
     IProtectedAnnouncementsProcessor protectedAnnouncementsProcessor =
-            new ProtectedAnnouncementsProcessorImpl(this.db, emailer);
+        new ProtectedAnnouncementsProcessorImpl(this.db, emailer);
     ICheckoutProcessor checkoutProcessor = new CheckoutProcessorImpl(this.db, emailer);
 
     ApiRouter router =
