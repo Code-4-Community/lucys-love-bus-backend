@@ -42,35 +42,17 @@ import org.jooq.generated.tables.records.EventsRecord;
 
 public class EventsProcessorImpl implements IEventsProcessor {
 
-  private final DSLContext db;
-  private final EventDatabaseOperations eventDatabaseOperations;
+  protected final DSLContext db;
+  protected final EventDatabaseOperations eventDatabaseOperations;
 
   /** Hours after the start of an event that the event will still show on upcoming pages */
-  private final int registerLeniencyHours = 12;
+  protected final int registerLeniencyHours = 12;
   /** The number of days before an event a GP can register */
-  private final int daysGpCanRegister = 5;
+  protected final int daysGpCanRegister = 5;
 
   public EventsProcessorImpl(DSLContext db) {
     this.db = db;
     this.eventDatabaseOperations = new EventDatabaseOperations(db);
-  }
-
-  @Override
-  public SingleEventResponse createEvent(CreateEventRequest request, JWTData userData)
-      throws BadRequestImageException, S3FailedUploadException {
-    if (userData.getPrivilegeLevel() != PrivilegeLevel.ADMIN) {
-      throw new AdminOnlyRouteException();
-    }
-
-    String publicImageUrl =
-        S3Requester.validateUploadImageToS3LucyEvents(request.getTitle(), request.getThumbnail());
-    request.setThumbnail(
-        publicImageUrl); // Update the request to contain the URL for the DB and JSON response OR
-    // null if no image given
-
-    EventsRecord newEventRecord = eventRequestToRecord(request);
-    newEventRecord.store();
-    return eventPojoToResponse(newEventRecord.into(Events.class), userData);
   }
 
   @Override
@@ -161,175 +143,13 @@ public class EventsProcessorImpl implements IEventsProcessor {
         .fetchMap(EVENTS.ID, EVENT_REGISTRATIONS.TICKET_QUANTITY);
   }
 
-  @Override
-  public SingleEventResponse modifyEvent(
-      int eventId, ModifyEventRequest request, JWTData userData) {
-    if (userData.getPrivilegeLevel() != PrivilegeLevel.ADMIN) {
-      throw new AdminOnlyRouteException();
-    }
-    EventsRecord record = db.fetchOne(EVENTS, EVENTS.ID.eq(eventId));
-    if (request.getTitle() != null) {
-      record.setTitle(request.getTitle());
-    }
-    if (request.getSpotsAvailable() != null) {
-      int currentRegistered = eventDatabaseOperations.getSumRegistrationRequests(eventId);
-      if (currentRegistered > request.getSpotsAvailable()) {
-        throw new InvalidEventCapacityException(request.getSpotsAvailable(), currentRegistered);
-      }
-      record.setCapacity(request.getSpotsAvailable());
-    }
-    if (request.getThumbnail() != null) {
-      record.setThumbnail(request.getThumbnail());
-    }
-    if (request.getDetails() != null) {
-      EventDetails details = request.getDetails();
-      if (details.getDescription() != null) {
-        record.setDescription(details.getDescription());
-      }
-      if (details.getLocation() != null) {
-        record.setLocation(details.getLocation());
-      }
-      if (details.getStart() != null) {
-        record.setStartTime(details.getStart());
-      }
-      if (details.getEnd() != null) {
-        record.setEndTime(details.getEnd());
-      }
-    }
-    if (request.getPrice() != null) {
-      record.setPrice(request.getPrice());
-    }
-    record.store();
-
-    return getSingleEvent(eventId, userData);
-  }
-
-  @Override
-  public void deleteEvent(int eventId, JWTData userData) {
-    if (userData.getPrivilegeLevel() != PrivilegeLevel.ADMIN) {
-      throw new AdminOnlyRouteException();
-    }
-    db.delete(EVENTS).where(EVENTS.ID.eq(eventId)).execute();
-  }
-
-  @Override
-  public EventRegistrations getEventRegisteredUsers(int eventId, JWTData userData) {
-    if (userData.getPrivilegeLevel() != PrivilegeLevel.ADMIN) {
-      throw new AdminOnlyRouteException();
-    }
-
-    if (!db.fetchExists(EVENTS.where(EVENTS.ID.eq(eventId)))) {
-      throw new EventDoesNotExistException(eventId);
-    }
-
-    List<Registration> regs =
-        db.select(
-                CONTACTS.FIRST_NAME,
-                CONTACTS.LAST_NAME,
-                CONTACTS.EMAIL,
-                EVENT_REGISTRATIONS.TICKET_QUANTITY)
-            .from(EVENT_REGISTRATIONS)
-            .join(CONTACTS)
-            .on(EVENT_REGISTRATIONS.USER_ID.eq(CONTACTS.USER_ID))
-            .where(EVENT_REGISTRATIONS.EVENT_ID.eq(eventId))
-            .and(CONTACTS.IS_MAIN_CONTACT.isTrue())
-            .fetchInto(Registration.class);
-
-    return new EventRegistrations(regs);
-  }
-
-  /**
-   * Returns a String that contains the CSV data for the given event's RSVPs.
-   *
-   * @param eventId The event to get the RSVPs of.
-   * @param userData The user.
-   * @return The CSV of RSVPs.
-   */
-  @Override
-  public String getEventRSVPs(int eventId, JWTData userData) {
-    if (userData.getPrivilegeLevel() != PrivilegeLevel.ADMIN) {
-      throw new AdminOnlyRouteException();
-    }
-
-    if (!db.fetchExists(EVENTS.where(EVENTS.ID.eq(eventId)))) {
-      throw new EventDoesNotExistException(eventId);
-    }
-
-    List<RSVP> rsvpUsers =
-        db.select(
-                USERS.ID,
-                EVENT_REGISTRATIONS.TICKET_QUANTITY,
-                USERS.EMAIL,
-                USERS.PRIVILEGE_LEVEL,
-                USERS.ADDRESS,
-                USERS.CITY,
-                USERS.STATE,
-                USERS.ZIPCODE)
-            .from(EVENT_REGISTRATIONS)
-            .join(USERS)
-            .on(EVENT_REGISTRATIONS.USER_ID.eq(USERS.ID))
-            .where(EVENT_REGISTRATIONS.EVENT_ID.eq(eventId))
-            .fetchInto(RSVP.class);
-
-    List<RSVP> rsvpContacts =
-        db.select(
-                EVENT_REGISTRATIONS.USER_ID,
-                CONTACTS.EMAIL,
-                CONTACTS.FIRST_NAME,
-                CONTACTS.LAST_NAME,
-                CONTACTS.IS_MAIN_CONTACT,
-                CONTACTS.DATE_OF_BIRTH,
-                CONTACTS.PHONE_NUMBER,
-                CONTACTS.PRONOUNS,
-                CONTACTS.ALLERGIES,
-                CONTACTS.DIAGNOSIS,
-                CONTACTS.MEDICATIONS,
-                CONTACTS.NOTES)
-            .from(EVENT_REGISTRATIONS)
-            .join(CONTACTS)
-            .on(EVENT_REGISTRATIONS.USER_ID.eq(CONTACTS.USER_ID))
-            .where(EVENT_REGISTRATIONS.EVENT_ID.eq(eventId))
-            .fetchInto(RSVP.class);
-
-    List<RSVP> rsvpChildren =
-        db.select(
-                EVENT_REGISTRATIONS.USER_ID,
-                CHILDREN.FIRST_NAME,
-                CHILDREN.LAST_NAME,
-                CHILDREN.DATE_OF_BIRTH,
-                CHILDREN.PRONOUNS,
-                CHILDREN.ALLERGIES,
-                CHILDREN.DIAGNOSIS,
-                CHILDREN.MEDICATIONS,
-                CHILDREN.NOTES,
-                CHILDREN.SCHOOL_YEAR,
-                CHILDREN.SCHOOL)
-            .from(EVENT_REGISTRATIONS)
-            .join(CHILDREN)
-            .on(EVENT_REGISTRATIONS.USER_ID.eq(CHILDREN.USER_ID))
-            .where(EVENT_REGISTRATIONS.EVENT_ID.eq(eventId))
-            .fetchInto(RSVP.class);
-
-    rsvpUsers.addAll(rsvpContacts);
-    rsvpUsers.addAll(rsvpChildren);
-    rsvpUsers.sort(Comparator.comparing(RSVP::getUserId));
-
-    StringBuilder builder = new StringBuilder();
-    builder.append(RSVP.toHeaderCSV());
-    for (RSVP rsvp : rsvpUsers) {
-      builder.append(rsvp.toRowCSV());
-    }
-
-    return builder.toString();
-  }
-
   /**
    * Turns a list of jOOq Events DTO into one of our Event DTO.
    *
    * @param events jOOq data objects.
    * @return List of our Event data object.
    */
-  private List<SingleEventResponse> listOfEventsToListOfSingleEventResponse(
+  protected List<SingleEventResponse> listOfEventsToListOfSingleEventResponse(
       List<Events> events, JWTData userData) {
     Map<Integer, Integer> ticketCounts = getTicketCounts(events, userData.getUserId());
     return events.stream()
@@ -356,7 +176,7 @@ public class EventsProcessorImpl implements IEventsProcessor {
   }
 
   /** Takes a database representation of a single event and returns the dto representation. */
-  private SingleEventResponse eventPojoToResponse(Events event, JWTData userData) {
+  protected SingleEventResponse eventPojoToResponse(Events event, JWTData userData) {
     int ticketsBought =
         getTicketCounts(Arrays.asList(event), userData.getUserId()).getOrDefault(event.getId(), 0);
 
@@ -375,8 +195,25 @@ public class EventsProcessorImpl implements IEventsProcessor {
         event.getPrice());
   }
 
+  /**
+   * Returns true if the given user is qualified for the event.
+   *
+   * <p>No user can register for an event that has already ended - GP users can only register for
+   * events in the next 5 days
+   */
+  protected boolean canUserRegister(Events event, JWTData userData) {
+    if (event.getEndTime().before(Timestamp.from(Instant.now()))) {
+      return false;
+    }
+    if (userData.getPrivilegeLevel().equals(PrivilegeLevel.GP)) {
+      Timestamp fiveDays = Timestamp.from(Instant.now().plus(daysGpCanRegister, ChronoUnit.DAYS));
+      return event.getStartTime().before(fiveDays);
+    }
+    return true;
+  }
+
   /** Takes a dto representation of an event and returns the database record representation. */
-  private EventsRecord eventRequestToRecord(CreateEventRequest request) {
+  protected EventsRecord eventRequestToRecord(CreateEventRequest request) {
     EventsRecord newRecord = db.newRecord(EVENTS);
     newRecord.setTitle(request.getTitle());
     newRecord.setDescription(request.getDetails().getDescription());
@@ -387,22 +224,5 @@ public class EventsProcessorImpl implements IEventsProcessor {
     newRecord.setEndTime(request.getDetails().getEnd());
     newRecord.setPrice(request.getPrice());
     return newRecord;
-  }
-
-  /**
-   * Returns true if the given user is qualified for the event.
-   *
-   * <p>No user can register for an event that has already ended - GP users can only register for
-   * events in the next 5 days
-   */
-  private boolean canUserRegister(Events event, JWTData userData) {
-    if (event.getEndTime().before(Timestamp.from(Instant.now()))) {
-      return false;
-    }
-    if (userData.getPrivilegeLevel().equals(PrivilegeLevel.GP)) {
-      Timestamp fiveDays = Timestamp.from(Instant.now().plus(daysGpCanRegister, ChronoUnit.DAYS));
-      return event.getStartTime().before(fiveDays);
-    }
-    return true;
   }
 }

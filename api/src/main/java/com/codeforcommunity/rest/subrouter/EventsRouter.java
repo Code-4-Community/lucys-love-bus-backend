@@ -36,22 +36,12 @@ public class EventsRouter implements IRouter {
   public Router initializeRouter(Vertx vertx) {
     Router router = Router.router(vertx);
 
-    registerCreateEvent(router);
     registerGetEvents(router);
     registerGetUserEventsQualified(router);
     registerGetUserEventsSignedUp(router);
     registerGetSingleEvent(router);
-    registerModifyEvent(router);
-    registerDeleteEvent(router);
-    registerGetEventRegisteredUsers(router);
-    registerGetEventRSVPs(router);
 
     return router;
-  }
-
-  private void registerCreateEvent(Router router) {
-    Route createRequestRoute = router.post("/");
-    createRequestRoute.handler(this::handleCreateEventRoute);
   }
 
   private void registerGetSingleEvent(Router router) {
@@ -72,26 +62,6 @@ public class EventsRouter implements IRouter {
   private void registerGetEvents(Router router) {
     Route getEvent = router.get("/");
     getEvent.handler(this::handleGetEvents);
-  }
-
-  private void registerModifyEvent(Router router) {
-    Route modifyEventRoute = router.put("/:event_id");
-    modifyEventRoute.handler(this::handleModifyEventRoute);
-  }
-
-  private void registerDeleteEvent(Router router) {
-    Route deleteEventRoute = router.delete("/:event_id");
-    deleteEventRoute.handler(this::handleDeleteEventRoute);
-  }
-
-  private void registerGetEventRegisteredUsers(Router router) {
-    Route getUsersSignedUpEventRoute = router.get("/:event_id/registrations");
-    getUsersSignedUpEventRoute.handler(this::handleGetEventRegisteredUsers);
-  }
-
-  private void registerGetEventRSVPs(Router router) {
-    Route getUsersSignedUpEventRoute = router.get("/:event_id/rsvps");
-    getUsersSignedUpEventRoute.handler(this::handleGetEventRSVPs);
   }
 
   private void handleGetEvents(RoutingContext ctx) {
@@ -125,15 +95,6 @@ public class EventsRouter implements IRouter {
     end(ctx.response(), 200, JsonObject.mapFrom(response).encode());
   }
 
-  private void handleCreateEventRoute(RoutingContext ctx) {
-    CreateEventRequest requestData = getJsonBodyAsClass(ctx, CreateEventRequest.class);
-    JWTData userData = ctx.get("jwt_data");
-
-    SingleEventResponse response = processor.createEvent(requestData, userData);
-
-    end(ctx.response(), 200, JsonObject.mapFrom(response).encode());
-  }
-
   private void handleGetSingleEventRoute(RoutingContext ctx) {
     int eventId = getRequestParameterAsInt(ctx.request(), "event_id");
     JWTData userData = ctx.get("jwt_data");
@@ -141,38 +102,5 @@ public class EventsRouter implements IRouter {
     SingleEventResponse response = processor.getSingleEvent(eventId, userData);
 
     end(ctx.response(), 200, JsonObject.mapFrom(response).encode());
-  }
-
-  private void handleModifyEventRoute(RoutingContext ctx) {
-    int eventId = getRequestParameterAsInt(ctx.request(), "event_id");
-    ModifyEventRequest requestData = getJsonBodyAsClass(ctx, ModifyEventRequest.class);
-    JWTData userData = ctx.get("jwt_data");
-
-    SingleEventResponse response = processor.modifyEvent(eventId, requestData, userData);
-    end(ctx.response(), 200, JsonObject.mapFrom(response).encode());
-  }
-
-  private void handleDeleteEventRoute(RoutingContext ctx) {
-    int eventId = getRequestParameterAsInt(ctx.request(), "event_id");
-    JWTData userData = ctx.get("jwt_data");
-
-    processor.deleteEvent(eventId, userData);
-    end(ctx.response(), 200);
-  }
-
-  private void handleGetEventRegisteredUsers(RoutingContext ctx) {
-    int eventId = getRequestParameterAsInt(ctx.request(), "event_id");
-    JWTData userData = ctx.get("jwt_data");
-
-    EventRegistrations regs = processor.getEventRegisteredUsers(eventId, userData);
-    end(ctx.response(), 200, JsonObject.mapFrom(regs).encode());
-  }
-
-  private void handleGetEventRSVPs(RoutingContext ctx) {
-    int eventId = getRequestParameterAsInt(ctx.request(), "event_id");
-    JWTData userData = ctx.get("jwt_data");
-
-    String rsvp = processor.getEventRSVPs(eventId, userData);
-    end(ctx.response(), 200, rsvp, "text/csv");
   }
 }

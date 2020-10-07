@@ -1,0 +1,23 @@
+package com.codeforcommunity.api;
+
+import com.codeforcommunity.auth.JWTData;
+import com.codeforcommunity.dto.userEvents.requests.CreateEventRequest;
+import com.codeforcommunity.dto.userEvents.requests.ModifyEventRequest;
+import com.codeforcommunity.dto.userEvents.responses.EventRegistrations;
+import com.codeforcommunity.dto.userEvents.responses.SingleEventResponse;
+import com.codeforcommunity.exceptions.BadRequestImageException;
+import com.codeforcommunity.exceptions.S3FailedUploadException;
+
+public interface IProtectedEventsProcessor extends IEventsProcessor {
+
+    SingleEventResponse createEvent(CreateEventRequest request, JWTData userData)
+            throws BadRequestImageException, S3FailedUploadException;
+
+    SingleEventResponse modifyEvent(int eventId, ModifyEventRequest request, JWTData userData);
+
+    void deleteEvent(int eventId, JWTData userData);
+
+    EventRegistrations getEventRegisteredUsers(int eventId, JWTData userData);
+
+    String getEventRSVPs(int eventId, JWTData userData);
+}
