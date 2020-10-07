@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+/** A class to represent the details of an event. */
 public class EventDetails extends ApiDto {
   private String description;
   private String location;
@@ -22,34 +23,74 @@ public class EventDetails extends ApiDto {
 
   private EventDetails() {}
 
+  /**
+   * Gets the event description.
+   *
+   * @return the event description
+   */
   public String getDescription() {
     return description;
   }
 
+  /**
+   * Sets the given description as the description of the event
+   *
+   * @param description the description to be set
+   */
   public void setDescription(String description) {
     this.description = description;
   }
 
+  /**
+   * Gets the location of the event.
+   *
+   * @return the location of the event
+   */
   public String getLocation() {
     return location;
   }
 
+  /**
+   * Sets the given location as the location of the event.
+   *
+   * @param location the location to be set
+   */
   public void setLocation(String location) {
     this.location = location;
   }
 
+  /**
+   * Gets the start time of the event.
+   *
+   * @return the start time
+   */
   public Timestamp getStart() {
     return start;
   }
 
+  /**
+   * Sets the start time of the event.
+   *
+   * @param start the start time
+   */
   public void setStart(Timestamp start) {
     this.start = start;
   }
 
+  /**
+   * Gets the end time of the event.
+   *
+   * @return the end time
+   */
   public Timestamp getEnd() {
     return end;
   }
 
+  /**
+   * Sets the end time of the event.
+   *
+   * @param end the end time
+   */
   public void setEnd(Timestamp end) {
     this.end = end;
   }

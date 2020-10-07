@@ -1,8 +1,8 @@
 package com.codeforcommunity.processor;
 
-import static org.jooq.generated.Tables.CONTACTS;
 import static org.jooq.generated.Tables.PF_REQUESTS;
 import static org.jooq.generated.Tables.USERS;
+import static org.jooq.generatedmvn.Tables.CONTACTS;
 
 import com.codeforcommunity.api.IRequestsProcessor;
 import com.codeforcommunity.auth.JWTData;

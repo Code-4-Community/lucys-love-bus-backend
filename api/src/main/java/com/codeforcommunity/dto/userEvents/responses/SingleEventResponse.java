@@ -2,6 +2,7 @@ package com.codeforcommunity.dto.userEvents.responses;
 
 import com.codeforcommunity.dto.userEvents.components.EventDetails;
 
+/** A class to represent the response to a single event */
 public class SingleEventResponse {
   private int id;
   private String title;
@@ -36,38 +37,83 @@ public class SingleEventResponse {
 
   private SingleEventResponse() {}
 
+  /**
+   * Gets the id of the event
+   *
+   * @return the id
+   */
   public int getId() {
     return id;
   }
 
+  /**
+   * Gets the title of the event
+   *
+   * @return the title
+   */
   public String getTitle() {
     return title;
   }
 
+  /**
+   * Gets the spots available at the event.
+   *
+   * @return the number of available spots
+   */
   public int getSpotsAvailable() {
     return spotsAvailable;
   }
 
+  /**
+   * Gets the event capacity.
+   *
+   * @return the capacity
+   */
   public int getCapacity() {
     return capacity;
   }
 
+  /**
+   * Gets the event thumbnail.
+   *
+   * @return the thumbnail
+   */
   public String getThumbnail() {
     return thumbnail;
   }
 
+  /**
+   * Gets the event details.
+   *
+   * @return the details
+   */
   public EventDetails getDetails() {
     return details;
   }
 
+  /**
+   * Gets the ticket count of the event.
+   *
+   * @return the count
+   */
   public int getTicketCount() {
     return ticketCount;
   }
 
+  /**
+   * Get whether the event is open for registration.
+   *
+   * @return if you can register or not
+   */
   public boolean isCanRegister() {
     return canRegister;
   }
 
+  /**
+   * Gets the price of the event.
+   *
+   * @return the price s
+   */
   public int getPrice() {
     return price;
   }

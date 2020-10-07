@@ -5,6 +5,7 @@ import com.codeforcommunity.dto.userEvents.components.EventDetails;
 import java.util.ArrayList;
 import java.util.List;
 
+/** A class to create an event request */
 public class CreateEventRequest extends ApiDto {
   private String title;
   private Integer spotsAvailable;
@@ -23,26 +24,56 @@ public class CreateEventRequest extends ApiDto {
 
   private CreateEventRequest() {}
 
+  /**
+   * Sets the thumbnail to be the given thumbnail
+   *
+   * @param thumbnail the thumbnail
+   */
   public void setThumbnail(String thumbnail) {
     this.thumbnail = thumbnail;
   }
 
+  /**
+   * Gets the title of the event request
+   *
+   * @return the title
+   */
   public String getTitle() {
     return title;
   }
 
+  /**
+   * Gets the number of spots available at the event
+   *
+   * @return the number of spots available
+   */
   public int getSpotsAvailable() {
     return spotsAvailable;
   }
 
+  /**
+   * Gets the current thumbnail for the event request
+   *
+   * @return the thumbnail
+   */
   public String getThumbnail() {
     return thumbnail;
   }
 
+  /**
+   * Gets the details of the event
+   *
+   * @return the details
+   */
   public EventDetails getDetails() {
     return details;
   }
 
+  /**
+   * Gets the price of the event
+   *
+   * @return the prices
+   */
   public int getPrice() {
     return price;
   }
