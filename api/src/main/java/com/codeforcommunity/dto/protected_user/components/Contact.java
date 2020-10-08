@@ -6,8 +6,7 @@ import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
 
-/** Representation of a child's contact. */
-// TODO: modify the Contact Javadoc based on schema updates
+/** Representation of a  contact. */
 public class Contact extends ApiDto {
 
   /** Used on PUT requests, ignored on POST */
@@ -40,10 +39,10 @@ public class Contact extends ApiDto {
    * @param dateOfBirth this contact's DOB
    * @param email this contact's email
    * @param phoneNumber this contact's phone number
-   * @param allergies this contact's child's allergies
-   * @param diagnosis this contact's child's diagnosis
-   * @param medication this contact's child's medications
-   * @param notes notes about this contact's child
+   * @param allergies this contact's allergies
+   * @param diagnosis this contact's diagnosis
+   * @param medication this contact's medications
+   * @param notes notes about this contact's
    * @param pronouns this contact's pronouns
    * @param shouldSendEmails boolean for if contact wants to be sent emails
    */
@@ -209,16 +208,16 @@ public class Contact extends ApiDto {
   }
 
   /**
-   * Returns this contact's child's allergies
+   * Returns this contact's allergies
    *
-   * @return this contact's child's allergies
+   * @return this contact's allergies
    */
   public String getAllergies() {
     return allergies;
   }
 
   /**
-   * Updates this contact's child's allergies
+   * Updates this contact's allergies
    *
    * @param allergies the new allergies
    */
@@ -227,16 +226,16 @@ public class Contact extends ApiDto {
   }
 
   /**
-   * Returns this contact's child's diagnosis
+   * Returns this contact's diagnosis
    *
-   * @return this contact's child's diagnosis
+   * @return this contact's diagnosis
    */
   public String getDiagnosis() {
     return diagnosis;
   }
 
   /**
-   * Updates this contact's child's diagnosis
+   * Updates this contact's diagnosis
    *
    * @param diagnosis the new diagnosis
    */
@@ -245,16 +244,16 @@ public class Contact extends ApiDto {
   }
 
   /**
-   * Returns this contact's child's medications
+   * Returns this contact's medications
    *
-   * @return this contact's child's medications
+   * @return this contact's medications
    */
   public String getMedications() {
     return medications;
   }
 
   /**
-   * Updates this contact's child's medications
+   * Updates this contact's medications
    *
    * @param medications the new medications
    */
@@ -263,16 +262,16 @@ public class Contact extends ApiDto {
   }
 
   /**
-   * Returns the notes about this contact's child
+   * Returns the notes about this contact
    *
-   * @return the notes about this contact's child
+   * @return the notes about this contact
    */
   public String getNotes() {
     return notes;
   }
 
   /**
-   * Updates the notes about this contact's child
+   * Updates the notes about this contact
    *
    * @param notes the new notes
    */

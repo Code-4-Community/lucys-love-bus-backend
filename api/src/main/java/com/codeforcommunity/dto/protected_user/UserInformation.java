@@ -7,8 +7,7 @@ import com.codeforcommunity.dto.protected_user.components.Contact;
 import java.util.ArrayList;
 import java.util.List;
 
-/** A representation of a user's information. */
-// TODO: what kind of a user does this information belong to?
+/** A representation of an account creator's (family representative) information. */
 public class UserInformation extends ApiDto {
 
   private Contact mainContact;
