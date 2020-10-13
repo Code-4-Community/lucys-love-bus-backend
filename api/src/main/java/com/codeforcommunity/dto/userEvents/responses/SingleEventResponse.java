@@ -35,13 +35,13 @@ public class SingleEventResponse {
   }
 
   public SingleEventResponse(
-          int id,
-          String title,
-          int spotsAvailable,
-          int capacity,
-          String thumbnail,
-          EventDetails details,
-          int price) {
+      int id,
+      String title,
+      int spotsAvailable,
+      int capacity,
+      String thumbnail,
+      EventDetails details,
+      int price) {
     this.id = id;
     this.title = title;
     this.spotsAvailable = spotsAvailable;

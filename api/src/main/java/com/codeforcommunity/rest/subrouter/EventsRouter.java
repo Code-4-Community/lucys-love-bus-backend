@@ -2,7 +2,6 @@ package com.codeforcommunity.rest.subrouter;
 
 import static com.codeforcommunity.rest.ApiRouter.end;
 import static com.codeforcommunity.rest.RestFunctions.getJsonBodyAsClass;
-import static com.codeforcommunity.rest.RestFunctions.getMultipleQueryParams;
 import static com.codeforcommunity.rest.RestFunctions.getOptionalQueryParam;
 import static com.codeforcommunity.rest.RestFunctions.getRequestParameterAsInt;
 
@@ -21,7 +20,6 @@ import io.vertx.ext.web.Route;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import java.sql.Timestamp;
-import java.util.List;
 import java.util.Optional;
 
 public class EventsRouter implements IRouter {
