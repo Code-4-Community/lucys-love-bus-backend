@@ -1,21 +1,11 @@
 package com.codeforcommunity;
 
-import com.codeforcommunity.api.IAnnouncementsProcessor;
-import com.codeforcommunity.api.IAuthProcessor;
-import com.codeforcommunity.api.ICheckoutProcessor;
-import com.codeforcommunity.api.IEventsProcessor;
-import com.codeforcommunity.api.IProtectedUserProcessor;
-import com.codeforcommunity.api.IRequestsProcessor;
+import com.codeforcommunity.api.*;
 import com.codeforcommunity.auth.JWTAuthorizer;
 import com.codeforcommunity.auth.JWTCreator;
 import com.codeforcommunity.auth.JWTHandler;
 import com.codeforcommunity.logger.SLogger;
-import com.codeforcommunity.processor.AnnouncementsProcessorImpl;
-import com.codeforcommunity.processor.AuthProcessorImpl;
-import com.codeforcommunity.processor.CheckoutProcessorImpl;
-import com.codeforcommunity.processor.EventsProcessorImpl;
-import com.codeforcommunity.processor.ProtectedUserProcessorImpl;
-import com.codeforcommunity.processor.RequestsProcessorImpl;
+import com.codeforcommunity.processor.*;
 import com.codeforcommunity.propertiesLoader.PropertiesLoader;
 import com.codeforcommunity.requester.Emailer;
 import com.codeforcommunity.rest.ApiRouter;
@@ -90,6 +80,7 @@ public class ServiceMain {
         new ProtectedUserProcessorImpl(this.db, emailer);
     IRequestsProcessor requestsProcessor = new RequestsProcessorImpl(this.db, emailer);
     IEventsProcessor eventsProcessor = new EventsProcessorImpl(this.db);
+    IPublicEventsProcessor publicEventsProcessor = new PublicEventsProcessorImpl(this.db);
     IAnnouncementsProcessor announcementEventsProcessor =
         new AnnouncementsProcessorImpl(this.db, emailer);
     ICheckoutProcessor checkoutProcessor = new CheckoutProcessorImpl(this.db, emailer);
@@ -100,6 +91,7 @@ public class ServiceMain {
             protectedUserProcessor,
             requestsProcessor,
             eventsProcessor,
+            publicEventsProcessor,
             announcementEventsProcessor,
             checkoutProcessor,
             jwtAuthorizer);
