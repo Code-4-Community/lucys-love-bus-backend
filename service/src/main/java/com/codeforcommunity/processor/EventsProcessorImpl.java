@@ -85,12 +85,6 @@ public class EventsProcessorImpl implements IEventsProcessor {
   }
 
   @Override
-  public GetEventsResponse getEvents(List<Integer> eventIds, JWTData userData) {
-    List<Events> e = db.selectFrom(EVENTS).where(EVENTS.ID.in(eventIds)).fetchInto(Events.class);
-    return new GetEventsResponse(listOfEventsToListOfSingleEventResponse(e, userData), e.size());
-  }
-
-  @Override
   public GetEventsResponse getEventsSignedUp(GetUserEventsRequest request, JWTData userData) {
 
     SelectConditionStep<Record> q =

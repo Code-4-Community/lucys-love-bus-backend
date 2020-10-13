@@ -34,6 +34,23 @@ public class SingleEventResponse {
     this.price = price;
   }
 
+  public SingleEventResponse(
+          int id,
+          String title,
+          int spotsAvailable,
+          int capacity,
+          String thumbnail,
+          EventDetails details,
+          int price) {
+    this.id = id;
+    this.title = title;
+    this.spotsAvailable = spotsAvailable;
+    this.capacity = capacity;
+    this.thumbnail = thumbnail;
+    this.details = details;
+    this.price = price;
+  }
+
   private SingleEventResponse() {}
 
   public int getId() {

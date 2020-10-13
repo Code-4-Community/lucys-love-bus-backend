@@ -37,7 +37,6 @@ public class EventsRouter implements IRouter {
     Router router = Router.router(vertx);
 
     registerCreateEvent(router);
-    registerGetEvents(router);
     registerGetUserEventsQualified(router);
     registerGetUserEventsSignedUp(router);
     registerGetSingleEvent(router);
@@ -69,11 +68,6 @@ public class EventsRouter implements IRouter {
     getUserEventQualified.handler(this::handleGetUserEventsQualified);
   }
 
-  private void registerGetEvents(Router router) {
-    Route getEvent = router.get("/");
-    getEvent.handler(this::handleGetEvents);
-  }
-
   private void registerModifyEvent(Router router) {
     Route modifyEventRoute = router.put("/:event_id");
     modifyEventRoute.handler(this::handleModifyEventRoute);
@@ -92,16 +86,6 @@ public class EventsRouter implements IRouter {
   private void registerGetEventRSVPs(Router router) {
     Route getUsersSignedUpEventRoute = router.get("/:event_id/rsvps");
     getUsersSignedUpEventRoute.handler(this::handleGetEventRSVPs);
-  }
-
-  private void handleGetEvents(RoutingContext ctx) {
-
-    List<Integer> intIds = getMultipleQueryParams(ctx, "ids", str -> Integer.parseInt(str));
-    JWTData userData = ctx.get("jwt_data");
-
-    GetEventsResponse response = processor.getEvents(intIds, userData);
-
-    end(ctx.response(), 200, JsonObject.mapFrom(response).encode());
   }
 
   private void handleGetUserEventsQualified(RoutingContext ctx) {
