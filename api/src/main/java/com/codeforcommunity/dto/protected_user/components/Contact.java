@@ -6,7 +6,7 @@ import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
 
-/** Representation of a  contact. */
+/** Representation of a contact. */
 public class Contact extends ApiDto {
 
   /** Used on PUT requests, ignored on POST */
