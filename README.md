@@ -6,6 +6,21 @@ This project is the Java backend api scaffold for lucys-love-bus.
 
 [![Coverage Status](https://coveralls.io/repos/github/Code-4-Community/lucys-love-bus-backend/badge.svg?branch=master)](https://coveralls.io/github/Code-4-Community/lucys-love-bus-backend?branch=master)
 
+### Commands
+
+#### `mvn clean install`
+Installs all maven packages, builds and compiles the backend, sets up the database, initalizes JOOQ classes, and runs tests.
+
+#### `mvn spotless:apply`
+Formatting and linting. Required by our integration testing.
+
+### Install
+
+[Comprehensive Install Documentation](https://docs.c4cneu.com/getting-started/setup-local-dev/)
+
+#### Install Java 8 & Maven
+Download Java 8 JDK from Oracle, and Maven. Make sure you're on the correct Java version before running `mvn`.
+
 
 #### Start a local postgres database
 1. Download postgres with pgAdmin4. https://www.postgresql.org/download/
