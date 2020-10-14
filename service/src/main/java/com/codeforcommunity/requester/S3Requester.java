@@ -10,12 +10,20 @@ import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.codeforcommunity.aws.EncodedImage;
 import com.codeforcommunity.exceptions.BadRequestImageException;
 import com.codeforcommunity.exceptions.S3FailedUploadException;
+import com.codeforcommunity.propertiesLoader.PropertiesLoader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Base64;
+import java.util.Properties;
 
 public class S3Requester {
+  private static final String BUCKET_PUBLIC_URL;
+  private static final String BUCKET_PUBLIC;
+  private static final String DIR_PUBLIC;
+
+  private static final AmazonS3 s3Client;
+
   // for testing purposes so we can mock this
   public static class Externs {
     private static final AmazonS3 s3Client =
@@ -27,10 +35,6 @@ public class S3Requester {
   }
 
   private static Externs externs = new Externs();
-  private static final String BUCKET_LLB_PUBLIC_URL =
-      "https://lucys-love-bus.s3.us-east-2.amazonaws.com";
-  private static final String BUCKET_LLB_PUBLIC = "lucys-love-bus";
-  private static final String DIR_LLB_PUBLIC_EVENTS = "events";
 
   /**
    * This should only be used for testing purposes when we mock the s3Client.
@@ -39,6 +43,15 @@ public class S3Requester {
    */
   public static void setExterns(Externs customExterns) {
     externs = customExterns;
+  }
+
+  static {
+    Properties awsProperties = PropertiesLoader.getAwsProperties();
+    BUCKET_PUBLIC_URL = PropertiesLoader.loadProperty(awsProperties, "s3_bucket_url");
+    BUCKET_PUBLIC = PropertiesLoader.loadProperty(awsProperties, "s3_bucket_name");
+    DIR_PUBLIC = PropertiesLoader.loadProperty(awsProperties, "s3_upload_dir");
+
+    s3Client = AmazonS3ClientBuilder.standard().withRegion(Regions.US_EAST_2).build();
   }
 
   /**
@@ -127,20 +140,19 @@ public class S3Requester {
 
     // Create the request to upload the image
     PutObjectRequest awsRequest =
-        new PutObjectRequest(BUCKET_LLB_PUBLIC, directoryName + "/" + fullFileName, tempFile);
-    awsRequest.setCannedAcl(
-        CannedAccessControlList.PublicRead); // Set the image to be publicly available
+        new PutObjectRequest(BUCKET_PUBLIC, directoryName + "/" + fullFileName, tempFile);
 
-    // Set the image file metadata
+    // Set the image to be publicly available
+    awsRequest.setCannedAcl(CannedAccessControlList.PublicRead);
+
+    // Set the image file metadata (to be of type image)
     ObjectMetadata awsObjectMetadata = new ObjectMetadata();
-    awsObjectMetadata.setContentType(
-        encodedImage.getFileType()
-            + encodedImage.getFileExtension()); // Set file type to be an image
+    awsObjectMetadata.setContentType(encodedImage.getFileType() + encodedImage.getFileExtension());
     awsRequest.setMetadata(awsObjectMetadata);
 
     try {
       // Perform the upload to S3
-      externs.getS3Client().putObject(awsRequest);
+      s3Client.putObject(awsRequest);
     } catch (SdkClientException e) {
       // The AWS S3 upload failed
       throw new S3FailedUploadException(e.getMessage());
@@ -149,7 +161,7 @@ public class S3Requester {
     // Delete the temporary file that was written to disk
     tempFile.delete();
 
-    return String.format("%s/%s/%s", BUCKET_LLB_PUBLIC_URL, directoryName, fullFileName);
+    return String.format("%s/%s/%s", BUCKET_PUBLIC_URL, directoryName, fullFileName);
   }
 
   /**
@@ -166,7 +178,7 @@ public class S3Requester {
   public static String validateUploadImageToS3LucyEvents(String eventTitle, String base64Encoding)
       throws BadRequestImageException, S3FailedUploadException {
     String fileName = getImageFileNameWithoutExtension(eventTitle);
-    return validateBase64ImageAndUploadToS3(fileName, DIR_LLB_PUBLIC_EVENTS, base64Encoding);
+    return validateBase64ImageAndUploadToS3(fileName, DIR_PUBLIC, base64Encoding);
   }
 
   /**
