@@ -1,11 +1,5 @@
 package com.codeforcommunity.rest.subrouter;
 
-import static com.codeforcommunity.rest.ApiRouter.end;
-import static com.codeforcommunity.rest.RestFunctions.getJsonBodyAsClass;
-import static com.codeforcommunity.rest.RestFunctions.getMultipleQueryParams;
-import static com.codeforcommunity.rest.RestFunctions.getOptionalQueryParam;
-import static com.codeforcommunity.rest.RestFunctions.getRequestParameterAsInt;
-
 import com.codeforcommunity.api.IEventsProcessor;
 import com.codeforcommunity.auth.JWTData;
 import com.codeforcommunity.dto.userEvents.requests.CreateEventRequest;
@@ -20,9 +14,13 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Route;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
+
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
+
+import static com.codeforcommunity.rest.ApiRouter.end;
+import static com.codeforcommunity.rest.RestFunctions.*;
 
 public class EventsRouter implements IRouter {
 
@@ -113,8 +111,7 @@ public class EventsRouter implements IRouter {
 
     Optional<Integer> count = getOptionalQueryParam(ctx, "count", str -> Integer.parseInt(str));
     Optional<Timestamp> endDate = getOptionalQueryParam(ctx, "end", str -> Timestamp.valueOf(str));
-    Optional<Timestamp> startDate =
-            getOptionalQueryParam(ctx, "start", str -> Timestamp.valueOf(str));
+    Optional<Timestamp> startDate = getOptionalQueryParam(ctx, "start", str -> Timestamp.valueOf(str));
 
     GetUserEventsRequest request = new GetUserEventsRequest(endDate, startDate, count);
 

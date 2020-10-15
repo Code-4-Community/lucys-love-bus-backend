@@ -13,8 +13,7 @@ import java.util.List;
 
 public interface IEventsProcessor {
 
-  SingleEventResponse createEvent(CreateEventRequest request, JWTData userData)
-          throws BadRequestImageException, S3FailedUploadException;
+  SingleEventResponse createEvent(CreateEventRequest request, JWTData userData) throws BadRequestImageException, S3FailedUploadException;
 
   SingleEventResponse getSingleEvent(int eventId, JWTData userData);
 
