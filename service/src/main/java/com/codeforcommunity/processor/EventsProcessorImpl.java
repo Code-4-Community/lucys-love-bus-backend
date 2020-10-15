@@ -57,15 +57,15 @@ public class EventsProcessorImpl implements IEventsProcessor {
 
   @Override
   public SingleEventResponse createEvent(CreateEventRequest request, JWTData userData)
-          throws BadRequestImageException, S3FailedUploadException {
+      throws BadRequestImageException, S3FailedUploadException {
     if (userData.getPrivilegeLevel() != PrivilegeLevel.ADMIN) {
       throw new AdminOnlyRouteException();
     }
 
     String publicImageUrl =
-            S3Requester.validateUploadImageToS3LucyEvents(request.getTitle(), request.getThumbnail());
+        S3Requester.validateUploadImageToS3LucyEvents(request.getTitle(), request.getThumbnail());
     request.setThumbnail(
-            publicImageUrl); // Update the request to contain the URL for the DB and JSON response OR
+        publicImageUrl); // Update the request to contain the URL for the DB and JSON response OR
     // null if no image given
 
     EventsRecord newEventRecord = eventRequestToRecord(request);
@@ -94,23 +94,23 @@ public class EventsProcessorImpl implements IEventsProcessor {
   public GetEventsResponse getEventsSignedUp(GetUserEventsRequest request, JWTData userData) {
 
     SelectConditionStep<Record> q =
-            db.select(EVENTS.fields())
-                    .from(
-                            USERS
-                                    .join(EVENT_REGISTRATIONS)
-                                    .onKey(EVENT_REGISTRATIONS.USER_ID)
-                                    .join(EVENTS)
-                                    .onKey(EVENT_REGISTRATIONS.EVENT_ID))
-                    .where(USERS.ID.eq(userData.getUserId()));
+        db.select(EVENTS.fields())
+            .from(
+                USERS
+                    .join(EVENT_REGISTRATIONS)
+                    .onKey(EVENT_REGISTRATIONS.USER_ID)
+                    .join(EVENTS)
+                    .onKey(EVENT_REGISTRATIONS.EVENT_ID))
+            .where(USERS.ID.eq(userData.getUserId()));
 
     SelectConditionStep<Record> afterDateFilter = q;
 
     if (request.getEndDate().isPresent()) {
       if (request.getStartDate().isPresent()) {
         afterDateFilter =
-                q.and(
-                        EVENTS.START_TIME.between(
-                                request.getStartDate().get(), request.getEndDate().get()));
+            q.and(
+                EVENTS.START_TIME.between(
+                    request.getStartDate().get(), request.getEndDate().get()));
       } else {
         afterDateFilter = q.and(EVENTS.START_TIME.lessOrEqual(request.getEndDate().get()));
       }
@@ -136,13 +136,13 @@ public class EventsProcessorImpl implements IEventsProcessor {
   @Override
   public GetEventsResponse getEventsQualified(JWTData userData) {
     Timestamp startDate =
-            Timestamp.from(Instant.now().minus(registerLeniencyHours, ChronoUnit.HOURS));
+        Timestamp.from(Instant.now().minus(registerLeniencyHours, ChronoUnit.HOURS));
 
     List<Events> eventsList =
-            db.selectFrom(EVENTS)
-                    .where(EVENTS.START_TIME.greaterOrEqual(startDate))
-                    .orderBy(EVENTS.START_TIME.asc())
-                    .fetchInto(Events.class);
+        db.selectFrom(EVENTS)
+            .where(EVENTS.START_TIME.greaterOrEqual(startDate))
+            .orderBy(EVENTS.START_TIME.asc())
+            .fetchInto(Events.class);
 
     List<SingleEventResponse> res = listOfEventsToListOfSingleEventResponse(eventsList, userData);
 
@@ -152,18 +152,18 @@ public class EventsProcessorImpl implements IEventsProcessor {
   private Map<Integer, Integer> getTicketCounts(List<Events> events, int userId) {
     List<Integer> ids = events.stream().map(Events::getId).collect(Collectors.toList());
     return db.select(EVENTS.ID, EVENT_REGISTRATIONS.TICKET_QUANTITY)
-            .from(EVENTS)
-            .join(EVENT_REGISTRATIONS)
-            .on(EVENTS.ID.eq(EVENT_REGISTRATIONS.EVENT_ID))
-            .where(EVENTS.ID.in(ids))
-            .and(EVENT_REGISTRATIONS.USER_ID.eq(userId))
-            .and(EVENT_REGISTRATIONS.TICKET_QUANTITY.gt(0))
-            .fetchMap(EVENTS.ID, EVENT_REGISTRATIONS.TICKET_QUANTITY);
+        .from(EVENTS)
+        .join(EVENT_REGISTRATIONS)
+        .on(EVENTS.ID.eq(EVENT_REGISTRATIONS.EVENT_ID))
+        .where(EVENTS.ID.in(ids))
+        .and(EVENT_REGISTRATIONS.USER_ID.eq(userId))
+        .and(EVENT_REGISTRATIONS.TICKET_QUANTITY.gt(0))
+        .fetchMap(EVENTS.ID, EVENT_REGISTRATIONS.TICKET_QUANTITY);
   }
 
   @Override
   public SingleEventResponse modifyEvent(
-          int eventId, ModifyEventRequest request, JWTData userData) {
+      int eventId, ModifyEventRequest request, JWTData userData) {
     if (userData.getPrivilegeLevel() != PrivilegeLevel.ADMIN) {
       throw new AdminOnlyRouteException();
     }
@@ -223,17 +223,17 @@ public class EventsProcessorImpl implements IEventsProcessor {
     }
 
     List<Registration> regs =
-            db.select(
-                    CONTACTS.FIRST_NAME,
-                    CONTACTS.LAST_NAME,
-                    CONTACTS.EMAIL,
-                    EVENT_REGISTRATIONS.TICKET_QUANTITY)
-                    .from(EVENT_REGISTRATIONS)
-                    .join(CONTACTS)
-                    .on(EVENT_REGISTRATIONS.USER_ID.eq(CONTACTS.USER_ID))
-                    .where(EVENT_REGISTRATIONS.EVENT_ID.eq(eventId))
-                    .and(CONTACTS.IS_MAIN_CONTACT.isTrue())
-                    .fetchInto(Registration.class);
+        db.select(
+                CONTACTS.FIRST_NAME,
+                CONTACTS.LAST_NAME,
+                CONTACTS.EMAIL,
+                EVENT_REGISTRATIONS.TICKET_QUANTITY)
+            .from(EVENT_REGISTRATIONS)
+            .join(CONTACTS)
+            .on(EVENT_REGISTRATIONS.USER_ID.eq(CONTACTS.USER_ID))
+            .where(EVENT_REGISTRATIONS.EVENT_ID.eq(eventId))
+            .and(CONTACTS.IS_MAIN_CONTACT.isTrue())
+            .fetchInto(Registration.class);
 
     return new EventRegistrations(regs);
   }
@@ -256,59 +256,59 @@ public class EventsProcessorImpl implements IEventsProcessor {
     }
 
     List<RSVP> rsvpUsers =
-            db.select(
-                    USERS.ID,
-                    EVENT_REGISTRATIONS.TICKET_QUANTITY,
-                    USERS.EMAIL,
-                    USERS.PRIVILEGE_LEVEL,
-                    USERS.ADDRESS,
-                    USERS.CITY,
-                    USERS.STATE,
-                    USERS.ZIPCODE)
-                    .from(EVENT_REGISTRATIONS)
-                    .join(USERS)
-                    .on(EVENT_REGISTRATIONS.USER_ID.eq(USERS.ID))
-                    .where(EVENT_REGISTRATIONS.EVENT_ID.eq(eventId))
-                    .fetchInto(RSVP.class);
+        db.select(
+                USERS.ID,
+                EVENT_REGISTRATIONS.TICKET_QUANTITY,
+                USERS.EMAIL,
+                USERS.PRIVILEGE_LEVEL,
+                USERS.ADDRESS,
+                USERS.CITY,
+                USERS.STATE,
+                USERS.ZIPCODE)
+            .from(EVENT_REGISTRATIONS)
+            .join(USERS)
+            .on(EVENT_REGISTRATIONS.USER_ID.eq(USERS.ID))
+            .where(EVENT_REGISTRATIONS.EVENT_ID.eq(eventId))
+            .fetchInto(RSVP.class);
 
     List<RSVP> rsvpContacts =
-            db.select(
-                    EVENT_REGISTRATIONS.USER_ID,
-                    CONTACTS.EMAIL,
-                    CONTACTS.FIRST_NAME,
-                    CONTACTS.LAST_NAME,
-                    CONTACTS.IS_MAIN_CONTACT,
-                    CONTACTS.DATE_OF_BIRTH,
-                    CONTACTS.PHONE_NUMBER,
-                    CONTACTS.PRONOUNS,
-                    CONTACTS.ALLERGIES,
-                    CONTACTS.DIAGNOSIS,
-                    CONTACTS.MEDICATIONS,
-                    CONTACTS.NOTES)
-                    .from(EVENT_REGISTRATIONS)
-                    .join(CONTACTS)
-                    .on(EVENT_REGISTRATIONS.USER_ID.eq(CONTACTS.USER_ID))
-                    .where(EVENT_REGISTRATIONS.EVENT_ID.eq(eventId))
-                    .fetchInto(RSVP.class);
+        db.select(
+                EVENT_REGISTRATIONS.USER_ID,
+                CONTACTS.EMAIL,
+                CONTACTS.FIRST_NAME,
+                CONTACTS.LAST_NAME,
+                CONTACTS.IS_MAIN_CONTACT,
+                CONTACTS.DATE_OF_BIRTH,
+                CONTACTS.PHONE_NUMBER,
+                CONTACTS.PRONOUNS,
+                CONTACTS.ALLERGIES,
+                CONTACTS.DIAGNOSIS,
+                CONTACTS.MEDICATIONS,
+                CONTACTS.NOTES)
+            .from(EVENT_REGISTRATIONS)
+            .join(CONTACTS)
+            .on(EVENT_REGISTRATIONS.USER_ID.eq(CONTACTS.USER_ID))
+            .where(EVENT_REGISTRATIONS.EVENT_ID.eq(eventId))
+            .fetchInto(RSVP.class);
 
     List<RSVP> rsvpChildren =
-            db.select(
-                    EVENT_REGISTRATIONS.USER_ID,
-                    CHILDREN.FIRST_NAME,
-                    CHILDREN.LAST_NAME,
-                    CHILDREN.DATE_OF_BIRTH,
-                    CHILDREN.PRONOUNS,
-                    CHILDREN.ALLERGIES,
-                    CHILDREN.DIAGNOSIS,
-                    CHILDREN.MEDICATIONS,
-                    CHILDREN.NOTES,
-                    CHILDREN.SCHOOL_YEAR,
-                    CHILDREN.SCHOOL)
-                    .from(EVENT_REGISTRATIONS)
-                    .join(CHILDREN)
-                    .on(EVENT_REGISTRATIONS.USER_ID.eq(CHILDREN.USER_ID))
-                    .where(EVENT_REGISTRATIONS.EVENT_ID.eq(eventId))
-                    .fetchInto(RSVP.class);
+        db.select(
+                EVENT_REGISTRATIONS.USER_ID,
+                CHILDREN.FIRST_NAME,
+                CHILDREN.LAST_NAME,
+                CHILDREN.DATE_OF_BIRTH,
+                CHILDREN.PRONOUNS,
+                CHILDREN.ALLERGIES,
+                CHILDREN.DIAGNOSIS,
+                CHILDREN.MEDICATIONS,
+                CHILDREN.NOTES,
+                CHILDREN.SCHOOL_YEAR,
+                CHILDREN.SCHOOL)
+            .from(EVENT_REGISTRATIONS)
+            .join(CHILDREN)
+            .on(EVENT_REGISTRATIONS.USER_ID.eq(CHILDREN.USER_ID))
+            .where(EVENT_REGISTRATIONS.EVENT_ID.eq(eventId))
+            .fetchInto(RSVP.class);
 
     rsvpUsers.addAll(rsvpContacts);
     rsvpUsers.addAll(rsvpChildren);
@@ -330,49 +330,49 @@ public class EventsProcessorImpl implements IEventsProcessor {
    * @return List of our Event data object.
    */
   private List<SingleEventResponse> listOfEventsToListOfSingleEventResponse(
-          List<Events> events, JWTData userData) {
+      List<Events> events, JWTData userData) {
     Map<Integer, Integer> ticketCounts = getTicketCounts(events, userData.getUserId());
     return events.stream()
-            .map(
-                    event -> {
-                      EventDetails details =
-                              new EventDetails(
-                                      event.getDescription(),
-                                      event.getLocation(),
-                                      event.getStartTime(),
-                                      event.getEndTime());
-                      return new SingleEventResponse(
-                              event.getId(),
-                              event.getTitle(),
-                              eventDatabaseOperations.getSpotsLeft(event.getId()),
-                              event.getCapacity(),
-                              event.getThumbnail(),
-                              details,
-                              ticketCounts.getOrDefault(event.getId(), 0),
-                              canUserRegister(event, userData),
-                              event.getPrice());
-                    })
-            .collect(Collectors.toList());
+        .map(
+            event -> {
+              EventDetails details =
+                  new EventDetails(
+                      event.getDescription(),
+                      event.getLocation(),
+                      event.getStartTime(),
+                      event.getEndTime());
+              return new SingleEventResponse(
+                  event.getId(),
+                  event.getTitle(),
+                  eventDatabaseOperations.getSpotsLeft(event.getId()),
+                  event.getCapacity(),
+                  event.getThumbnail(),
+                  details,
+                  ticketCounts.getOrDefault(event.getId(), 0),
+                  canUserRegister(event, userData),
+                  event.getPrice());
+            })
+        .collect(Collectors.toList());
   }
 
   /** Takes a database representation of a single event and returns the dto representation. */
   private SingleEventResponse eventPojoToResponse(Events event, JWTData userData) {
     int ticketsBought =
-            getTicketCounts(Arrays.asList(event), userData.getUserId()).getOrDefault(event.getId(), 0);
+        getTicketCounts(Arrays.asList(event), userData.getUserId()).getOrDefault(event.getId(), 0);
 
     EventDetails details =
-            new EventDetails(
-                    event.getDescription(), event.getLocation(), event.getStartTime(), event.getEndTime());
+        new EventDetails(
+            event.getDescription(), event.getLocation(), event.getStartTime(), event.getEndTime());
     return new SingleEventResponse(
-            event.getId(),
-            event.getTitle(),
-            eventDatabaseOperations.getSpotsLeft(event.getId()),
-            event.getCapacity(),
-            event.getThumbnail(),
-            details,
-            ticketsBought,
-            canUserRegister(event, userData),
-            event.getPrice());
+        event.getId(),
+        event.getTitle(),
+        eventDatabaseOperations.getSpotsLeft(event.getId()),
+        event.getCapacity(),
+        event.getThumbnail(),
+        details,
+        ticketsBought,
+        canUserRegister(event, userData),
+        event.getPrice());
   }
 
   /** Takes a dto representation of an event and returns the database record representation. */

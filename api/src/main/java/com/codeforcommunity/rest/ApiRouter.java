@@ -1,23 +1,22 @@
 package com.codeforcommunity.rest;
 
-import com.codeforcommunity.api.IProtectedUserProcessor;
-import com.codeforcommunity.api.IPublicEventsProcessor;
+import com.codeforcommunity.api.IAnnouncementsProcessor;
 import com.codeforcommunity.api.IAuthProcessor;
 import com.codeforcommunity.api.ICheckoutProcessor;
-import com.codeforcommunity.api.IAnnouncementsProcessor;
 import com.codeforcommunity.api.IEventsProcessor;
+import com.codeforcommunity.api.IProtectedUserProcessor;
+import com.codeforcommunity.api.IPublicEventsProcessor;
 import com.codeforcommunity.api.IRequestsProcessor;
 import com.codeforcommunity.auth.JWTAuthorizer;
-import com.codeforcommunity.rest.subrouter.CommonRouter;
-import com.codeforcommunity.rest.subrouter.AuthRouter;
-import com.codeforcommunity.rest.subrouter.ProtectedUserRouter;
-import com.codeforcommunity.rest.subrouter.PfRequestRouter;
-import com.codeforcommunity.rest.subrouter.EventsRouter;
-import com.codeforcommunity.rest.subrouter.PublicEventsRouter;
 import com.codeforcommunity.rest.subrouter.AnnouncementsRouter;
+import com.codeforcommunity.rest.subrouter.AuthRouter;
 import com.codeforcommunity.rest.subrouter.CheckoutRouter;
+import com.codeforcommunity.rest.subrouter.CommonRouter;
+import com.codeforcommunity.rest.subrouter.EventsRouter;
+import com.codeforcommunity.rest.subrouter.PfRequestRouter;
+import com.codeforcommunity.rest.subrouter.ProtectedUserRouter;
+import com.codeforcommunity.rest.subrouter.PublicEventsRouter;
 import com.codeforcommunity.rest.subrouter.WebhooksRouter;
-
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.ext.web.Router;
