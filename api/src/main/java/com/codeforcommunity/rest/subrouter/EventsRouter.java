@@ -2,6 +2,7 @@ package com.codeforcommunity.rest.subrouter;
 
 import static com.codeforcommunity.rest.ApiRouter.end;
 import static com.codeforcommunity.rest.RestFunctions.getJsonBodyAsClass;
+import static com.codeforcommunity.rest.RestFunctions.getMultipleQueryParams;
 import static com.codeforcommunity.rest.RestFunctions.getOptionalQueryParam;
 import static com.codeforcommunity.rest.RestFunctions.getRequestParameterAsInt;
 
@@ -20,6 +21,7 @@ import io.vertx.ext.web.Route;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import java.sql.Timestamp;
+import java.util.List;
 import java.util.Optional;
 
 public class EventsRouter implements IRouter {
@@ -35,6 +37,7 @@ public class EventsRouter implements IRouter {
     Router router = Router.router(vertx);
 
     registerCreateEvent(router);
+    registerGetEvents(router);
     registerGetUserEventsQualified(router);
     registerGetUserEventsSignedUp(router);
     registerGetSingleEvent(router);
@@ -66,6 +69,11 @@ public class EventsRouter implements IRouter {
     getUserEventQualified.handler(this::handleGetUserEventsQualified);
   }
 
+  private void registerGetEvents(Router router) {
+    Route getEvent = router.get("/");
+    getEvent.handler(this::handleGetEvents);
+  }
+
   private void registerModifyEvent(Router router) {
     Route modifyEventRoute = router.put("/:event_id");
     modifyEventRoute.handler(this::handleModifyEventRoute);
@@ -86,6 +94,16 @@ public class EventsRouter implements IRouter {
     getUsersSignedUpEventRoute.handler(this::handleGetEventRSVPs);
   }
 
+  private void handleGetEvents(RoutingContext ctx) {
+
+    List<Integer> intIds = getMultipleQueryParams(ctx, "ids", str -> Integer.parseInt(str));
+    JWTData userData = ctx.get("jwt_data");
+
+    GetEventsResponse response = processor.getEvents(intIds, userData);
+
+    end(ctx.response(), 200, JsonObject.mapFrom(response).encode());
+  }
+
   private void handleGetUserEventsQualified(RoutingContext ctx) {
     GetEventsResponse response = processor.getEventsQualified(ctx.get("jwt_data"));
     end(ctx.response(), 200, JsonObject.mapFrom(response).encode());
@@ -96,7 +114,7 @@ public class EventsRouter implements IRouter {
     Optional<Integer> count = getOptionalQueryParam(ctx, "count", str -> Integer.parseInt(str));
     Optional<Timestamp> endDate = getOptionalQueryParam(ctx, "end", str -> Timestamp.valueOf(str));
     Optional<Timestamp> startDate =
-        getOptionalQueryParam(ctx, "start", str -> Timestamp.valueOf(str));
+            getOptionalQueryParam(ctx, "start", str -> Timestamp.valueOf(str));
 
     GetUserEventsRequest request = new GetUserEventsRequest(endDate, startDate, count);
 
