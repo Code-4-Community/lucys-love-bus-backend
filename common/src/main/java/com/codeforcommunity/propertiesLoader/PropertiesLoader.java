@@ -49,11 +49,19 @@ public class PropertiesLoader {
     return getProperties("jwt.properties");
   }
 
+  public static Properties getStripeProperties() {
+    return getProperties("stripe.properties");
+  }
+
+  public static Properties getFrontendProperties() {
+    return getProperties("frontend.properties");
+  }
+
   public static Properties getSlackProperties() {
     return getProperties("slack.properties");
   }
 
   public static Properties getAwsProperties() {
-    return getProperties("properties/aws.properties");
+    return getProperties("aws.properties");
   }
 }
