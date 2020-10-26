@@ -7,6 +7,7 @@ import com.codeforcommunity.dto.protected_user.components.Contact;
 import java.util.ArrayList;
 import java.util.List;
 
+/** A representation of an account creator's (family representative) information. */
 public class UserInformation extends ApiDto {
 
   private Contact mainContact;
@@ -14,6 +15,14 @@ public class UserInformation extends ApiDto {
   private List<Child> children;
   private AddressData location;
 
+  /**
+   * Creates a new UserInformation object with the given fields.
+   *
+   * @param mainContact the main contact
+   * @param additionalContacts the list of additional contacts
+   * @param children the list of children
+   * @param location the location of the user
+   */
   public UserInformation(
       Contact mainContact,
       List<Contact> additionalContacts,
@@ -25,40 +34,89 @@ public class UserInformation extends ApiDto {
     this.location = location;
   }
 
+  /** Creates a UserInformation with no information (all fields are null) */
   private UserInformation() {}
 
+  /**
+   * Returns the main contact
+   *
+   * @return the main contact
+   */
   public Contact getMainContact() {
     return mainContact;
   }
 
+  /**
+   * Updates the main contact
+   *
+   * @param mainContact the new main contact
+   */
   public void setMainContact(Contact mainContact) {
     this.mainContact = mainContact;
   }
 
+  /**
+   * Returns the list of additional contacts
+   *
+   * @return the list of additional contacts
+   */
   public List<Contact> getAdditionalContacts() {
     return additionalContacts;
   }
 
+  /**
+   * Updates the list of additional contacts
+   *
+   * @param additionalContacts the new list of additional contacts
+   */
   public void setAdditionalContacts(List<Contact> additionalContacts) {
     this.additionalContacts = additionalContacts;
   }
 
+  /**
+   * Returns the list of children
+   *
+   * @return the list of children
+   */
   public List<Child> getChildren() {
     return children;
   }
 
+  /**
+   * Updates the list of children
+   *
+   * @param children the new list of children
+   */
   public void setChildren(List<Child> children) {
     this.children = children;
   }
 
+  /**
+   * Returns this user's location
+   *
+   * @return this user's location
+   */
   public AddressData getLocation() {
     return location;
   }
 
+  /**
+   * Updates this user's location
+   *
+   * @param location the new location
+   */
   public void setLocation(AddressData location) {
     this.location = location;
   }
 
+  /**
+   * Verify this UserInformation is valid by checking the validity of the main contact, additional
+   * contacts and children.
+   *
+   * @param fieldPrefix A string to prefix each field with (for use if this is a sub-field). Should
+   *     be of the form "OBJECT.".
+   * @return a list of strings with each string indicating one field that is invalid
+   */
   @Override
   public List<String> validateFields(String fieldPrefix) {
     String fieldName = fieldPrefix + "user_information.";
