@@ -58,6 +58,13 @@ public class EventsProcessorImplTest {
   // 04/17/2020 @ 5:06am (UTC)
   private final int END_TIMESTAMP_TEST = 1587100000;
 
+  // sample public bucket URL to be used in tests
+  private final String BUCKET_PUBLIC_URL = "https://test-bucket.s3.us-east-2.amazonaws.com";
+  // sample public bucket name to be used in tests
+  private final String BUCKET_PUBLIC_NAME = "test-bucket";
+  // sample directory name to be used in tests
+  private final String DIR_NAME = "test-dir";
+
   @BeforeEach
   private void setup() {
     this.myJooqMock = new JooqMock();
@@ -72,6 +79,9 @@ public class EventsProcessorImplTest {
 
     when(mockS3Client.putObject(any(PutObjectRequest.class))).thenReturn(mockPutObjectResult);
     when(mockExterns.getS3Client()).thenReturn(mockS3Client);
+    when(mockExterns.getBucketPublic()).thenReturn(BUCKET_PUBLIC_NAME);
+    when(mockExterns.getBucketPublicUrl()).thenReturn(BUCKET_PUBLIC_URL);
+    when(mockExterns.getDirPublic()).thenReturn(DIR_NAME);
 
     S3Requester.setExterns(mockExterns);
   }
@@ -135,9 +145,7 @@ public class EventsProcessorImplTest {
     assertEquals(res.getId(), 0);
     assertEquals(res.getTitle(), "sample");
     assertEquals(res.getCapacity(), 5);
-    assertEquals(
-        res.getThumbnail(),
-        "https://lucys-love-bus.s3.us-east-2.amazonaws.com/events/sample_thumbnail.gif");
+    assertEquals(res.getThumbnail(), BUCKET_PUBLIC_URL + "/" + DIR_NAME + "/sample_thumbnail.gif");
     assertEquals(res.getDetails().getDescription(), myEventDetails.getDescription());
     assertEquals(res.getDetails().getLocation(), myEventDetails.getLocation());
     assertEquals(res.getDetails().getEnd(), myEventDetails.getEnd());
