@@ -215,8 +215,9 @@ public class AnnouncementsProcessorImplTest {
     announcement.setEventId(1);
     announcement.setTitle("c4c");
     announcement.setDescription("code for community");
-    myJooqMock.addReturn("SELECT", announcement);
     myJooqMock.addReturn("INSERT", announcement);
+
+    myJooqMock.addReturn("SELECT", announcement);
 
     // mock sending event specific announcement email
     myJooqMock.addReturn("SELECT", event);
@@ -373,5 +374,40 @@ public class AnnouncementsProcessorImplTest {
     assertEquals(res.getAnnouncements().get(1).getTitle(), "lucy's love bus");
     assertEquals(res.getAnnouncements().get(1).getCreated(), new Timestamp(START_TIMESTAMP_TEST2));
     assertEquals(res.getAnnouncements().get(1).getDescription(), "code for community");
+  }
+
+
+  // test deleting an announcement properly
+  @Test
+  public void testDeleteAnnouncement() {
+    JWTData myUserData = new JWTData(0, PrivilegeLevel.ADMIN);
+
+    int deletedAnnouncementId = 42;
+    AnnouncementsRecord announcementToDelete = myJooqMock.getContext().newRecord(Tables.ANNOUNCEMENTS);
+    announcementToDelete.setId(deletedAnnouncementId);
+    announcementToDelete.setTitle("sample title");
+    announcementToDelete.setDescription("sample description");
+    myJooqMock.addReturn("DELETE", announcementToDelete);
+
+    myAnnouncementsProcessorImpl.deleteAnnouncement(deletedAnnouncementId, myUserData);
+
+    Object[] deleteBindings = myJooqMock.getSqlBindings().get("DELETE").get(0);
+
+    assertEquals(deletedAnnouncementId, deleteBindings[0]);
+  }
+
+  @Test
+  public void testDeleteNonexistentAnnouncement() {
+    JWTData myUserData = new JWTData(0, PrivilegeLevel.ADMIN);
+
+    int deletedAnnouncementId = 42;
+    myJooqMock.addEmptyReturn("DELETE");
+
+    myAnnouncementsProcessorImpl.deleteAnnouncement(deletedAnnouncementId, myUserData);
+
+    assertEquals(1, myJooqMock.timesCalled("DELETE"));
+    Object[] deleteBindings = myJooqMock.getSqlBindings().get("DELETE").get(0);
+
+    assertEquals(deletedAnnouncementId, deleteBindings[0]);
   }
 }
