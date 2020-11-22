@@ -135,6 +135,7 @@ public class AuthDatabaseOperations {
     mainContact.setLastName(request.getLastName());
     mainContact.setPhoneNumber(request.getPhoneNumber());
     mainContact.setAllergies(request.getAllergies());
+    mainContact.setReferrer(request.getReferrer());
     mainContact.store();
 
     String verificationToken = createSecretKey(newUser.getId(), VerificationKeyType.VERIFY_EMAIL);
