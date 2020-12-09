@@ -2,14 +2,14 @@ package com.codeforcommunity.rest.subrouter;
 
 import com.codeforcommunity.auth.JWTAuthorizer;
 import com.codeforcommunity.auth.JWTData;
-import com.codeforcommunity.exceptions.AccessTokenInvalidException;
+import com.codeforcommunity.exceptions.TokenInvalidException;
+import com.codeforcommunity.rest.FailureHandler;
 import com.codeforcommunity.rest.IRouter;
 import com.codeforcommunity.rest.RestFunctions;
 import io.vertx.core.Vertx;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
-import io.vertx.ext.web.handler.LoggerHandler;
 import java.util.Optional;
 
 public class CommonRouter implements IRouter {
@@ -23,8 +23,6 @@ public class CommonRouter implements IRouter {
   @Override
   public Router initializeRouter(Vertx vertx) {
     Router router = Router.router(vertx);
-
-    router.route().handler(LoggerHandler.create()); // Adds request logging
 
     router.route().handler(BodyHandler.create(false)); // Add body handling
 
@@ -54,7 +52,7 @@ public class CommonRouter implements IRouter {
       ctx.put("jwt_data", jwtData.get());
       ctx.next();
     } else {
-      throw new AccessTokenInvalidException();
+      throw new TokenInvalidException("access");
     }
   }
 }

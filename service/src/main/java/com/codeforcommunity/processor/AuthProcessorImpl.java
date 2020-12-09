@@ -20,29 +20,42 @@ import com.codeforcommunity.exceptions.UserDoesNotExistException;
 import com.codeforcommunity.requester.Emailer;
 import java.util.Optional;
 import org.jooq.DSLContext;
+import com.codeforcommunity.exceptions.TokenInvalidException;
+import com.codeforcommunity.requester.Emailer;
+import java.util.Optional;
+import org.jooq.DSLContext;
+import org.jooq.generated.tables.pojos.Users;
 import org.jooq.generated.tables.records.UsersRecord;
 
 public class AuthProcessorImpl implements IAuthProcessor {
 
   private final AuthDatabaseOperations authDatabaseOperations;
-  private final JWTCreator jwtCreator;
   private final Emailer emailer;
+  private final JWTCreator jwtCreator;
 
-  public AuthProcessorImpl(DSLContext db, JWTCreator jwtCreator, Emailer emailer) {
+  public AuthProcessorImpl(DSLContext db, Emailer emailer, JWTCreator jwtCreator) {
     this.authDatabaseOperations = new AuthDatabaseOperations(db);
-    this.jwtCreator = jwtCreator;
     this.emailer = emailer;
+    this.jwtCreator = jwtCreator;
   }
 
   /**
    * Check that inputs are valid with the database Creates a new refresh jwt Creates a new access
    * jwt Creates a new user database row Return the new jwts
    *
-   * @throws EmailAlreadyInUseException if the given username or email are already used.
+   * @throws EmailAlreadyInUseException if the given email is already used.
    */
   @Override
   public SessionResponse signUp(NewUserRequest request) {
-    authDatabaseOperations.createNewUser(request);
+    UsersRecord user =
+        authDatabaseOperations.createNewUser(
+            request.getEmail(),
+            request.getPassword(),
+            request.getFirstName(),
+            request.getLastName());
+
+    emailer.sendWelcomeEmail(
+        request.getEmail(), AuthDatabaseOperations.getFullName(user.into(Users.class)));
 
     return setupSessionResponse(request.getEmail());
   }
@@ -89,7 +102,7 @@ public class AuthProcessorImpl implements IAuthProcessor {
         }
       };
     } else {
-      throw new AuthException("The given refresh token is invalid");
+      throw new TokenInvalidException("refresh");
     }
   }
 
@@ -100,20 +113,14 @@ public class AuthProcessorImpl implements IAuthProcessor {
   @Override
   public void requestPasswordReset(ForgotPasswordRequest request) {
     String email = request.getEmail();
-    JWTData userData;
-    try {
-      userData = authDatabaseOperations.getUserJWTData(email);
-    } catch (UserDoesNotExistException e) {
-      // Don't tell the client that the email doesn't exist
-      return;
-    }
+    JWTData userData = authDatabaseOperations.getUserJWTData(email);
 
     String token =
         authDatabaseOperations.createSecretKey(
             userData.getUserId(), VerificationKeyType.FORGOT_PASSWORD);
 
-    emailer.sendEmailToMainContact(
-        userData.getUserId(), (e, n) -> emailer.sendForgotPassword(e, n, token));
+    Users user = authDatabaseOperations.getUserPojo(userData.getUserId());
+    emailer.sendPasswordChangeRequestEmail(email, AuthDatabaseOperations.getFullName(user), token);
   }
 
   /**
@@ -123,16 +130,15 @@ public class AuthProcessorImpl implements IAuthProcessor {
    */
   @Override
   public void resetPassword(ResetPasswordRequest request) {
-    if (isPasswordInvalid(request.getNewPassword())) {
-      throw new InvalidPasswordException();
-    }
-
     UsersRecord user =
         authDatabaseOperations.validateSecretKey(
             request.getSecretKey(), VerificationKeyType.FORGOT_PASSWORD);
 
-    user.setPassHash(Passwords.createHash(request.getNewPassword()));
+    user.setPasswordHash(Passwords.createHash(request.getNewPassword()));
     user.store();
+
+    emailer.sendPasswordChangeConfirmationEmail(
+        user.getEmail(), AuthDatabaseOperations.getFullName(user.into(Users.class)));
   }
 
   @Override
@@ -164,14 +170,6 @@ public class AuthProcessorImpl implements IAuthProcessor {
       // If this is thrown there is probably an error in our JWT creation / validation logic
       throw new IllegalStateException("Newly created refresh token was deemed invalid");
     }
-  }
-
-  /**
-   * Returns true if the given password is invalid. A password is invalid if it is less than 8
-   * characters.
-   */
-  private boolean isPasswordInvalid(String password) {
-    return password.length() < 8;
   }
 
   /**

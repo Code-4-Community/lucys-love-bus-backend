@@ -1,27 +1,27 @@
 package com.codeforcommunity.enums;
 
 public enum PrivilegeLevel {
-  GP(0),
-  PF(1),
-  ADMIN(2);
+  STANDARD("standard"),
+  PF("pf"),
+  ADMIN("admin");
 
-  private int val;
+  private String name;
 
-  PrivilegeLevel(int val) {
-    this.val = val;
+  PrivilegeLevel(String name) {
+    this.name = name;
   }
 
-  public int getVal() {
-    return val;
+  public String getName() {
+    return name;
   }
 
-  public static PrivilegeLevel from(Integer val) {
+  public static PrivilegeLevel from(String name) {
     for (PrivilegeLevel privilegeLevel : PrivilegeLevel.values()) {
-      if (privilegeLevel.val == val) {
+      if (privilegeLevel.name.equals(name)) {
         return privilegeLevel;
       }
     }
     throw new IllegalArgumentException(
-        String.format("Given num (%d) that doesn't correspond to any PrivilegeLevel", val));
+        String.format("Given name `%s` doesn't correspond to any `PrivilegeLevel`", name));
   }
 }

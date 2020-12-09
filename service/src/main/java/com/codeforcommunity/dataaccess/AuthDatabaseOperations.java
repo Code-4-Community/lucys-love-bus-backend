@@ -30,6 +30,10 @@ import org.jooq.DSLContext;
 import org.jooq.generated.Tables;
 import org.jooq.generated.tables.pojos.Users;
 import org.jooq.generated.tables.records.ContactsRecord;
+import java.util.Optional;
+import org.jooq.DSLContext;
+import org.jooq.generated.Tables;
+import org.jooq.generated.tables.pojos.Users;
 import org.jooq.generated.tables.records.UsersRecord;
 import org.jooq.generated.tables.records.VerificationKeysRecord;
 
@@ -45,13 +49,13 @@ public class AuthDatabaseOperations {
   public AuthDatabaseOperations(DSLContext db) {
     this.db = db;
 
-    Properties expirationProperties = PropertiesLoader.getExpirationProperties();
     this.secondsVerificationEmailValid =
-        Integer.parseInt(expirationProperties.getProperty("seconds_verification_email_valid"));
+        Integer.parseInt(
+            PropertiesLoader.loadProperty("expiration_seconds_verification_email_valid"));
     this.secondsForgotPasswordValid =
-        Integer.parseInt(expirationProperties.getProperty("seconds_forgot_password_valid"));
+        Integer.parseInt(PropertiesLoader.loadProperty("expiration_seconds_forgot_password_valid"));
     this.msRefreshExpiration =
-        Integer.parseInt(expirationProperties.getProperty("ms_refresh_expiration"));
+        Integer.parseInt(PropertiesLoader.loadProperty("expiration_ms_refresh"));
   }
 
   /**
@@ -101,7 +105,7 @@ public class AuthDatabaseOperations {
             db.selectFrom(USERS).where(USERS.EMAIL.eq(email)).fetchOneInto(Users.class));
 
     return maybeUser
-        .filter(user -> Passwords.isExpectedPassword(pass, user.getPassHash()))
+        .filter(user -> Passwords.isExpectedPassword(pass, user.getPasswordHash()))
         .isPresent();
   }
 
@@ -119,10 +123,13 @@ public class AuthDatabaseOperations {
     }
 
     UsersRecord newUser = db.newRecord(USERS);
-    newUser.setEmail(email);
-    newUser.setPassHash(Passwords.createHash(request.getPassword()));
     addAddressDataToUserRecord(newUser, request.getLocation());
-    newUser.setPrivilegeLevel(PrivilegeLevel.GP);
+    String verificationToken = createSecretKey(newUser.getId(), VerificationKeyType.VERIFY_EMAIL);
+    // TODO: Send verification email
+    newUser.setPasswordHash(Passwords.createHash(password));
+    newUser.setFirstName(firstName);
+    newUser.setLastName(lastName);
+    newUser.setPrivilegeLevel(PrivilegeLevel.STANDARD);
     newUser.store();
 
     ContactsRecord mainContact = db.newRecord(CONTACTS);
@@ -137,17 +144,14 @@ public class AuthDatabaseOperations {
     mainContact.setAllergies(request.getAllergies());
     mainContact.store();
 
-    String verificationToken = createSecretKey(newUser.getId(), VerificationKeyType.VERIFY_EMAIL);
-    // TODO: Send verification email
+
+    return newUser;
   }
 
   /** Given a JWT signature, store it in the BLACKLISTED_REFRESHES table. */
   public void addToBlackList(String signature) {
     Timestamp expirationTimestamp = Timestamp.from(Instant.now().plusMillis(msRefreshExpiration));
-    db.insertInto(Tables.BLACKLISTED_REFRESHES)
-        .values(signature, expirationTimestamp)
-        .onDuplicateKeyIgnore()
-        .execute();
+    db.newRecord(Tables.BLACKLISTED_REFRESHES).values(signature, expirationTimestamp).store();
   }
 
   /** Given a JWT signature return true if it is stored in the BLACKLISTED_REFRESHES table. */
@@ -192,7 +196,9 @@ public class AuthDatabaseOperations {
    * Given a userId and token, stores the token in the verification_keys table for the user and
    * invalidates all other keys of this type for this user.
    */
-  public String createSecretKey(int userId, VerificationKeyType type) {
+  public String createSecretKey(long userId, VerificationKeyType type) {
+
+    // Maybe add a different column besides used?
     db.update(VERIFICATION_KEYS)
         .set(VERIFICATION_KEYS.USED, true)
         .where(VERIFICATION_KEYS.USER_ID.eq(userId))
@@ -237,5 +243,11 @@ public class AuthDatabaseOperations {
 
   private AddressData extractAddressDataFromUser(Users user) {
     return new AddressData(user.getAddress(), user.getCity(), user.getState(), user.getZipcode());
+    return tokenResult.getCreatedAt().after(cutoffDate);
+  }
+
+  /** Given a user pojo, return the user's full name. */
+  public static String getFullName(Users user) {
+    return String.format("%s %s", user.getFirstName(), user.getLastName());
   }
 }

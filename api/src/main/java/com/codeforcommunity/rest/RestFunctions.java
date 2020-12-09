@@ -1,6 +1,6 @@
 package com.codeforcommunity.rest;
 
-import com.codeforcommunity.api.ApiDto;
+import com.codeforcommunity.dto.ApiDto;
 import com.codeforcommunity.exceptions.MalformedParameterException;
 import com.codeforcommunity.exceptions.MissingHeaderException;
 import com.codeforcommunity.exceptions.MissingParameterException;
@@ -62,6 +62,11 @@ public interface RestFunctions {
     throw new MissingParameterException(name);
   }
 
+  static boolean getRequestParameterAsBoolean(HttpServerRequest req, String name) {
+    String paramValue = req.getParam(name);
+    return Boolean.parseBoolean(paramValue);
+  }
+
   /**
    * Get's a query parameter that may or may not be there as an optional of the desired type.
    * Attempts to map the query parameter from a string to an instance of the desired type.
@@ -103,5 +108,5 @@ public interface RestFunctions {
       RoutingContext ctx, String name, Function<String, T> mapper) {
     List<String> queryParam = ctx.queryParam(name);
     return queryParam.stream().map(mapper).collect(Collectors.toList());
-  }
+}
 }
