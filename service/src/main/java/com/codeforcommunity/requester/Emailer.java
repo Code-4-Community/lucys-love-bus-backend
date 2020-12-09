@@ -155,7 +155,7 @@ public class Emailer {
       String eventName,
       String eventDate,
       String eventTime) {
-    String filePath = "/emails/PfRequestApproved.html";
+    String filePath = "/emails/RegistrationConfirmation.html";
     String subjectLine = String.format("You're Registered for %s!", eventName);
 
     Map<String, String> templateValues = new HashMap<>();
