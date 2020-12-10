@@ -125,7 +125,7 @@ public class AnnouncementsProcessorImplTest {
     PostAnnouncementRequest req = new PostAnnouncementRequest("sample title", "sample description");
 
     // mock the user
-    JWTData myUserData = new JWTData(0, PrivilegeLevel.GP);
+    JWTData myUserData = new JWTData(0, PrivilegeLevel.STANDARD);
 
     try {
       myAnnouncementsProcessorImpl.postAnnouncement(req, myUserData);
@@ -167,7 +167,7 @@ public class AnnouncementsProcessorImplTest {
     PostAnnouncementRequest req = new PostAnnouncementRequest("c4c", "code for community");
 
     // mock the user
-    JWTData myUserData = new JWTData(0, PrivilegeLevel.GP);
+    JWTData myUserData = new JWTData(0, PrivilegeLevel.STANDARD);
 
     try {
       myAnnouncementsProcessorImpl.postEventSpecificAnnouncement(req, myUserData, 1);

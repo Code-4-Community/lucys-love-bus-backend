@@ -1,8 +1,6 @@
 package com.codeforcommunity.processor;
 
 import static org.jooq.generated.Tables.*;
-import static org.jooq.generated.Tables.USERS;
-import static org.jooq.generated.Tables.VERIFICATION_KEYS;
 
 import com.codeforcommunity.api.IProtectedUserProcessor;
 import com.codeforcommunity.auth.JWTData;
@@ -10,12 +8,13 @@ import com.codeforcommunity.auth.Passwords;
 import com.codeforcommunity.dataaccess.AuthDatabaseOperations;
 import com.codeforcommunity.dataaccess.UserInformationDatabaseOperations;
 import com.codeforcommunity.dto.auth.AddressData;
-import com.codeforcommunity.dto.protected_user.ChangeEmailRequest;
 import com.codeforcommunity.dto.protected_user.SetContactsAndChildrenRequest;
 import com.codeforcommunity.dto.protected_user.UserInformation;
 import com.codeforcommunity.dto.protected_user.components.Child;
 import com.codeforcommunity.dto.protected_user.components.Contact;
+import com.codeforcommunity.dto.user.ChangeEmailRequest;
 import com.codeforcommunity.dto.user.ChangePasswordRequest;
+import com.codeforcommunity.dto.user.UserDataResponse;
 import com.codeforcommunity.exceptions.EmailAlreadyInUseException;
 import com.codeforcommunity.exceptions.TableNotMatchingUserException;
 import com.codeforcommunity.exceptions.UserDoesNotExistException;
@@ -29,32 +28,24 @@ import org.jooq.generated.tables.records.ChildrenRecord;
 import org.jooq.generated.tables.records.ContactsRecord;
 import org.jooq.generated.tables.records.UsersRecord;
 import org.jooq.impl.UpdatableRecordImpl;
-import com.codeforcommunity.dto.user.ChangeEmailRequest;
-import com.codeforcommunity.dto.user.ChangePasswordRequest;
-import com.codeforcommunity.dto.user.UserDataResponse;
-import com.codeforcommunity.exceptions.EmailAlreadyInUseException;
-import com.codeforcommunity.exceptions.UserDoesNotExistException;
-import com.codeforcommunity.exceptions.WrongPasswordException;
-import com.codeforcommunity.requester.Emailer;
-import org.jooq.DSLContext;
-import org.jooq.generated.tables.pojos.Users;
-import org.jooq.generated.tables.records.UsersRecord;
 
 public class ProtectedUserProcessorImpl implements IProtectedUserProcessor {
 
   private final DSLContext db;
   private final Emailer emailer;
+  private final AuthDatabaseOperations authDatabaseOperations;
+  private final UserInformationDatabaseOperations userInformationDatabaseOperations;
 
   public ProtectedUserProcessorImpl(DSLContext db, Emailer emailer) {
     this.db = db;
     this.emailer = emailer;
     this.authDatabaseOperations = new AuthDatabaseOperations(db);
-    this.userInformationDbOps = new UserInformationDatabaseOperations(db);
+    this.userInformationDatabaseOperations = new UserInformationDatabaseOperations(db);
   }
 
   @Override
   public void deleteUser(JWTData userData) {
-    long userId = userData.getUserId();
+    int userId = userData.getUserId();
 
     db.deleteFrom(VERIFICATION_KEYS).where(VERIFICATION_KEYS.USER_ID.eq(userId)).executeAsync();
 
@@ -85,19 +76,6 @@ public class ProtectedUserProcessorImpl implements IProtectedUserProcessor {
   }
 
   @Override
-  public void changePrimaryEmail(JWTData userData, ChangeEmailRequest changeEmailRequest) {
-        changePasswordRequest.getCurrentPassword(), user.getPasswordHash())) {
-      user.setPasswordHash(Passwords.createHash(changePasswordRequest.getNewPassword()));
-      user.store();
-    } else {
-      throw new WrongPasswordException();
-    }
-
-    emailer.sendPasswordChangeConfirmationEmail(
-        user.getEmail(), AuthDatabaseOperations.getFullName(user.into(Users.class)));
-  }
-
-  @Override
   public UserDataResponse getUserData(JWTData userData) {
     UsersRecord user = db.selectFrom(USERS).where(USERS.ID.eq(userData.getUserId())).fetchOne();
 
@@ -106,6 +84,54 @@ public class ProtectedUserProcessorImpl implements IProtectedUserProcessor {
     }
 
     return new UserDataResponse(user.getFirstName(), user.getLastName(), user.getEmail());
+  }
+
+  @Override
+  public void setContactsAndChildren(
+      JWTData userData, SetContactsAndChildrenRequest setContactsAndChildrenRequest) {
+
+    userInformationDatabaseOperations.updateMainContact(
+        setContactsAndChildrenRequest.getMainContact(), userData);
+
+    if (setContactsAndChildrenRequest.getChildren() != null
+        && !setContactsAndChildrenRequest.getChildren().isEmpty()) {
+      userInformationDatabaseOperations.addChildren(
+          setContactsAndChildrenRequest.getChildren(), userData);
+    }
+
+    if (setContactsAndChildrenRequest.getAdditionalContacts() != null
+        && !setContactsAndChildrenRequest.getAdditionalContacts().isEmpty()) {
+      userInformationDatabaseOperations.addAdditionalContacts(
+          setContactsAndChildrenRequest.getAdditionalContacts(), userData);
+    }
+  }
+
+  @Override
+  public UserInformation getPersonalUserInformation(JWTData userData) {
+    Users user =
+        db.selectFrom(USERS).where(USERS.ID.eq(userData.getUserId())).fetchOneInto(Users.class);
+
+    if (user == null) {
+      throw new UserDoesNotExistException(userData.getUserId());
+    }
+
+    return authDatabaseOperations.getUserInformation(user);
+  }
+
+  @Override
+  public void updatePersonalUserInformation(UserInformation userInformation, JWTData userData) {
+    userInformationDatabaseOperations.updateMainContact(userInformation.getMainContact(), userData);
+
+    AddressData locationData = userInformation.getLocation();
+    UsersRecord usersRecord =
+        db.selectFrom(USERS).where(USERS.ID.eq(userData.getUserId())).fetchOne();
+    userInformationDatabaseOperations.updateStoreLocationRecord(usersRecord, locationData);
+
+    List<Contact> additionalContacts = userInformation.getAdditionalContacts();
+    updateContacts(additionalContacts, userData);
+
+    List<Child> children = userInformation.getChildren();
+    updateChildren(children, userData);
   }
 
   @Override
@@ -144,53 +170,6 @@ public class ProtectedUserProcessorImpl implements IProtectedUserProcessor {
     }
   }
 
-  @Override
-  public void setContactsAndChildren(
-      JWTData userData, SetContactsAndChildrenRequest setContactsAndChildrenRequest) {
-
-    userInformationDbOps.updateMainContact(
-        setContactsAndChildrenRequest.getMainContact(), userData);
-
-    if (setContactsAndChildrenRequest.getChildren() != null
-        && !setContactsAndChildrenRequest.getChildren().isEmpty()) {
-      userInformationDbOps.addChildren(setContactsAndChildrenRequest.getChildren(), userData);
-    }
-
-    if (setContactsAndChildrenRequest.getAdditionalContacts() != null
-        && !setContactsAndChildrenRequest.getAdditionalContacts().isEmpty()) {
-      userInformationDbOps.addAdditionalContacts(
-          setContactsAndChildrenRequest.getAdditionalContacts(), userData);
-    }
-  }
-
-  @Override
-  public UserInformation getPersonalUserInformation(JWTData userData) {
-    Users user =
-        db.selectFrom(USERS).where(USERS.ID.eq(userData.getUserId())).fetchOneInto(Users.class);
-
-    if (user == null) {
-      throw new UserDoesNotExistException(userData.getUserId());
-    }
-
-    return authDatabaseOperations.getUserInformation(user);
-  }
-
-  @Override
-  public void updatePersonalUserInformation(UserInformation userInformation, JWTData userData) {
-    userInformationDbOps.updateMainContact(userInformation.getMainContact(), userData);
-
-    AddressData locationData = userInformation.getLocation();
-    UsersRecord usersRecord =
-        db.selectFrom(USERS).where(USERS.ID.eq(userData.getUserId())).fetchOne();
-    userInformationDbOps.updateStoreLocationRecord(usersRecord, locationData);
-
-    List<Contact> additionalContacts = userInformation.getAdditionalContacts();
-    updateContacts(additionalContacts, userData);
-
-    List<Child> children = userInformation.getChildren();
-    updateChildren(children, userData);
-  }
-
   /**
    * Based on a list of new contact dtos update, insert, or remove the given user's contact table to
    * reflect the dto list.
@@ -206,13 +185,13 @@ public class ProtectedUserProcessorImpl implements IProtectedUserProcessor {
           if (contact.getId() == null) {
             ContactsRecord newContact = db.newRecord(CONTACTS);
             newContact.setUserId(userData.getUserId());
-            userInformationDbOps.updateStoreContactRecord(newContact, contact);
+            userInformationDatabaseOperations.updateStoreContactRecord(newContact, contact);
           } else {
             ContactsRecord updatableContact = currentContacts.remove(contact.getId());
             if (updatableContact == null) {
               throw new TableNotMatchingUserException("Contact", contact.getId());
             }
-            userInformationDbOps.updateStoreContactRecord(updatableContact, contact);
+            userInformationDatabaseOperations.updateStoreContactRecord(updatableContact, contact);
           }
         });
     currentContacts.values().forEach(UpdatableRecordImpl::delete);
@@ -232,30 +211,15 @@ public class ProtectedUserProcessorImpl implements IProtectedUserProcessor {
           if (child.getId() == null) {
             ChildrenRecord newChild = db.newRecord(CHILDREN);
             newChild.setUserId(userData.getUserId());
-            userInformationDbOps.updateStoreChildRecord(newChild, child);
+            userInformationDatabaseOperations.updateStoreChildRecord(newChild, child);
           } else {
             ChildrenRecord updatableChild = currentChildren.remove(child.getId());
             if (updatableChild == null) {
               throw new TableNotMatchingUserException("Child", child.getId());
             }
-            userInformationDbOps.updateStoreChildRecord(updatableChild, child);
+            userInformationDatabaseOperations.updateStoreChildRecord(updatableChild, child);
           }
         });
     currentChildren.values().forEach(UpdatableRecordImpl::delete);
-    String previousEmail = user.getEmail();
-    if (Passwords.isExpectedPassword(changeEmailRequest.getPassword(), user.getPasswordHash())) {
-      if (db.fetchExists(USERS, USERS.EMAIL.eq(changeEmailRequest.getNewEmail()))) {
-        throw new EmailAlreadyInUseException(changeEmailRequest.getNewEmail());
-      }
-      user.setEmail(changeEmailRequest.getNewEmail());
-      user.store();
-    } else {
-      throw new WrongPasswordException();
-    }
-
-    emailer.sendEmailChangeConfirmationEmail(
-        previousEmail,
-        AuthDatabaseOperations.getFullName(user.into(Users.class)),
-        changeEmailRequest.getNewEmail());
   }
 }

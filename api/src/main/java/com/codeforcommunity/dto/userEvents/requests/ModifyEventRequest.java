@@ -1,6 +1,6 @@
 package com.codeforcommunity.dto.userEvents.requests;
 
-import com.codeforcommunity.api.ApiDto;
+import com.codeforcommunity.dto.ApiDto;
 import com.codeforcommunity.dto.userEvents.components.EventDetails;
 import java.util.ArrayList;
 import java.util.List;

@@ -1,17 +1,28 @@
 package com.codeforcommunity.rest;
 
+import com.codeforcommunity.exceptions.AlreadyRegisteredException;
 import com.codeforcommunity.exceptions.CreateUserException;
 import com.codeforcommunity.exceptions.EmailAlreadyInUseException;
+import com.codeforcommunity.exceptions.EventDoesNotExistException;
 import com.codeforcommunity.exceptions.ExpiredSecretKeyException;
 import com.codeforcommunity.exceptions.HandledException;
+import com.codeforcommunity.exceptions.InsufficientEventCapacityException;
+import com.codeforcommunity.exceptions.InvalidEventCapacityException;
 import com.codeforcommunity.exceptions.InvalidSecretKeyException;
 import com.codeforcommunity.exceptions.MalformedParameterException;
 import com.codeforcommunity.exceptions.MissingHeaderException;
 import com.codeforcommunity.exceptions.MissingParameterException;
+import com.codeforcommunity.exceptions.NotRegisteredException;
+import com.codeforcommunity.exceptions.RequestDoesNotExistException;
+import com.codeforcommunity.exceptions.ResourceNotOwnedException;
+import com.codeforcommunity.exceptions.StripeExternalException;
+import com.codeforcommunity.exceptions.StripeInvalidWebhookSecretException;
+import com.codeforcommunity.exceptions.TableNotMatchingUserException;
 import com.codeforcommunity.exceptions.TokenInvalidException;
 import com.codeforcommunity.exceptions.UsedSecretKeyException;
 import com.codeforcommunity.exceptions.UserDoesNotExistException;
 import com.codeforcommunity.exceptions.UsernameAlreadyInUseException;
+import com.codeforcommunity.exceptions.WrongPrivilegeException;
 import com.codeforcommunity.logger.SLogger;
 import io.vertx.ext.web.RoutingContext;
 
@@ -142,6 +153,98 @@ public class FailureHandler {
   public void handleS3FailedUpload(RoutingContext ctx, String exceptionMessage) {
     String message = "The given file could not be uploaded to AWS S3: " + exceptionMessage;
     end(ctx, message, 502);
+  }
+
+  public void handleAccessTokenInvalid(RoutingContext ctx) {
+    String message = "Given access token is expired or invalid";
+    end(ctx, message, 401);
+  }
+
+  public void handleRequestDoesNotExist(
+      RoutingContext ctx, RequestDoesNotExistException exception) {
+    String message = String.format("No request with id <%d> exists", exception.getRequestId());
+    end(ctx, message, 400);
+  }
+
+  public void handleAdminOnlyRoute(RoutingContext ctx) {
+    String message = "This route is only available to admin users";
+    end(ctx, message, 401);
+  }
+
+  public void handleOutstandingRequestException(RoutingContext ctx) {
+    String message =
+        "This user cannot open another request until all pending requests are reviewed by an admin";
+    end(ctx, message, 429);
+  }
+
+  public void handleResourceNotOwned(RoutingContext ctx, ResourceNotOwnedException exception) {
+    String message =
+        String.format(
+            "The resource <%s> is not owned by the calling user and is thus not accessible",
+            exception.getResource());
+    end(ctx, message, 401);
+  }
+
+  public void handleTableNotMatchingUser(
+      RoutingContext ctx, TableNotMatchingUserException exception) {
+    String message =
+        String.format(
+            "The passed %s resource with id %d is not owned by the calling user",
+            exception.getTableName(), exception.getTableId());
+    end(ctx, message, 400);
+  }
+
+  public void handleWrongPrivilegeException(RoutingContext ctx, WrongPrivilegeException exception) {
+    String message =
+        "This route is only available to users with the privilege: "
+            + exception.getRequiredPrivilegeLevel().name();
+    end(ctx, message, 401);
+  }
+
+  public void handleInsufficientEventCapacityException(
+      RoutingContext ctx, InsufficientEventCapacityException exception) {
+    String message =
+        "The user requested more tickets than are available for the event: "
+            + exception.getEventTitle();
+    end(ctx, message, 409);
+  }
+
+  public void handleNotRegisteredException(RoutingContext ctx, NotRegisteredException e) {
+    String message = "You are not registered for the event " + e.getEventTitle();
+    end(ctx, message, 409);
+  }
+
+  public void handleInvalidEventCapacityException(
+      RoutingContext ctx, InvalidEventCapacityException e) {
+    String message =
+        String.format(
+            "Cannot change the event capacity to %d because there are currently %d users signed up",
+            e.getDesiredCapacity(), e.getCurrentParticipants());
+    end(ctx, message, 409);
+  }
+
+  public void handleAlreadyRegisteredException(RoutingContext ctx, AlreadyRegisteredException e) {
+    String message = "You are already registered for the event " + e.getEventTitle();
+    end(ctx, message, 409);
+  }
+
+  public void handleStripeExternalException(RoutingContext ctx, StripeExternalException exception) {
+    String message =
+        "A call to Stripe's API returned an internal server error: " + exception.getMessage();
+    end(ctx, message, 502);
+  }
+
+  public void handleStripeInvalidWebhookSecretException(
+      RoutingContext ctx, StripeInvalidWebhookSecretException exception) {
+    String message =
+        "Incoming Stripe webhook request could not be verified: " + exception.getMessage();
+    end(ctx, message, 400);
+  }
+
+  public void handleEventDoesNotExistException(
+      RoutingContext ctx, EventDoesNotExistException exception) {
+    String message = "There is no event with id: " + exception.getEventId();
+    end(ctx, message, 404);
   }
 
   private void handleUncaughtError(RoutingContext ctx, Throwable throwable) {

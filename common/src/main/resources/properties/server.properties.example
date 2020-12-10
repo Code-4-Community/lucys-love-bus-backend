@@ -12,7 +12,7 @@ aws_s3_upload_dir = placeholder_s3_dir_name
 # DATABASE PROPERTIES
 # =======================================================================================================
 database_driver = org.postgresql.Driver
-database_url = jdbc:postgresql://localhost:5432/backend-scaffold?autoreconnect=true
+database_url = jdbc:postgresql://localhost:5432/lucys-love-bus?autoreconnect=true
 database_username = postgres
 database_password = placeholder_db_password
 
@@ -61,3 +61,12 @@ jwt_secret_key = placeholder_jwt_secret
 # =======================================================================================================
 slack_webhook_url = placeholder_slack_url
 slack_enabled = false
+
+
+# =======================================================================================================
+# STRIPE PROPERTIES
+# =======================================================================================================
+stripe_api_secret_key = sk_test_2TMIBMqcAIJmoP76SH793QzE
+stripe_webhook_signing_secret = whsec_WgFbXzt6iqcVaIkTQBAvcwXmAXX4ImTS
+cancel_registration_route = /checkout
+success_registration_route = /event-registration-confirmation/success/

@@ -40,8 +40,8 @@ public class RequestsProcessorImpl implements IRequestsProcessor {
     // Check that this user doesn't have outstanding requests
     // Add request to database
 
-    if (userData.getPrivilegeLevel() != PrivilegeLevel.GP) {
-      throw new WrongPrivilegeException(PrivilegeLevel.GP);
+    if (userData.getPrivilegeLevel() != PrivilegeLevel.STANDARD) {
+      throw new WrongPrivilegeException(PrivilegeLevel.STANDARD);
     }
     List<RequestStatus> pastRequests =
         db.selectFrom(PF_REQUESTS)

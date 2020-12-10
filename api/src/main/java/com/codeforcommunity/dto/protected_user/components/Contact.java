@@ -1,6 +1,6 @@
 package com.codeforcommunity.dto.protected_user.components;
 
-import com.codeforcommunity.api.ApiDto;
+import com.codeforcommunity.dto.ApiDto;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import java.sql.Date;
 import java.util.ArrayList;

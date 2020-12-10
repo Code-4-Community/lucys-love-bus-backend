@@ -27,13 +27,11 @@ import com.stripe.model.Event;
 import com.stripe.model.checkout.Session;
 import com.stripe.net.Webhook;
 import com.stripe.param.checkout.SessionCreateParams;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Properties;
 import java.util.stream.Collectors;
 import org.jooq.DSLContext;
 import org.jooq.generated.tables.pojos.Events;
@@ -59,21 +57,20 @@ public class CheckoutProcessorImpl implements ICheckoutProcessor {
     this.emailer = emailer;
     this.eventDatabaseOperations = new EventDatabaseOperations(db);
 
-    Properties stripeProperties = PropertiesLoader.getStripeProperties();
-    this.stripeAPISecretKey = stripeProperties.getProperty("stripe_api_secret_key");
-    this.stripeWebhookSigningSecret = stripeProperties.getProperty("stripe_webhook_signing_secret");
+    this.stripeAPISecretKey = PropertiesLoader.loadProperty("stripe_api_secret_key");
+    this.stripeWebhookSigningSecret =
+        PropertiesLoader.loadProperty("stripe_webhook_signing_secret");
 
-    Properties frontendProperties = PropertiesLoader.getFrontendProperties();
     this.cancelUrl =
         String.format(
             "%s%s",
-            frontendProperties.getProperty("domain"),
-            frontendProperties.getProperty("cancel_registration_route"));
+            PropertiesLoader.loadProperty("frontend_base_url"),
+            PropertiesLoader.loadProperty("cancel_registration_route"));
     this.successUrl =
         String.format(
             "%s%s",
-            frontendProperties.getProperty("domain"),
-            frontendProperties.getProperty("success_registration_route"));
+            PropertiesLoader.loadProperty("frontend_base_url"),
+            PropertiesLoader.loadProperty("success_registration_route"));
   }
 
   private String createCheckoutSessionAndEventRegistration(List<LineItem> lineItems, JWTData user)
@@ -135,7 +132,7 @@ public class CheckoutProcessorImpl implements ICheckoutProcessor {
 
     List<LineItem> lineItems = convertLineItems(request.getLineItemRequests(), retrievedEvents);
     assertLineItems(lineItems); // assert that quantities are within event capacity
-    if (user.getPrivilegeLevel() == PrivilegeLevel.GP) {
+    if (user.getPrivilegeLevel() == PrivilegeLevel.STANDARD) {
       return Optional.of(createCheckoutSessionAndEventRegistration(lineItems, user));
     } else {
       this.createEventRegistration(lineItems, user);
@@ -170,7 +167,7 @@ public class CheckoutProcessorImpl implements ICheckoutProcessor {
     validateUpdateEventRegistration(event, registration, quantity, eventId);
     int currentQuantity = registration.getTicketQuantity();
     if (quantity > currentQuantity) {
-      if (userData.getPrivilegeLevel() == PrivilegeLevel.GP) {
+      if (userData.getPrivilegeLevel() == PrivilegeLevel.STANDARD) {
         List<LineItemRequest> requests =
             Collections.singletonList(new LineItemRequest(eventId, quantity - currentQuantity));
         Map<Integer, EventsRecord> retrievedEvents =
@@ -233,7 +230,7 @@ public class CheckoutProcessorImpl implements ICheckoutProcessor {
         currentRegistration.store();
 
         // Send event registration confirmation
-        sendEventConfirmationEmail(eventId, userId, ticketQuantity);
+        //        sendEventConfirmationEmail(eventId, userId, ticketQuantity);
       } else {
         EventRegistrationsRecord record = db.newRecord(EVENT_REGISTRATIONS);
         record.setUserId(userId);
@@ -243,7 +240,8 @@ public class CheckoutProcessorImpl implements ICheckoutProcessor {
         record.store();
 
         // Send event registration confirmation
-        sendEventConfirmationEmail(eventId, userId, registration.getTicketQuantityDelta());
+        //        sendEventConfirmationEmail(eventId, userId,
+        // registration.getTicketQuantityDelta());
       }
     }
     db.delete(PENDING_REGISTRATIONS)
@@ -267,7 +265,8 @@ public class CheckoutProcessorImpl implements ICheckoutProcessor {
       newRecord.store();
 
       // Send event registration confirmation
-      sendEventConfirmationEmail(lineItem.getId(), user.getUserId(), lineItem.getQuantity());
+      //      sendEventConfirmationEmail(lineItem.getId(), user.getUserId(),
+      // lineItem.getQuantity());
     }
   }
 
@@ -341,14 +340,16 @@ public class CheckoutProcessorImpl implements ICheckoutProcessor {
     return lineItems;
   }
 
-  private void sendEventConfirmationEmail(int eventId, int userId, int ticketQuantity) {
-    String tickets = String.valueOf(ticketQuantity);
-    Events event = db.selectFrom(EVENTS).where(EVENTS.ID.eq(eventId)).fetchOneInto(Events.class);
-    String date = new SimpleDateFormat("MM/dd/yyyy").format(event.getStartTime());
-    String time = new SimpleDateFormat("HH:mm:ss").format(event.getStartTime());
-    emailer.sendEmailToAllContacts(
-        userId,
-        (e, n) ->
-            emailer.sendRegistrationConfirmation(e, n, tickets, event.getTitle(), date, time));
-  }
+  //  TODO: Implement event confirmation email
+  //  private void sendEventConfirmationEmail(int eventId, int userId, int ticketQuantity) {
+  //    String tickets = String.valueOf(ticketQuantity);
+  //    Events event =
+  // db.selectFrom(EVENTS).where(EVENTS.ID.eq(eventId)).fetchOneInto(Events.class);
+  //    String date = new SimpleDateFormat("MM/dd/yyyy").format(event.getStartTime());
+  //    String time = new SimpleDateFormat("HH:mm:ss").format(event.getStartTime());
+  //    emailer.sendEmailToAllContacts(
+  //        userId,
+  //        (e, n) ->
+  //            emailer.sendRegistrationConfirmation(e, n, tickets, event.getTitle(), date, time));
+  //  }
 }

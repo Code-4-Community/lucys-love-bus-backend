@@ -53,7 +53,7 @@ public class RequestsProcessorImplTest {
       myRequestsProcessorImpl.createRequest(myUserData);
       fail();
     } catch (WrongPrivilegeException e) {
-      assertEquals(e.getRequiredPrivilegeLevel(), PrivilegeLevel.GP);
+      assertEquals(e.getRequiredPrivilegeLevel(), PrivilegeLevel.STANDARD);
     }
   }
 
@@ -62,7 +62,7 @@ public class RequestsProcessorImplTest {
   public void testCreateRequest2() {
     // mock the user data
     JWTData myUserData = mock(JWTData.class);
-    when(myUserData.getPrivilegeLevel()).thenReturn(PrivilegeLevel.GP);
+    when(myUserData.getPrivilegeLevel()).thenReturn(PrivilegeLevel.STANDARD);
     when(myUserData.getUserId()).thenReturn(0);
 
     // mock the DB
@@ -84,7 +84,7 @@ public class RequestsProcessorImplTest {
   public void testCreateRequest3() {
     // mock the user data
     JWTData myUserData = mock(JWTData.class);
-    when(myUserData.getPrivilegeLevel()).thenReturn(PrivilegeLevel.GP);
+    when(myUserData.getPrivilegeLevel()).thenReturn(PrivilegeLevel.STANDARD);
     when(myUserData.getUserId()).thenReturn(0);
 
     // mock the DB
@@ -102,7 +102,7 @@ public class RequestsProcessorImplTest {
   public void testGetRequests1() {
     // mock the user data
     JWTData myUserData = mock(JWTData.class);
-    when(myUserData.getPrivilegeLevel()).thenReturn(PrivilegeLevel.GP);
+    when(myUserData.getPrivilegeLevel()).thenReturn(PrivilegeLevel.STANDARD);
     when(myUserData.getUserId()).thenReturn(0);
 
     try {
@@ -220,7 +220,7 @@ public class RequestsProcessorImplTest {
   public void testApproveRequest1() {
     // mock the user data
     JWTData myUserData = mock(JWTData.class);
-    when(myUserData.getPrivilegeLevel()).thenReturn(PrivilegeLevel.GP);
+    when(myUserData.getPrivilegeLevel()).thenReturn(PrivilegeLevel.STANDARD);
 
     try {
       myRequestsProcessorImpl.approveRequest(0, myUserData);
@@ -265,7 +265,7 @@ public class RequestsProcessorImplTest {
   public void testRejectRequest1() {
     // mock the user data
     JWTData myUserData = mock(JWTData.class);
-    when(myUserData.getPrivilegeLevel()).thenReturn(PrivilegeLevel.GP);
+    when(myUserData.getPrivilegeLevel()).thenReturn(PrivilegeLevel.STANDARD);
 
     try {
       myRequestsProcessorImpl.rejectRequest(0, myUserData);
@@ -300,7 +300,7 @@ public class RequestsProcessorImplTest {
   // test getting request statuses when there are none
   @Test
   public void testGetRequestStatus1() {
-    JWTData myUserData = new JWTData(1, PrivilegeLevel.GP);
+    JWTData myUserData = new JWTData(1, PrivilegeLevel.STANDARD);
 
     myJooqMock.addEmptyReturn("SELECT");
 
@@ -311,7 +311,7 @@ public class RequestsProcessorImplTest {
   // test getting request statuses when there is one
   @Test
   public void testGetRequestStatus2() {
-    JWTData myUserData = new JWTData(1, PrivilegeLevel.GP);
+    JWTData myUserData = new JWTData(1, PrivilegeLevel.STANDARD);
 
     // mock the DB for PF requests
     Record3<Integer, RequestStatus, Timestamp> myPFReqRecord =
@@ -329,7 +329,7 @@ public class RequestsProcessorImplTest {
   // test getting request statuses when there are multiple
   @Test
   public void testGetRequestStatus3() {
-    JWTData myUserData = new JWTData(1, PrivilegeLevel.GP);
+    JWTData myUserData = new JWTData(1, PrivilegeLevel.STANDARD);
 
     // mock the DB for PF requests
     Record3<Integer, RequestStatus, Timestamp> myPFReqRecord1 =

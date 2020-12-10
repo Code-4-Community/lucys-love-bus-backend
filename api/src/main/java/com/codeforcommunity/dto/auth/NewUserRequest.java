@@ -1,7 +1,6 @@
 package com.codeforcommunity.dto.auth;
 
 import com.codeforcommunity.dto.ApiDto;
-import com.codeforcommunity.exceptions.InvalidPasswordException;
 import java.util.ArrayList;
 import java.util.List;
 

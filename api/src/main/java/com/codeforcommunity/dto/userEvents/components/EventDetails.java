@@ -1,6 +1,6 @@
 package com.codeforcommunity.dto.userEvents.components;
 
-import com.codeforcommunity.api.ApiDto;
+import com.codeforcommunity.dto.ApiDto;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -139,6 +139,6 @@ public class EventDetails extends ApiDto {
   }
 
   private boolean isStartInvalid(Timestamp start) {
-    return start.before(Date.from(Instant.now().minusSeconds(ApiDto.secondsLateEventCreation)));
+    return start.before(Date.from(Instant.now()));
   }
 }

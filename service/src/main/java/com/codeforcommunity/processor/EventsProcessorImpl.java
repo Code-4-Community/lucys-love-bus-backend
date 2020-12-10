@@ -399,7 +399,7 @@ public class EventsProcessorImpl implements IEventsProcessor {
     if (event.getEndTime().before(Timestamp.from(Instant.now()))) {
       return false;
     }
-    if (userData.getPrivilegeLevel().equals(PrivilegeLevel.GP)) {
+    if (userData.getPrivilegeLevel().equals(PrivilegeLevel.STANDARD)) {
       Timestamp fiveDays = Timestamp.from(Instant.now().plus(daysGpCanRegister, ChronoUnit.DAYS));
       return event.getStartTime().before(fiveDays);
     }

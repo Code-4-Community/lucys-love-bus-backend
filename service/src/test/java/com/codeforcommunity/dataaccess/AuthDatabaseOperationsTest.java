@@ -68,7 +68,7 @@ public class AuthDatabaseOperationsTest {
     UsersRecord myUser = myJooqMock.getContext().newRecord(Tables.USERS);
     myUser.setEmail(myEmail);
     myUser.setId(1);
-    myUser.setPrivilegeLevel(PrivilegeLevel.GP);
+    myUser.setPrivilegeLevel(PrivilegeLevel.STANDARD);
     myJooqMock.addReturn("SELECT", myUser);
 
     JWTData userData = myAuthDatabaseOperations.getUserJWTData(myEmail);
@@ -87,7 +87,7 @@ public class AuthDatabaseOperationsTest {
     myUser.setEmail(myEmail);
     myUser.setPassHash(Passwords.createHash("letmein"));
     myUser.setId(1);
-    myUser.setPrivilegeLevel(PrivilegeLevel.GP);
+    myUser.setPrivilegeLevel(PrivilegeLevel.STANDARD);
     myJooqMock.addReturn("SELECT", myUser);
 
     assertFalse(myAuthDatabaseOperations.isValidLogin(myEmail, "letmeout"));
@@ -103,7 +103,7 @@ public class AuthDatabaseOperationsTest {
     myUser.setEmail(myEmail);
     myUser.setPassHash(Passwords.createHash("letmein"));
     myUser.setId(1);
-    myUser.setPrivilegeLevel(PrivilegeLevel.GP);
+    myUser.setPrivilegeLevel(PrivilegeLevel.STANDARD);
     myJooqMock.addReturn("SELECT", myUser);
 
     assertTrue(myAuthDatabaseOperations.isValidLogin(myEmail, "letmein"));
@@ -119,7 +119,7 @@ public class AuthDatabaseOperationsTest {
     myUser.setEmail(myEmail);
     myUser.setPassHash(Passwords.createHash("letmein"));
     myUser.setId(1);
-    myUser.setPrivilegeLevel(PrivilegeLevel.GP);
+    myUser.setPrivilegeLevel(PrivilegeLevel.STANDARD);
     myJooqMock.addReturn("SELECT", myUser);
 
     NewUserRequest req =

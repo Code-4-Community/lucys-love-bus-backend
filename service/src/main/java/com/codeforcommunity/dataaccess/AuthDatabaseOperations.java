@@ -25,15 +25,10 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
-import java.util.Properties;
 import org.jooq.DSLContext;
 import org.jooq.generated.Tables;
 import org.jooq.generated.tables.pojos.Users;
 import org.jooq.generated.tables.records.ContactsRecord;
-import java.util.Optional;
-import org.jooq.DSLContext;
-import org.jooq.generated.Tables;
-import org.jooq.generated.tables.pojos.Users;
 import org.jooq.generated.tables.records.UsersRecord;
 import org.jooq.generated.tables.records.VerificationKeysRecord;
 
@@ -143,7 +138,6 @@ public class AuthDatabaseOperations {
     mainContact.setPhoneNumber(request.getPhoneNumber());
     mainContact.setAllergies(request.getAllergies());
     mainContact.store();
-
 
     return newUser;
   }

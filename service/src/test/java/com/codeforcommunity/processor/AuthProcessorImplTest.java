@@ -64,7 +64,7 @@ public class AuthProcessorImplTest {
     // seed the db
     UsersRecord record = myJooqMock.getContext().newRecord(Tables.USERS);
     record.setId(0);
-    record.setPrivilegeLevel(PrivilegeLevel.GP);
+    record.setPrivilegeLevel(PrivilegeLevel.STANDARD);
     myJooqMock.addReturn("INSERT", record);
     myJooqMock.addEmptyReturn("SELECT");
     myJooqMock.addReturn("SELECT", record);
@@ -136,7 +136,7 @@ public class AuthProcessorImplTest {
     String loginPass = "fundies";
 
     int recordId = 1;
-    PrivilegeLevel recordPL = PrivilegeLevel.GP;
+    PrivilegeLevel recordPL = PrivilegeLevel.STANDARD;
 
     // make a user record
     UsersRecord record = myJooqMock.getContext().newRecord(Tables.USERS);
@@ -173,7 +173,7 @@ public class AuthProcessorImplTest {
     String loginPass = "fundies";
 
     int recordId = 1;
-    PrivilegeLevel recordPL = PrivilegeLevel.GP;
+    PrivilegeLevel recordPL = PrivilegeLevel.STANDARD;
 
     // make a user record
     UsersRecord record = myJooqMock.getContext().newRecord(Tables.USERS);
@@ -208,7 +208,7 @@ public class AuthProcessorImplTest {
     String loginPass = "fundies";
 
     int recordId = 1;
-    PrivilegeLevel recordPL = PrivilegeLevel.GP;
+    PrivilegeLevel recordPL = PrivilegeLevel.STANDARD;
 
     // make a user record
     UsersRecord recordCopy = myJooqMock.getContext().newRecord(Tables.USERS);

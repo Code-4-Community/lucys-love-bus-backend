@@ -4,6 +4,8 @@ import static com.codeforcommunity.rest.ApiRouter.end;
 
 import com.codeforcommunity.api.IProtectedUserProcessor;
 import com.codeforcommunity.auth.JWTData;
+import com.codeforcommunity.dto.protected_user.SetContactsAndChildrenRequest;
+import com.codeforcommunity.dto.protected_user.UserInformation;
 import com.codeforcommunity.dto.user.ChangeEmailRequest;
 import com.codeforcommunity.dto.user.ChangePasswordRequest;
 import com.codeforcommunity.dto.user.UserDataResponse;
@@ -74,7 +76,7 @@ public class ProtectedUserRouter implements IRouter {
     setUserContactInfoRoute.handler(this::handleUpdateUserContactInfo);
   }
 
-  private void handleDeleteUser(RoutingContext ctx) {
+  private void handleDeleteUserRoute(RoutingContext ctx) {
     JWTData userData = ctx.get("jwt_data");
 
     processor.deleteUser(userData);
@@ -92,19 +94,10 @@ public class ProtectedUserRouter implements IRouter {
     end(ctx.response(), 200);
   }
 
-  private void handleChangeEmailRoute(RoutingContext ctx) {
-    JWTData userData = ctx.get("jwt_data");
-    ChangeEmailRequest changeEmailRequest = getJsonBodyAsClass(ctx, ChangeEmailRequest.class);
-
-    processor.changePrimaryEmail(userData, changeEmailRequest);
-
-    end(ctx.response(), 200);
-  }
-
   private void handleSetUserContactInfo(RoutingContext ctx) {
     JWTData userData = ctx.get("jwt_data");
     SetContactsAndChildrenRequest setUserContactInfoRequest =
-        getJsonBodyAsClass(ctx, SetContactsAndChildrenRequest.class);
+        RestFunctions.getJsonBodyAsClass(ctx, SetContactsAndChildrenRequest.class);
 
     processor.setContactsAndChildren(userData, setUserContactInfoRequest);
 
@@ -121,9 +114,11 @@ public class ProtectedUserRouter implements IRouter {
 
   private void handleUpdateUserContactInfo(RoutingContext ctx) {
     JWTData userData = ctx.get("jwt_data");
-    UserInformation userInformation = getJsonBodyAsClass(ctx, UserInformation.class);
+    UserInformation userInformation = RestFunctions.getJsonBodyAsClass(ctx, UserInformation.class);
 
     processor.updatePersonalUserInformation(userInformation, userData);
+  }
+
   private void handleGetUserDataRoute(RoutingContext ctx) {
     JWTData userData = ctx.get("jwt_data");
 

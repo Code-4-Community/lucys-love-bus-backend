@@ -108,5 +108,5 @@ public interface RestFunctions {
       RoutingContext ctx, String name, Function<String, T> mapper) {
     List<String> queryParam = ctx.queryParam(name);
     return queryParam.stream().map(mapper).collect(Collectors.toList());
-}
+  }
 }
