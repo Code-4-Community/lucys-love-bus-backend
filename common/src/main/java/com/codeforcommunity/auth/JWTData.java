@@ -4,15 +4,15 @@ import com.codeforcommunity.enums.PrivilegeLevel;
 
 public class JWTData {
 
-  private final int userId;
+  private final Integer userId;
   private final PrivilegeLevel privilegeLevel;
 
-  public JWTData(int userId, PrivilegeLevel privilegeLevel) {
+  public JWTData(Integer userId, PrivilegeLevel privilegeLevel) {
     this.userId = userId;
     this.privilegeLevel = privilegeLevel;
   }
 
-  public int getUserId() {
+  public Integer getUserId() {
     return this.userId;
   }
 

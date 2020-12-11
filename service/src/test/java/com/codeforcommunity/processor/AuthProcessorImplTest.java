@@ -55,7 +55,7 @@ public class AuthProcessorImplTest {
     this.mockJWTCreator = mock(JWTCreator.class);
     this.myAuthProcessorImpl =
         new AuthProcessorImpl(
-            myJooqMock.getContext(), mockJWTCreator, new Emailer(myJooqMock.getContext()));
+            myJooqMock.getContext(), new Emailer(myJooqMock.getContext()), mockJWTCreator);
   }
 
   // test sign up where all the fields are filled in

@@ -42,12 +42,7 @@ public class AuthProcessorImpl implements IAuthProcessor {
    */
   @Override
   public SessionResponse signUp(NewUserRequest request) {
-    UsersRecord user =
-        authDatabaseOperations.createNewUser(
-            request.getEmail(),
-            request.getPassword(),
-            request.getFirstName(),
-            request.getLastName());
+    UsersRecord user = authDatabaseOperations.createNewUser(request);
 
     emailer.sendWelcomeEmail(
         request.getEmail(), AuthDatabaseOperations.getFullName(user.into(Users.class)));
@@ -129,7 +124,7 @@ public class AuthProcessorImpl implements IAuthProcessor {
         authDatabaseOperations.validateSecretKey(
             request.getSecretKey(), VerificationKeyType.FORGOT_PASSWORD);
 
-    user.setPasswordHash(Passwords.createHash(request.getNewPassword()));
+    user.setPassHash(Passwords.createHash(request.getNewPassword()));
     user.store();
 
     emailer.sendPasswordChangeConfirmationEmail(

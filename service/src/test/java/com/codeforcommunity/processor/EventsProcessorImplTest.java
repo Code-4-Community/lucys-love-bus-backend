@@ -976,8 +976,8 @@ public class EventsProcessorImplTest {
    * Brandon.
    */
   @ParameterizedTest
-  @ValueSource(ints = {0, 1})
-  public void testGetEventRegisteredUsersIncorrectPrivilegeLevel(int privLevel) {
+  @ValueSource(strings = {"standard", "pf"})
+  public void testGetEventRegisteredUsersIncorrectPrivilegeLevel(String privLevel) {
     PrivilegeLevel level = PrivilegeLevel.from(privLevel);
     JWTData jwtData = mock(JWTData.class);
     when(jwtData.getPrivilegeLevel()).thenReturn(level);

@@ -81,7 +81,7 @@ public class ServiceMain {
     // Log uncaught exceptions to Slack
     vertx.exceptionHandler(SLogger::logApplicationError);
 
-    Emailer emailer = new Emailer();
+    Emailer emailer = new Emailer(this.db);
 
     IAuthProcessor authProcessor = new AuthProcessorImpl(this.db, emailer, jwtCreator);
     IProtectedUserProcessor protectedUserProcessor =

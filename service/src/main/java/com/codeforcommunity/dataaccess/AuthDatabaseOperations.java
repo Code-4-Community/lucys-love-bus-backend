@@ -91,6 +91,23 @@ public class AuthDatabaseOperations {
   }
 
   /**
+   * Gets the Users pojo associated with the given id if that user exists.
+   *
+   * @throws UserDoesNotExistException if given email does not match a user.
+   */
+  public Users getUserPojo(int userId) {
+    Optional<Users> maybeUser =
+        Optional.ofNullable(
+            db.selectFrom(USERS).where(USERS.ID.eq(userId)).fetchOneInto(Users.class));
+
+    if (maybeUser.isPresent()) {
+      return maybeUser.get();
+    } else {
+      throw new UserDoesNotExistException(userId);
+    }
+  }
+
+  /**
    * Returns true if the given username and password correspond to a user in the USER table and
    * false otherwise.
    */
@@ -100,7 +117,7 @@ public class AuthDatabaseOperations {
             db.selectFrom(USERS).where(USERS.EMAIL.eq(email)).fetchOneInto(Users.class));
 
     return maybeUser
-        .filter(user -> Passwords.isExpectedPassword(pass, user.getPasswordHash()))
+        .filter(user -> Passwords.isExpectedPassword(pass, user.getPassHash()))
         .isPresent();
   }
 
@@ -110,7 +127,7 @@ public class AuthDatabaseOperations {
    * @throws EmailAlreadyInUseException if the given username and email are already used in the USER
    *     table.
    */
-  public void createNewUser(NewUserRequest request) {
+  public UsersRecord createNewUser(NewUserRequest request) {
     String email = request.getEmail();
     boolean emailUsed = db.fetchExists(db.selectFrom(USERS).where(USERS.EMAIL.eq(email)));
     if (emailUsed) {
@@ -119,11 +136,10 @@ public class AuthDatabaseOperations {
 
     UsersRecord newUser = db.newRecord(USERS);
     addAddressDataToUserRecord(newUser, request.getLocation());
-    String verificationToken = createSecretKey(newUser.getId(), VerificationKeyType.VERIFY_EMAIL);
-    // TODO: Send verification email
-    newUser.setPasswordHash(Passwords.createHash(password));
-    newUser.setFirstName(firstName);
-    newUser.setLastName(lastName);
+    //    String verificationToken = createSecretKey(newUser.getId(),
+    // VerificationKeyType.VERIFY_EMAIL);
+    //    // TODO: Send verification email
+    newUser.setPassHash(Passwords.createHash(request.getPassword()));
     newUser.setPrivilegeLevel(PrivilegeLevel.STANDARD);
     newUser.store();
 
@@ -190,7 +206,7 @@ public class AuthDatabaseOperations {
    * Given a userId and token, stores the token in the verification_keys table for the user and
    * invalidates all other keys of this type for this user.
    */
-  public String createSecretKey(long userId, VerificationKeyType type) {
+  public String createSecretKey(int userId, VerificationKeyType type) {
 
     // Maybe add a different column besides used?
     db.update(VERIFICATION_KEYS)
@@ -237,11 +253,10 @@ public class AuthDatabaseOperations {
 
   private AddressData extractAddressDataFromUser(Users user) {
     return new AddressData(user.getAddress(), user.getCity(), user.getState(), user.getZipcode());
-    return tokenResult.getCreatedAt().after(cutoffDate);
   }
 
   /** Given a user pojo, return the user's full name. */
   public static String getFullName(Users user) {
-    return String.format("%s %s", user.getFirstName(), user.getLastName());
+    return "Jack Blanc";
   }
 }

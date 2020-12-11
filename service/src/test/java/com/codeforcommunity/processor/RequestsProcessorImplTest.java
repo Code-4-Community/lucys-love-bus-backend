@@ -256,7 +256,7 @@ public class RequestsProcessorImplTest {
     assertEquals(
         myJooqMock.getSqlBindings().get("UPDATE").get(0)[0], RequestStatus.APPROVED.getVal());
     assertEquals(myJooqMock.getSqlBindings().get("UPDATE").get(0)[1], myUserRecord.getId());
-    assertEquals(myJooqMock.getSqlBindings().get("UPDATE").get(1)[0], PrivilegeLevel.PF.getVal());
+    assertEquals(myJooqMock.getSqlBindings().get("UPDATE").get(1)[0], PrivilegeLevel.PF);
     assertEquals(myJooqMock.getSqlBindings().get("UPDATE").get(1)[1], myUserRecord.getId());
   }
 

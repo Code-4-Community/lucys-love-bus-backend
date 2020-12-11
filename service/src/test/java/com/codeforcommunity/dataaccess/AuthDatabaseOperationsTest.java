@@ -295,6 +295,6 @@ public class AuthDatabaseOperationsTest {
     assertEquals(true, updateBindings.get(0)[0]);
     assertEquals(token, insertBindings.get(0)[0]);
     assertEquals(0, insertBindings.get(0)[1]);
-    assertEquals(VerificationKeyType.FORGOT_PASSWORD.getVal(), insertBindings.get(0)[2]);
+    assertEquals(VerificationKeyType.FORGOT_PASSWORD.getName(), insertBindings.get(0)[2]);
   }
 }

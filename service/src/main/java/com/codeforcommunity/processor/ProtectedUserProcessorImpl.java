@@ -83,7 +83,8 @@ public class ProtectedUserProcessorImpl implements IProtectedUserProcessor {
       throw new UserDoesNotExistException(userData.getUserId());
     }
 
-    return new UserDataResponse(user.getFirstName(), user.getLastName(), user.getEmail());
+    throw new RuntimeException("ahhhhhhhhhh");
+    //    return new UserDataResponse(user.getFirstName(), user.getLastName(), user.getEmail());
   }
 
   @Override
