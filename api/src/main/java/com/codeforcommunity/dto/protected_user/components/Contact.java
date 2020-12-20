@@ -26,6 +26,7 @@ public class Contact extends ApiDto {
   private String notes;
   private String pronouns;
   private Boolean shouldSendEmails;
+  private String referrer;
 
   /** Creates a contact with no information (all fields null). */
   public Contact() {}
@@ -58,7 +59,8 @@ public class Contact extends ApiDto {
       String medication,
       String notes,
       String pronouns,
-      Boolean shouldSendEmails) {
+      Boolean shouldSendEmails,
+      String referrer) {
     this.id = id;
     this.firstName = firstName;
     this.lastName = lastName;
@@ -71,6 +73,7 @@ public class Contact extends ApiDto {
     this.notes = notes;
     this.pronouns = pronouns;
     this.shouldSendEmails = shouldSendEmails;
+    this.referrer = referrer;
   }
 
   /**
@@ -313,5 +316,23 @@ public class Contact extends ApiDto {
    */
   public void setShouldSendEmails(Boolean shouldSendEmails) {
     this.shouldSendEmails = shouldSendEmails;
+  }
+
+  /**
+   * Returns this Contact's referrer.
+   *
+   * @return this Contact's referrer.
+   */
+  public String getReferrer() {
+    return this.referrer;
+  }
+
+  /**
+   * Sets this Contact's referrer to the given one.
+   *
+   * @param referrer the new referrer.
+   */
+  public void setReferrer(String referrer) {
+    this.referrer = referrer;
   }
 }
