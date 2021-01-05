@@ -85,7 +85,7 @@ public class RestFunctions {
    * @param <T> the desired type.
    * @return An optional object of the query param as it's desired type.
    */
-  static <T> Optional<T> getOptionalQueryParam(
+  public static <T> Optional<T> getOptionalQueryParam(
       RoutingContext ctx, String name, Function<String, T> mapper) {
     List<String> params = ctx.queryParam(name);
     T returnValue;
@@ -112,7 +112,7 @@ public class RestFunctions {
    * @return A list of the desired type of all the values of the query param that could successfully
    *     be mapped.
    */
-  static <T> List<T> getMultipleQueryParams(
+  public static <T> List<T> getMultipleQueryParams(
       RoutingContext ctx, String name, Function<String, T> mapper) {
     List<String> queryParam = ctx.queryParam(name);
     return queryParam.stream().map(mapper).collect(Collectors.toList());
