@@ -136,6 +136,7 @@ public class AuthDatabaseOperations {
 
     UsersRecord newUser = db.newRecord(USERS);
     addAddressDataToUserRecord(newUser, request.getLocation());
+    newUser.setEmail(request.getEmail());
     //    String verificationToken = createSecretKey(newUser.getId(),
     // VerificationKeyType.VERIFY_EMAIL);
     //    // TODO: Send verification email
