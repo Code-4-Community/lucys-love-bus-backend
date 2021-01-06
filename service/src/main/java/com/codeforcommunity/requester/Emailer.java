@@ -47,61 +47,6 @@ public class Emailer {
     this.db = db;
   }
 
-  public void sendWelcomeEmail(String sendToEmail, String sendToName) {
-    String filePath = "/emails/WelcomeEmail.html";
-
-    Map<String, String> templateValues = new HashMap<>();
-    templateValues.put("name", sendToName);
-    templateValues.put("link", loginUrl);
-    Optional<String> emailBody = emailOperations.getTemplateString(filePath, templateValues);
-
-    emailBody.ifPresent(s -> emailOperations.sendEmail(sendToName, sendToEmail, subjectWelcome, s));
-  }
-
-  public void sendEmailChangeConfirmationEmail(
-      String sendToEmail, String sendToName, String newEmail) {
-    String filePath = "/emails/EmailChangeConfirmation.html";
-
-    Map<String, String> templateValues = new HashMap<>();
-    templateValues.put("new_email", newEmail);
-    Optional<String> emailBody = emailOperations.getTemplateString(filePath, templateValues);
-
-    emailBody.ifPresent(
-        s -> emailOperations.sendEmail(sendToName, sendToEmail, subjectEmailChange, s));
-  }
-
-  public void sendPasswordChangeRequestEmail(
-      String sendToEmail, String sendToName, String passwordResetKey) {
-    String filePath = "/emails/PasswordChangeRequest.html";
-
-    Map<String, String> templateValues = new HashMap<>();
-    templateValues.put("link", String.format(passwordResetTemplate, passwordResetKey));
-    Optional<String> emailBody = emailOperations.getTemplateString(filePath, templateValues);
-
-    emailBody.ifPresent(
-        s -> emailOperations.sendEmail(sendToName, sendToEmail, subjectPasswordResetRequest, s));
-  }
-
-  public void sendPasswordChangeConfirmationEmail(String sendToEmail, String sendToName) {
-    String filePath = "/emails/PasswordChangeConfirmation.html";
-
-    Map<String, String> templateValues = new HashMap<>();
-    Optional<String> emailBody = emailOperations.getTemplateString(filePath, templateValues);
-
-    emailBody.ifPresent(
-        s -> emailOperations.sendEmail(sendToName, sendToEmail, subjectPasswordResetConfirm, s));
-  }
-
-  public void sendAccountDeactivatedEmail(String sendToEmail, String sendToName) {
-    String filePath = "/emails/AccountDeactivated.html";
-
-    Map<String, String> templateValues = new HashMap<>();
-    Optional<String> emailBody = emailOperations.getTemplateString(filePath, templateValues);
-
-    emailBody.ifPresent(
-        s -> emailOperations.sendEmail(sendToName, sendToEmail, subjectAccountDeleted, s));
-  }
-
   /**
    * Fetches a main contact for a user and provides their email and full name to the sender
    * function.
