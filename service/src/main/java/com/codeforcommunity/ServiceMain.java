@@ -70,7 +70,7 @@ public class ServiceMain {
 
   /** Initialize the server and get all the supporting classes going. */
   private void initializeServer() {
-    JWTHandler jwtHandler = new JWTHandler(PropertiesLoader.loadProperty("secret_key"));
+    JWTHandler jwtHandler = new JWTHandler(PropertiesLoader.loadProperty("jwt_secret_key"));
     JWTAuthorizer jwtAuthorizer = new JWTAuthorizer(jwtHandler);
     JWTCreator jwtCreator = new JWTCreator(jwtHandler);
 
