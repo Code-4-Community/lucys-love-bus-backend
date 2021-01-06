@@ -26,7 +26,9 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import org.jooq.DSLContext;
+import org.jooq.Record2;
 import org.jooq.generated.Tables;
+import org.jooq.generated.tables.Contacts;
 import org.jooq.generated.tables.pojos.Users;
 import org.jooq.generated.tables.records.ContactsRecord;
 import org.jooq.generated.tables.records.UsersRecord;
@@ -254,10 +256,5 @@ public class AuthDatabaseOperations {
 
   private AddressData extractAddressDataFromUser(Users user) {
     return new AddressData(user.getAddress(), user.getCity(), user.getState(), user.getZipcode());
-  }
-
-  /** Given a user pojo, return the user's full name. */
-  public static String getFullName(Users user) {
-    return "Jack Blanc";
   }
 }

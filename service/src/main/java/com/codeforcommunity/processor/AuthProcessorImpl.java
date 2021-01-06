@@ -16,6 +16,7 @@ import com.codeforcommunity.enums.VerificationKeyType;
 import com.codeforcommunity.exceptions.AuthException;
 import com.codeforcommunity.exceptions.EmailAlreadyInUseException;
 import com.codeforcommunity.exceptions.TokenInvalidException;
+import com.codeforcommunity.exceptions.UserDoesNotExistException;
 import com.codeforcommunity.requester.Emailer;
 import java.util.Optional;
 import org.jooq.DSLContext;
@@ -42,10 +43,7 @@ public class AuthProcessorImpl implements IAuthProcessor {
    */
   @Override
   public SessionResponse signUp(NewUserRequest request) {
-    UsersRecord user = authDatabaseOperations.createNewUser(request);
-
-    emailer.sendWelcomeEmail(
-        request.getEmail(), AuthDatabaseOperations.getFullName(user.into(Users.class)));
+    authDatabaseOperations.createNewUser(request);
 
     return setupSessionResponse(request.getEmail());
   }
@@ -103,15 +101,20 @@ public class AuthProcessorImpl implements IAuthProcessor {
   @Override
   public void requestPasswordReset(ForgotPasswordRequest request) {
     String email = request.getEmail();
-    JWTData userData = authDatabaseOperations.getUserJWTData(email);
+    JWTData userData;
+    try {
+      userData = authDatabaseOperations.getUserJWTData(email);
+    } catch (UserDoesNotExistException e) {
+      // Don't tell the client that the email doesn't exist
+      return;
+    }
 
     String token =
-        authDatabaseOperations.createSecretKey(
-            userData.getUserId(), VerificationKeyType.FORGOT_PASSWORD);
+            authDatabaseOperations.createSecretKey(
+                    userData.getUserId(), VerificationKeyType.FORGOT_PASSWORD);
 
-    Users user = authDatabaseOperations.getUserPojo(userData.getUserId());
-    emailer.sendPasswordChangeRequestEmail(email, AuthDatabaseOperations.getFullName(user), token);
-  }
+    emailer.sendEmailToMainContact(
+            userData.getUserId(), (e, n) -> emailer.sendForgotPassword(e, n, token));  }
 
   /**
    * Check for an existing secret key that matches the request Make sure the key is valid (time
@@ -126,9 +129,6 @@ public class AuthProcessorImpl implements IAuthProcessor {
 
     user.setPassHash(Passwords.createHash(request.getNewPassword()));
     user.store();
-
-    emailer.sendPasswordChangeConfirmationEmail(
-        user.getEmail(), AuthDatabaseOperations.getFullName(user.into(Users.class)));
   }
 
   @Override

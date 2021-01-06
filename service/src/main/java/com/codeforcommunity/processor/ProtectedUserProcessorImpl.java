@@ -52,8 +52,9 @@ public class ProtectedUserProcessorImpl implements IProtectedUserProcessor {
     UsersRecord user = db.selectFrom(USERS).where(USERS.ID.eq(userId)).fetchOne();
     user.delete();
 
-    emailer.sendAccountDeactivatedEmail(
-        user.getEmail(), AuthDatabaseOperations.getFullName(user.into(Users.class)));
+    emailer.sendEmailToMainContact(
+        userId, emailer::sendAccountDeactivatedEmail
+    );
   }
 
   @Override
@@ -83,7 +84,7 @@ public class ProtectedUserProcessorImpl implements IProtectedUserProcessor {
       throw new UserDoesNotExistException(userData.getUserId());
     }
 
-    throw new RuntimeException("ahhhhhhhhhh");
+    throw new RuntimeException("Not implemented");
     //    return new UserDataResponse(user.getFirstName(), user.getLastName(), user.getEmail());
   }
 
