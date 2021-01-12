@@ -1,22 +1,12 @@
 package com.codeforcommunity.processor;
 
-import static org.jooq.generated.Tables.EVENTS;
-import static org.jooq.generated.Tables.EVENT_REGISTRATIONS;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.PutObjectResult;
 import com.codeforcommunity.JooqMock;
 import com.codeforcommunity.dataaccess.EventDatabaseOperations;
-import com.codeforcommunity.dto.userEvents.responses.GetEventsResponse;
+import com.codeforcommunity.dto.userEvents.responses.GetPublicEventsResponse;
 import com.codeforcommunity.requester.S3Requester;
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
 import org.jooq.Record1;
 import org.jooq.Record2;
 import org.jooq.generated.Tables;
@@ -24,9 +14,20 @@ import org.jooq.generated.tables.records.EventsRecord;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.jooq.generated.Tables.EVENTS;
+import static org.jooq.generated.Tables.EVENT_REGISTRATIONS;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 public class PublicEventsProcessorImplTest {
 
-  private PublicEventsProcessorImpl myEventsProcessorImpl;
+  private PublicEventsProcessorImpl myPublicEventsProcessorImpl;
   private JooqMock myJooqMock;
 
   // use UNIX time for ease of testing
@@ -40,7 +41,7 @@ public class PublicEventsProcessorImplTest {
     this.myJooqMock = new JooqMock();
     EventDatabaseOperations myEventDatabaseOperations =
         new EventDatabaseOperations(myJooqMock.getContext());
-    this.myEventsProcessorImpl = new PublicEventsProcessorImpl(myJooqMock.getContext());
+    this.myPublicEventsProcessorImpl = new PublicEventsProcessorImpl(myJooqMock.getContext());
 
     // mock Amazon S3
     AmazonS3Client mockS3Client = mock(AmazonS3Client.class);
@@ -61,7 +62,7 @@ public class PublicEventsProcessorImplTest {
 
     myJooqMock.addEmptyReturn("SELECT");
 
-    GetEventsResponse res = myEventsProcessorImpl.getEvents(eventIds);
+    GetPublicEventsResponse res = myPublicEventsProcessorImpl.getPublicEvents(eventIds);
     assertEquals(0, res.getEvents().size());
     assertEquals(0, res.getTotalCount());
   }
@@ -99,7 +100,7 @@ public class PublicEventsProcessorImplTest {
     myTicketsRecord.values(1);
     myJooqMock.addReturn("SELECT", myTicketsRecord);
 
-    GetEventsResponse res = myEventsProcessorImpl.getEvents(eventIds);
+    GetPublicEventsResponse res = myPublicEventsProcessorImpl.getPublicEvents(eventIds);
 
     assertEquals(event1.getId(), res.getEvents().get(0).getId());
     assertEquals(event1.getTitle(), res.getEvents().get(0).getTitle());
@@ -147,7 +148,7 @@ public class PublicEventsProcessorImplTest {
     eventIds.add(0);
     eventIds.add(1);
 
-    GetEventsResponse res = myEventsProcessorImpl.getEvents(eventIds);
+    GetPublicEventsResponse res = myPublicEventsProcessorImpl.getPublicEvents(eventIds);
 
     assertEquals(event1.getId(), res.getEvents().get(0).getId());
     assertEquals(event1.getTitle(), res.getEvents().get(0).getTitle());

@@ -1,9 +1,9 @@
 package com.codeforcommunity.api;
 
-import com.codeforcommunity.dto.userEvents.responses.GetEventsResponse;
+import com.codeforcommunity.dto.userEvents.responses.GetPublicEventsResponse;
 import java.util.List;
 
 public interface IPublicEventsProcessor {
 
-  GetEventsResponse getEvents(List<Integer> event);
+  GetPublicEventsResponse getPublicEvents(List<Integer> eventIds);
 }

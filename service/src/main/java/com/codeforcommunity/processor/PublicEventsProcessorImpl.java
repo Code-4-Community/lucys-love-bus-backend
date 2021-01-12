@@ -5,8 +5,8 @@ import static org.jooq.generated.Tables.EVENTS;
 import com.codeforcommunity.api.IPublicEventsProcessor;
 import com.codeforcommunity.dataaccess.EventDatabaseOperations;
 import com.codeforcommunity.dto.userEvents.components.EventDetails;
-import com.codeforcommunity.dto.userEvents.responses.GetEventsResponse;
-import com.codeforcommunity.dto.userEvents.responses.SingleEventResponse;
+import com.codeforcommunity.dto.userEvents.responses.GetPublicEventsResponse;
+import com.codeforcommunity.dto.userEvents.responses.PublicSingleEventResponse;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.jooq.DSLContext;
@@ -23,9 +23,11 @@ public class PublicEventsProcessorImpl implements IPublicEventsProcessor {
   }
 
   @Override
-  public GetEventsResponse getEvents(List<Integer> eventIds) {
-    List<Events> e = db.selectFrom(EVENTS).where(EVENTS.ID.in(eventIds)).fetchInto(Events.class);
-    return new GetEventsResponse(listOfEventsToListOfSingleEventResponse(e), e.size());
+  public GetPublicEventsResponse getPublicEvents(List<Integer> eventIds) {
+    List<Events> events =
+        db.selectFrom(EVENTS).where(EVENTS.ID.in(eventIds)).fetchInto(Events.class);
+    return new GetPublicEventsResponse(
+        listOfEventsToListOfPublicSingleEventResponse(events), events.size());
   }
 
   /**
@@ -34,7 +36,8 @@ public class PublicEventsProcessorImpl implements IPublicEventsProcessor {
    * @param events jOOq data objects.
    * @return List of our Event data object.
    */
-  private List<SingleEventResponse> listOfEventsToListOfSingleEventResponse(List<Events> events) {
+  private List<PublicSingleEventResponse> listOfEventsToListOfPublicSingleEventResponse(
+      List<Events> events) {
     return events.stream()
         .map(
             event -> {
@@ -44,7 +47,7 @@ public class PublicEventsProcessorImpl implements IPublicEventsProcessor {
                       event.getLocation(),
                       event.getStartTime(),
                       event.getEndTime());
-              return new SingleEventResponse(
+              return new PublicSingleEventResponse(
                   event.getId(),
                   event.getTitle(),
                   eventDatabaseOperations.getSpotsLeft(event.getId()),

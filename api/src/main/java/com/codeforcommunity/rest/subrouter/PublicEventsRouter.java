@@ -4,7 +4,7 @@ import static com.codeforcommunity.rest.ApiRouter.end;
 import static com.codeforcommunity.rest.RestFunctions.getMultipleQueryParams;
 
 import com.codeforcommunity.api.IPublicEventsProcessor;
-import com.codeforcommunity.dto.userEvents.responses.GetEventsResponse;
+import com.codeforcommunity.dto.userEvents.responses.GetPublicEventsResponse;
 import com.codeforcommunity.rest.IRouter;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
@@ -34,8 +34,8 @@ public class PublicEventsRouter implements IRouter {
   }
 
   private void handleGetEvents(RoutingContext ctx) {
-    List<Integer> intIds = getMultipleQueryParams(ctx, "ids", str -> Integer.parseInt(str));
-    GetEventsResponse response = processor.getEvents(intIds);
+    List<Integer> eventIds = getMultipleQueryParams(ctx, "ids", Integer::parseInt);
+    GetPublicEventsResponse response = processor.getPublicEvents(eventIds);
     end(ctx.response(), 200, JsonObject.mapFrom(response).encode());
   }
 }
