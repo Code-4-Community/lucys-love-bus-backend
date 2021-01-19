@@ -1,18 +1,24 @@
 package com.codeforcommunity.processor;
 
-import static org.jooq.generated.Tables.EVENTS;
-
 import com.codeforcommunity.api.IPublicEventsProcessor;
 import com.codeforcommunity.dataaccess.EventDatabaseOperations;
 import com.codeforcommunity.dto.userEvents.components.EventDetails;
 import com.codeforcommunity.dto.userEvents.responses.GetPublicEventsResponse;
 import com.codeforcommunity.dto.userEvents.responses.PublicSingleEventResponse;
-import java.util.List;
-import java.util.stream.Collectors;
 import org.jooq.DSLContext;
 import org.jooq.generated.tables.pojos.Events;
 
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static org.jooq.generated.Tables.EVENTS;
+
 public class PublicEventsProcessorImpl implements IPublicEventsProcessor {
+
+  private final int registerLeniencyHours = 12;
 
   private final DSLContext db;
   private final EventDatabaseOperations eventDatabaseOperations;
@@ -24,8 +30,20 @@ public class PublicEventsProcessorImpl implements IPublicEventsProcessor {
 
   @Override
   public GetPublicEventsResponse getPublicEvents(List<Integer> eventIds) {
-    List<Events> events =
-        db.selectFrom(EVENTS).where(EVENTS.ID.in(eventIds)).fetchInto(Events.class);
+
+    List<Events> events;
+
+    if (eventIds.isEmpty()) {
+      Timestamp startDate =
+          Timestamp.from(Instant.now().minus(registerLeniencyHours, ChronoUnit.HOURS));
+      events =
+          db.selectFrom(EVENTS)
+              .where(EVENTS.START_TIME.greaterOrEqual(startDate))
+              .orderBy(EVENTS.START_TIME.asc())
+              .fetchInto(Events.class);
+    } else {
+      events = db.selectFrom(EVENTS).where(EVENTS.ID.in(eventIds)).fetchInto(Events.class);
+    }
     return new GetPublicEventsResponse(
         listOfEventsToListOfPublicSingleEventResponse(events), events.size());
   }
