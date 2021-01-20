@@ -156,6 +156,7 @@ public class AuthDatabaseOperations {
     mainContact.setLastName(request.getLastName());
     mainContact.setPhoneNumber(request.getPhoneNumber());
     mainContact.setAllergies(request.getAllergies());
+    mainContact.setReferrer(request.getReferrer());
     mainContact.store();
 
     return newUser;

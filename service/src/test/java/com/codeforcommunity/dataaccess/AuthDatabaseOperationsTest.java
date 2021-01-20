@@ -123,7 +123,8 @@ public class AuthDatabaseOperationsTest {
     myJooqMock.addReturn("SELECT", myUser);
 
     NewUserRequest req =
-        new NewUserRequest(myEmail, "letmeout", "Brandon", "Liang", null, null, null);
+        new NewUserRequest(
+            myEmail, "letmeout", "Brandon", "Liang", null, null, null, "Brandon's referrer");
 
     try {
       myAuthDatabaseOperations.createNewUser(req);
@@ -146,6 +147,7 @@ public class AuthDatabaseOperationsTest {
     AddressData sampleLocation = new AddressData("420 Hemenway Street", "Boston", "MA", "02115");
     String samplePN = "200-233-4334";
     String sampleAllergies = "Eggs/Fish";
+    String sampleReferrer = "Conner's referrer";
 
     NewUserRequest req =
         new NewUserRequest(
@@ -155,7 +157,8 @@ public class AuthDatabaseOperationsTest {
             sampleLN,
             sampleLocation,
             samplePN,
-            sampleAllergies);
+            sampleAllergies,
+            sampleReferrer);
 
     myJooqMock.addEmptyReturn("SELECT");
     myJooqMock.addEmptyReturn("UPDATE");

@@ -39,6 +39,7 @@ public class RequestsProcessorImpl implements IRequestsProcessor {
     // Check that this user is a GP
     // Check that this user doesn't have outstanding requests
     // Add request to database
+    // Sends an email to all administrators
 
     if (userData.getPrivilegeLevel() != PrivilegeLevel.STANDARD) {
       throw new WrongPrivilegeException(PrivilegeLevel.STANDARD);
@@ -56,6 +57,8 @@ public class RequestsProcessorImpl implements IRequestsProcessor {
     newRecord.setUserId(userData.getUserId());
     newRecord.setStatus(RequestStatus.PENDING);
     newRecord.store();
+
+    emailer.sendEmailToAllAdministrators(emailer::sendParticipatingFamilyRequestNotification);
   }
 
   @Override

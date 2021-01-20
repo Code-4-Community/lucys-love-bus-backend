@@ -1,15 +1,19 @@
 package com.codeforcommunity.requester;
 
 import static org.jooq.generated.Tables.CONTACTS;
+import static org.jooq.generated.Tables.USERS;
 
 import com.codeforcommunity.email.EmailOperations;
+import com.codeforcommunity.enums.PrivilegeLevel;
 import com.codeforcommunity.propertiesLoader.PropertiesLoader;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import org.jooq.DSLContext;
+import org.jooq.Record1;
 import org.jooq.Record3;
 
 public class Emailer {
@@ -17,6 +21,7 @@ public class Emailer {
   private final DSLContext db;
   private final String loginUrl;
   private final String passwordResetTemplate;
+  private final String PF_REQUEST_URL;
 
   private final String subjectWelcome = PropertiesLoader.loadProperty("email_subject_welcome");
   private final String subjectEmailChange =
@@ -36,6 +41,9 @@ public class Emailer {
     int emailPort = Integer.parseInt(PropertiesLoader.loadProperty("email_port"));
     boolean shouldSendEmails =
         Boolean.parseBoolean(PropertiesLoader.loadProperty("email_should_send"));
+
+    this.PF_REQUEST_URL =
+        String.format("%s%s", PropertiesLoader.loadProperty("frontend_base_url"), "/family-requests");
 
     this.emailOperations =
         new EmailOperations(
@@ -79,6 +87,19 @@ public class Emailer {
           String sendToEmail = record.component1();
           String sendToName = String.format("%s %s", record.component2(), record.component3());
           sender.accept(sendToEmail, sendToName);
+        });
+  }
+
+  public void sendEmailToAllAdministrators(Consumer<String> sender) {
+    List<Record1<String>> receivers =
+        db.select(USERS.EMAIL)
+            .from(USERS)
+            .where(USERS.PRIVILEGE_LEVEL.eq(PrivilegeLevel.ADMIN))
+            .fetch();
+    receivers.forEach(
+        record -> {
+          String sendToEmail = record.component1();
+          sender.accept(sendToEmail);
         });
   }
 
@@ -156,7 +177,7 @@ public class Emailer {
       String eventName,
       String eventDate,
       String eventTime) {
-    String filePath = "/emails/PfRequestApproved.html";
+    String filePath = "/emails/RegistrationConfirmation.html";
     String subjectLine = String.format("You're Registered for %s!", eventName);
 
     Map<String, String> templateValues = new HashMap<>();
@@ -207,6 +228,18 @@ public class Emailer {
     templateValues.put("link", this.loginUrl);
     templateValues.put("announcement_title", announcementTitle);
     templateValues.put("announcement_content", announcementContent);
+    Optional<String> emailBody = emailOperations.getTemplateString(filePath, templateValues);
+
+    emailBody.ifPresent(s -> emailOperations.sendEmail(sendToName, sendToEmail, subjectLine, s));
+  }
+
+  public void sendParticipatingFamilyRequestNotification(String sendToEmail) {
+    String filePath = "/emails/RequestSubmitted.html";
+    String sendToName = "Administrator";
+    String subjectLine = "New Request Submitted";
+
+    Map<String, String> templateValues = new HashMap<>();
+    templateValues.put("link", this.PF_REQUEST_URL);
     Optional<String> emailBody = emailOperations.getTemplateString(filePath, templateValues);
 
     emailBody.ifPresent(s -> emailOperations.sendEmail(sendToName, sendToEmail, subjectLine, s));
