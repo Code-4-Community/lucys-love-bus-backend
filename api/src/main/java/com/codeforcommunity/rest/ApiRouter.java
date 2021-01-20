@@ -5,6 +5,7 @@ import com.codeforcommunity.api.IAuthProcessor;
 import com.codeforcommunity.api.ICheckoutProcessor;
 import com.codeforcommunity.api.IEventsProcessor;
 import com.codeforcommunity.api.IProtectedUserProcessor;
+import com.codeforcommunity.api.IPublicEventsProcessor;
 import com.codeforcommunity.api.IRequestsProcessor;
 import com.codeforcommunity.auth.JWTAuthorizer;
 import com.codeforcommunity.rest.subrouter.AnnouncementsRouter;
@@ -14,6 +15,7 @@ import com.codeforcommunity.rest.subrouter.CommonRouter;
 import com.codeforcommunity.rest.subrouter.EventsRouter;
 import com.codeforcommunity.rest.subrouter.PfRequestRouter;
 import com.codeforcommunity.rest.subrouter.ProtectedUserRouter;
+import com.codeforcommunity.rest.subrouter.PublicEventsRouter;
 import com.codeforcommunity.rest.subrouter.WebhooksRouter;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServerResponse;
@@ -25,6 +27,7 @@ public class ApiRouter implements IRouter {
   private final ProtectedUserRouter protectedUserRouter;
   private final PfRequestRouter requestRouter;
   private final EventsRouter eventsRouter;
+  private final PublicEventsRouter publicEventsRouter;
   private final AnnouncementsRouter announcementsRouter;
   private final CheckoutRouter checkoutRouter;
   private final WebhooksRouter webhooksRouter;
@@ -34,6 +37,7 @@ public class ApiRouter implements IRouter {
       IProtectedUserProcessor protectedUserProcessor,
       IRequestsProcessor requestsProcessor,
       IEventsProcessor eventsProcessor,
+      IPublicEventsProcessor publicEventsProcessor,
       IAnnouncementsProcessor announcementEventsProcessor,
       ICheckoutProcessor checkoutProcessor,
       JWTAuthorizer jwtAuthorizer) {
@@ -43,6 +47,7 @@ public class ApiRouter implements IRouter {
     this.protectedUserRouter = new ProtectedUserRouter(protectedUserProcessor);
     this.requestRouter = new PfRequestRouter(requestsProcessor);
     this.eventsRouter = new EventsRouter(eventsProcessor);
+    this.publicEventsRouter = new PublicEventsRouter(publicEventsProcessor);
     this.announcementsRouter = new AnnouncementsRouter(announcementEventsProcessor);
     this.checkoutRouter = new CheckoutRouter(checkoutProcessor);
     this.webhooksRouter = new WebhooksRouter(checkoutProcessor);
@@ -54,6 +59,7 @@ public class ApiRouter implements IRouter {
 
     router.mountSubRouter("/user", authRouter.initializeRouter(vertx));
     router.mountSubRouter("/webhooks", webhooksRouter.initializeRouter(vertx));
+    router.mountSubRouter("/events", publicEventsRouter.initializeRouter(vertx));
     router.mountSubRouter("/protected", defineProtectedRoutes(vertx));
 
     return router;
