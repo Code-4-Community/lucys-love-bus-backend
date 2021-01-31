@@ -48,7 +48,8 @@ public class ProtectedUserProcessorImplTest {
           "claritin",
           "none",
           "he/him/his",
-          true);
+          true,
+          "Brandon's referrer");
 
   private final Contact CONTACT_EXAMPLE_2 =
       new Contact(
@@ -64,7 +65,8 @@ public class ProtectedUserProcessorImplTest {
           null,
           "helped me a lot with writing these tests :)",
           "he/him/his",
-          false);
+          false,
+          "Conner's referrer");
 
   private final Contact CONTACT_EXAMPLE_3 =
       new Contact(
@@ -79,7 +81,8 @@ public class ProtectedUserProcessorImplTest {
           null,
           "analytical engine",
           "she/her/hers",
-          false);
+          false,
+          "Ada's referrer");
 
   private final Child CHILD_EXAMPLE_1 =
       new Child(

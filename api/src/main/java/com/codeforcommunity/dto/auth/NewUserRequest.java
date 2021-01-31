@@ -14,6 +14,7 @@ public class NewUserRequest extends ApiDto {
   private AddressData location;
   private String phoneNumber;
   private String allergies;
+  private String referrer;
 
   public NewUserRequest(
       String email,
@@ -22,7 +23,8 @@ public class NewUserRequest extends ApiDto {
       String lastName,
       AddressData location,
       String phoneNumber,
-      String allergies) {
+      String allergies,
+      String referrer) {
     this.email = email;
     this.password = password;
     this.firstName = firstName;
@@ -30,6 +32,7 @@ public class NewUserRequest extends ApiDto {
     this.location = location;
     this.phoneNumber = phoneNumber;
     this.allergies = allergies;
+    this.referrer = referrer;
   }
 
   private NewUserRequest() {}
@@ -182,5 +185,23 @@ public class NewUserRequest extends ApiDto {
    */
   public void setAllergies(String allergies) {
     this.allergies = allergies;
+  }
+
+  /**
+   * Retrieves the referrer field.
+   *
+   * @return the String referrer field.
+   */
+  public String getReferrer() {
+    return this.referrer;
+  }
+
+  /**
+   * Sets this NewUserRequest's referrer field to the provided referrer.
+   *
+   * @param referrer the value to set this referrer field to.
+   */
+  public void setReferrer(String referrer) {
+    this.referrer = referrer;
   }
 }

@@ -1,10 +1,7 @@
 package com.codeforcommunity.rest.subrouter;
 
 import static com.codeforcommunity.rest.ApiRouter.end;
-import static com.codeforcommunity.rest.RestFunctions.getJsonBodyAsClass;
-import static com.codeforcommunity.rest.RestFunctions.getMultipleQueryParams;
-import static com.codeforcommunity.rest.RestFunctions.getOptionalQueryParam;
-import static com.codeforcommunity.rest.RestFunctions.getRequestParameterAsInt;
+import static com.codeforcommunity.rest.RestFunctions.*;
 
 import com.codeforcommunity.api.IEventsProcessor;
 import com.codeforcommunity.auth.JWTData;
