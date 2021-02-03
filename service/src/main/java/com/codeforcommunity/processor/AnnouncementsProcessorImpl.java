@@ -1,14 +1,8 @@
 package com.codeforcommunity.processor;
 
-import static org.jooq.generated.Tables.ANNOUNCEMENTS;
-import static org.jooq.generated.Tables.CONTACTS;
-import static org.jooq.generated.Tables.EVENTS;
-import static org.jooq.generated.Tables.EVENT_REGISTRATIONS;
-
 import com.codeforcommunity.api.IAnnouncementsProcessor;
 import com.codeforcommunity.auth.JWTData;
 import com.codeforcommunity.dto.announcements.Announcement;
-import com.codeforcommunity.dto.announcements.GetAnnouncementsRequest;
 import com.codeforcommunity.dto.announcements.GetAnnouncementsResponse;
 import com.codeforcommunity.dto.announcements.GetEventSpecificAnnouncementsRequest;
 import com.codeforcommunity.dto.announcements.PostAnnouncementRequest;
@@ -17,14 +11,19 @@ import com.codeforcommunity.enums.PrivilegeLevel;
 import com.codeforcommunity.exceptions.AdminOnlyRouteException;
 import com.codeforcommunity.exceptions.MalformedParameterException;
 import com.codeforcommunity.requester.Emailer;
-import java.sql.Timestamp;
-import java.util.List;
-import java.util.stream.Collectors;
 import org.jooq.DSLContext;
 import org.jooq.Record3;
 import org.jooq.generated.tables.pojos.Announcements;
 import org.jooq.generated.tables.pojos.Events;
 import org.jooq.generated.tables.records.AnnouncementsRecord;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static org.jooq.generated.Tables.ANNOUNCEMENTS;
+import static org.jooq.generated.Tables.CONTACTS;
+import static org.jooq.generated.Tables.EVENTS;
+import static org.jooq.generated.Tables.EVENT_REGISTRATIONS;
 
 public class AnnouncementsProcessorImpl implements IAnnouncementsProcessor {
 
@@ -34,27 +33,6 @@ public class AnnouncementsProcessorImpl implements IAnnouncementsProcessor {
   public AnnouncementsProcessorImpl(DSLContext db, Emailer emailer) {
     this.db = db;
     this.emailer = emailer;
-  }
-
-  @Override
-  public GetAnnouncementsResponse getAnnouncements(GetAnnouncementsRequest request) {
-    int count = request.getCount();
-    Timestamp start = request.getStartDate();
-    Timestamp end = request.getEndDate();
-
-    List<Announcements> announcements =
-        db.selectFrom(ANNOUNCEMENTS)
-            .where(ANNOUNCEMENTS.CREATED.between(start, end))
-            .and(ANNOUNCEMENTS.EVENT_ID.isNull())
-            .orderBy(ANNOUNCEMENTS.CREATED.desc())
-            .fetchInto(Announcements.class);
-
-    if (count < announcements.size()) {
-      announcements = announcements.subList(0, count);
-    }
-    return new GetAnnouncementsResponse(
-        announcements.size(),
-        announcements.stream().map(this::convertAnnouncementObject).collect(Collectors.toList()));
   }
 
   /**

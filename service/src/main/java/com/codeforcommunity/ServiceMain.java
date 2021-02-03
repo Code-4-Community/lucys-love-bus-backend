@@ -5,6 +5,7 @@ import com.codeforcommunity.api.IAuthProcessor;
 import com.codeforcommunity.api.ICheckoutProcessor;
 import com.codeforcommunity.api.IEventsProcessor;
 import com.codeforcommunity.api.IProtectedUserProcessor;
+import com.codeforcommunity.api.IPublicAnnouncementsProcessor;
 import com.codeforcommunity.api.IPublicEventsProcessor;
 import com.codeforcommunity.api.IRequestsProcessor;
 import com.codeforcommunity.auth.JWTAuthorizer;
@@ -16,15 +17,17 @@ import com.codeforcommunity.processor.AuthProcessorImpl;
 import com.codeforcommunity.processor.CheckoutProcessorImpl;
 import com.codeforcommunity.processor.EventsProcessorImpl;
 import com.codeforcommunity.processor.ProtectedUserProcessorImpl;
+import com.codeforcommunity.processor.PublicAnnouncementsProcessorImpl;
 import com.codeforcommunity.processor.PublicEventsProcessorImpl;
 import com.codeforcommunity.processor.RequestsProcessorImpl;
 import com.codeforcommunity.propertiesLoader.PropertiesLoader;
 import com.codeforcommunity.requester.Emailer;
 import com.codeforcommunity.rest.ApiRouter;
 import io.vertx.core.Vertx;
-import java.util.Properties;
 import org.jooq.DSLContext;
 import org.jooq.impl.DSL;
+
+import java.util.Properties;
 
 public class ServiceMain {
   private DSLContext db;
@@ -93,8 +96,10 @@ public class ServiceMain {
     IRequestsProcessor requestsProcessor = new RequestsProcessorImpl(this.db, emailer);
     IEventsProcessor eventsProcessor = new EventsProcessorImpl(this.db);
     IPublicEventsProcessor publicEventsProcessor = new PublicEventsProcessorImpl(this.db);
-    IAnnouncementsProcessor announcementEventsProcessor =
+    IAnnouncementsProcessor announcementProcessor =
         new AnnouncementsProcessorImpl(this.db, emailer);
+    IPublicAnnouncementsProcessor publicAnnouncementsProcessor =
+            new PublicAnnouncementsProcessorImpl(this.db, emailer);
     ICheckoutProcessor checkoutProcessor = new CheckoutProcessorImpl(this.db, emailer);
 
     ApiRouter router =
@@ -104,7 +109,8 @@ public class ServiceMain {
             requestsProcessor,
             eventsProcessor,
             publicEventsProcessor,
-            announcementEventsProcessor,
+            announcementProcessor,
+            publicAnnouncementsProcessor,
             checkoutProcessor,
             jwtAuthorizer);
 
