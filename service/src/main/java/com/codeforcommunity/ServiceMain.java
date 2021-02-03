@@ -24,10 +24,9 @@ import com.codeforcommunity.propertiesLoader.PropertiesLoader;
 import com.codeforcommunity.requester.Emailer;
 import com.codeforcommunity.rest.ApiRouter;
 import io.vertx.core.Vertx;
+import java.util.Properties;
 import org.jooq.DSLContext;
 import org.jooq.impl.DSL;
-
-import java.util.Properties;
 
 public class ServiceMain {
   private DSLContext db;
@@ -99,7 +98,7 @@ public class ServiceMain {
     IAnnouncementsProcessor announcementProcessor =
         new AnnouncementsProcessorImpl(this.db, emailer);
     IPublicAnnouncementsProcessor publicAnnouncementsProcessor =
-            new PublicAnnouncementsProcessorImpl(this.db, emailer);
+        new PublicAnnouncementsProcessorImpl(this.db, emailer);
     ICheckoutProcessor checkoutProcessor = new CheckoutProcessorImpl(this.db, emailer);
 
     ApiRouter router =

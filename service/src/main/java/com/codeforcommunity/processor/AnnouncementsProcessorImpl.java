@@ -1,5 +1,10 @@
 package com.codeforcommunity.processor;
 
+import static org.jooq.generated.Tables.ANNOUNCEMENTS;
+import static org.jooq.generated.Tables.CONTACTS;
+import static org.jooq.generated.Tables.EVENTS;
+import static org.jooq.generated.Tables.EVENT_REGISTRATIONS;
+
 import com.codeforcommunity.api.IAnnouncementsProcessor;
 import com.codeforcommunity.auth.JWTData;
 import com.codeforcommunity.dto.announcements.Announcement;
@@ -11,19 +16,13 @@ import com.codeforcommunity.enums.PrivilegeLevel;
 import com.codeforcommunity.exceptions.AdminOnlyRouteException;
 import com.codeforcommunity.exceptions.MalformedParameterException;
 import com.codeforcommunity.requester.Emailer;
+import java.util.List;
+import java.util.stream.Collectors;
 import org.jooq.DSLContext;
 import org.jooq.Record3;
 import org.jooq.generated.tables.pojos.Announcements;
 import org.jooq.generated.tables.pojos.Events;
 import org.jooq.generated.tables.records.AnnouncementsRecord;
-
-import java.util.List;
-import java.util.stream.Collectors;
-
-import static org.jooq.generated.Tables.ANNOUNCEMENTS;
-import static org.jooq.generated.Tables.CONTACTS;
-import static org.jooq.generated.Tables.EVENTS;
-import static org.jooq.generated.Tables.EVENT_REGISTRATIONS;
 
 public class AnnouncementsProcessorImpl implements IAnnouncementsProcessor {
 

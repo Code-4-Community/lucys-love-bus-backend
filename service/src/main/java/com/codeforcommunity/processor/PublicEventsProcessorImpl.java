@@ -1,20 +1,19 @@
 package com.codeforcommunity.processor;
 
+import static org.jooq.generated.Tables.EVENTS;
+
 import com.codeforcommunity.api.IPublicEventsProcessor;
 import com.codeforcommunity.dataaccess.EventDatabaseOperations;
 import com.codeforcommunity.dto.userEvents.components.EventDetails;
 import com.codeforcommunity.dto.userEvents.responses.GetPublicEventsResponse;
 import com.codeforcommunity.dto.userEvents.responses.PublicSingleEventResponse;
-import org.jooq.DSLContext;
-import org.jooq.generated.tables.pojos.Events;
-
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import static org.jooq.generated.Tables.EVENTS;
+import org.jooq.DSLContext;
+import org.jooq.generated.tables.pojos.Events;
 
 public class PublicEventsProcessorImpl implements IPublicEventsProcessor {
 
