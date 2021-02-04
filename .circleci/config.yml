@@ -1,9 +1,17 @@
 version: 2.1
 
-orbs:
-  maven: circleci/maven@0.0.12
+jobs:
+  build:
+    steps: 
+      run: 
+        # property configuration
+        - export DIR_PROP='common/src/main/resources/properties/'
+        - ./copy_properties.sh $DIR_PROP
 
-workflows:
-  maven_test:
-    jobs:
-      - maven/test # checkout, build, test, and upload test results
+        # creates a local database which we use to run tests
+        - psql -c 'create database "lucys-love-bus";' -U postgres
+        
+        - python3 -m pip install requests
+        - mvn spotless:check install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
+        
+        - mvn clean test jacoco:report coveralls:report
