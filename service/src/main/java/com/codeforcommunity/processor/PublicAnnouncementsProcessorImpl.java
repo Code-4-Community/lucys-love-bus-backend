@@ -1,18 +1,17 @@
 package com.codeforcommunity.processor;
 
+import static org.jooq.generated.Tables.ANNOUNCEMENTS;
+
 import com.codeforcommunity.api.IPublicAnnouncementsProcessor;
 import com.codeforcommunity.dto.announcements.Announcement;
 import com.codeforcommunity.dto.announcements.GetAnnouncementsRequest;
 import com.codeforcommunity.dto.announcements.GetAnnouncementsResponse;
 import com.codeforcommunity.requester.Emailer;
-import org.jooq.DSLContext;
-import org.jooq.generated.tables.pojos.Announcements;
-
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import static org.jooq.generated.Tables.ANNOUNCEMENTS;
+import org.jooq.DSLContext;
+import org.jooq.generated.tables.pojos.Announcements;
 
 public class PublicAnnouncementsProcessorImpl implements IPublicAnnouncementsProcessor {
 

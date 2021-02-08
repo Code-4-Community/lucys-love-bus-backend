@@ -1,5 +1,8 @@
 package com.codeforcommunity.processor;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
+
 import com.codeforcommunity.JooqMock;
 import com.codeforcommunity.auth.JWTData;
 import com.codeforcommunity.dto.announcements.GetAnnouncementsRequest;
@@ -11,18 +14,14 @@ import com.codeforcommunity.enums.PrivilegeLevel;
 import com.codeforcommunity.exceptions.AdminOnlyRouteException;
 import com.codeforcommunity.exceptions.MalformedParameterException;
 import com.codeforcommunity.requester.Emailer;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
 import org.jooq.generated.Tables;
 import org.jooq.generated.tables.records.AnnouncementsRecord;
 import org.jooq.generated.tables.records.EventsRecord;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
 
 // Contains tests for AnnouncementsProcessorImpl.java in main
 public class AnnouncementsProcessorImplTest {
@@ -52,7 +51,7 @@ public class AnnouncementsProcessorImplTest {
   public void testGetAnnouncements1() {
     // craft the get request
     GetAnnouncementsRequest req =
-            new GetAnnouncementsRequest(new Timestamp(0), new Timestamp(1000), 2);
+        new GetAnnouncementsRequest(new Timestamp(0), new Timestamp(1000), 2);
 
     myJooqMock.addEmptyReturn("SELECT");
     GetAnnouncementsResponse res = myAnnouncementsProcessorImpl.getAnnouncements(req);
@@ -65,10 +64,10 @@ public class AnnouncementsProcessorImplTest {
   public void testGetAnnouncements2() {
     // craft the get request
     GetAnnouncementsRequest req =
-            new GetAnnouncementsRequest(
-                    new Timestamp(START_TIMESTAMP_TEST2 - 1000),
-                    new Timestamp(END_TIMESTAMP_TEST + 1000),
-                    2);
+        new GetAnnouncementsRequest(
+            new Timestamp(START_TIMESTAMP_TEST2 - 1000),
+            new Timestamp(END_TIMESTAMP_TEST + 1000),
+            2);
 
     // mock the announcements inside the DB
     AnnouncementsRecord announcement1 = myJooqMock.getContext().newRecord(Tables.ANNOUNCEMENTS);
@@ -100,10 +99,10 @@ public class AnnouncementsProcessorImplTest {
   public void testGetAnnouncements3() {
     // craft the get request
     GetAnnouncementsRequest req =
-            new GetAnnouncementsRequest(
-                    new Timestamp(START_TIMESTAMP_TEST - 1000),
-                    new Timestamp(END_TIMESTAMP_TEST + 1000),
-                    2);
+        new GetAnnouncementsRequest(
+            new Timestamp(START_TIMESTAMP_TEST - 1000),
+            new Timestamp(END_TIMESTAMP_TEST + 1000),
+            2);
 
     // mock the announcements inside the DB
     AnnouncementsRecord announcement1 = myJooqMock.getContext().newRecord(Tables.ANNOUNCEMENTS);

@@ -1,5 +1,7 @@
 package com.codeforcommunity.rest.subrouter;
 
+import static com.codeforcommunity.rest.ApiRouter.end;
+
 import com.codeforcommunity.api.IAnnouncementsProcessor;
 import com.codeforcommunity.auth.JWTData;
 import com.codeforcommunity.dto.announcements.GetAnnouncementsRequest;
@@ -14,11 +16,8 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Route;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
-
 import java.sql.Timestamp;
 import java.util.Optional;
-
-import static com.codeforcommunity.rest.ApiRouter.end;
 
 public class AnnouncementsRouter implements IRouter {
 
@@ -70,13 +69,13 @@ public class AnnouncementsRouter implements IRouter {
 
   private void handleGetAnnouncements(RoutingContext ctx) {
     Optional<Timestamp> start =
-            RestFunctions.getOptionalQueryParam(ctx, "start", Timestamp::valueOf);
+        RestFunctions.getOptionalQueryParam(ctx, "start", Timestamp::valueOf);
     Optional<Timestamp> end = RestFunctions.getOptionalQueryParam(ctx, "end", Timestamp::valueOf);
     Optional<Integer> count = RestFunctions.getOptionalQueryParam(ctx, "count", Integer::parseInt);
 
     Timestamp endParam = end.orElseGet(() -> new Timestamp(System.currentTimeMillis()));
     Timestamp startParam =
-            start.orElseGet(() -> new Timestamp(endParam.getTime() - 3 * MILLIS_IN_WEEK));
+        start.orElseGet(() -> new Timestamp(endParam.getTime() - 3 * MILLIS_IN_WEEK));
     int countParam = count.orElse(DEFAULT_COUNT);
 
     GetAnnouncementsRequest request = new GetAnnouncementsRequest(startParam, endParam, countParam);

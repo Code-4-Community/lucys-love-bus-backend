@@ -1,5 +1,7 @@
 package com.codeforcommunity.rest.subrouter;
 
+import static com.codeforcommunity.rest.ApiRouter.end;
+
 import com.codeforcommunity.api.IPublicAnnouncementsProcessor;
 import com.codeforcommunity.dto.announcements.GetAnnouncementsRequest;
 import com.codeforcommunity.dto.announcements.GetAnnouncementsResponse;
@@ -10,11 +12,8 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Route;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
-
 import java.sql.Timestamp;
 import java.util.Optional;
-
-import static com.codeforcommunity.rest.ApiRouter.end;
 
 public class PublicAnnouncementsRouter implements IRouter {
 
