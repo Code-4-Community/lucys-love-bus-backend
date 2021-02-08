@@ -1,7 +1,5 @@
 package com.codeforcommunity.rest.subrouter;
 
-import static com.codeforcommunity.rest.ApiRouter.end;
-
 import com.codeforcommunity.api.IAnnouncementsProcessor;
 import com.codeforcommunity.auth.JWTData;
 import com.codeforcommunity.dto.announcements.GetAnnouncementsRequest;
@@ -19,6 +17,8 @@ import io.vertx.ext.web.RoutingContext;
 
 import java.sql.Timestamp;
 import java.util.Optional;
+
+import static com.codeforcommunity.rest.ApiRouter.end;
 
 public class AnnouncementsRouter implements IRouter {
 
@@ -48,22 +48,6 @@ public class AnnouncementsRouter implements IRouter {
     getAnnouncementsRoute.handler(this::handleGetAnnouncements);
   }
 
-  private void handleGetAnnouncements(RoutingContext ctx) {
-    Optional<Timestamp> start =
-            RestFunctions.getOptionalQueryParam(ctx, "start", Timestamp::valueOf);
-    Optional<Timestamp> end = RestFunctions.getOptionalQueryParam(ctx, "end", Timestamp::valueOf);
-    Optional<Integer> count = RestFunctions.getOptionalQueryParam(ctx, "count", Integer::parseInt);
-
-    Timestamp endParam = end.orElseGet(() -> new Timestamp(System.currentTimeMillis()));
-    Timestamp startParam =
-            start.orElseGet(() -> new Timestamp(endParam.getTime() - 3 * MILLIS_IN_WEEK));
-    int countParam = count.orElse(DEFAULT_COUNT);
-
-    GetAnnouncementsRequest request = new GetAnnouncementsRequest(startParam, endParam, countParam);
-    GetAnnouncementsResponse response = processor.getAnnouncements(request);
-    end(ctx.response(), 200, JsonObject.mapFrom(response).toString());
-  }
-
   private void registerPostAnnouncement(Router router) {
     Route postAnnouncementRoute = router.post("/");
     postAnnouncementRoute.handler(this::handlePostAnnouncement);
@@ -82,6 +66,22 @@ public class AnnouncementsRouter implements IRouter {
   private void registerDeleteAnnouncement(Router router) {
     Route deleteAnnouncementRoute = router.delete("/:announcement_id");
     deleteAnnouncementRoute.handler(this::handleDeleteAnnouncement);
+  }
+
+  private void handleGetAnnouncements(RoutingContext ctx) {
+    Optional<Timestamp> start =
+            RestFunctions.getOptionalQueryParam(ctx, "start", Timestamp::valueOf);
+    Optional<Timestamp> end = RestFunctions.getOptionalQueryParam(ctx, "end", Timestamp::valueOf);
+    Optional<Integer> count = RestFunctions.getOptionalQueryParam(ctx, "count", Integer::parseInt);
+
+    Timestamp endParam = end.orElseGet(() -> new Timestamp(System.currentTimeMillis()));
+    Timestamp startParam =
+            start.orElseGet(() -> new Timestamp(endParam.getTime() - 3 * MILLIS_IN_WEEK));
+    int countParam = count.orElse(DEFAULT_COUNT);
+
+    GetAnnouncementsRequest request = new GetAnnouncementsRequest(startParam, endParam, countParam);
+    GetAnnouncementsResponse response = processor.getAnnouncements(request);
+    end(ctx.response(), 200, JsonObject.mapFrom(response).toString());
   }
 
   private void handlePostAnnouncement(RoutingContext ctx) {
