@@ -1,0 +1,1 @@
+ALTER TABLE announcements ADD COLUMN src VARCHAR DEFAULT null;

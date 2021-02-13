@@ -13,6 +13,7 @@ public class Announcement {
   private String title;
   private String description;
   private Integer eventId;
+  private String src;
 
   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss Z")
   private Timestamp created;
@@ -29,12 +30,13 @@ public class Announcement {
    * @param eventId id of the event this announcement is relevant to
    */
   public Announcement(
-      int id, String title, String description, Timestamp created, Integer eventId) {
+      int id, String title, String description, Timestamp created, Integer eventId, String src) {
     this.id = id;
     this.title = title;
     this.description = description;
     this.created = created;
     this.eventId = eventId;
+    this.src = src;
   }
 
   /**
@@ -82,6 +84,15 @@ public class Announcement {
     return eventId;
   }
 
+  /**
+   * Gets the image src of this announcement.
+   *
+   * @return the image src of this announcement.
+   */
+  public String getSrc() {
+    return src;
+  }
+
   @Override
   public String toString() {
     return "Announcement{"
@@ -97,6 +108,8 @@ public class Announcement {
         + eventId
         + ", created="
         + created
+        + ", src="
+        + src
         + '}';
   }
 }
