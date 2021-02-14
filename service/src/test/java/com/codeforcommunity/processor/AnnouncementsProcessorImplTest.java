@@ -376,14 +376,14 @@ public class AnnouncementsProcessorImplTest {
     assertEquals(res.getAnnouncements().get(1).getDescription(), "code for community");
   }
 
-
   // test deleting an announcement properly
   @Test
   public void testDeleteAnnouncement() {
     JWTData myUserData = new JWTData(0, PrivilegeLevel.ADMIN);
 
     int deletedAnnouncementId = 42;
-    AnnouncementsRecord announcementToDelete = myJooqMock.getContext().newRecord(Tables.ANNOUNCEMENTS);
+    AnnouncementsRecord announcementToDelete =
+        myJooqMock.getContext().newRecord(Tables.ANNOUNCEMENTS);
     announcementToDelete.setId(deletedAnnouncementId);
     announcementToDelete.setTitle("sample title");
     announcementToDelete.setDescription("sample description");

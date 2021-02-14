@@ -27,6 +27,7 @@ public class Contact extends ApiDto {
   private String pronouns;
   private Boolean shouldSendEmails;
   private String referrer;
+  private String profilePicture;
 
   /** Creates a contact with no information (all fields null). */
   public Contact() {}
@@ -46,6 +47,7 @@ public class Contact extends ApiDto {
    * @param notes notes about this contact's
    * @param pronouns this contact's pronouns
    * @param shouldSendEmails boolean for if contact wants to be sent emails
+   * @param profilePicture base64 encoded string representing the this contact's profile picture
    */
   public Contact(
       Integer id,
@@ -60,7 +62,8 @@ public class Contact extends ApiDto {
       String notes,
       String pronouns,
       Boolean shouldSendEmails,
-      String referrer) {
+      String referrer,
+      String profilePicture) {
     this.id = id;
     this.firstName = firstName;
     this.lastName = lastName;
@@ -74,6 +77,7 @@ public class Contact extends ApiDto {
     this.pronouns = pronouns;
     this.shouldSendEmails = shouldSendEmails;
     this.referrer = referrer;
+    this.profilePicture = profilePicture;
   }
 
   /**
@@ -334,5 +338,23 @@ public class Contact extends ApiDto {
    */
   public void setReferrer(String referrer) {
     this.referrer = referrer;
+  }
+
+  /**
+   * Returns this Contact's profilePictureBLOB.
+   *
+   * @return this Contact's profilePictureBLOB.
+   */
+  public String getProfilePicture() {
+    return this.profilePicture;
+  }
+
+  /**
+   * Sets this Contact's profilePictureBLOB to the given one.
+   *
+   * @param profilePictureBLOB the new profilePictureBLOB.
+   */
+  public void setProfilePicture(String profilePictureBLOB) {
+    this.profilePicture = profilePicture;
   }
 }

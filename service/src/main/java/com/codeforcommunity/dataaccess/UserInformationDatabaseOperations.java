@@ -12,6 +12,7 @@ import com.codeforcommunity.dto.auth.AddressData;
 import com.codeforcommunity.dto.protected_user.components.Child;
 import com.codeforcommunity.dto.protected_user.components.Contact;
 import com.codeforcommunity.exceptions.UserDoesNotExistException;
+import com.codeforcommunity.requester.S3Requester;
 import java.util.List;
 import org.jooq.DSLContext;
 import org.jooq.generated.tables.records.ChildrenRecord;
@@ -54,6 +55,10 @@ public class UserInformationDatabaseOperations {
     if (mainContact == null) {
       throw new UserDoesNotExistException(userData.getUserId());
     }
+
+    String publicImageUrl =
+        S3Requester.validateUploadImageToS3LucyEvents("", newContactData.getProfilePicture());
+    newContactData.setProfilePicture(publicImageUrl); // Actually setting Image URL
 
     newContactData.setShouldSendEmails(true);
     updateStoreContactRecord(mainContact, newContactData);
@@ -113,6 +118,7 @@ public class UserInformationDatabaseOperations {
     contactsRecord.setNotes(contactDto.getNotes());
     contactsRecord.setShouldSendEmails(contactDto.getShouldSendEmails());
     contactsRecord.setPhoneNumber(contactDto.getPhoneNumber());
+    contactsRecord.setProfilepicture(contactDto.getProfilePicture());
 
     contactsRecord.store();
   }
