@@ -32,7 +32,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import org.jooq.generated.Tables;
-import org.jooq.generated.tables.records.BlacklistedRefreshesRecord;
 import org.jooq.generated.tables.records.UsersRecord;
 import org.jooq.generated.tables.records.VerificationKeysRecord;
 import org.junit.jupiter.api.BeforeEach;
