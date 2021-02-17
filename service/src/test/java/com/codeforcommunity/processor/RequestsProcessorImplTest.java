@@ -8,6 +8,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.codeforcommunity.JooqMock;
+import com.codeforcommunity.JooqMock.OperationType;
 import com.codeforcommunity.auth.JWTData;
 import com.codeforcommunity.dto.pfrequests.RequestData;
 import com.codeforcommunity.dto.pfrequests.RequestStatusData;
@@ -69,7 +70,7 @@ public class RequestsProcessorImplTest {
     PfRequestsRecord myPFReqRecord = myJooqMock.getContext().newRecord(Tables.PF_REQUESTS);
     myPFReqRecord.setUserId(0);
     myPFReqRecord.setStatus(RequestStatus.PENDING);
-    myJooqMock.addReturn("SELECT", myPFReqRecord);
+    myJooqMock.addReturn(OperationType.SELECT, myPFReqRecord);
 
     try {
       myRequestsProcessorImpl.createRequest(myUserData);
@@ -91,8 +92,8 @@ public class RequestsProcessorImplTest {
     PfRequestsRecord myPFReqRecord = myJooqMock.getContext().newRecord(Tables.PF_REQUESTS);
     myPFReqRecord.setUserId(0);
     myPFReqRecord.setStatus(RequestStatus.APPROVED);
-    myJooqMock.addReturn("SELECT", myPFReqRecord);
-    myJooqMock.addReturn("INSERT", myPFReqRecord);
+    myJooqMock.addReturn(OperationType.SELECT, myPFReqRecord);
+    myJooqMock.addReturn(OperationType.INSERT, myPFReqRecord);
 
     myRequestsProcessorImpl.createRequest(myUserData);
   }
@@ -122,7 +123,7 @@ public class RequestsProcessorImplTest {
     when(myUserData.getUserId()).thenReturn(0);
 
     // mock the DB
-    myJooqMock.addEmptyReturn("SELECT");
+    myJooqMock.addEmptyReturn(OperationType.SELECT);
 
     assertEquals(myRequestsProcessorImpl.getRequests(myUserData).size(), 0);
   }
@@ -146,7 +147,7 @@ public class RequestsProcessorImplTest {
                 Tables.CONTACTS.LAST_NAME,
                 Tables.CONTACTS.PHONE_NUMBER);
     record.values(0, 0, "brandon@example.com", "Brandon", "Liang", "555-555-5555");
-    myJooqMock.addReturn("SELECT", record);
+    myJooqMock.addReturn(OperationType.SELECT, record);
 
     List<RequestData> reqs = myRequestsProcessorImpl.getRequests(myUserData);
 
@@ -194,7 +195,7 @@ public class RequestsProcessorImplTest {
     List<Record6> records = new ArrayList<>();
     records.add(record1);
     records.add(record2);
-    myJooqMock.addReturn("SELECT", records);
+    myJooqMock.addReturn(OperationType.SELECT, records);
 
     List<RequestData> reqs = myRequestsProcessorImpl.getRequests(myUserData);
 
@@ -242,22 +243,22 @@ public class RequestsProcessorImplTest {
     myPFReqRecord.setUserId(0);
     myPFReqRecord.setId(0);
     myPFReqRecord.setStatus(RequestStatus.PENDING);
-    myJooqMock.addReturn("SELECT", myPFReqRecord);
-    myJooqMock.addReturn("UPDATE", myPFReqRecord);
+    myJooqMock.addReturn(OperationType.SELECT, myPFReqRecord);
+    myJooqMock.addReturn(OperationType.UPDATE, myPFReqRecord);
 
     // mock the DB for a user
     UsersRecord myUserRecord = myJooqMock.getContext().newRecord(Tables.USERS);
     myUserRecord.setId(0);
     myUserRecord.setPrivilegeLevel(PrivilegeLevel.ADMIN);
-    myJooqMock.addReturn("UPDATE", myUserRecord);
+    myJooqMock.addReturn(OperationType.UPDATE, myUserRecord);
 
     myRequestsProcessorImpl.approveRequest(0, myUserData);
 
     assertEquals(
-        myJooqMock.getSqlBindings().get("UPDATE").get(0)[0], RequestStatus.APPROVED.getVal());
-    assertEquals(myJooqMock.getSqlBindings().get("UPDATE").get(0)[1], myUserRecord.getId());
-    assertEquals(myJooqMock.getSqlBindings().get("UPDATE").get(1)[0], PrivilegeLevel.PF);
-    assertEquals(myJooqMock.getSqlBindings().get("UPDATE").get(1)[1], myUserRecord.getId());
+        myJooqMock.getSqlOperationBindings().get(OperationType.UPDATE).get(0)[0], RequestStatus.APPROVED.getVal());
+    assertEquals(myJooqMock.getSqlOperationBindings().get(OperationType.UPDATE).get(0)[1], myUserRecord.getId());
+    assertEquals(myJooqMock.getSqlOperationBindings().get(OperationType.UPDATE).get(1)[0], PrivilegeLevel.PF.getName());
+    assertEquals(myJooqMock.getSqlOperationBindings().get(OperationType.UPDATE).get(1)[1], myUserRecord.getId());
   }
 
   // general users can't reject requests
@@ -287,14 +288,14 @@ public class RequestsProcessorImplTest {
     myPFReqRecord.setUserId(0);
     myPFReqRecord.setId(0);
     myPFReqRecord.setStatus(RequestStatus.PENDING);
-    myJooqMock.addReturn("SELECT", myPFReqRecord);
-    myJooqMock.addReturn("UPDATE", myPFReqRecord);
+    myJooqMock.addReturn(OperationType.SELECT, myPFReqRecord);
+    myJooqMock.addReturn(OperationType.UPDATE, myPFReqRecord);
 
     myRequestsProcessorImpl.rejectRequest(0, myUserData);
 
     assertEquals(
-        myJooqMock.getSqlBindings().get("UPDATE").get(0)[0], RequestStatus.REJECTED.getVal());
-    assertEquals(myJooqMock.getSqlBindings().get("UPDATE").get(0)[1], myPFReqRecord.getUserId());
+        myJooqMock.getSqlOperationBindings().get(OperationType.UPDATE).get(0)[0], RequestStatus.REJECTED.getVal());
+    assertEquals(myJooqMock.getSqlOperationBindings().get(OperationType.UPDATE).get(0)[1], myPFReqRecord.getUserId());
   }
 
   // test getting request statuses when there are none
@@ -302,7 +303,7 @@ public class RequestsProcessorImplTest {
   public void testGetRequestStatus1() {
     JWTData myUserData = new JWTData(1, PrivilegeLevel.STANDARD);
 
-    myJooqMock.addEmptyReturn("SELECT");
+    myJooqMock.addEmptyReturn(OperationType.SELECT);
 
     List<RequestStatusData> statuses = myRequestsProcessorImpl.getRequestStatuses(myUserData);
     assertTrue(statuses.isEmpty());
@@ -317,7 +318,7 @@ public class RequestsProcessorImplTest {
     Record3<Integer, RequestStatus, Timestamp> myPFReqRecord =
         myJooqMock.getContext().newRecord(PF_REQUESTS.ID, PF_REQUESTS.STATUS, PF_REQUESTS.CREATED);
     myPFReqRecord.values(1, RequestStatus.PENDING, new Timestamp(0));
-    myJooqMock.addReturn("SELECT", myPFReqRecord);
+    myJooqMock.addReturn(OperationType.SELECT, myPFReqRecord);
 
     List<RequestStatusData> statuses = myRequestsProcessorImpl.getRequestStatuses(myUserData);
     assertEquals(1, statuses.size());
@@ -343,7 +344,7 @@ public class RequestsProcessorImplTest {
     List<Record3<Integer, RequestStatus, Timestamp>> myPFReqRecords = new ArrayList<>();
     myPFReqRecords.add(myPFReqRecord1);
     myPFReqRecords.add(myPFReqRecord2);
-    myJooqMock.addReturn("SELECT", myPFReqRecords);
+    myJooqMock.addReturn(OperationType.SELECT, myPFReqRecords);
 
     List<RequestStatusData> statuses = myRequestsProcessorImpl.getRequestStatuses(myUserData);
     assertEquals(2, statuses.size());
