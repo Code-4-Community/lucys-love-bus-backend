@@ -20,7 +20,6 @@ import com.codeforcommunity.exceptions.UserDoesNotExistException;
 import com.codeforcommunity.requester.Emailer;
 import java.util.Optional;
 import org.jooq.DSLContext;
-import org.jooq.generated.tables.pojos.Users;
 import org.jooq.generated.tables.records.UsersRecord;
 
 public class AuthProcessorImpl implements IAuthProcessor {
@@ -110,11 +109,12 @@ public class AuthProcessorImpl implements IAuthProcessor {
     }
 
     String token =
-            authDatabaseOperations.createSecretKey(
-                    userData.getUserId(), VerificationKeyType.FORGOT_PASSWORD);
+        authDatabaseOperations.createSecretKey(
+            userData.getUserId(), VerificationKeyType.FORGOT_PASSWORD);
 
     emailer.sendEmailToMainContact(
-            userData.getUserId(), (e, n) -> emailer.sendForgotPassword(e, n, token));  }
+        userData.getUserId(), (e, n) -> emailer.sendForgotPassword(e, n, token));
+  }
 
   /**
    * Check for an existing secret key that matches the request Make sure the key is valid (time

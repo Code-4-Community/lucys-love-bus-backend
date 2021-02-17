@@ -80,7 +80,7 @@ public class ModifyEventRequest extends ApiDto {
       fields.add(fieldName + "spots_available");
     }
     if (details != null) {
-      fields.addAll(details.validateFields(fieldName, true));
+      fields.addAll(details.validateFields(fieldName));
     }
     return fields;
   }

@@ -52,9 +52,7 @@ public class ProtectedUserProcessorImpl implements IProtectedUserProcessor {
     UsersRecord user = db.selectFrom(USERS).where(USERS.ID.eq(userId)).fetchOne();
     user.delete();
 
-    emailer.sendEmailToMainContact(
-        userId, emailer::sendAccountDeactivatedEmail
-    );
+    emailer.sendEmailToMainContact(userId, emailer::sendAccountDeactivated);
   }
 
   @Override

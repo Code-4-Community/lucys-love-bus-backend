@@ -1,5 +1,12 @@
 package com.codeforcommunity.processor;
 
+import static org.jooq.generated.Tables.EVENTS;
+import static org.jooq.generated.Tables.EVENT_REGISTRATIONS;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.PutObjectResult;
@@ -7,23 +14,15 @@ import com.codeforcommunity.JooqMock;
 import com.codeforcommunity.dataaccess.EventDatabaseOperations;
 import com.codeforcommunity.dto.userEvents.responses.GetPublicEventsResponse;
 import com.codeforcommunity.requester.S3Requester;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
 import org.jooq.Record1;
 import org.jooq.Record2;
 import org.jooq.generated.Tables;
 import org.jooq.generated.tables.records.EventsRecord;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.jooq.generated.Tables.EVENTS;
-import static org.jooq.generated.Tables.EVENT_REGISTRATIONS;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 public class PublicEventsProcessorImplTest {
 

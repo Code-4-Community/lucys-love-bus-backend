@@ -43,7 +43,8 @@ public class Emailer {
         Boolean.parseBoolean(PropertiesLoader.loadProperty("email_should_send"));
 
     this.PF_REQUEST_URL =
-        String.format("%s%s", PropertiesLoader.loadProperty("frontend_base_url"), "/family-requests");
+        String.format(
+            "%s%s", PropertiesLoader.loadProperty("frontend_base_url"), "/family-requests");
 
     this.emailOperations =
         new EmailOperations(
