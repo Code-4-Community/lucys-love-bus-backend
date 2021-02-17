@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import com.codeforcommunity.JooqMock;
+import com.codeforcommunity.JooqMock.OperationType;
 import com.codeforcommunity.auth.JWTData;
 import com.codeforcommunity.auth.Passwords;
 import com.codeforcommunity.dto.protected_user.SetContactsAndChildrenRequest;
@@ -147,15 +148,15 @@ public class ProtectedUserProcessorImplTest {
     UsersRecord usersRecord = myJooqMock.getContext().newRecord(Tables.USERS);
     usersRecord.setId(0);
 
-    myJooqMock.addReturn("DELETE", erRecord);
-    myJooqMock.addReturn("DELETE", vkRecord);
-    myJooqMock.addReturn("DELETE", pfRecord);
-    myJooqMock.addReturn("DELETE", childrenRecord);
-    myJooqMock.addReturn("DELETE", contactsRecord);
-    myJooqMock.addReturn("DELETE", usersRecord);
+    myJooqMock.addReturn(OperationType.DELETE, erRecord);
+    myJooqMock.addReturn(OperationType.DELETE, vkRecord);
+    myJooqMock.addReturn(OperationType.DELETE, pfRecord);
+    myJooqMock.addReturn(OperationType.DELETE, childrenRecord);
+    myJooqMock.addReturn(OperationType.DELETE, contactsRecord);
+    myJooqMock.addReturn(OperationType.DELETE, usersRecord);
 
     myProtectedUserProcessorImpl.deleteUser(myUser);
-    List<Object[]> bindings = myJooqMock.getSqlBindings().get("DELETE");
+    List<Object[]> bindings = myJooqMock.getSqlOperationBindings().get(OperationType.DELETE);
 
     assertEquals(6, bindings.size());
     assertEquals(myUser.getUserId(), bindings.get(0)[0]);
@@ -172,7 +173,7 @@ public class ProtectedUserProcessorImplTest {
     JWTData myUser = new JWTData(0, PrivilegeLevel.GP);
     ChangePasswordRequest req = new ChangePasswordRequest("oldpasswd", "newpasswd");
 
-    myJooqMock.addEmptyReturn("SELECT");
+    myJooqMock.addEmptyReturn(OperationType.SELECT);
 
     try {
       myProtectedUserProcessorImpl.changePassword(myUser, req);
@@ -191,7 +192,7 @@ public class ProtectedUserProcessorImplTest {
     UsersRecord myUsersRecord = new UsersRecord();
     myUsersRecord.setId(0);
     myUsersRecord.setPassHash(Passwords.createHash("currentpasswd"));
-    myJooqMock.addReturn("SELECT", myUsersRecord);
+    myJooqMock.addReturn(OperationType.SELECT, myUsersRecord);
 
     ChangePasswordRequest req = new ChangePasswordRequest("oldpasswd", "newpasswd");
 
@@ -212,14 +213,14 @@ public class ProtectedUserProcessorImplTest {
     UsersRecord myUsersRecord = new UsersRecord();
     myUsersRecord.setId(0);
     myUsersRecord.setPassHash(Passwords.createHash("currentpasswd"));
-    myJooqMock.addReturn("SELECT", myUsersRecord);
-    myJooqMock.addReturn("UPDATE", myUsersRecord);
+    myJooqMock.addReturn(OperationType.SELECT, myUsersRecord);
+    myJooqMock.addReturn(OperationType.UPDATE, myUsersRecord);
 
     ChangePasswordRequest req = new ChangePasswordRequest("currentpasswd", "newpasswd");
 
     myProtectedUserProcessorImpl.changePassword(myUser, req);
 
-    List<Object[]> updateBindings = myJooqMock.getSqlBindings().get("UPDATE");
+    List<Object[]> updateBindings = myJooqMock.getSqlOperationBindings().get(OperationType.UPDATE);
 
     assertEquals(1, updateBindings.size());
   }
@@ -230,7 +231,7 @@ public class ProtectedUserProcessorImplTest {
     JWTData myUser = new JWTData(0, PrivilegeLevel.GP);
     SetContactsAndChildrenRequest req = new SetContactsAndChildrenRequest(null, null, null);
 
-    myJooqMock.addEmptyReturn("SELECT");
+    myJooqMock.addEmptyReturn(OperationType.SELECT);
 
     try {
       myProtectedUserProcessorImpl.setContactsAndChildren(myUser, req);
@@ -255,14 +256,14 @@ public class ProtectedUserProcessorImplTest {
     ContactsRecord myContact = myJooqMock.getContext().newRecord(Tables.CONTACTS);
     myContact.setUserId(0);
     myContact.setIsMainContact(true);
-    myJooqMock.addReturn("SELECT", myContact);
-    myJooqMock.addReturn("INSERT", myContact);
-    myJooqMock.addReturn("UPDATE", myContact);
+    myJooqMock.addReturn(OperationType.SELECT, myContact);
+    myJooqMock.addReturn(OperationType.INSERT, myContact);
+    myJooqMock.addReturn(OperationType.UPDATE, myContact);
 
     myProtectedUserProcessorImpl.setContactsAndChildren(myUser, req);
 
-    List<Object[]> insertBindings = myJooqMock.getSqlBindings().get("INSERT");
-    List<Object[]> updateBindings = myJooqMock.getSqlBindings().get("UPDATE");
+    List<Object[]> insertBindings = myJooqMock.getSqlOperationBindings().get(OperationType.INSERT);
+    List<Object[]> updateBindings = myJooqMock.getSqlOperationBindings().get(OperationType.UPDATE);
 
     assertEquals(2, insertBindings.size());
     assertEquals(2, updateBindings.size());
@@ -287,14 +288,14 @@ public class ProtectedUserProcessorImplTest {
     ContactsRecord myContact = myJooqMock.getContext().newRecord(Tables.CONTACTS);
     myContact.setUserId(0);
     myContact.setIsMainContact(true);
-    myJooqMock.addReturn("SELECT", myContact);
-    myJooqMock.addReturn("INSERT", myContact);
-    myJooqMock.addReturn("UPDATE", myContact);
+    myJooqMock.addReturn(OperationType.SELECT, myContact);
+    myJooqMock.addReturn(OperationType.INSERT, myContact);
+    myJooqMock.addReturn(OperationType.UPDATE, myContact);
 
     myProtectedUserProcessorImpl.setContactsAndChildren(myUser, req);
 
-    List<Object[]> insertBindings = myJooqMock.getSqlBindings().get("INSERT");
-    List<Object[]> updateBindings = myJooqMock.getSqlBindings().get("UPDATE");
+    List<Object[]> insertBindings = myJooqMock.getSqlOperationBindings().get(OperationType.INSERT);
+    List<Object[]> updateBindings = myJooqMock.getSqlOperationBindings().get(OperationType.UPDATE);
 
     assertEquals(2, insertBindings.size());
     assertEquals(2, updateBindings.size());
@@ -324,14 +325,14 @@ public class ProtectedUserProcessorImplTest {
     ContactsRecord myContact = myJooqMock.getContext().newRecord(Tables.CONTACTS);
     myContact.setUserId(0);
     myContact.setIsMainContact(true);
-    myJooqMock.addReturn("SELECT", myContact);
-    myJooqMock.addReturn("INSERT", myContact);
-    myJooqMock.addReturn("UPDATE", myContact);
+    myJooqMock.addReturn(OperationType.SELECT, myContact);
+    myJooqMock.addReturn(OperationType.INSERT, myContact);
+    myJooqMock.addReturn(OperationType.UPDATE, myContact);
 
     myProtectedUserProcessorImpl.setContactsAndChildren(myUser, req);
 
-    List<Object[]> insertBindings = myJooqMock.getSqlBindings().get("INSERT");
-    List<Object[]> updateBindings = myJooqMock.getSqlBindings().get("UPDATE");
+    List<Object[]> insertBindings = myJooqMock.getSqlOperationBindings().get(OperationType.INSERT);
+    List<Object[]> updateBindings = myJooqMock.getSqlOperationBindings().get(OperationType.UPDATE);
 
     assertEquals(2, updateBindings.size());
     assertEquals(4, insertBindings.size());
