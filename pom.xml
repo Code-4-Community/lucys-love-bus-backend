@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>com.codeforcommunity</groupId>
@@ -19,6 +19,11 @@
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <log4j-version>2.13.0</log4j-version>
+    <vertx-version>3.8.5</vertx-version>
+    <jooq-version>3.12.4</jooq-version>
+    <javamail-version>6.0.3</javamail-version>
+    <flyway-version>7.1.0</flyway-version>
   </properties>
 
   <build>
@@ -35,65 +40,14 @@
             <target>1.8</target>
           </configuration>
         </plugin>
-
-        <!-- Used for running the main class -->
-        <plugin>
-          <groupId>org.codehaus.mojo</groupId>
-          <artifactId>exec-maven-plugin</artifactId>
-          <version>1.6.0</version>
-          <executions>
-            <execution>
-              <goals>
-                <goal>java</goal>
-              </goals>
-            </execution>
-          </executions>
-          <configuration>
-            <mainClass>com.codeforcommunity.ServiceMain</mainClass>
-          </configuration>
-        </plugin>
-        <plugin>
-          <artifactId>maven-surefire-plugin</artifactId>
-          <version>2.22.2</version>
-        </plugin>
-        <plugin>
-          <!-- used for integration tests -->
-          <artifactId>maven-failsafe-plugin</artifactId>
-          <version>2.22.2</version>
-        </plugin>
-
-        <plugin>
-          <groupId>org.eluder.coveralls</groupId>
-          <artifactId>coveralls-maven-plugin</artifactId>
-          <version>4.3.0</version>
-          <configuration>
-            <repoToken>29ZjiTAZvTIj4DdAEjkfF5TowDFDtf2oA</repoToken>
-          </configuration>
-          <dependencies>
-            <dependency>
-              <groupId>javax.xml.bind</groupId>
-              <artifactId>jaxb-api</artifactId>
-              <version>2.2.3</version>
-            </dependency>
-          </dependencies>
-        </plugin>
-
-        <plugin>
-          <groupId>org.jacoco</groupId>
-          <artifactId>jacoco-maven-plugin</artifactId>
-          <version>0.8.6</version>
-          <executions>
-            <execution>
-              <id>default-prepare-agent</id>
-              <goals>
-                <goal>prepare-agent</goal>
-              </goals>
-            </execution>
-          </executions>
-        </plugin>
       </plugins>
     </pluginManagement>
+
     <plugins>
+      <plugin>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>2.22.2</version>
+      </plugin>
 
       <!-- Used for coveralls test coverage -->
       <plugin>
@@ -125,7 +79,6 @@
           </execution>
         </executions>
       </plugin>
-
       <plugin>
         <!-- formatter -->
         <groupId>com.diffplug.spotless</groupId>
@@ -138,9 +91,6 @@
             </googleJavaFormat>
             <trimTrailingWhitespace/>
             <removeUnusedImports/>
-<!--            <licenseHeader>-->
-<!--              <content>/* (C)$YEAR Code4Community*/</content>-->
-<!--            </licenseHeader>-->
           </java>
         </configuration>
         <executions>
@@ -153,6 +103,25 @@
             </goals>
           </execution>
         </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>3.0.0</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <executable>maven</executable>
+          <environmentVariables>
+            <LANG>en_US</LANG>
+          </environmentVariables>
+        </configuration>
       </plugin>
     </plugins>
   </build>
@@ -168,62 +137,62 @@
       <dependency>
         <groupId>org.apache.logging.log4j</groupId>
         <artifactId>log4j-api</artifactId>
-        <version>2.13.0</version>
+        <version>${log4j-version}</version>
       </dependency>
       <dependency>
         <groupId>org.apache.logging.log4j</groupId>
         <artifactId>log4j-slf4j-impl</artifactId>
-        <version>2.13.0</version>
+        <version>${log4j-version}</version>
       </dependency>
 
       <!-- Used for general Vertx utilities in API server stuff -->
       <dependency>
         <groupId>io.vertx</groupId>
         <artifactId>vertx-core</artifactId>
-        <version>3.8.5</version>
+        <version>${vertx-version}</version>
       </dependency>
 
       <!-- Used for API routing -->
       <dependency>
         <groupId>io.vertx</groupId>
         <artifactId>vertx-web</artifactId>
-        <version>3.8.5</version>
+        <version>${vertx-version}</version>
       </dependency>
 
       <!-- Used for making HTTP requests -->
       <dependency>
         <groupId>io.vertx</groupId>
         <artifactId>vertx-web-client</artifactId>
-        <version>3.8.5</version>
+        <version>${vertx-version}</version>
       </dependency>
 
       <!-- Used for general jOOQ SQL query building -->
       <dependency>
         <groupId>org.jooq</groupId>
         <artifactId>jooq</artifactId>
-        <version>3.12.4</version>
+        <version>${jooq-version}</version>
       </dependency>
 
       <!-- Used for the generation of jOOQ classes -->
       <dependency>
         <groupId>org.jooq</groupId>
         <artifactId>jooq-meta</artifactId>
-        <version>3.12.4</version>
+        <version>${jooq-version}</version>
       </dependency>
       <dependency>
         <groupId>org.jooq</groupId>
         <artifactId>jooq-meta-extensions</artifactId>
-        <version>3.12.4</version>
+        <version>${jooq-version}</version>
       </dependency>
       <dependency>
         <groupId>org.jooq</groupId>
         <artifactId>jooq-codegen</artifactId>
-        <version>3.12.4</version>
+        <version>${jooq-version}</version>
       </dependency>
       <dependency>
         <groupId>org.jooq</groupId>
         <artifactId>jooq-codegen-maven</artifactId>
-        <version>3.12.4</version>
+        <version>${jooq-version}</version>
       </dependency>
 
 
@@ -245,12 +214,12 @@
       <dependency>
         <groupId>org.simplejavamail</groupId>
         <artifactId>simple-java-mail</artifactId>
-        <version>6.0.3</version>
+        <version>${javamail-version}</version>
       </dependency>
       <dependency>
         <groupId>org.simplejavamail</groupId>
         <artifactId>batch-module</artifactId>
-        <version>6.0.3</version>
+        <version>${javamail-version}</version>
       </dependency>
 
       <!-- Postgresql driver -->
@@ -264,14 +233,7 @@
       <dependency>
         <groupId>org.junit.jupiter</groupId>
         <artifactId>junit-jupiter</artifactId>
-        <version>5.6.0</version>
-        <scope>test</scope>
-      </dependency>
-
-      <dependency>
-        <groupId>org.junit.jupiter</groupId>
-        <artifactId>junit-jupiter-engine</artifactId>
-        <version>5.5.2</version>
+        <version>5.6.2</version>
         <scope>test</scope>
       </dependency>
       <dependency>
@@ -301,6 +263,13 @@
         <groupId>com.amazonaws</groupId>
         <artifactId>aws-java-sdk-s3</artifactId>
         <version>1.11.893</version>
+      </dependency>
+
+      <!-- Flyway for managing database migrations -->
+      <dependency>
+        <groupId>org.flywaydb</groupId>
+        <artifactId>flyway-core</artifactId>
+        <version>${flyway-version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
