@@ -64,7 +64,7 @@ public class AuthProcessorImplTest {
     // seed the db
     UsersRecord record = myJooqMock.getContext().newRecord(Tables.USERS);
     record.setId(0);
-    record.setPrivilegeLevel(PrivilegeLevel.GP);
+    record.setPrivilegeLevel(PrivilegeLevel.STANDARD);
     myJooqMock.addReturn(OperationType.INSERT, record);
     myJooqMock.addExistsReturn(false);
     myJooqMock.addReturn(OperationType.SELECT, record);
