@@ -1,6 +1,7 @@
 package com.codeforcommunity.enums;
 
 public enum PrivilegeLevel {
+  // TODO: do not alter the order of these until the corresponding DB column is migrated to a string
   STANDARD("standard"),
   PF("pf"),
   ADMIN("admin");

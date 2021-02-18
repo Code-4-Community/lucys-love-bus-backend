@@ -34,13 +34,14 @@ public class RequestsProcessorImplTest {
 
   private JooqMock myJooqMock;
   private RequestsProcessorImpl myRequestsProcessorImpl;
+  private Emailer mockEmailer;
 
   // set up all the mocks
   @BeforeEach
   public void setup() {
     this.myJooqMock = new JooqMock();
-    this.myRequestsProcessorImpl =
-        new RequestsProcessorImpl(myJooqMock.getContext(), new Emailer(myJooqMock.getContext()));
+    this.mockEmailer = mock(Emailer.class);
+    this.myRequestsProcessorImpl = new RequestsProcessorImpl(myJooqMock.getContext(), mockEmailer);
   }
 
   // test creating a request that fails because user isn't GP
@@ -262,7 +263,7 @@ public class RequestsProcessorImplTest {
         myUserRecord.getId());
     assertEquals(
         myJooqMock.getSqlOperationBindings().get(OperationType.UPDATE).get(1)[0],
-        PrivilegeLevel.PF.getName());
+        PrivilegeLevel.PF.ordinal());
     assertEquals(
         myJooqMock.getSqlOperationBindings().get(OperationType.UPDATE).get(1)[1],
         myUserRecord.getId());

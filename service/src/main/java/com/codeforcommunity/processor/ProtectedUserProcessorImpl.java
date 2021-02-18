@@ -46,13 +46,8 @@ public class ProtectedUserProcessorImpl implements IProtectedUserProcessor {
   @Override
   public void deleteUser(JWTData userData) {
     int userId = userData.getUserId();
-
-    db.deleteFrom(VERIFICATION_KEYS).where(VERIFICATION_KEYS.USER_ID.eq(userId)).executeAsync();
-
-    UsersRecord user = db.selectFrom(USERS).where(USERS.ID.eq(userId)).fetchOne();
-    user.delete();
-
-    emailer.sendEmailToMainContact(userId, emailer::sendAccountDeactivated);
+    emailer.sendEmailToAllContacts(userId, emailer::sendAccountDeactivated);
+    this.userInformationDatabaseOperations.deleteUserRelatedTables(userId);
   }
 
   @Override
@@ -68,7 +63,7 @@ public class ProtectedUserProcessorImpl implements IProtectedUserProcessor {
       user.setPassHash(Passwords.createHash(changePasswordRequest.getNewPassword()));
       user.store();
 
-      emailer.sendEmailToMainContact(user.getId(), emailer::sendPasswordChange);
+      emailer.sendEmailToMainContact(user.getId(), emailer::sendPasswordChangeConfirmationEmail);
     } else {
       throw new WrongPasswordException();
     }
@@ -160,11 +155,13 @@ public class ProtectedUserProcessorImpl implements IProtectedUserProcessor {
 
       emailer.sendEmailToAllContacts(
           userData.getUserId(),
-          (e, n) -> emailer.sendEmailChange(e, n, changeEmailRequest.getNewEmail()));
+          (e, n) ->
+              emailer.sendEmailChangeConfirmationEmail(e, n, changeEmailRequest.getNewEmail()));
       user.store();
       emailer.sendEmailToMainContact(
           userData.getUserId(),
-          (e, n) -> emailer.sendEmailChange(e, n, changeEmailRequest.getNewEmail()));
+          (e, n) ->
+              emailer.sendEmailChangeConfirmationEmail(e, n, changeEmailRequest.getNewEmail()));
     } else {
       throw new WrongPasswordException();
     }

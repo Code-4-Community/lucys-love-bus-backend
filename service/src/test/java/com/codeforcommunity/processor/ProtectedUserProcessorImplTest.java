@@ -2,6 +2,7 @@ package com.codeforcommunity.processor;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.Mockito.mock;
 
 import com.codeforcommunity.JooqMock;
 import com.codeforcommunity.JooqMock.OperationType;
@@ -33,6 +34,7 @@ public class ProtectedUserProcessorImplTest {
 
   private JooqMock myJooqMock;
   private ProtectedUserProcessorImpl myProtectedUserProcessorImpl;
+  private Emailer mockEmailer;
 
   // make examples for Contacts
   private final Contact CONTACT_EXAMPLE_1 =
@@ -118,9 +120,9 @@ public class ProtectedUserProcessorImplTest {
   @BeforeEach
   public void setup() {
     this.myJooqMock = new JooqMock();
+    this.mockEmailer = mock(Emailer.class);
     this.myProtectedUserProcessorImpl =
-        new ProtectedUserProcessorImpl(
-            myJooqMock.getContext(), new Emailer(myJooqMock.getContext()));
+        new ProtectedUserProcessorImpl(myJooqMock.getContext(), this.mockEmailer);
   }
 
   // test properly deleting a user

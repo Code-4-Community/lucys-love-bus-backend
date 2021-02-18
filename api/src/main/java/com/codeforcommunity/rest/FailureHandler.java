@@ -155,11 +155,6 @@ public class FailureHandler {
     end(ctx, message, 502);
   }
 
-  public void handleAccessTokenInvalid(RoutingContext ctx) {
-    String message = "Given access token is expired or invalid";
-    end(ctx, message, 401);
-  }
-
   public void handleRequestDoesNotExist(
       RoutingContext ctx, RequestDoesNotExistException exception) {
     String message = String.format("No request with id <%d> exists", exception.getRequestId());

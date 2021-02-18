@@ -137,9 +137,6 @@ public class AuthDatabaseOperations {
     UsersRecord newUser = db.newRecord(USERS);
     addAddressDataToUserRecord(newUser, request.getLocation());
     newUser.setEmail(request.getEmail());
-    //    String verificationToken = createSecretKey(newUser.getId(),
-    // VerificationKeyType.VERIFY_EMAIL);
-    //    // TODO: Send verification email
     newUser.setPassHash(Passwords.createHash(request.getPassword()));
     newUser.setPrivilegeLevel(PrivilegeLevel.STANDARD);
     newUser.store();
@@ -156,6 +153,10 @@ public class AuthDatabaseOperations {
     mainContact.setAllergies(request.getAllergies());
     mainContact.setReferrer(request.getReferrer());
     mainContact.store();
+
+    // String verificationToken = createSecretKey(newUser.getId(),
+    // VerificationKeyType.VERIFY_EMAIL);
+    // TODO: Send verification email
 
     return newUser;
   }

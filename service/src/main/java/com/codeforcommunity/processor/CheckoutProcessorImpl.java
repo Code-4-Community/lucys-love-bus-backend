@@ -27,6 +27,7 @@ import com.stripe.model.Event;
 import com.stripe.model.checkout.Session;
 import com.stripe.net.Webhook;
 import com.stripe.param.checkout.SessionCreateParams;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -230,7 +231,7 @@ public class CheckoutProcessorImpl implements ICheckoutProcessor {
         currentRegistration.store();
 
         // Send event registration confirmation
-        //        sendEventConfirmationEmail(eventId, userId, ticketQuantity);
+        sendEventConfirmationEmail(eventId, userId, ticketQuantity);
       } else {
         EventRegistrationsRecord record = db.newRecord(EVENT_REGISTRATIONS);
         record.setUserId(userId);
@@ -240,8 +241,7 @@ public class CheckoutProcessorImpl implements ICheckoutProcessor {
         record.store();
 
         // Send event registration confirmation
-        //        sendEventConfirmationEmail(eventId, userId,
-        // registration.getTicketQuantityDelta());
+        sendEventConfirmationEmail(eventId, userId, registration.getTicketQuantityDelta());
       }
     }
     db.delete(PENDING_REGISTRATIONS)
@@ -265,8 +265,7 @@ public class CheckoutProcessorImpl implements ICheckoutProcessor {
       newRecord.store();
 
       // Send event registration confirmation
-      //      sendEventConfirmationEmail(lineItem.getId(), user.getUserId(),
-      // lineItem.getQuantity());
+      sendEventConfirmationEmail(lineItem.getId(), user.getUserId(), lineItem.getQuantity());
     }
   }
 
@@ -340,16 +339,14 @@ public class CheckoutProcessorImpl implements ICheckoutProcessor {
     return lineItems;
   }
 
-  //  TODO: Implement event confirmation email
-  //  private void sendEventConfirmationEmail(int eventId, int userId, int ticketQuantity) {
-  //    String tickets = String.valueOf(ticketQuantity);
-  //    Events event =
-  // db.selectFrom(EVENTS).where(EVENTS.ID.eq(eventId)).fetchOneInto(Events.class);
-  //    String date = new SimpleDateFormat("MM/dd/yyyy").format(event.getStartTime());
-  //    String time = new SimpleDateFormat("HH:mm:ss").format(event.getStartTime());
-  //    emailer.sendEmailToAllContacts(
-  //        userId,
-  //        (e, n) ->
-  //            emailer.sendRegistrationConfirmation(e, n, tickets, event.getTitle(), date, time));
-  //  }
+  private void sendEventConfirmationEmail(int eventId, int userId, int ticketQuantity) {
+    String tickets = String.valueOf(ticketQuantity);
+    Events event = db.selectFrom(EVENTS).where(EVENTS.ID.eq(eventId)).fetchOneInto(Events.class);
+    String date = new SimpleDateFormat("MM/dd/yyyy").format(event.getStartTime());
+    String time = new SimpleDateFormat("HH:mm:ss").format(event.getStartTime());
+    emailer.sendEmailToAllContacts(
+        userId,
+        (e, n) ->
+            emailer.sendRegistrationConfirmation(e, n, tickets, event.getTitle(), date, time));
+  }
 }

@@ -20,8 +20,8 @@ public class Emailer {
   private final EmailOperations emailOperations;
   private final DSLContext db;
   private final String loginUrl;
-  private final String passwordResetTemplate;
-  private final String PF_REQUEST_URL;
+  private final String passwordResetUrl;
+  private final String pfRequestUrl;
 
   private final String subjectWelcome = PropertiesLoader.loadProperty("email_subject_welcome");
   private final String subjectEmailChange =
@@ -42,17 +42,17 @@ public class Emailer {
     boolean shouldSendEmails =
         Boolean.parseBoolean(PropertiesLoader.loadProperty("email_should_send"));
 
-    this.PF_REQUEST_URL =
-        String.format(
-            "%s%s", PropertiesLoader.loadProperty("frontend_base_url"), "/family-requests");
-
     this.emailOperations =
         new EmailOperations(
             shouldSendEmails, senderName, sendEmail, sendPassword, emailHost, emailPort);
 
     this.loginUrl = PropertiesLoader.loadProperty("frontend_base_url");
-    this.passwordResetTemplate =
+    this.passwordResetUrl =
         this.loginUrl + PropertiesLoader.loadProperty("frontend_password_reset_route");
+    this.pfRequestUrl =
+        String.format(
+            "%s%s", PropertiesLoader.loadProperty("frontend_base_url"), "/family-requests");
+
     this.db = db;
   }
 
@@ -104,9 +104,49 @@ public class Emailer {
         });
   }
 
-  public void sendAccountDeactivated(String sendToEmail, String sendToName) {
-    String filePath = "/emails/AccountDeactivated.html";
-    String subjectLine = "Your Lucy's Love Bus Account has been Deactivated";
+  public void sendWelcomeEmail(String sendToEmail, String sendToName) {
+    // TODO: configure the proper email, including verification key
+    String filePath = "/emails/WelcomeEmail.html";
+
+    Map<String, String> templateValues = new HashMap<>();
+    templateValues.put("name", sendToName);
+    templateValues.put("link", loginUrl);
+    Optional<String> emailBody = emailOperations.getTemplateString(filePath, templateValues);
+
+    emailBody.ifPresent(s -> emailOperations.sendEmail(sendToName, sendToEmail, subjectWelcome, s));
+  }
+
+  public void sendEmailChangeConfirmationEmail(
+      String sendToEmail, String sendToName, String newEmail) {
+    String filePath = "/emails/EmailChangeConfirmation.html";
+    String subjectLine = "Your Lucy's Love Bus Email has been Changed";
+
+    Map<String, String> templateValues = new HashMap<>();
+    templateValues.put("name", sendToName);
+    templateValues.put("link", this.loginUrl);
+    templateValues.put("new_email", newEmail);
+    Optional<String> emailBody = emailOperations.getTemplateString(filePath, templateValues);
+
+    emailBody.ifPresent(s -> emailOperations.sendEmail(sendToName, sendToEmail, subjectLine, s));
+  }
+
+  public void sendPasswordChangeRequestEmail(
+      String sendToEmail, String sendToName, String secretKey) {
+    String filePath = "/emails/PasswordChangeRequest.html";
+    String subjectLine = "Reset your Lucy's Love Bus Password";
+
+    String forgotPasswordLink = String.format(this.passwordResetUrl, secretKey);
+    Map<String, String> templateValues = new HashMap<>();
+    templateValues.put("name", sendToName);
+    templateValues.put("link", forgotPasswordLink);
+    Optional<String> emailBody = emailOperations.getTemplateString(filePath, templateValues);
+
+    emailBody.ifPresent(s -> emailOperations.sendEmail(sendToName, sendToEmail, subjectLine, s));
+  }
+
+  public void sendPasswordChangeConfirmationEmail(String sendToEmail, String sendToName) {
+    String filePath = "/emails/PasswordChangeConfirmation.html";
+    String subjectLine = "Your Lucy's Love Bus Password has Changed";
 
     Map<String, String> templateValues = new HashMap<>();
     templateValues.put("name", sendToName);
@@ -115,14 +155,12 @@ public class Emailer {
     emailBody.ifPresent(s -> emailOperations.sendEmail(sendToName, sendToEmail, subjectLine, s));
   }
 
-  public void sendEmailChange(String sendToEmail, String sendToName, String newEmail) {
-    String filePath = "/emails/EmailChange.html";
-    String subjectLine = "Your Lucy's Love Bus Email has been Changed";
+  public void sendAccountDeactivated(String sendToEmail, String sendToName) {
+    String filePath = "/emails/AccountDeactivated.html";
+    String subjectLine = "Your Lucy's Love Bus Account has been Deactivated";
 
     Map<String, String> templateValues = new HashMap<>();
     templateValues.put("name", sendToName);
-    templateValues.put("link", this.loginUrl);
-    templateValues.put("new_email", newEmail);
     Optional<String> emailBody = emailOperations.getTemplateString(filePath, templateValues);
 
     emailBody.ifPresent(s -> emailOperations.sendEmail(sendToName, sendToEmail, subjectLine, s));
@@ -142,30 +180,6 @@ public class Emailer {
     templateValues.put("link", this.loginUrl);
     templateValues.put("announcement_title", announcementTitle);
     templateValues.put("announcement_content", announcementContent);
-    Optional<String> emailBody = emailOperations.getTemplateString(filePath, templateValues);
-
-    emailBody.ifPresent(s -> emailOperations.sendEmail(sendToName, sendToEmail, subjectLine, s));
-  }
-
-  public void sendForgotPassword(String sendToEmail, String sendToName, String secretKey) {
-    String filePath = "/emails/ForgotPassword.html";
-    String subjectLine = "Reset your Lucy's Love Bus Password";
-
-    String forgotPasswordLink = String.format(this.passwordResetTemplate, secretKey);
-    Map<String, String> templateValues = new HashMap<>();
-    templateValues.put("name", sendToName);
-    templateValues.put("link", forgotPasswordLink);
-    Optional<String> emailBody = emailOperations.getTemplateString(filePath, templateValues);
-
-    emailBody.ifPresent(s -> emailOperations.sendEmail(sendToName, sendToEmail, subjectLine, s));
-  }
-
-  public void sendPasswordChange(String sendToEmail, String sendToName) {
-    String filePath = "/emails/PasswordChange.html";
-    String subjectLine = "Your Lucy's Love Bus Password has Changed";
-
-    Map<String, String> templateValues = new HashMap<>();
-    templateValues.put("name", sendToName);
     Optional<String> emailBody = emailOperations.getTemplateString(filePath, templateValues);
 
     emailBody.ifPresent(s -> emailOperations.sendEmail(sendToName, sendToEmail, subjectLine, s));
@@ -240,7 +254,7 @@ public class Emailer {
     String subjectLine = "New Request Submitted";
 
     Map<String, String> templateValues = new HashMap<>();
-    templateValues.put("link", this.PF_REQUEST_URL);
+    templateValues.put("link", this.pfRequestUrl);
     Optional<String> emailBody = emailOperations.getTemplateString(filePath, templateValues);
 
     emailBody.ifPresent(s -> emailOperations.sendEmail(sendToName, sendToEmail, subjectLine, s));
