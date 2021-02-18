@@ -3,9 +3,9 @@
 # =======================================================================================================
 aws_access_key = placeholder_aws_access_key
 aws_secret_key = placeholder_aws_secret_key
-aws_s3_bucket_url = placeholder_s3_bucket_url
-aws_s3_bucket_name = placeholder_s3_bucket_name
-aws_s3_upload_dir = placeholder_s3_dir_name
+s3_bucket_url = placeholder_s3_bucket_url
+s3_bucket_name = placeholder_s3_bucket_name
+s3_upload_dir = placeholder_s3_dir_name
 
 
 # =======================================================================================================
