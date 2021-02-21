@@ -13,7 +13,7 @@ public class Announcement {
   private String title;
   private String description;
   private Integer eventId;
-  private String src;
+  private String imageSrc;
 
   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss Z")
   private Timestamp created;
@@ -30,13 +30,18 @@ public class Announcement {
    * @param eventId id of the event this announcement is relevant to
    */
   public Announcement(
-      int id, String title, String description, Timestamp created, Integer eventId, String src) {
+      int id,
+      String title,
+      String description,
+      Timestamp created,
+      Integer eventId,
+      String imageSrc) {
     this.id = id;
     this.title = title;
     this.description = description;
     this.created = created;
     this.eventId = eventId;
-    this.src = src;
+    this.imageSrc = imageSrc;
   }
 
   /**
@@ -89,8 +94,8 @@ public class Announcement {
    *
    * @return the image src of this announcement.
    */
-  public String getSrc() {
-    return src;
+  public String getImageSrc() {
+    return imageSrc;
   }
 
   @Override
@@ -108,8 +113,8 @@ public class Announcement {
         + eventId
         + ", created="
         + created
-        + ", src="
-        + src
+        + ", image_src="
+        + imageSrc
         + '}';
   }
 }

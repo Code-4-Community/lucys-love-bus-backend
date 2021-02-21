@@ -70,7 +70,7 @@ public class AnnouncementsProcessorImpl implements IAnnouncementsProcessor {
         announcement.getDescription(),
         announcement.getCreated(),
         announcement.getEventId(),
-        announcement.getSrc());
+        announcement.getImageSrc());
   }
 
   @Override
@@ -156,6 +156,9 @@ public class AnnouncementsProcessorImpl implements IAnnouncementsProcessor {
     AnnouncementsRecord newRecord = db.newRecord(ANNOUNCEMENTS);
     newRecord.setTitle(request.getTitle());
     newRecord.setDescription(request.getDescription());
+    if (request.getImageSrc().isPresent()) {
+      newRecord.setImageSrc(request.getImageSrc().get());
+    }
     return newRecord;
   }
 

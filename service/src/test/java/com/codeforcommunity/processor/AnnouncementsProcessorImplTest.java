@@ -161,6 +161,53 @@ public class AnnouncementsProcessorImplTest {
     assertEquals(res.getAnnouncement().getCreated(), new Timestamp(START_TIMESTAMP_TEST));
   }
 
+  // test posting an announcement with an image, without admin privileges
+  @Test
+  public void testPostAnnouncementsWithImageSrc1() {
+    // make the request object
+    PostAnnouncementRequest req = new PostAnnouncementRequest("sample title", "sample description",
+        "https://facts.net/wp-content/uploads/2020/07/monarch-butterfly-facts.jpg");
+
+    // mock the user
+    JWTData myUserData = new JWTData(0, PrivilegeLevel.GP);
+
+    try {
+      myAnnouncementsProcessorImpl.postAnnouncement(req, myUserData);
+      fail();
+    } catch (AdminOnlyRouteException e) {
+      // we're good
+    }
+  }
+
+  // test posting an announcement with an image normally
+  @Test
+  public void testPostAnnouncementsWithImageSrc2() {
+    // make the request object
+    PostAnnouncementRequest req = new PostAnnouncementRequest("sample title", "sample description",
+        "https://facts.net/wp-content/uploads/2020/07/monarch-butterfly-facts.jpg");
+
+    // mock the announcement inside the DB
+    AnnouncementsRecord announcement = myJooqMock.getContext().newRecord(Tables.ANNOUNCEMENTS);
+    announcement.setId(0);
+    announcement.setTitle("sample title");
+    announcement.setCreated(new Timestamp(START_TIMESTAMP_TEST));
+    announcement.setDescription("sample description");
+    announcement.setImageSrc("https://facts.net/wp-content/uploads/2020/07/monarch-butterfly-facts.jpg");
+    myJooqMock.addReturn("SELECT", announcement);
+    myJooqMock.addReturn("INSERT", announcement);
+
+    // mock the user
+    JWTData myUserData = new JWTData(0, PrivilegeLevel.ADMIN);
+
+    PostAnnouncementResponse res = myAnnouncementsProcessorImpl.postAnnouncement(req, myUserData);
+
+    assertEquals(res.getAnnouncement().getDescription(), "sample description");
+    assertEquals(res.getAnnouncement().getTitle(), "sample title");
+    assertEquals(res.getAnnouncement().getId(), 0);
+    assertEquals(res.getAnnouncement().getCreated(), new Timestamp(START_TIMESTAMP_TEST));
+    assertEquals(res.getAnnouncement().getImageSrc(),"https://facts.net/wp-content/uploads/2020/07/monarch-butterfly-facts.jpg");
+  }
+
   // posting an event specific announcement fails if user isn't an admin
   @Test
   public void testPostEventSpecificAnnouncement1() {
@@ -199,6 +246,42 @@ public class AnnouncementsProcessorImplTest {
   // posting an event specific announcement succeeds with event with no announcements yet
   @Test
   public void testPostEventSpecificAnnouncement3() {
+    PostAnnouncementRequest req = new PostAnnouncementRequest("c4c", "code for community",
+        "https://facts.net/wp-content/uploads/2020/07/monarch-butterfly-facts.jpg");
+
+    // mock the user
+    JWTData myUserData = new JWTData(0, PrivilegeLevel.ADMIN);
+
+    // mock the specific event inside the DB
+    EventsRecord event = myJooqMock.getContext().newRecord(Tables.EVENTS);
+    event.setId(1);
+    myJooqMock.addReturn("SELECT", event);
+
+    // mock the announcement inside the DB
+    AnnouncementsRecord announcement = myJooqMock.getContext().newRecord(Tables.ANNOUNCEMENTS);
+    announcement.setId(1);
+    announcement.setEventId(1);
+    announcement.setTitle("c4c");
+    announcement.setDescription("code for community");
+    announcement.setImageSrc("https://facts.net/wp-content/uploads/2020/07/monarch-butterfly-facts.jpg");
+    myJooqMock.addReturn("SELECT", announcement);
+    myJooqMock.addReturn("INSERT", announcement);
+
+    // mock sending event specific announcement email
+    myJooqMock.addReturn("SELECT", event);
+
+    PostAnnouncementResponse res =
+        myAnnouncementsProcessorImpl.postEventSpecificAnnouncement(req, myUserData, 1);
+    assertEquals(res.getAnnouncement().getEventId(), announcement.getEventId());
+    assertEquals((Integer) res.getAnnouncement().getId(), announcement.getId());
+    assertEquals(res.getAnnouncement().getTitle(), req.getTitle());
+    assertEquals(res.getAnnouncement().getDescription(), req.getDescription());
+    assertEquals(res.getAnnouncement().getImageSrc(), req.getImageSrc().get());
+  }
+
+  // posting an event specific announcement (with an image) succeeds with event with no announcements yet
+  @Test
+  public void testPostEventSpecificAnnouncementWithImageSrc1() {
     PostAnnouncementRequest req = new PostAnnouncementRequest("c4c", "code for community");
 
     // mock the user

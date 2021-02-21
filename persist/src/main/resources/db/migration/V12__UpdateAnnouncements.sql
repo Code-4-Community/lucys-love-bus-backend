@@ -1,1 +1,2 @@
-ALTER TABLE announcements ADD COLUMN src VARCHAR DEFAULT null;
+ALTER TABLE announcements
+ADD COLUMN image_src VARCHAR DEFAULT null;
