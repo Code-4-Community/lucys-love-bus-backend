@@ -54,6 +54,13 @@ public interface IAuthProcessor {
   void resetPassword(ResetPasswordRequest request);
 
   /**
+   * Sends a verification email to the new user's email.
+   *
+   * @param request request object containing refresh token as well as needed user information.
+   */
+  void sendVerificationEmail(NewUserRequest request);
+
+  /**
    * Allows clients to submit a secret key in order to verify their email.
    *
    * @param secretKey string of user's verification token.

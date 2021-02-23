@@ -103,6 +103,7 @@ public class AuthRouter implements IRouter {
     NewUserRequest request = RestFunctions.getJsonBodyAsClass(ctx, NewUserRequest.class);
 
     SessionResponse response = authProcessor.signUp(request);
+    authProcessor.sendVerificationEmail(request);
 
     end(ctx.response(), 201, JsonObject.mapFrom(response).toString());
   }

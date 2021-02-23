@@ -22,6 +22,7 @@ public class Emailer {
   private final DSLContext db;
   private final String MAIN_PAGE_URL;
   private final String FORGOT_PASSWORD_URL_TEMPLATE;
+  private final String VERIFY_EMAIL_URL_TEMPLATE;
   private final String PF_REQUEST_URL;
 
   public Emailer(DSLContext db) {
@@ -44,6 +45,12 @@ public class Emailer {
             "%s%s",
             frontendProperties.getProperty("domain"),
             frontendProperties.getProperty("forgot_password_route"));
+
+    this.VERIFY_EMAIL_URL_TEMPLATE =
+        String.format(
+            "%s%s",
+            frontendProperties.getProperty("domain"),
+            frontendProperties.getProperty("verify_email_route"));
 
     this.PF_REQUEST_URL =
         String.format("%s%s", frontendProperties.getProperty("domain"), "/family-requests");
@@ -153,6 +160,19 @@ public class Emailer {
     Map<String, String> templateValues = new HashMap<>();
     templateValues.put("name", sendToName);
     templateValues.put("link", forgotPasswordLink);
+    Optional<String> emailBody = emailOperations.getTemplateString(filePath, templateValues);
+
+    emailBody.ifPresent(s -> emailOperations.sendEmail(sendToName, sendToEmail, subjectLine, s));
+  }
+
+  public void sendEmailVerification(String sendToEmail, String sendToName, String secretKey) {
+    String filePath = "/emails/SignupVerification.html";
+    String subjectLine = "Verify your email";
+
+    String emailVerificationLink = String.format(VERIFY_EMAIL_URL_TEMPLATE, secretKey);
+    Map<String, String> templateValues = new HashMap<>();
+    templateValues.put("name", sendToName);
+    templateValues.put("link", emailVerificationLink);
     Optional<String> emailBody = emailOperations.getTemplateString(filePath, templateValues);
 
     emailBody.ifPresent(s -> emailOperations.sendEmail(sendToName, sendToEmail, subjectLine, s));

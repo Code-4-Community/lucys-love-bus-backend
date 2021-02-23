@@ -255,10 +255,17 @@ public class RequestsProcessorImplTest {
     myRequestsProcessorImpl.approveRequest(0, myUserData);
 
     assertEquals(
-        myJooqMock.getSqlOperationBindings().get(OperationType.UPDATE).get(0)[0], RequestStatus.APPROVED.getVal());
-    assertEquals(myJooqMock.getSqlOperationBindings().get(OperationType.UPDATE).get(0)[1], myUserRecord.getId());
-    assertEquals(myJooqMock.getSqlOperationBindings().get(OperationType.UPDATE).get(1)[0], PrivilegeLevel.PF.getVal());
-    assertEquals(myJooqMock.getSqlOperationBindings().get(OperationType.UPDATE).get(1)[1], myUserRecord.getId());
+        myJooqMock.getSqlOperationBindings().get(OperationType.UPDATE).get(0)[0],
+        RequestStatus.APPROVED.getVal());
+    assertEquals(
+        myJooqMock.getSqlOperationBindings().get(OperationType.UPDATE).get(0)[1],
+        myUserRecord.getId());
+    assertEquals(
+        myJooqMock.getSqlOperationBindings().get(OperationType.UPDATE).get(1)[0],
+        PrivilegeLevel.PF.getVal());
+    assertEquals(
+        myJooqMock.getSqlOperationBindings().get(OperationType.UPDATE).get(1)[1],
+        myUserRecord.getId());
   }
 
   // general users can't reject requests
@@ -294,8 +301,11 @@ public class RequestsProcessorImplTest {
     myRequestsProcessorImpl.rejectRequest(0, myUserData);
 
     assertEquals(
-        myJooqMock.getSqlOperationBindings().get(OperationType.UPDATE).get(0)[0], RequestStatus.REJECTED.getVal());
-    assertEquals(myJooqMock.getSqlOperationBindings().get(OperationType.UPDATE).get(0)[1], myPFReqRecord.getUserId());
+        myJooqMock.getSqlOperationBindings().get(OperationType.UPDATE).get(0)[0],
+        RequestStatus.REJECTED.getVal());
+    assertEquals(
+        myJooqMock.getSqlOperationBindings().get(OperationType.UPDATE).get(0)[1],
+        myPFReqRecord.getUserId());
   }
 
   // test getting request statuses when there are none

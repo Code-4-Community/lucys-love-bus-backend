@@ -136,6 +136,25 @@ public class AuthProcessorImpl implements IAuthProcessor {
   }
 
   @Override
+  public void sendVerificationEmail(NewUserRequest request) {
+    String email = request.getEmail();
+    JWTData userData;
+    try {
+      userData = authDatabaseOperations.getUserJWTData(email);
+    } catch (UserDoesNotExistException e) {
+      // Don't tell the client that the email doesn't exist
+      return;
+    }
+
+    String token =
+        authDatabaseOperations.createSecretKey(
+            userData.getUserId(), VerificationKeyType.VERIFY_EMAIL);
+
+    emailer.sendEmailToMainContact(
+        userData.getUserId(), (e, n) -> emailer.sendEmailVerification(e, n, token));
+  }
+
+  @Override
   public void verifyEmail(String secretKey) {
     UsersRecord user =
         authDatabaseOperations.validateSecretKey(secretKey, VerificationKeyType.VERIFY_EMAIL);
