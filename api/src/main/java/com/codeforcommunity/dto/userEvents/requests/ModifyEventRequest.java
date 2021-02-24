@@ -1,6 +1,6 @@
 package com.codeforcommunity.dto.userEvents.requests;
 
-import com.codeforcommunity.api.ApiDto;
+import com.codeforcommunity.dto.ApiDto;
 import com.codeforcommunity.dto.userEvents.components.EventDetails;
 import java.util.ArrayList;
 import java.util.List;
@@ -80,7 +80,7 @@ public class ModifyEventRequest extends ApiDto {
       fields.add(fieldName + "spots_available");
     }
     if (details != null) {
-      fields.addAll(details.validateFields(fieldName, true));
+      fields.addAll(details.validateFields(fieldName));
     }
     return fields;
   }

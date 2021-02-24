@@ -13,10 +13,10 @@ public class JWTData {
   }
 
   public Integer getUserId() {
-    return userId;
+    return this.userId;
   }
 
   public PrivilegeLevel getPrivilegeLevel() {
-    return privilegeLevel;
+    return this.privilegeLevel;
   }
 }

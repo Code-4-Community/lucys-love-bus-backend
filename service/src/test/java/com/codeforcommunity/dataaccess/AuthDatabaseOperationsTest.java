@@ -22,7 +22,6 @@ import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
 import org.jooq.generated.Tables;
-import org.jooq.generated.tables.records.BlacklistedRefreshesRecord;
 import org.jooq.generated.tables.records.UsersRecord;
 import org.jooq.generated.tables.records.VerificationKeysRecord;
 import org.junit.jupiter.api.BeforeEach;
@@ -69,7 +68,7 @@ public class AuthDatabaseOperationsTest {
     UsersRecord myUser = myJooqMock.getContext().newRecord(Tables.USERS);
     myUser.setEmail(myEmail);
     myUser.setId(1);
-    myUser.setPrivilegeLevel(PrivilegeLevel.GP);
+    myUser.setPrivilegeLevel(PrivilegeLevel.STANDARD);
     myJooqMock.addReturn(OperationType.SELECT, myUser);
 
     JWTData userData = myAuthDatabaseOperations.getUserJWTData(myEmail);
@@ -88,7 +87,7 @@ public class AuthDatabaseOperationsTest {
     myUser.setEmail(myEmail);
     myUser.setPassHash(Passwords.createHash("letmein"));
     myUser.setId(1);
-    myUser.setPrivilegeLevel(PrivilegeLevel.GP);
+    myUser.setPrivilegeLevel(PrivilegeLevel.STANDARD);
     myJooqMock.addReturn(OperationType.SELECT, myUser);
 
     assertFalse(myAuthDatabaseOperations.isValidLogin(myEmail, "letmeout"));
@@ -104,7 +103,7 @@ public class AuthDatabaseOperationsTest {
     myUser.setEmail(myEmail);
     myUser.setPassHash(Passwords.createHash("letmein"));
     myUser.setId(1);
-    myUser.setPrivilegeLevel(PrivilegeLevel.GP);
+    myUser.setPrivilegeLevel(PrivilegeLevel.STANDARD);
     myJooqMock.addReturn(OperationType.SELECT, myUser);
 
     assertTrue(myAuthDatabaseOperations.isValidLogin(myEmail, "letmein"));
@@ -291,6 +290,6 @@ public class AuthDatabaseOperationsTest {
     assertEquals(true, updateBindings.get(0)[0]);
     assertEquals(token, insertBindings.get(0)[0]);
     assertEquals(0, insertBindings.get(0)[1]);
-    assertEquals(VerificationKeyType.FORGOT_PASSWORD.getVal(), insertBindings.get(0)[2]);
+    assertEquals(VerificationKeyType.FORGOT_PASSWORD.ordinal(), insertBindings.get(0)[2]);
   }
 }

@@ -2,6 +2,7 @@ package com.codeforcommunity.processor;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.Mockito.mock;
 
 import com.codeforcommunity.JooqMock;
 import com.codeforcommunity.JooqMock.OperationType;
@@ -29,6 +30,7 @@ public class AnnouncementsProcessorImplTest {
 
   private JooqMock myJooqMock;
   private AnnouncementsProcessorImpl myAnnouncementsProcessorImpl;
+  private Emailer mockEmailer;
 
   // use UNIX time for ease of testing
   // 04/16/2020 @ 1:20am (UTC)
@@ -42,9 +44,9 @@ public class AnnouncementsProcessorImplTest {
   @BeforeEach
   public void setup() {
     this.myJooqMock = new JooqMock();
+    this.mockEmailer = mock(Emailer.class);
     this.myAnnouncementsProcessorImpl =
-        new AnnouncementsProcessorImpl(
-            myJooqMock.getContext(), new Emailer(myJooqMock.getContext()));
+        new AnnouncementsProcessorImpl(myJooqMock.getContext(), this.mockEmailer);
   }
 
   // test getting announcements with range covering no events
@@ -126,7 +128,7 @@ public class AnnouncementsProcessorImplTest {
     PostAnnouncementRequest req = new PostAnnouncementRequest("sample title", "sample description");
 
     // mock the user
-    JWTData myUserData = new JWTData(0, PrivilegeLevel.GP);
+    JWTData myUserData = new JWTData(0, PrivilegeLevel.STANDARD);
 
     try {
       myAnnouncementsProcessorImpl.postAnnouncement(req, myUserData);
@@ -168,7 +170,7 @@ public class AnnouncementsProcessorImplTest {
     PostAnnouncementRequest req = new PostAnnouncementRequest("c4c", "code for community");
 
     // mock the user
-    JWTData myUserData = new JWTData(0, PrivilegeLevel.GP);
+    JWTData myUserData = new JWTData(0, PrivilegeLevel.STANDARD);
 
     try {
       myAnnouncementsProcessorImpl.postEventSpecificAnnouncement(req, myUserData, 1);

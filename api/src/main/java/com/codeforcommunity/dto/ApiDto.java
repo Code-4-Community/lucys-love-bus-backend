@@ -1,23 +1,19 @@
-package com.codeforcommunity.api;
+package com.codeforcommunity.dto;
 
 import com.codeforcommunity.exceptions.HandledException;
 import com.codeforcommunity.exceptions.MalformedParameterException;
-import com.codeforcommunity.propertiesLoader.PropertiesLoader;
 import java.util.List;
 
 public abstract class ApiDto {
-  // Seconds representing the cutoff for how much earlier than now an event can be created
-  protected static final long secondsLateEventCreation =
-      Long.parseLong(
-          PropertiesLoader.getExpirationProperties().getProperty("seconds_late_event_creation"));
-
   /**
    * Verify if the extending DTO is a valid object.
    *
    * @return A list of strings containing the fields that are invalid. Return a non-null an empty
    *     list if all fields are valid.
+   * @throws HandledException if an issue comes up with a field that would not otherwise fall under
+   *     a {@link MalformedParameterException}.
    */
-  private List<String> validateFields() {
+  private List<String> validateFields() throws HandledException {
     return validateFields("");
   }
 
@@ -28,31 +24,18 @@ public abstract class ApiDto {
    *     be of the form "OBJECT.".
    * @return A list of strings containing the fields that are invalid. Return a non-null empty list
    *     if all fields are valid.
+   * @throws HandledException if an issue comes up with a field that would not otherwise fall under
+   *     a {@link MalformedParameterException}.
    */
-  public abstract List<String> validateFields(String fieldPrefix);
-
-  /**
-   * Verify if the extending DTO is a valid object. This version should be overridden if this object
-   * has sometimes-optional fields. For an example, see {@link
-   * com.codeforcommunity.dto.userEvents.components.EventDetails}.
-   *
-   * @param fieldPrefix A string to prefix each field with 9for use if this is a sub-field). Should
-   *     be of the form "OBJECT.".
-   * @param nullable a boolean representing whether this is the nullable version of an object with
-   *     sometimes-optional fields.
-   * @return A list of strings containing the fields that are invalid. Return a non-null empty list
-   *     if all fields are valid.
-   */
-  public List<String> validateFields(String fieldPrefix, boolean nullable) {
-    return validateFields(fieldPrefix);
-  }
+  public abstract List<String> validateFields(String fieldPrefix) throws HandledException;
 
   /**
    * Validate the extending DTO. Calls validateFields, joins the list of fields, and throws a {@link
    * HandledException} containing the field(s) that caused the issue. Can be overridden if another
    * {@link HandledException} should be thrown.
    *
-   * @throws HandledException Containing the error fields.
+   * @throws HandledException Containing the error fields or corresponding to any other C4C defined
+   *     and handled errors that may come up.
    */
   public void validate() throws HandledException {
     List<String> fields = this.validateFields();
