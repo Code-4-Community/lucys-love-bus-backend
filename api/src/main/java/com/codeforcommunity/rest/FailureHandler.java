@@ -244,12 +244,12 @@ public class FailureHandler {
 
   private void handleUncaughtError(RoutingContext ctx, Throwable throwable) {
     String message = String.format("Internal server error caused by: %s", throwable.getMessage());
-    logger.error(message);
     throwable.printStackTrace();
     end(ctx, message, 500);
   }
 
   private void end(RoutingContext ctx, String message, int statusCode) {
+    logger.error(message);
     ctx.response().setStatusCode(statusCode).end(message);
   }
 }

@@ -179,7 +179,9 @@ public class EventsProcessorImpl implements IEventsProcessor {
       record.setCapacity(request.getSpotsAvailable());
     }
     if (request.getThumbnail() != null) {
-      record.setThumbnail(request.getThumbnail());
+      String thumbnail =
+          S3Requester.validateUploadImageToS3LucyEvents(request.getTitle(), request.getThumbnail());
+      record.setThumbnail(thumbnail);
     }
     if (request.getDetails() != null) {
       EventDetails details = request.getDetails();

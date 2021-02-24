@@ -255,7 +255,7 @@
       <dependency>
         <groupId>com.stripe</groupId>
         <artifactId>stripe-java</artifactId>
-        <version>19.5.0</version>
+        <version>20.41.0</version>
       </dependency>
 
       <!-- AWS S3 for storing images -->

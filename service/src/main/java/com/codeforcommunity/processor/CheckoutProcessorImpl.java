@@ -131,14 +131,38 @@ public class CheckoutProcessorImpl implements ICheckoutProcessor {
     // shouldn't already be registered for any of the events
     assertNotRegistered(eventIds, user.getUserId(), retrievedEvents);
 
-    List<LineItem> lineItems = convertLineItems(request.getLineItemRequests(), retrievedEvents);
-    assertLineItems(lineItems); // assert that quantities are within event capacity
-    if (user.getPrivilegeLevel() == PrivilegeLevel.STANDARD) {
-      return Optional.of(createCheckoutSessionAndEventRegistration(lineItems, user));
-    } else {
-      this.createEventRegistration(lineItems, user);
-      return Optional.empty();
+    List<LineItem> allLineItems = convertLineItems(request.getLineItemRequests(), retrievedEvents);
+    assertLineItems(allLineItems); // assert that quantities are within event capacity
+
+    List<LineItem> paidLineItems = new ArrayList<>();
+    List<LineItem> freeLineItems = new ArrayList<>();
+    for (LineItem lineItem : allLineItems) {
+      if (lineItem.getCents() > 0) {
+        paidLineItems.add(lineItem);
+      } else {
+        freeLineItems.add(lineItem);
+      }
     }
+
+    switch (user.getPrivilegeLevel()) {
+      case STANDARD:
+        if (paidLineItems.size() > 0) {
+          Optional<String> id =
+              Optional.of(createCheckoutSessionAndEventRegistration(paidLineItems, user));
+          if (freeLineItems.size() > 0) {
+            this.createEventRegistration(freeLineItems, user);
+          }
+          return id;
+        } else if (freeLineItems.size() > 0) {
+          this.createEventRegistration(freeLineItems, user);
+          return Optional.empty();
+        }
+      case PF:
+      case ADMIN:
+        this.createEventRegistration(allLineItems, user);
+        return Optional.empty();
+    }
+    return Optional.empty();
   }
 
   private void validateUpdateEventRegistration(
@@ -171,10 +195,7 @@ public class CheckoutProcessorImpl implements ICheckoutProcessor {
       if (userData.getPrivilegeLevel() == PrivilegeLevel.STANDARD) {
         List<LineItemRequest> requests =
             Collections.singletonList(new LineItemRequest(eventId, quantity - currentQuantity));
-        Map<Integer, EventsRecord> retrievedEvents =
-            getEventsRecordMap(Collections.singletonList(eventId));
-        List<LineItem> lineItems = convertLineItems(requests, retrievedEvents);
-        return Optional.of(createCheckoutSessionAndEventRegistration(lineItems, userData));
+        return createEventRegistration(new PostCreateEventRegistrations(requests), userData);
       } else {
         registration.setPaid(false);
       }
@@ -329,7 +350,7 @@ public class CheckoutProcessorImpl implements ICheckoutProcessor {
             new LineItem(
                 event.getTitle(),
                 event.getDescription(),
-                TICKET_PRICE_CENTS,
+                event.getPrice(),
                 ticketQuantity,
                 request.getEventId()));
       } else {

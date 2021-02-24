@@ -110,6 +110,7 @@ public class CheckoutProcessorImplTest {
     myEvent.setStartTime(new Timestamp(0));
     myEvent.setEndTime(new Timestamp(10000));
     myEvent.setThumbnail("random url");
+    myEvent.setPrice(500);
     myJooqMock.addReturn(OperationType.SELECT, myEvent);
 
     // mock event registrations
@@ -172,6 +173,7 @@ public class CheckoutProcessorImplTest {
     myEvent1.setStartTime(new Timestamp(0));
     myEvent1.setEndTime(new Timestamp(10000));
     myEvent1.setThumbnail("random url");
+    myEvent1.setPrice(500);
 
     EventsRecord myEvent2 = myJooqMock.getContext().newRecord(Tables.EVENTS);
     myEvent2.setId(1);
@@ -179,6 +181,7 @@ public class CheckoutProcessorImplTest {
     myEvent2.setDescription("Community outreach");
     myEvent2.setCapacity(15);
     myEvent2.setLocation("Los Angeles");
+    myEvent2.setPrice(500);
 
     List<EventsRecord> myEvents = new ArrayList<>();
     myEvents.add(myEvent1);
