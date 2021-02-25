@@ -10,6 +10,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.codeforcommunity.JooqMock;
+import com.codeforcommunity.JooqMock.OperationType;
 import com.codeforcommunity.auth.JWTCreator;
 import com.codeforcommunity.auth.JWTData;
 import com.codeforcommunity.auth.Passwords;
@@ -24,20 +25,17 @@ import com.codeforcommunity.dto.auth.SessionResponse;
 import com.codeforcommunity.enums.PrivilegeLevel;
 import com.codeforcommunity.enums.VerificationKeyType;
 import com.codeforcommunity.exceptions.AuthException;
-import com.codeforcommunity.exceptions.InvalidPasswordException;
+import com.codeforcommunity.exceptions.TokenInvalidException;
 import com.codeforcommunity.requester.Emailer;
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import org.jooq.generated.Tables;
-import org.jooq.generated.tables.records.BlacklistedRefreshesRecord;
 import org.jooq.generated.tables.records.UsersRecord;
 import org.jooq.generated.tables.records.VerificationKeysRecord;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 
 // Contains tests for AuthProcessorImpl.java in main
 public class AuthProcessorImplTest {
@@ -45,6 +43,7 @@ public class AuthProcessorImplTest {
   private JooqMock myJooqMock;
   private JWTCreator mockJWTCreator;
   private AuthProcessorImpl myAuthProcessorImpl;
+  private Emailer mockEmailer;
   private final String REFRESH_TOKEN_EXAMPLE = "sample refresh token";
   private final String ACCESS_TOKEN_EXAMPLE = "sample access token";
 
@@ -53,9 +52,9 @@ public class AuthProcessorImplTest {
   public void setup() {
     this.myJooqMock = new JooqMock();
     this.mockJWTCreator = mock(JWTCreator.class);
+    this.mockEmailer = mock(Emailer.class);
     this.myAuthProcessorImpl =
-        new AuthProcessorImpl(
-            myJooqMock.getContext(), mockJWTCreator, new Emailer(myJooqMock.getContext()));
+        new AuthProcessorImpl(myJooqMock.getContext(), this.mockEmailer, mockJWTCreator);
   }
 
   // test sign up where all the fields are filled in
@@ -64,11 +63,11 @@ public class AuthProcessorImplTest {
     // seed the db
     UsersRecord record = myJooqMock.getContext().newRecord(Tables.USERS);
     record.setId(0);
-    record.setPrivilegeLevel(PrivilegeLevel.GP);
-    myJooqMock.addReturn("INSERT", record);
-    myJooqMock.addEmptyReturn("SELECT");
-    myJooqMock.addReturn("SELECT", record);
-    myJooqMock.addEmptyReturn("UPDATE");
+    record.setPrivilegeLevel(PrivilegeLevel.STANDARD);
+    myJooqMock.addReturn(OperationType.INSERT, record);
+    myJooqMock.addExistsReturn(false);
+    myJooqMock.addReturn(OperationType.SELECT, record);
+    myJooqMock.addEmptyReturn(OperationType.UPDATE);
 
     when(mockJWTCreator.createNewRefreshToken(any(JWTData.class)))
         .thenReturn(REFRESH_TOKEN_EXAMPLE);
@@ -97,7 +96,7 @@ public class AuthProcessorImplTest {
   // test log in where all the fields are null
   @Test
   public void testLogin1() {
-    myJooqMock.addEmptyReturn("SELECT");
+    myJooqMock.addEmptyReturn(OperationType.SELECT);
 
     LoginRequest myLoginRequest = new LoginRequest();
 
@@ -115,7 +114,7 @@ public class AuthProcessorImplTest {
     String incorrectEmail = "incorrect@email.com";
     String incorrectPass = "incorrect";
 
-    myJooqMock.addEmptyReturn("SELECT");
+    myJooqMock.addEmptyReturn(OperationType.SELECT);
 
     LoginRequest myLoginRequest = new LoginRequest();
 
@@ -137,7 +136,7 @@ public class AuthProcessorImplTest {
     String loginPass = "fundies";
 
     int recordId = 1;
-    PrivilegeLevel recordPL = PrivilegeLevel.GP;
+    PrivilegeLevel recordPL = PrivilegeLevel.STANDARD;
 
     // make a user record
     UsersRecord record = myJooqMock.getContext().newRecord(Tables.USERS);
@@ -145,7 +144,7 @@ public class AuthProcessorImplTest {
     record.setPrivilegeLevel(recordPL);
     record.setEmail(loginEmail);
     record.setPassHash(Passwords.createHash(loginPass));
-    myJooqMock.addReturn("SELECT", record);
+    myJooqMock.addReturn(OperationType.SELECT, record);
 
     when(mockJWTCreator.createNewRefreshToken(any(JWTData.class)))
         .thenReturn(REFRESH_TOKEN_EXAMPLE);
@@ -174,7 +173,7 @@ public class AuthProcessorImplTest {
     String loginPass = "fundies";
 
     int recordId = 1;
-    PrivilegeLevel recordPL = PrivilegeLevel.GP;
+    PrivilegeLevel recordPL = PrivilegeLevel.STANDARD;
 
     // make a user record
     UsersRecord record = myJooqMock.getContext().newRecord(Tables.USERS);
@@ -182,7 +181,7 @@ public class AuthProcessorImplTest {
     record.setPrivilegeLevel(recordPL);
     record.setEmail(loginEmail);
     record.setPassHash(Passwords.createHash(loginPass));
-    myJooqMock.addReturn("SELECT", record);
+    myJooqMock.addReturn(OperationType.SELECT, record);
 
     when(mockJWTCreator.createNewRefreshToken(any(JWTData.class)))
         .thenReturn(REFRESH_TOKEN_EXAMPLE);
@@ -209,7 +208,7 @@ public class AuthProcessorImplTest {
     String loginPass = "fundies";
 
     int recordId = 1;
-    PrivilegeLevel recordPL = PrivilegeLevel.GP;
+    PrivilegeLevel recordPL = PrivilegeLevel.STANDARD;
 
     // make a user record
     UsersRecord recordCopy = myJooqMock.getContext().newRecord(Tables.USERS);
@@ -217,7 +216,7 @@ public class AuthProcessorImplTest {
     recordCopy.setPrivilegeLevel(recordPL);
     recordCopy.setEmail(loginEmail);
     recordCopy.setPassHash(Passwords.createHash(loginPass));
-    myJooqMock.addReturn("SELECT", recordCopy);
+    myJooqMock.addReturn(OperationType.SELECT, recordCopy);
 
     when(mockJWTCreator.createNewRefreshToken(any(JWTData.class)))
         .thenReturn(REFRESH_TOKEN_EXAMPLE);
@@ -241,17 +240,17 @@ public class AuthProcessorImplTest {
   @Test
   public void testLogout() {
     // mock the blacklisted refresh token table
-    myJooqMock.addEmptyReturn("INSERT");
+    myJooqMock.addEmptyReturn(OperationType.INSERT);
     myAuthProcessorImpl.logout("sample.refresh.token");
 
     // is the binding correct
-    assertEquals("token", myJooqMock.getSqlBindings().get("INSERT").get(0)[0]);
+    assertEquals("token", myJooqMock.getSqlOperationBindings().get(OperationType.INSERT).get(0)[0]);
   }
 
   // test session refresh with correctly refreshed token
   @Test
   public void testRefreshSession1() {
-    myJooqMock.addEmptyReturn("SELECT");
+    myJooqMock.addEmptyReturn(OperationType.SELECT);
 
     Optional<String> accessToken = Optional.of(ACCESS_TOKEN_EXAMPLE);
 
@@ -268,7 +267,7 @@ public class AuthProcessorImplTest {
   // test session refresh with invalid refresh token
   @Test
   public void testRefreshSession2() {
-    myJooqMock.addEmptyReturn("SELECT");
+    myJooqMock.addEmptyReturn(OperationType.SELECT);
 
     Optional<String> accessToken = Optional.empty();
 
@@ -279,20 +278,17 @@ public class AuthProcessorImplTest {
     try {
       myAuthProcessorImpl.refreshSession(invalid);
       fail();
-    } catch (AuthException e) {
-      assertEquals(e.getMessage(), "The given refresh token is invalid");
+    } catch (TokenInvalidException e) {
+      assertEquals(e.getTokenType(), "refresh");
     }
   }
 
   // test session refresh with token invalidated by a previous logout
   @Test
   public void testRefreshSession3() {
-    BlacklistedRefreshesRecord record =
-        myJooqMock.getContext().newRecord(Tables.BLACKLISTED_REFRESHES);
-    record.setRefreshHash(ACCESS_TOKEN_EXAMPLE);
-    myJooqMock.addReturn("SELECT", record);
+    myJooqMock.addExistsReturn(true);
 
-    myJooqMock.addEmptyReturn("SELECT");
+    myJooqMock.addEmptyReturn(OperationType.SELECT);
 
     Optional<String> accessToken = Optional.of(ACCESS_TOKEN_EXAMPLE);
 
@@ -316,7 +312,7 @@ public class AuthProcessorImplTest {
     ForgotPasswordRequest mockReq = mock(ForgotPasswordRequest.class);
     when(mockReq.getEmail()).thenReturn(userEmail);
 
-    myJooqMock.addEmptyReturn("SELECT");
+    myJooqMock.addEmptyReturn(OperationType.SELECT);
 
     myAuthProcessorImpl.requestPasswordReset(mockReq);
   }
@@ -333,11 +329,11 @@ public class AuthProcessorImplTest {
     UsersRecord myUsersRecord = new UsersRecord();
     myUsersRecord.setId(0);
     myUsersRecord.setEmail(userEmail);
-    myJooqMock.addReturn("SELECT", myUsersRecord);
+    myJooqMock.addReturn(OperationType.SELECT, myUsersRecord);
 
     // so that JooqMock doesn't give us warnings
-    myJooqMock.addEmptyReturn("INSERT");
-    myJooqMock.addEmptyReturn("UPDATE");
+    myJooqMock.addEmptyReturn(OperationType.INSERT);
+    myJooqMock.addEmptyReturn(OperationType.UPDATE);
 
     myAuthProcessorImpl.requestPasswordReset(mockReq);
 
@@ -345,23 +341,8 @@ public class AuthProcessorImplTest {
   }
 
   // test that resetting the password fails if it's too short
-  @ParameterizedTest
-  @ValueSource(strings = {"bad", "poor"})
-  public void testResetPassword1(String badPassword) {
-    String sk = "secret key";
-    ResetPasswordRequest req = new ResetPasswordRequest(sk, badPassword);
-
-    try {
-      myAuthProcessorImpl.resetPassword(req);
-      fail();
-    } catch (InvalidPasswordException e) {
-      // we're good
-    }
-  }
-
-  // test that resetting the password fails if it's too short
   @Test
-  public void testResetPassword2() {
+  public void testResetPassword1() {
     String sk = "secret key";
     String goodPassword = "good-password";
 
@@ -374,19 +355,19 @@ public class AuthProcessorImplTest {
     vkRecord.setType(VerificationKeyType.FORGOT_PASSWORD);
     vkRecord.setUsed(false);
     vkRecord.setCreated(new Timestamp(new Date().getTime()));
-    myJooqMock.addReturn("SELECT", vkRecord);
-    myJooqMock.addReturn("UPDATE", vkRecord);
+    myJooqMock.addReturn(OperationType.SELECT, vkRecord);
+    myJooqMock.addReturn(OperationType.UPDATE, vkRecord);
 
     // mock the DB so that it contains an actual user
     UsersRecord userRecord = new UsersRecord();
     userRecord.setId(0);
-    myJooqMock.addReturn("SELECT", userRecord);
-    myJooqMock.addReturn("UPDATE", userRecord);
+    myJooqMock.addReturn(OperationType.SELECT, userRecord);
+    myJooqMock.addReturn(OperationType.UPDATE, userRecord);
 
     myAuthProcessorImpl.resetPassword(req);
 
     // test if the correct items are being updated
-    List<Object[]> updateBindings = myJooqMock.getSqlBindings().get("UPDATE");
+    List<Object[]> updateBindings = myJooqMock.getSqlOperationBindings().get(OperationType.UPDATE);
     assertEquals(sk, updateBindings.get(0)[1]);
 
     // hashes are of equal length
@@ -406,18 +387,18 @@ public class AuthProcessorImplTest {
     vkRecord.setType(VerificationKeyType.VERIFY_EMAIL);
     vkRecord.setUsed(false);
     vkRecord.setCreated(new Timestamp(new Date().getTime()));
-    myJooqMock.addReturn("SELECT", vkRecord);
-    myJooqMock.addReturn("UPDATE", vkRecord);
+    myJooqMock.addReturn(OperationType.SELECT, vkRecord);
+    myJooqMock.addReturn(OperationType.UPDATE, vkRecord);
 
     // mock the DB so that it contains an actual user
     UsersRecord userRecord = new UsersRecord();
     userRecord.setId(0);
-    myJooqMock.addReturn("SELECT", userRecord);
-    myJooqMock.addReturn("UPDATE", userRecord);
+    myJooqMock.addReturn(OperationType.SELECT, userRecord);
+    myJooqMock.addReturn(OperationType.UPDATE, userRecord);
 
     myAuthProcessorImpl.verifyEmail(sk);
 
-    List<Object[]> updateBindings = myJooqMock.getSqlBindings().get("UPDATE");
+    List<Object[]> updateBindings = myJooqMock.getSqlOperationBindings().get(OperationType.UPDATE);
 
     // test if the correct items are being updated
     assertEquals(sk, updateBindings.get(0)[1]);

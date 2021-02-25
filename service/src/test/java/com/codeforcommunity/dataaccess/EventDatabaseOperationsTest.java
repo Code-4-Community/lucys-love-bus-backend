@@ -3,6 +3,7 @@ package com.codeforcommunity.dataaccess;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.codeforcommunity.JooqMock;
+import com.codeforcommunity.JooqMock.OperationType;
 import org.jooq.Record1;
 import org.jooq.generated.Tables;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,15 +27,15 @@ public class EventDatabaseOperationsTest {
     Record1<Integer> myEventRegistration =
         myJooqMock.getContext().newRecord(Tables.EVENTS.CAPACITY);
     myEventRegistration.values(4);
-    myJooqMock.addReturn("SELECT", myEventRegistration);
+    myJooqMock.addReturn(OperationType.SELECT, myEventRegistration);
 
     Record1<Integer> myTicketsRecord =
         myJooqMock.getContext().newRecord(Tables.EVENT_REGISTRATIONS.TICKET_QUANTITY);
     myTicketsRecord.values(1);
-    myJooqMock.addReturn("SELECT", myTicketsRecord);
+    myJooqMock.addReturn(OperationType.SELECT, myTicketsRecord);
 
     // pending
-    myJooqMock.addEmptyReturn("SELECT");
+    myJooqMock.addEmptyReturn(OperationType.SELECT);
 
     assertEquals(3, myEventDatabaseOperations.getSpotsLeft(0));
   }
@@ -50,8 +51,8 @@ public class EventDatabaseOperationsTest {
         myJooqMock.getContext().newRecord(Tables.EVENTS.CAPACITY);
     myEventRegistration.values(4);
 
-    myJooqMock.addReturn("SELECT", myTicketsRecord);
-    myJooqMock.addReturn("SELECT", myEventRegistration);
+    myJooqMock.addReturn(OperationType.SELECT, myTicketsRecord);
+    myJooqMock.addReturn(OperationType.SELECT, myEventRegistration);
 
     assertEquals(0, myEventDatabaseOperations.getSpotsLeft(0));
   }
@@ -67,8 +68,8 @@ public class EventDatabaseOperationsTest {
         myJooqMock.getContext().newRecord(Tables.EVENT_REGISTRATIONS.TICKET_QUANTITY);
     myTicketsRecord.values(10);
 
-    myJooqMock.addReturn("SELECT", myEventRegistration);
-    myJooqMock.addReturn("SELECT", myTicketsRecord);
+    myJooqMock.addReturn(OperationType.SELECT, myEventRegistration);
+    myJooqMock.addReturn(OperationType.SELECT, myTicketsRecord);
 
     assertEquals(0, myEventDatabaseOperations.getSpotsLeft(0));
   }

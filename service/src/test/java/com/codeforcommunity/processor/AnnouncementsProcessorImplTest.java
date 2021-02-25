@@ -2,8 +2,10 @@ package com.codeforcommunity.processor;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.Mockito.mock;
 
 import com.codeforcommunity.JooqMock;
+import com.codeforcommunity.JooqMock.OperationType;
 import com.codeforcommunity.auth.JWTData;
 import com.codeforcommunity.dto.announcements.GetAnnouncementsRequest;
 import com.codeforcommunity.dto.announcements.GetAnnouncementsResponse;
@@ -28,6 +30,7 @@ public class AnnouncementsProcessorImplTest {
 
   private JooqMock myJooqMock;
   private AnnouncementsProcessorImpl myAnnouncementsProcessorImpl;
+  private Emailer mockEmailer;
 
   // use UNIX time for ease of testing
   // 04/16/2020 @ 1:20am (UTC)
@@ -41,9 +44,9 @@ public class AnnouncementsProcessorImplTest {
   @BeforeEach
   public void setup() {
     this.myJooqMock = new JooqMock();
+    this.mockEmailer = mock(Emailer.class);
     this.myAnnouncementsProcessorImpl =
-        new AnnouncementsProcessorImpl(
-            myJooqMock.getContext(), new Emailer(myJooqMock.getContext()));
+        new AnnouncementsProcessorImpl(myJooqMock.getContext(), this.mockEmailer);
   }
 
   // test getting announcements with range covering no events
@@ -53,7 +56,7 @@ public class AnnouncementsProcessorImplTest {
     GetAnnouncementsRequest req =
         new GetAnnouncementsRequest(new Timestamp(0), new Timestamp(1000), 2);
 
-    myJooqMock.addEmptyReturn("SELECT");
+    myJooqMock.addEmptyReturn(OperationType.SELECT);
     GetAnnouncementsResponse res = myAnnouncementsProcessorImpl.getAnnouncements(req);
 
     assertEquals(res.getTotalCount(), 0);
@@ -85,7 +88,7 @@ public class AnnouncementsProcessorImplTest {
     List<AnnouncementsRecord> announcements = new ArrayList<>();
     announcements.add(announcement1);
     announcements.add(announcement2);
-    myJooqMock.addReturn("SELECT", announcements);
+    myJooqMock.addReturn(OperationType.SELECT, announcements);
 
     GetAnnouncementsResponse res = myAnnouncementsProcessorImpl.getAnnouncements(req);
 
@@ -110,7 +113,7 @@ public class AnnouncementsProcessorImplTest {
     announcement1.setTitle("the first announcement title");
     announcement1.setCreated(new Timestamp(START_TIMESTAMP_TEST));
     announcement1.setDescription("the first announcement description");
-    myJooqMock.addReturn("SELECT", announcement1);
+    myJooqMock.addReturn(OperationType.SELECT, announcement1);
 
     GetAnnouncementsResponse res = myAnnouncementsProcessorImpl.getAnnouncements(req);
 
@@ -125,7 +128,7 @@ public class AnnouncementsProcessorImplTest {
     PostAnnouncementRequest req = new PostAnnouncementRequest("sample title", "sample description");
 
     // mock the user
-    JWTData myUserData = new JWTData(0, PrivilegeLevel.GP);
+    JWTData myUserData = new JWTData(0, PrivilegeLevel.STANDARD);
 
     try {
       myAnnouncementsProcessorImpl.postAnnouncement(req, myUserData);
@@ -147,8 +150,8 @@ public class AnnouncementsProcessorImplTest {
     announcement.setTitle("sample title");
     announcement.setCreated(new Timestamp(START_TIMESTAMP_TEST));
     announcement.setDescription("sample description");
-    myJooqMock.addReturn("SELECT", announcement);
-    myJooqMock.addReturn("INSERT", announcement);
+    myJooqMock.addReturn(OperationType.SELECT, announcement);
+    myJooqMock.addReturn(OperationType.INSERT, announcement);
 
     // mock the user
     JWTData myUserData = new JWTData(0, PrivilegeLevel.ADMIN);
@@ -167,7 +170,7 @@ public class AnnouncementsProcessorImplTest {
     PostAnnouncementRequest req = new PostAnnouncementRequest("c4c", "code for community");
 
     // mock the user
-    JWTData myUserData = new JWTData(0, PrivilegeLevel.GP);
+    JWTData myUserData = new JWTData(0, PrivilegeLevel.STANDARD);
 
     try {
       myAnnouncementsProcessorImpl.postEventSpecificAnnouncement(req, myUserData, 1);
@@ -186,7 +189,7 @@ public class AnnouncementsProcessorImplTest {
     JWTData myUserData = new JWTData(0, PrivilegeLevel.ADMIN);
 
     // return no events
-    myJooqMock.addEmptyReturn("SELECT");
+    myJooqMock.addEmptyReturn(OperationType.SELECT);
 
     try {
       myAnnouncementsProcessorImpl.postEventSpecificAnnouncement(req, myUserData, -1);
@@ -207,7 +210,7 @@ public class AnnouncementsProcessorImplTest {
     // mock the specific event inside the DB
     EventsRecord event = myJooqMock.getContext().newRecord(Tables.EVENTS);
     event.setId(1);
-    myJooqMock.addReturn("SELECT", event);
+    myJooqMock.addReturn(OperationType.SELECT, event);
 
     // mock the announcement inside the DB
     AnnouncementsRecord announcement = myJooqMock.getContext().newRecord(Tables.ANNOUNCEMENTS);
@@ -215,12 +218,11 @@ public class AnnouncementsProcessorImplTest {
     announcement.setEventId(1);
     announcement.setTitle("c4c");
     announcement.setDescription("code for community");
-    myJooqMock.addReturn("INSERT", announcement);
-
-    myJooqMock.addReturn("SELECT", announcement);
+    myJooqMock.addReturn(OperationType.SELECT, announcement);
+    myJooqMock.addReturn(OperationType.INSERT, announcement);
 
     // mock sending event specific announcement email
-    myJooqMock.addReturn("SELECT", event);
+    myJooqMock.addReturn(OperationType.SELECT, event);
 
     PostAnnouncementResponse res =
         myAnnouncementsProcessorImpl.postEventSpecificAnnouncement(req, myUserData, 1);
@@ -241,7 +243,7 @@ public class AnnouncementsProcessorImplTest {
     // mock the specific event inside the DB
     EventsRecord event = myJooqMock.getContext().newRecord(Tables.EVENTS);
     event.setId(1);
-    myJooqMock.addReturn("SELECT", event);
+    myJooqMock.addReturn(OperationType.SELECT, event);
 
     // mock the announcements inside the DB
     AnnouncementsRecord announcement1 = myJooqMock.getContext().newRecord(Tables.ANNOUNCEMENTS);
@@ -259,11 +261,11 @@ public class AnnouncementsProcessorImplTest {
     List<AnnouncementsRecord> announcements = new ArrayList<>();
     announcements.add(announcement1);
     announcements.add(announcement2);
-    myJooqMock.addReturn("SELECT", announcements);
-    myJooqMock.addReturn("INSERT", announcements);
+    myJooqMock.addReturn(OperationType.SELECT, announcements);
+    myJooqMock.addReturn(OperationType.INSERT, announcements);
 
     // mock sending event specific announcement email
-    myJooqMock.addReturn("SELECT", event);
+    myJooqMock.addReturn(OperationType.SELECT, event);
 
     PostAnnouncementResponse res =
         myAnnouncementsProcessorImpl.postEventSpecificAnnouncement(req, myUserData, 1);
@@ -291,7 +293,7 @@ public class AnnouncementsProcessorImplTest {
   public void testGetEventSpecificAnnouncements2() {
     GetEventSpecificAnnouncementsRequest req = new GetEventSpecificAnnouncementsRequest(3);
 
-    myJooqMock.addEmptyReturn("SELECT");
+    myJooqMock.addEmptyReturn(OperationType.SELECT);
 
     try {
       myAnnouncementsProcessorImpl.getEventSpecificAnnouncements(req);
@@ -309,7 +311,7 @@ public class AnnouncementsProcessorImplTest {
     // mock the specific event inside the DB
     EventsRecord event = myJooqMock.getContext().newRecord(Tables.EVENTS);
     event.setId(1);
-    myJooqMock.addReturn("SELECT", event);
+    myJooqMock.addReturn(OperationType.SELECT, event);
 
     // mock the announcement inside the DB
     AnnouncementsRecord announcement = myJooqMock.getContext().newRecord(Tables.ANNOUNCEMENTS);
@@ -318,7 +320,7 @@ public class AnnouncementsProcessorImplTest {
     announcement.setTitle("sample title");
     announcement.setCreated(new Timestamp(START_TIMESTAMP_TEST));
     announcement.setDescription("sample description");
-    myJooqMock.addReturn("SELECT", announcement);
+    myJooqMock.addReturn(OperationType.SELECT, announcement);
 
     GetAnnouncementsResponse res = myAnnouncementsProcessorImpl.getEventSpecificAnnouncements(req);
 
@@ -339,7 +341,7 @@ public class AnnouncementsProcessorImplTest {
     // mock the specific event inside the DB
     EventsRecord event = myJooqMock.getContext().newRecord(Tables.EVENTS);
     event.setId(1);
-    myJooqMock.addReturn("SELECT", event);
+    myJooqMock.addReturn(OperationType.SELECT, event);
 
     // mock the announcements inside the DB
     AnnouncementsRecord announcement1 = myJooqMock.getContext().newRecord(Tables.ANNOUNCEMENTS);
@@ -359,7 +361,7 @@ public class AnnouncementsProcessorImplTest {
     List<AnnouncementsRecord> announcements = new ArrayList<>();
     announcements.add(announcement1);
     announcements.add(announcement2);
-    myJooqMock.addReturn("SELECT", announcements);
+    myJooqMock.addReturn(OperationType.SELECT, announcements);
 
     GetAnnouncementsResponse res = myAnnouncementsProcessorImpl.getEventSpecificAnnouncements(req);
 
@@ -387,11 +389,11 @@ public class AnnouncementsProcessorImplTest {
     announcementToDelete.setId(deletedAnnouncementId);
     announcementToDelete.setTitle("sample title");
     announcementToDelete.setDescription("sample description");
-    myJooqMock.addReturn("DELETE", announcementToDelete);
+    myJooqMock.addReturn(OperationType.DELETE, announcementToDelete);
 
     myAnnouncementsProcessorImpl.deleteAnnouncement(deletedAnnouncementId, myUserData);
 
-    Object[] deleteBindings = myJooqMock.getSqlBindings().get("DELETE").get(0);
+    Object[] deleteBindings = myJooqMock.getSqlBindings(OperationType.DELETE).get(0);
 
     assertEquals(deletedAnnouncementId, deleteBindings[0]);
   }
@@ -401,12 +403,12 @@ public class AnnouncementsProcessorImplTest {
     JWTData myUserData = new JWTData(0, PrivilegeLevel.ADMIN);
 
     int deletedAnnouncementId = 42;
-    myJooqMock.addEmptyReturn("DELETE");
+    myJooqMock.addEmptyReturn(OperationType.DELETE);
 
     myAnnouncementsProcessorImpl.deleteAnnouncement(deletedAnnouncementId, myUserData);
 
-    assertEquals(1, myJooqMock.timesCalled("DELETE"));
-    Object[] deleteBindings = myJooqMock.getSqlBindings().get("DELETE").get(0);
+    assertEquals(1, myJooqMock.timesCalled(OperationType.DELETE));
+    Object[] deleteBindings = myJooqMock.getSqlBindings(OperationType.DELETE).get(0);
 
     assertEquals(deletedAnnouncementId, deleteBindings[0]);
   }

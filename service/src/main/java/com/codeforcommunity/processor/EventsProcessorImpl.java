@@ -179,7 +179,9 @@ public class EventsProcessorImpl implements IEventsProcessor {
       record.setCapacity(request.getSpotsAvailable());
     }
     if (request.getThumbnail() != null) {
-      record.setThumbnail(request.getThumbnail());
+      String thumbnail =
+          S3Requester.validateUploadImageToS3LucyEvents(request.getTitle(), request.getThumbnail());
+      record.setThumbnail(thumbnail);
     }
     if (request.getDetails() != null) {
       EventDetails details = request.getDetails();
@@ -399,7 +401,7 @@ public class EventsProcessorImpl implements IEventsProcessor {
     if (event.getEndTime().before(Timestamp.from(Instant.now()))) {
       return false;
     }
-    if (userData.getPrivilegeLevel().equals(PrivilegeLevel.GP)) {
+    if (userData.getPrivilegeLevel().equals(PrivilegeLevel.STANDARD)) {
       Timestamp fiveDays = Timestamp.from(Instant.now().plus(daysGpCanRegister, ChronoUnit.DAYS));
       return event.getStartTime().before(fiveDays);
     }

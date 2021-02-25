@@ -4,45 +4,45 @@ import requests
 # The directory that contains all `.properties.example` files
 PROPERTIES_DIR = "common/src/main/resources/properties/"
 
+# The environment variable with the Slack webhook URL
+SLACK_WEBHOOK_ENV_VAR = "SLACK_WEBHOOK_URL"
+
 # Dictionary that maps example file names to a dictionary where the keys
 #   are the PROPERTIES (KEYS), and the values are ENVIRONMENT VARIABLES
 ENV_VALUES = {
-    "aws.properties.example": {
+    "server.properties.example": {
+
+        # AWS Properties
         "aws_access_key": "AWS_ACCESS_KEY_ID",
         "aws_secret_key": "AWS_SECRET_ACCESS_KEY",
-    },
+        "s3_bucket_url": "S3_BUCKET_URL",
+        "s3_bucket_name": "S3_BUCKET_NAME",
+        "s3_upload_dir": "S3_UPLOAD_DIR",
 
-    "db.properties.example": {
-        "database.url": "DB_DOMAIN",
-        "database.username": "DB_USERNAME",
-        "database.password": "DB_PASSWORD",
-    },
+        # Database Properties
+        "database_url": "DB_DOMAIN",
+        "database_username": "DB_USERNAME",
+        "database_password": "DB_PASSWORD",
 
-    "stripe.properties.example": {
-        "stripe_api_secret_key": "STRIPE_API_SECRET",
-        "stripe_webhook_signing_secret": "STRIPE_WEBHOOK_SECRET",
-    },
+        # Email Properties
+        "email_send_password": "GMAIL_APP_PASSWORD",
+        "email_should_send": "GMAIL_APP_ENABLED",
 
-    "emailer.properties.example": {
-        "sendPassword": "GMAIL_APP_PASSWORD",
-        "shouldSendEmails": "GMAIL_APP_ENABLED",
-    },
+        # JWT Properties
+        "jwt_secret_key": "JWT_SECRET_KEY",
 
-    "jwt.properties.example": {
-        "secret_key": "JWT_SECRET_KEY",
-    },
+        # Slack Properties
+        "slack_webhook_url": SLACK_WEBHOOK_ENV_VAR,
+        "slack_enabled": "SLACK_ENABLED",
 
-    "slack.properties.example": {
-        "slack_webhook_url": "SLACK_WEBHOOK_URL",
-        "enabled": "SLACK_ENABLED",
+        # Stripe Properties
+        "stripe_api_secret_key": "STRIPE_API_SECRET_KEY",
+        "stripe_webhook_signing_secret": "STRIPE_WEBHOOK_SIGNING_SECRET",
     },
-
 }
 
 # Whether or not to log errors to Slack
 SEND_SLACK = True
-# The environment variable with the Slack webhook URL
-SLACK_WEBHOOK_ENV_VAR = "SLACK_WEBHOOK_URL"
 
 
 def main():
