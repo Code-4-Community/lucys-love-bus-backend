@@ -18,8 +18,8 @@ public class EmailOperations {
   private final SLogger logger = new SLogger(EmailOperations.class);
 
   private final boolean shouldSendEmails;
-  private final String sendEmail;
   private final String senderName;
+  private final String sendEmail;
   private final Mailer mailer;
 
   public EmailOperations(
@@ -116,7 +116,7 @@ public class EmailOperations {
    * email.
    */
   public void sendEmail(String sendToName, String sendToEmail, String subject, String emailBody) {
-    if (!this.shouldSendEmails) {
+    if (!shouldSendEmails) {
       return;
     }
 

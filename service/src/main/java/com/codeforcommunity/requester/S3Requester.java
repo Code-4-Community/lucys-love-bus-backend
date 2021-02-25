@@ -15,7 +15,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Base64;
-import java.util.Properties;
 
 public class S3Requester {
   // Contains information about S3 that is not part of this class's implementation
@@ -23,13 +22,9 @@ public class S3Requester {
     private static final AmazonS3 s3Client =
         AmazonS3ClientBuilder.standard().withRegion(Regions.US_EAST_2).build();
 
-    private static final Properties awsProperties = PropertiesLoader.getAwsProperties();
-    private static final String BUCKET_PUBLIC_URL =
-        PropertiesLoader.loadProperty(awsProperties, "s3_bucket_url");
-    private static final String BUCKET_PUBLIC =
-        PropertiesLoader.loadProperty(awsProperties, "s3_bucket_name");
-    private static final String DIR_PUBLIC =
-        PropertiesLoader.loadProperty(awsProperties, "s3_upload_dir");
+    private static final String BUCKET_PUBLIC_URL = PropertiesLoader.loadProperty("s3_bucket_url");
+    private static final String BUCKET_PUBLIC = PropertiesLoader.loadProperty("s3_bucket_name");
+    private static final String DIR_PUBLIC = PropertiesLoader.loadProperty("s3_upload_dir");
 
     public AmazonS3 getS3Client() {
       return s3Client;

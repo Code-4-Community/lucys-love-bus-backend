@@ -33,9 +33,9 @@ public class AuthRouter implements IRouter {
     registerRefreshUser(router);
     registerNewUser(router);
     registerLogoutUser(router);
+    registerVerifySecretKey(router);
     registerRequestForgotPassword(router);
     registerResetPassword(router);
-    registerVerifySecretKey(router);
 
     return router;
   }
@@ -72,7 +72,7 @@ public class AuthRouter implements IRouter {
 
   /** This route is for validating a secret key that has been sent to a user's email. */
   private void registerVerifySecretKey(Router router) {
-    Route verifySecretKeyRoute = router.post("/verify/:secret_key");
+    Route verifySecretKeyRoute = router.get("/verify/:secret_key");
     verifySecretKeyRoute.handler(this::handleVerifySecretKey);
   }
 
@@ -81,7 +81,7 @@ public class AuthRouter implements IRouter {
 
     SessionResponse response = authProcessor.login(userRequest);
 
-    end(ctx.response(), 201, JsonObject.mapFrom(response).encode());
+    end(ctx.response(), 200, JsonObject.mapFrom(response).encode());
   }
 
   private void handlePostRefreshUser(RoutingContext ctx) {
@@ -101,7 +101,6 @@ public class AuthRouter implements IRouter {
 
   private void handlePostNewUser(RoutingContext ctx) {
     NewUserRequest request = RestFunctions.getJsonBodyAsClass(ctx, NewUserRequest.class);
-
     SessionResponse response = authProcessor.signUp(request);
     authProcessor.sendVerificationEmail(request);
 

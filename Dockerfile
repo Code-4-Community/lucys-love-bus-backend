@@ -5,6 +5,6 @@ FROM openjdk:8
 # see https://docs.docker.com/engine/reference/builder/#expose
 EXPOSE 8081
 
-# Add fatjar and set entry point
-COPY service/target/service-1.0-SNAPSHOT-jar-with-dependencies.jar fatjar.jar
-ENTRYPOINT java -jar fatjar.jar
+# Add the server.jar and set entry point
+COPY service/target/service-1.0-SNAPSHOT-jar-with-dependencies.jar server.jar
+ENTRYPOINT java -jar server.jar
