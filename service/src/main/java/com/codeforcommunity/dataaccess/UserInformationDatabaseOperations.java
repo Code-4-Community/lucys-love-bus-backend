@@ -55,9 +55,12 @@ public class UserInformationDatabaseOperations {
     if (mainContact == null) {
       throw new UserDoesNotExistException(userData.getUserId());
     }
-
+    System.out.println("uploading image with base64 string: " + newContactData.getProfilePicture());
     String publicImageUrl =
         S3Requester.validateUploadImageToS3LucyEvents("", newContactData.getProfilePicture());
+
+    System.out.println("At image URL: " + publicImageUrl);
+
     newContactData.setProfilePicture(publicImageUrl); // Actually setting Image URL
 
     newContactData.setShouldSendEmails(true);
