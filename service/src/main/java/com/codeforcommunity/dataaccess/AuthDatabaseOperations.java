@@ -139,6 +139,7 @@ public class AuthDatabaseOperations {
     newUser.setEmail(request.getEmail());
     newUser.setPassHash(Passwords.createHash(request.getPassword()));
     newUser.setPrivilegeLevel(PrivilegeLevel.STANDARD);
+    newUser.setPhotoRelease(request.getPhotoRelease());
     newUser.store();
 
     ContactsRecord mainContact = db.newRecord(CONTACTS);
