@@ -56,8 +56,8 @@ public class Emailer {
     this.verifyEmailUrl =
         String.format(
             "%s%s",
-            frontendProperties.getProperty("frontend_base_url"),
-            frontendProperties.getProperty("verify_email_route"));
+            PropertiesLoader.getProperty("frontend_base_url"),
+            PropertiesLoader.getProperty("verify_email_route"));
 
     this.db = db;
   }
