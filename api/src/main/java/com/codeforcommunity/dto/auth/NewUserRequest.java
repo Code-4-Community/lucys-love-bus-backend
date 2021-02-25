@@ -14,6 +14,7 @@ public class NewUserRequest extends ApiDto {
   private String phoneNumber;
   private String allergies;
   private String referrer;
+  private Boolean photoRelease;
 
   public NewUserRequest(
       String email,
@@ -23,7 +24,8 @@ public class NewUserRequest extends ApiDto {
       AddressData location,
       String phoneNumber,
       String allergies,
-      String referrer) {
+      String referrer,
+      Boolean photoRelease) {
     this.email = email;
     this.password = password;
     this.firstName = firstName;
@@ -32,6 +34,7 @@ public class NewUserRequest extends ApiDto {
     this.phoneNumber = phoneNumber;
     this.allergies = allergies;
     this.referrer = referrer;
+    this.photoRelease = photoRelease;
   }
 
   private NewUserRequest() {}
@@ -51,6 +54,9 @@ public class NewUserRequest extends ApiDto {
     }
     if (isEmpty(lastName)) {
       fields.add(fieldName + "last_name");
+    }
+    if (photoRelease == null) {
+      fields.add(fieldName + "photoRelease");
     }
     if (location == null) {
       fields.add(fieldName + "location");
@@ -167,5 +173,13 @@ public class NewUserRequest extends ApiDto {
    */
   public void setReferrer(String referrer) {
     this.referrer = referrer;
+  }
+
+  public boolean getPhotoRelease() {
+    return this.photoRelease;
+  }
+
+  public void setPhotoRelease(Boolean photoRelease) {
+    this.photoRelease = photoRelease;
   }
 }

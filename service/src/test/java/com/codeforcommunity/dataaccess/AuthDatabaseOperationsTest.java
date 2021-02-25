@@ -118,7 +118,7 @@ public class AuthDatabaseOperationsTest {
 
     NewUserRequest req =
         new NewUserRequest(
-            myEmail, "letmeout", "Brandon", "Liang", null, null, null, "Brandon's referrer");
+            myEmail, "letmeout", "Brandon", "Liang", null, null, null, "Brandon's referrer", false);
 
     try {
       myAuthDatabaseOperations.createNewUser(req);
@@ -152,7 +152,8 @@ public class AuthDatabaseOperationsTest {
             sampleLocation,
             samplePN,
             sampleAllergies,
-            sampleReferrer);
+            sampleReferrer,
+            false);
 
     myJooqMock.addEmptyReturn(OperationType.SELECT);
     myJooqMock.addEmptyReturn(OperationType.UPDATE);

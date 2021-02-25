@@ -85,7 +85,8 @@ public class AuthProcessorImplTest {
             new AddressData("West 5th Street", "New York", "NY", "10002"),
             "555-555-5555",
             "Peanuts",
-            "Brandon's referrer");
+            "Brandon's referrer",
+            false);
 
     SessionResponse res = myAuthProcessorImpl.signUp(req);
 
