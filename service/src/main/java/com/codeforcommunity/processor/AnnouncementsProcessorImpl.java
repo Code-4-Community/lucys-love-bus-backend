@@ -120,7 +120,13 @@ public class AnnouncementsProcessorImpl implements IAnnouncementsProcessor {
               email, name, eventName, request.getTitle(), request.getDescription());
         });
 
-    return announcementPojoToResponse(newAnnouncementsRecord.into(Announcements.class));
+    // the timestamp wasn't showing correctly, so just
+    // get the announcement directly from the database
+    return announcementPojoToResponse(
+        db.selectFrom(ANNOUNCEMENTS)
+            .where(ANNOUNCEMENTS.ID.eq(newAnnouncementsRecord.getId()))
+            .fetchInto(Announcements.class)
+            .get(0));
   }
 
   @Override
