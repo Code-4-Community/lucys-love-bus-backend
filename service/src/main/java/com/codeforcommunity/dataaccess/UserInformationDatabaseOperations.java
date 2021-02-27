@@ -14,6 +14,7 @@ import com.codeforcommunity.dto.protected_user.components.Contact;
 import com.codeforcommunity.exceptions.UserDoesNotExistException;
 import com.codeforcommunity.requester.S3Requester;
 import java.util.List;
+import java.util.UUID;
 import org.jooq.DSLContext;
 import org.jooq.generated.tables.records.ChildrenRecord;
 import org.jooq.generated.tables.records.ContactsRecord;
@@ -55,9 +56,10 @@ public class UserInformationDatabaseOperations {
     if (mainContact == null) {
       throw new UserDoesNotExistException(userData.getUserId());
     }
-    System.out.println("uploading image with base64 string: " + newContactData.getProfilePicture());
+
+    String filename = "profile-" + UUID.randomUUID();
     String publicImageUrl =
-        S3Requester.validateUploadImageToS3LucyEvents("", newContactData.getProfilePicture());
+        S3Requester.validateUploadImageToS3LucyEvents(filename, newContactData.getProfilePicture());
 
     System.out.println("At image URL: " + publicImageUrl);
 
