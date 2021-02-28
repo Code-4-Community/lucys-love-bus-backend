@@ -103,7 +103,8 @@ public class ProtectedUserProcessorImplTest {
           "none",
           "brain damage",
           "IV fluid",
-          "do not take his helmet off");
+          "do not take his helmet off",
+          null);
 
   private final Child CHILD_EXAMPLE_2 =
       new Child(
@@ -117,6 +118,7 @@ public class ProtectedUserProcessorImplTest {
           null,
           "type-2 diabetes",
           "Metaglip",
+          null,
           null);
 
   // set up all the mocks

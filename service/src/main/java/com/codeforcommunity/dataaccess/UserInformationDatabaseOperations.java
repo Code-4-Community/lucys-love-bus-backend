@@ -83,6 +83,12 @@ public class UserInformationDatabaseOperations {
   public void addAdditionalContacts(List<Contact> additionalContacts, JWTData userData) {
     for (Contact contact : additionalContacts) {
       ContactsRecord contactsRecord = db.newRecord(CONTACTS);
+
+      String filename = "profile-" + UUID.randomUUID();
+      String publicImageUrl =
+          S3Requester.validateUploadImageToS3LucyEvents(filename, contact.getProfilePicture());
+      contact.setProfilePicture(publicImageUrl); // Actually setting Image URL
+
       contactsRecord.setUserId(userData.getUserId());
       updateStoreContactRecord(contactsRecord, contact);
     }
@@ -95,6 +101,12 @@ public class UserInformationDatabaseOperations {
   public void addChildren(List<Child> children, JWTData userData) {
     for (Child child : children) {
       ChildrenRecord childrenRecord = db.newRecord(CHILDREN);
+
+      String filename = "profile-" + UUID.randomUUID();
+      String publicImageUrl =
+          S3Requester.validateUploadImageToS3LucyEvents(filename, child.getProfilePicture());
+      child.setProfilePicture(publicImageUrl); // Actually setting Image URL
+
       childrenRecord.setUserId(userData.getUserId());
       updateStoreChildRecord(childrenRecord, child);
     }
@@ -123,7 +135,8 @@ public class UserInformationDatabaseOperations {
     contactsRecord.setNotes(contactDto.getNotes());
     contactsRecord.setShouldSendEmails(contactDto.getShouldSendEmails());
     contactsRecord.setPhoneNumber(contactDto.getPhoneNumber());
-    contactsRecord.setProfilepicture(contactDto.getProfilePicture());
+    contactsRecord.setProfilePicture(contactDto.getProfilePicture());
+    contactsRecord.setReferrer(contactDto.getReferrer());
 
     contactsRecord.store();
   }
@@ -140,6 +153,7 @@ public class UserInformationDatabaseOperations {
     childrenRecord.setDiagnosis(childDto.getDiagnosis());
     childrenRecord.setMedications(childDto.getMedications());
     childrenRecord.setNotes(childDto.getNotes());
+    childrenRecord.setProfilePicture(childDto.getProfilePicture());
 
     childrenRecord.store();
   }
