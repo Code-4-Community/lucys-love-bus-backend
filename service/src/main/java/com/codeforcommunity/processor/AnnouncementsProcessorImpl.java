@@ -166,7 +166,7 @@ public class AnnouncementsProcessorImpl implements IAnnouncementsProcessor {
     newRecord.setTitle(request.getTitle());
     newRecord.setDescription(request.getDescription());
     if (request.getImageSrc().isPresent()) {
-      String filename = "annoucement-" + UUID.randomUUID();
+      String filename = "announcement-" + UUID.randomUUID();
       String publicImageUrl =
               S3Requester.validateUploadImageToS3LucyEvents(filename, request.getImageSrc().get());
 
