@@ -249,7 +249,7 @@ public class FailureHandler {
   }
 
   private void end(RoutingContext ctx, String message, int statusCode) {
-    logger.error(message);
+    logger.info(message);
     ctx.response().setStatusCode(statusCode).end(message);
   }
 }
