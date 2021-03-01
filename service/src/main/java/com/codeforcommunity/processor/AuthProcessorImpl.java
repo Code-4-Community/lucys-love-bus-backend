@@ -43,6 +43,7 @@ public class AuthProcessorImpl implements IAuthProcessor {
   @Override
   public SessionResponse signUp(NewUserRequest request) {
     authDatabaseOperations.createNewUser(request);
+    sendVerificationEmail(request);
 
     return setupSessionResponse(request.getEmail());
   }
@@ -135,8 +136,7 @@ public class AuthProcessorImpl implements IAuthProcessor {
     user.store();
   }
 
-  @Override
-  public void sendVerificationEmail(NewUserRequest request) {
+  private void sendVerificationEmail(NewUserRequest request) {
     String email = request.getEmail();
     JWTData userData;
     try {
