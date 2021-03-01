@@ -19,7 +19,10 @@ import com.codeforcommunity.exceptions.MalformedParameterException;
 import com.codeforcommunity.requester.Emailer;
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
+
+import com.codeforcommunity.requester.S3Requester;
 import org.jooq.DSLContext;
 import org.jooq.Record3;
 import org.jooq.generated.tables.pojos.Announcements;
@@ -163,7 +166,11 @@ public class AnnouncementsProcessorImpl implements IAnnouncementsProcessor {
     newRecord.setTitle(request.getTitle());
     newRecord.setDescription(request.getDescription());
     if (request.getImageSrc().isPresent()) {
-      newRecord.setImageSrc(request.getImageSrc().get());
+      String filename = "annoucement-" + UUID.randomUUID();
+      String publicImageUrl =
+              S3Requester.validateUploadImageToS3LucyEvents(filename, request.getImageSrc().get());
+
+      newRecord.setImageSrc(publicImageUrl);
     }
     return newRecord;
   }
