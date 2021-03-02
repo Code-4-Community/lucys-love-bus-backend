@@ -56,8 +56,8 @@ public class Emailer {
     this.verifyEmailUrl =
         String.format(
             "%s%s",
-            PropertiesLoader.getProperty("frontend_base_url"),
-            PropertiesLoader.getProperty("verify_email_route"));
+            PropertiesLoader.loadProperty("frontend_base_url"),
+            PropertiesLoader.loadProperty("verify_email_route"));
 
     this.db = db;
   }
@@ -165,7 +165,7 @@ public class Emailer {
     String filePath = "/emails/SignupVerification.html";
     String subjectLine = "Verify your email";
 
-    String emailVerificationLink = String.format(VERIFY_EMAIL_URL_TEMPLATE, secretKey);
+    String emailVerificationLink = String.format(verifyEmailUrl, secretKey);
     Map<String, String> templateValues = new HashMap<>();
     templateValues.put("name", sendToName);
     templateValues.put("link", emailVerificationLink);
