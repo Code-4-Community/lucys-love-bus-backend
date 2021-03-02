@@ -22,6 +22,7 @@ public class Emailer {
   private final String loginUrl;
   private final String passwordResetUrl;
   private final String pfRequestUrl;
+  private final String verifyEmailUrl;
 
   private final String subjectWelcome = PropertiesLoader.loadProperty("email_subject_welcome");
   private final String subjectEmailChange =
@@ -52,6 +53,11 @@ public class Emailer {
     this.pfRequestUrl =
         String.format(
             "%s%s", PropertiesLoader.loadProperty("frontend_base_url"), "/family-requests");
+    this.verifyEmailUrl =
+        String.format(
+            "%s%s",
+            PropertiesLoader.loadProperty("frontend_base_url"),
+            PropertiesLoader.loadProperty("verify_email_route"));
 
     this.db = db;
   }
@@ -150,6 +156,19 @@ public class Emailer {
 
     Map<String, String> templateValues = new HashMap<>();
     templateValues.put("name", sendToName);
+    Optional<String> emailBody = emailOperations.getTemplateString(filePath, templateValues);
+
+    emailBody.ifPresent(s -> emailOperations.sendEmail(sendToName, sendToEmail, subjectLine, s));
+  }
+
+  public void sendEmailVerification(String sendToEmail, String sendToName, String secretKey) {
+    String filePath = "/emails/SignupVerification.html";
+    String subjectLine = "Verify your email";
+
+    String emailVerificationLink = String.format(verifyEmailUrl, secretKey);
+    Map<String, String> templateValues = new HashMap<>();
+    templateValues.put("name", sendToName);
+    templateValues.put("link", emailVerificationLink);
     Optional<String> emailBody = emailOperations.getTemplateString(filePath, templateValues);
 
     emailBody.ifPresent(s -> emailOperations.sendEmail(sendToName, sendToEmail, subjectLine, s));

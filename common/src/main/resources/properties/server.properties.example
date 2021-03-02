@@ -39,7 +39,7 @@ email_subject_account_deleted = Your Account Has Been Deleted
 # =======================================================================================================
 frontend_base_url = https://lovebusprograms.org
 frontend_password_reset_route = /forgot-password-reset/%s/
-
+verify_email_route = /verify/%s/
 
 # =======================================================================================================
 # EXPIRATION PROPERTIES
