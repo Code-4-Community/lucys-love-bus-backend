@@ -101,7 +101,7 @@ public class EventsProcessorImplTest {
 
     // mock the DB
     JWTData badUser = mock(JWTData.class);
-    when(badUser.getPrivilegeLevel()).thenReturn(PrivilegeLevel.GP);
+    when(badUser.getPrivilegeLevel()).thenReturn(PrivilegeLevel.STANDARD);
 
     try {
       myEventsProcessorImpl.createEvent(myEventRequest, badUser);
@@ -158,7 +158,7 @@ public class EventsProcessorImplTest {
     // mock the DB
     myJooqMock.addEmptyReturn(OperationType.SELECT);
 
-    JWTData userData = new JWTData(0, PrivilegeLevel.GP);
+    JWTData userData = new JWTData(0, PrivilegeLevel.STANDARD);
 
     try {
       myEventsProcessorImpl.getSingleEvent(5, userData);
@@ -214,7 +214,7 @@ public class EventsProcessorImplTest {
     // mock pending registrations
     myJooqMock.addEmptyReturn(OperationType.SELECT);
 
-    JWTData userData = new JWTData(0, PrivilegeLevel.GP);
+    JWTData userData = new JWTData(0, PrivilegeLevel.STANDARD);
     SingleEventResponse res = myEventsProcessorImpl.getSingleEvent(1, userData);
 
     assertEquals(res.getId(), 1);
@@ -238,7 +238,7 @@ public class EventsProcessorImplTest {
 
     myJooqMock.addEmptyReturn(OperationType.SELECT);
 
-    JWTData userData = new JWTData(0, PrivilegeLevel.GP);
+    JWTData userData = new JWTData(0, PrivilegeLevel.STANDARD);
     GetEventsResponse res = myEventsProcessorImpl.getEvents(eventIds, userData);
     assertEquals(0, res.getEvents().size());
     assertEquals(0, res.getTotalCount());
@@ -276,7 +276,7 @@ public class EventsProcessorImplTest {
     myTicketsRecord.values(1);
     myJooqMock.addReturn(OperationType.SELECT, myTicketsRecord);
 
-    JWTData userData = new JWTData(0, PrivilegeLevel.GP);
+    JWTData userData = new JWTData(0, PrivilegeLevel.STANDARD);
     GetEventsResponse res = myEventsProcessorImpl.getEvents(eventIds, userData);
 
     assertEquals(event1.getId(), res.getEvents().get(0).getId());
@@ -324,7 +324,7 @@ public class EventsProcessorImplTest {
     eventIds.add(0);
     eventIds.add(1);
 
-    JWTData userData = new JWTData(0, PrivilegeLevel.GP);
+    JWTData userData = new JWTData(0, PrivilegeLevel.STANDARD);
     GetEventsResponse res = myEventsProcessorImpl.getEvents(eventIds, userData);
 
     assertEquals(event1.getId(), res.getEvents().get(0).getId());
@@ -343,7 +343,7 @@ public class EventsProcessorImplTest {
 
     myJooqMock.addEmptyReturn(OperationType.SELECT);
 
-    JWTData myUserData = new JWTData(0, PrivilegeLevel.GP);
+    JWTData myUserData = new JWTData(0, PrivilegeLevel.STANDARD);
 
     GetEventsResponse res = myEventsProcessorImpl.getEventsSignedUp(req, myUserData);
 
@@ -377,7 +377,7 @@ public class EventsProcessorImplTest {
     ticketCount.values(0, 5);
     myJooqMock.addReturn(OperationType.SELECT, ticketCount);
 
-    JWTData myUserData = new JWTData(0, PrivilegeLevel.GP);
+    JWTData myUserData = new JWTData(0, PrivilegeLevel.STANDARD);
 
     GetEventsResponse res = myEventsProcessorImpl.getEventsSignedUp(req, myUserData);
 
@@ -461,7 +461,7 @@ public class EventsProcessorImplTest {
     myJooqMock.addReturn(OperationType.SELECT, myTicketsRecord);
     myJooqMock.addEmptyReturn(OperationType.SELECT);
 
-    JWTData myUserData = new JWTData(0, PrivilegeLevel.GP);
+    JWTData myUserData = new JWTData(0, PrivilegeLevel.STANDARD);
 
     GetEventsResponse res = myEventsProcessorImpl.getEventsSignedUp(req, myUserData);
 
@@ -549,7 +549,7 @@ public class EventsProcessorImplTest {
     myJooqMock.addReturn(OperationType.SELECT, myTicketsRecord);
     myJooqMock.addReturn(OperationType.SELECT, myEventRegistration);
 
-    JWTData myUserData = new JWTData(0, PrivilegeLevel.GP);
+    JWTData myUserData = new JWTData(0, PrivilegeLevel.STANDARD);
 
     GetEventsResponse res = myEventsProcessorImpl.getEventsSignedUp(req, myUserData);
 
@@ -612,7 +612,7 @@ public class EventsProcessorImplTest {
   @Test
   public void testGetEventsQualified3() {
     // write tests for both an admin and gp user
-    JWTData myGPUserData = new JWTData(0, PrivilegeLevel.GP);
+    JWTData myGPUserData = new JWTData(0, PrivilegeLevel.STANDARD);
 
     EventsRecord myEvent1 = myJooqMock.getContext().newRecord(EVENTS);
     myEvent1.setId(0);
@@ -681,7 +681,7 @@ public class EventsProcessorImplTest {
   // modifying an event fails if the user isn't an admin
   @Test
   public void testModifyEvent1() {
-    JWTData myUserData = new JWTData(0, PrivilegeLevel.GP);
+    JWTData myUserData = new JWTData(0, PrivilegeLevel.STANDARD);
 
     ModifyEventRequest req = new ModifyEventRequest(null, null, null, null, null);
 
@@ -701,7 +701,7 @@ public class EventsProcessorImplTest {
         new ModifyEventRequest(
             "edited title",
             10,
-            "edited thumbnail",
+            null,
             new EventDetails(
                 "new description",
                 "new location",
@@ -714,7 +714,6 @@ public class EventsProcessorImplTest {
     myEvent.setId(0);
     myEvent.setTitle("old title");
     myEvent.setCapacity(5);
-    myEvent.setThumbnail("old thumbnail");
     myEvent.setDescription("old description");
     myEvent.setLocation("old location");
     myEvent.setPrice(500);
@@ -746,16 +745,15 @@ public class EventsProcessorImplTest {
 
     Object[] updateBindings = myJooqMock.getSqlOperationBindings().get(OperationType.UPDATE).get(0);
 
-    assertEquals(9, updateBindings.length);
+    assertEquals(8, updateBindings.length);
     assertEquals(req.getTitle(), updateBindings[0]);
     assertEquals(req.getDetails().getDescription(), updateBindings[1]);
     assertEquals(req.getSpotsAvailable(), updateBindings[2]);
     assertEquals(req.getDetails().getLocation(), updateBindings[3]);
     assertEquals(req.getDetails().getStart(), updateBindings[4]);
     assertEquals(req.getDetails().getEnd(), updateBindings[5]);
-    assertEquals(req.getThumbnail(), updateBindings[6]);
-    assertEquals(myEvent.getPrice(), updateBindings[7]);
-    assertEquals(myEvent.getId(), updateBindings[8]);
+    assertEquals(myEvent.getPrice(), updateBindings[6]);
+    assertEquals(myEvent.getId(), updateBindings[7]);
   }
 
   // modifying an event with the event details null
@@ -763,15 +761,13 @@ public class EventsProcessorImplTest {
   public void testModifyEvent3() {
     JWTData myUserData = new JWTData(0, PrivilegeLevel.ADMIN);
 
-    ModifyEventRequest req =
-        new ModifyEventRequest("edited title", 10, "edited thumbnail", null, 10);
+    ModifyEventRequest req = new ModifyEventRequest("edited title", 10, null, null, 10);
 
     // mock the events
     EventsRecord myEvent = myJooqMock.getContext().newRecord(EVENTS);
     myEvent.setId(0);
     myEvent.setTitle("old title");
     myEvent.setCapacity(5);
-    myEvent.setThumbnail("old thumbnail");
     myEvent.setDescription("old description");
     myEvent.setLocation("old location");
     myEvent.setStartTime(new Timestamp(0));
@@ -803,12 +799,11 @@ public class EventsProcessorImplTest {
 
     Object[] updateBindings = myJooqMock.getSqlOperationBindings().get(OperationType.UPDATE).get(0);
 
-    assertEquals(5, updateBindings.length);
+    assertEquals(4, updateBindings.length);
     assertEquals(req.getTitle(), updateBindings[0]);
     assertEquals(req.getSpotsAvailable(), updateBindings[1]);
-    assertEquals(req.getThumbnail(), updateBindings[2]);
-    assertEquals(myEvent.getPrice(), updateBindings[3]);
-    assertEquals(myEvent.getId(), updateBindings[4]);
+    assertEquals(myEvent.getPrice(), updateBindings[2]);
+    assertEquals(myEvent.getId(), updateBindings[3]);
   }
 
   // modifying an event with the event details null and some other fields null
@@ -816,15 +811,13 @@ public class EventsProcessorImplTest {
   public void testModifyEvent4() {
     JWTData myUserData = new JWTData(0, PrivilegeLevel.ADMIN);
 
-    ModifyEventRequest req =
-        new ModifyEventRequest("edited title", null, "edited thumbnail", null, 20);
+    ModifyEventRequest req = new ModifyEventRequest("edited title", null, null, null, 20);
 
     // mock the event
     EventsRecord myEvent = myJooqMock.getContext().newRecord(EVENTS);
     myEvent.setId(0);
     myEvent.setTitle("old title");
     myEvent.setCapacity(5);
-    myEvent.setThumbnail("old thumbnail");
     myEvent.setDescription("old description");
     myEvent.setLocation("old location");
     myEvent.setPrice(20);
@@ -844,11 +837,10 @@ public class EventsProcessorImplTest {
 
     Object[] updateBindings = myJooqMock.getSqlOperationBindings().get(OperationType.UPDATE).get(0);
 
-    assertEquals(4, updateBindings.length);
+    assertEquals(3, updateBindings.length);
     assertEquals(req.getTitle(), updateBindings[0]);
-    assertEquals(req.getThumbnail(), updateBindings[1]);
-    assertEquals(myEvent.getPrice(), updateBindings[2]);
-    assertEquals(myEvent.getId(), updateBindings[3]);
+    assertEquals(myEvent.getPrice(), updateBindings[1]);
+    assertEquals(myEvent.getId(), updateBindings[2]);
   }
 
   // modifying an event with the every field null
@@ -863,7 +855,6 @@ public class EventsProcessorImplTest {
     myEvent.setId(0);
     myEvent.setTitle("old title");
     myEvent.setCapacity(5);
-    myEvent.setThumbnail("old thumbnail");
     myEvent.setDescription("old description");
     myEvent.setLocation("old location");
     myEvent.setPrice(65);
@@ -895,7 +886,7 @@ public class EventsProcessorImplTest {
         new ModifyEventRequest(
             "edited title",
             null,
-            "edited thumbnail",
+            null,
             new EventDetails("new description", "new location", null, null),
             50);
 
@@ -903,7 +894,6 @@ public class EventsProcessorImplTest {
     myEvent.setId(0);
     myEvent.setTitle("old title");
     myEvent.setCapacity(5);
-    myEvent.setThumbnail("old thumbnail");
     myEvent.setDescription("old description");
     myEvent.setLocation("old location");
     myEvent.setPrice(50);
@@ -923,19 +913,18 @@ public class EventsProcessorImplTest {
 
     Object[] updateBindings = myJooqMock.getSqlOperationBindings().get(OperationType.UPDATE).get(0);
 
-    assertEquals(6, updateBindings.length);
+    assertEquals(5, updateBindings.length);
     assertEquals(req.getTitle(), updateBindings[0]);
     assertEquals(req.getDetails().getDescription(), updateBindings[1]);
     assertEquals(req.getDetails().getLocation(), updateBindings[2]);
-    assertEquals(req.getThumbnail(), updateBindings[3]);
-    assertEquals(req.getPrice(), updateBindings[4]);
-    assertEquals(myEvent.getId(), updateBindings[5]);
+    assertEquals(req.getPrice(), updateBindings[3]);
+    assertEquals(myEvent.getId(), updateBindings[4]);
   }
 
   // deleting an event fails if the user isn't an admin
   @Test
   public void testDeleteEvent1() {
-    JWTData nonAdmin = new JWTData(0, PrivilegeLevel.GP);
+    JWTData nonAdmin = new JWTData(0, PrivilegeLevel.STANDARD);
 
     try {
       myEventsProcessorImpl.deleteEvent(0, nonAdmin);
@@ -968,8 +957,8 @@ public class EventsProcessorImplTest {
    * Brandon.
    */
   @ParameterizedTest
-  @ValueSource(ints = {0, 1})
-  public void testGetEventRegisteredUsersIncorrectPrivilegeLevel(int privLevel) {
+  @ValueSource(strings = {"standard", "pf"})
+  public void testGetEventRegisteredUsersIncorrectPrivilegeLevel(String privLevel) {
     PrivilegeLevel level = PrivilegeLevel.from(privLevel);
     JWTData jwtData = mock(JWTData.class);
     when(jwtData.getPrivilegeLevel()).thenReturn(level);
@@ -1102,7 +1091,7 @@ public class EventsProcessorImplTest {
 
     GetUserEventsRequest req =
         new GetUserEventsRequest(Optional.empty(), Optional.empty(), Optional.empty());
-    JWTData data = new JWTData(1, PrivilegeLevel.GP);
+    JWTData data = new JWTData(1, PrivilegeLevel.STANDARD);
     GetEventsResponse resp = myEventsProcessorImpl.getEventsSignedUp(req, data);
 
     assertEquals(ticketCount == -1 ? 0 : ticketCount, resp.getEvents().get(0).getTicketCount());
@@ -1111,7 +1100,7 @@ public class EventsProcessorImplTest {
   @ParameterizedTest
   @ValueSource(ints = {-1, 0, 1, 2})
   public void testGetEventsQualifiedUserSignedUp(int count) {
-    JWTData data = new JWTData(1, PrivilegeLevel.GP);
+    JWTData data = new JWTData(1, PrivilegeLevel.STANDARD);
 
     prepSignedUp(count);
 
@@ -1122,7 +1111,7 @@ public class EventsProcessorImplTest {
   @ParameterizedTest
   @ValueSource(ints = {-1, 0, 1, 2})
   public void testGetSingleEventUserSignedUp(int count) {
-    JWTData data = new JWTData(1, PrivilegeLevel.GP);
+    JWTData data = new JWTData(1, PrivilegeLevel.STANDARD);
 
     prepSignedUp(count);
     GetEventsResponse resp = myEventsProcessorImpl.getEventsQualified(data);

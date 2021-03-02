@@ -68,7 +68,7 @@ public class AuthDatabaseOperationsTest {
     UsersRecord myUser = myJooqMock.getContext().newRecord(Tables.USERS);
     myUser.setEmail(myEmail);
     myUser.setId(1);
-    myUser.setPrivilegeLevel(PrivilegeLevel.GP);
+    myUser.setPrivilegeLevel(PrivilegeLevel.STANDARD);
     myJooqMock.addReturn(OperationType.SELECT, myUser);
 
     JWTData userData = myAuthDatabaseOperations.getUserJWTData(myEmail);
@@ -87,7 +87,7 @@ public class AuthDatabaseOperationsTest {
     myUser.setEmail(myEmail);
     myUser.setPassHash(Passwords.createHash("letmein"));
     myUser.setId(1);
-    myUser.setPrivilegeLevel(PrivilegeLevel.GP);
+    myUser.setPrivilegeLevel(PrivilegeLevel.STANDARD);
     myJooqMock.addReturn(OperationType.SELECT, myUser);
 
     assertFalse(myAuthDatabaseOperations.isValidLogin(myEmail, "letmeout"));
@@ -103,7 +103,7 @@ public class AuthDatabaseOperationsTest {
     myUser.setEmail(myEmail);
     myUser.setPassHash(Passwords.createHash("letmein"));
     myUser.setId(1);
-    myUser.setPrivilegeLevel(PrivilegeLevel.GP);
+    myUser.setPrivilegeLevel(PrivilegeLevel.STANDARD);
     myJooqMock.addReturn(OperationType.SELECT, myUser);
 
     assertTrue(myAuthDatabaseOperations.isValidLogin(myEmail, "letmein"));
@@ -118,7 +118,7 @@ public class AuthDatabaseOperationsTest {
 
     NewUserRequest req =
         new NewUserRequest(
-            myEmail, "letmeout", "Brandon", "Liang", null, null, null, "Brandon's referrer");
+            myEmail, "letmeout", "Brandon", "Liang", null, null, null, "Brandon's referrer", false);
 
     try {
       myAuthDatabaseOperations.createNewUser(req);
@@ -152,7 +152,8 @@ public class AuthDatabaseOperationsTest {
             sampleLocation,
             samplePN,
             sampleAllergies,
-            sampleReferrer);
+            sampleReferrer,
+            false);
 
     myJooqMock.addEmptyReturn(OperationType.SELECT);
     myJooqMock.addEmptyReturn(OperationType.UPDATE);
@@ -290,6 +291,6 @@ public class AuthDatabaseOperationsTest {
     assertEquals(true, updateBindings.get(0)[0]);
     assertEquals(token, insertBindings.get(0)[0]);
     assertEquals(0, insertBindings.get(0)[1]);
-    assertEquals(VerificationKeyType.FORGOT_PASSWORD.getVal(), insertBindings.get(0)[2]);
+    assertEquals(VerificationKeyType.FORGOT_PASSWORD.ordinal(), insertBindings.get(0)[2]);
   }
 }

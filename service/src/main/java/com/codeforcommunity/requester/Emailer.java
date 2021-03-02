@@ -10,7 +10,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Properties;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import org.jooq.DSLContext;
@@ -20,45 +19,47 @@ import org.jooq.Record3;
 public class Emailer {
   private final EmailOperations emailOperations;
   private final DSLContext db;
-  private final String MAIN_PAGE_URL;
-  private final String FORGOT_PASSWORD_URL_TEMPLATE;
-  private final String VERIFY_EMAIL_URL_TEMPLATE;
-  private final String PF_REQUEST_URL;
+  private final String loginUrl;
+  private final String passwordResetUrl;
+  private final String pfRequestUrl;
+  private final String verifyEmailUrl;
+
+  private final String subjectWelcome = PropertiesLoader.loadProperty("email_subject_welcome");
+  private final String subjectEmailChange =
+      PropertiesLoader.loadProperty("email_subject_email_change");
+  private final String subjectPasswordResetRequest =
+      PropertiesLoader.loadProperty("email_subject_password_reset_request");
+  private final String subjectPasswordResetConfirm =
+      PropertiesLoader.loadProperty("email_subject_password_reset_confirm");
+  private final String subjectAccountDeleted =
+      PropertiesLoader.loadProperty("email_subject_account_deleted");
 
   public Emailer(DSLContext db) {
-    Properties emailProperties = PropertiesLoader.getEmailerProperties();
-    String senderName = emailProperties.getProperty("senderName");
-    String sendEmail = emailProperties.getProperty("sendEmail");
-    String sendPassword = emailProperties.getProperty("sendPassword");
-    String emailHost = emailProperties.getProperty("emailHost");
-    int emailPort = Integer.parseInt(emailProperties.getProperty("emailPort"));
+    String senderName = PropertiesLoader.loadProperty("email_sender_name");
+    String sendEmail = PropertiesLoader.loadProperty("email_send_email");
+    String sendPassword = PropertiesLoader.loadProperty("email_send_password");
+    String emailHost = PropertiesLoader.loadProperty("email_host");
+    int emailPort = Integer.parseInt(PropertiesLoader.loadProperty("email_port"));
     boolean shouldSendEmails =
-        Boolean.parseBoolean(emailProperties.getProperty("shouldSendEmails", "false"));
+        Boolean.parseBoolean(PropertiesLoader.loadProperty("email_should_send"));
 
-    Properties frontendProperties = PropertiesLoader.getFrontendProperties();
-    this.MAIN_PAGE_URL =
-        String.format(
-            "%s%s",
-            frontendProperties.getProperty("domain"), frontendProperties.getProperty("main_route"));
-    this.FORGOT_PASSWORD_URL_TEMPLATE =
-        String.format(
-            "%s%s",
-            frontendProperties.getProperty("domain"),
-            frontendProperties.getProperty("forgot_password_route"));
-
-    this.VERIFY_EMAIL_URL_TEMPLATE =
-        String.format(
-            "%s%s",
-            frontendProperties.getProperty("domain"),
-            frontendProperties.getProperty("verify_email_route"));
-
-    this.PF_REQUEST_URL =
-        String.format("%s%s", frontendProperties.getProperty("domain"), "/family-requests");
-
-    this.db = db;
     this.emailOperations =
         new EmailOperations(
             shouldSendEmails, senderName, sendEmail, sendPassword, emailHost, emailPort);
+
+    this.loginUrl = PropertiesLoader.loadProperty("frontend_base_url");
+    this.passwordResetUrl =
+        this.loginUrl + PropertiesLoader.loadProperty("frontend_password_reset_route");
+    this.pfRequestUrl =
+        String.format(
+            "%s%s", PropertiesLoader.loadProperty("frontend_base_url"), "/family-requests");
+    this.verifyEmailUrl =
+        String.format(
+            "%s%s",
+            PropertiesLoader.getProperty("frontend_base_url"),
+            PropertiesLoader.getProperty("verify_email_route"));
+
+    this.db = db;
   }
 
   /**
@@ -109,57 +110,52 @@ public class Emailer {
         });
   }
 
-  public void sendAccountDeactivated(String sendToEmail, String sendToName) {
-    String filePath = "/emails/AccountDeactivated.html";
-    String subjectLine = "Your Lucy's Love Bus Account has been Deactivated";
+  public void sendWelcomeEmail(String sendToEmail, String sendToName) {
+    // TODO: configure the proper email, including verification key
+    String filePath = "/emails/WelcomeEmail.html";
 
     Map<String, String> templateValues = new HashMap<>();
     templateValues.put("name", sendToName);
+    templateValues.put("link", loginUrl);
     Optional<String> emailBody = emailOperations.getTemplateString(filePath, templateValues);
 
-    emailBody.ifPresent(s -> emailOperations.sendEmail(sendToName, sendToEmail, subjectLine, s));
+    emailBody.ifPresent(s -> emailOperations.sendEmail(sendToName, sendToEmail, subjectWelcome, s));
   }
 
-  public void sendEmailChange(String sendToEmail, String sendToName, String newEmail) {
-    String filePath = "/emails/EmailChange.html";
+  public void sendEmailChangeConfirmationEmail(
+      String sendToEmail, String sendToName, String newEmail) {
+    String filePath = "/emails/EmailChangeConfirmation.html";
     String subjectLine = "Your Lucy's Love Bus Email has been Changed";
 
     Map<String, String> templateValues = new HashMap<>();
     templateValues.put("name", sendToName);
-    templateValues.put("link", MAIN_PAGE_URL);
+    templateValues.put("link", this.loginUrl);
     templateValues.put("new_email", newEmail);
     Optional<String> emailBody = emailOperations.getTemplateString(filePath, templateValues);
 
     emailBody.ifPresent(s -> emailOperations.sendEmail(sendToName, sendToEmail, subjectLine, s));
   }
 
-  public void sendEventSpecificAnnouncement(
-      String sendToEmail,
-      String sendToName,
-      String eventName,
-      String announcementTitle,
-      String announcementContent) {
-    String filePath = "/emails/EventSpecificAnnouncement.html";
-    String subjectLine = String.format("Announcement for %s", eventName);
+  public void sendPasswordChangeRequestEmail(
+      String sendToEmail, String sendToName, String secretKey) {
+    String filePath = "/emails/PasswordChangeRequest.html";
+    String subjectLine = "Reset your Lucy's Love Bus Password";
 
+    String forgotPasswordLink = String.format(this.passwordResetUrl, secretKey);
     Map<String, String> templateValues = new HashMap<>();
     templateValues.put("name", sendToName);
-    templateValues.put("link", MAIN_PAGE_URL);
-    templateValues.put("announcement_title", announcementTitle);
-    templateValues.put("announcement_content", announcementContent);
+    templateValues.put("link", forgotPasswordLink);
     Optional<String> emailBody = emailOperations.getTemplateString(filePath, templateValues);
 
     emailBody.ifPresent(s -> emailOperations.sendEmail(sendToName, sendToEmail, subjectLine, s));
   }
 
-  public void sendForgotPassword(String sendToEmail, String sendToName, String secretKey) {
-    String filePath = "/emails/ForgotPassword.html";
-    String subjectLine = "Reset your Lucy's Love Bus Password";
+  public void sendPasswordChangeConfirmationEmail(String sendToEmail, String sendToName) {
+    String filePath = "/emails/PasswordChangeConfirmation.html";
+    String subjectLine = "Your Lucy's Love Bus Password has Changed";
 
-    String forgotPasswordLink = String.format(FORGOT_PASSWORD_URL_TEMPLATE, secretKey);
     Map<String, String> templateValues = new HashMap<>();
     templateValues.put("name", sendToName);
-    templateValues.put("link", forgotPasswordLink);
     Optional<String> emailBody = emailOperations.getTemplateString(filePath, templateValues);
 
     emailBody.ifPresent(s -> emailOperations.sendEmail(sendToName, sendToEmail, subjectLine, s));
@@ -178,12 +174,31 @@ public class Emailer {
     emailBody.ifPresent(s -> emailOperations.sendEmail(sendToName, sendToEmail, subjectLine, s));
   }
 
-  public void sendPasswordChange(String sendToEmail, String sendToName) {
-    String filePath = "/emails/PasswordChange.html";
-    String subjectLine = "Your Lucy's Love Bus Password has Changed";
+  public void sendAccountDeactivated(String sendToEmail, String sendToName) {
+    String filePath = "/emails/AccountDeactivated.html";
+    String subjectLine = "Your Lucy's Love Bus Account has been Deactivated";
 
     Map<String, String> templateValues = new HashMap<>();
     templateValues.put("name", sendToName);
+    Optional<String> emailBody = emailOperations.getTemplateString(filePath, templateValues);
+
+    emailBody.ifPresent(s -> emailOperations.sendEmail(sendToName, sendToEmail, subjectLine, s));
+  }
+
+  public void sendEventSpecificAnnouncement(
+      String sendToEmail,
+      String sendToName,
+      String eventName,
+      String announcementTitle,
+      String announcementContent) {
+    String filePath = "/emails/EventSpecificAnnouncement.html";
+    String subjectLine = String.format("Announcement for %s", eventName);
+
+    Map<String, String> templateValues = new HashMap<>();
+    templateValues.put("name", sendToName);
+    templateValues.put("link", this.loginUrl);
+    templateValues.put("announcement_title", announcementTitle);
+    templateValues.put("announcement_content", announcementContent);
     Optional<String> emailBody = emailOperations.getTemplateString(filePath, templateValues);
 
     emailBody.ifPresent(s -> emailOperations.sendEmail(sendToName, sendToEmail, subjectLine, s));
@@ -216,7 +231,7 @@ public class Emailer {
 
     Map<String, String> templateValues = new HashMap<>();
     templateValues.put("name", sendToName);
-    templateValues.put("link", MAIN_PAGE_URL);
+    templateValues.put("link", this.loginUrl);
     Optional<String> emailBody = emailOperations.getTemplateString(filePath, templateValues);
 
     emailBody.ifPresent(s -> emailOperations.sendEmail(sendToName, sendToEmail, subjectLine, s));
@@ -244,7 +259,7 @@ public class Emailer {
 
     Map<String, String> templateValues = new HashMap<>();
     templateValues.put("name", sendToName);
-    templateValues.put("link", MAIN_PAGE_URL);
+    templateValues.put("link", this.loginUrl);
     templateValues.put("announcement_title", announcementTitle);
     templateValues.put("announcement_content", announcementContent);
     Optional<String> emailBody = emailOperations.getTemplateString(filePath, templateValues);
@@ -258,7 +273,7 @@ public class Emailer {
     String subjectLine = "New Request Submitted";
 
     Map<String, String> templateValues = new HashMap<>();
-    templateValues.put("link", this.PF_REQUEST_URL);
+    templateValues.put("link", this.pfRequestUrl);
     Optional<String> emailBody = emailOperations.getTemplateString(filePath, templateValues);
 
     emailBody.ifPresent(s -> emailOperations.sendEmail(sendToName, sendToEmail, subjectLine, s));

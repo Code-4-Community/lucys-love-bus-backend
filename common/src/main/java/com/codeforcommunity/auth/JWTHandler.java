@@ -25,11 +25,8 @@ public class JWTHandler {
     this.verification = getDefaultClaimVerification(this.algorithm);
 
     this.MS_REFRESH_EXPIRATION =
-        Long.valueOf(
-            PropertiesLoader.getExpirationProperties().getProperty("ms_refresh_expiration"));
-    this.MS_ACCESS_EXPIRATION =
-        Long.valueOf(
-            PropertiesLoader.getExpirationProperties().getProperty("ms_access_expiration"));
+        Long.valueOf(PropertiesLoader.loadProperty("expiration_ms_refresh"));
+    this.MS_ACCESS_EXPIRATION = Long.valueOf(PropertiesLoader.loadProperty("expiration_ms_access"));
   }
 
   /**
@@ -79,13 +76,13 @@ public class JWTHandler {
     DecodedJWT decodedJWT = getDecodedJWT(token);
     int userId = decodedJWT.getClaim("userId").asInt();
     PrivilegeLevel privilegeLevel =
-        PrivilegeLevel.from(decodedJWT.getClaim("privilegeLevel").asInt());
+        PrivilegeLevel.from(decodedJWT.getClaim("privilegeLevel").asString());
     return new JWTData(userId, privilegeLevel);
   }
 
   private DecodedJWT getDecodedJWT(String jwt) throws JWTVerificationException {
     if (jwt == null) {
-      throw new JWTVerificationException("Given a null jwt string");
+      throw new JWTVerificationException("Given a null JWT String");
     }
     return verification.build().verify(jwt);
   }
@@ -99,7 +96,7 @@ public class JWTHandler {
     Date date = getTokenExpiration(isRefresh);
     return JWT.create()
         .withClaim("userId", jwtData.getUserId())
-        .withClaim("privilegeLevel", jwtData.getPrivilegeLevel().getVal())
+        .withClaim("privilegeLevel", jwtData.getPrivilegeLevel().getName())
         .withExpiresAt(date)
         .withIssuer(C4C_ISSUER)
         .sign(algorithm);

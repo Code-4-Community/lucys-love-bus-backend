@@ -1,5 +1,0 @@
-aws_access_key = placeholder_aws_access_key
-aws_secret_key = placeholder_aws_secret_key
-s3_bucket_url = https://lucys-love-bus.s3.us-east-2.amazonaws.com
-s3_bucket_name = lucys-love-bus
-s3_upload_dir = events

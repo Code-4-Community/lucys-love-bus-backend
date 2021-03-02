@@ -2,6 +2,7 @@ package com.codeforcommunity.processor;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.Mockito.mock;
 
 import com.codeforcommunity.JooqMock;
 import com.codeforcommunity.JooqMock.OperationType;
@@ -33,6 +34,7 @@ public class ProtectedUserProcessorImplTest {
 
   private JooqMock myJooqMock;
   private ProtectedUserProcessorImpl myProtectedUserProcessorImpl;
+  private Emailer mockEmailer;
 
   // make examples for Contacts
   private final Contact CONTACT_EXAMPLE_1 =
@@ -118,9 +120,9 @@ public class ProtectedUserProcessorImplTest {
   @BeforeEach
   public void setup() {
     this.myJooqMock = new JooqMock();
+    this.mockEmailer = mock(Emailer.class);
     this.myProtectedUserProcessorImpl =
-        new ProtectedUserProcessorImpl(
-            myJooqMock.getContext(), new Emailer(myJooqMock.getContext()));
+        new ProtectedUserProcessorImpl(myJooqMock.getContext(), this.mockEmailer);
   }
 
   // test properly deleting a user
@@ -170,7 +172,7 @@ public class ProtectedUserProcessorImplTest {
   // test changing the password if the user is nulll
   @Test
   public void testChangePassword1() {
-    JWTData myUser = new JWTData(0, PrivilegeLevel.GP);
+    JWTData myUser = new JWTData(0, PrivilegeLevel.STANDARD);
     ChangePasswordRequest req = new ChangePasswordRequest("oldpasswd", "newpasswd");
 
     myJooqMock.addEmptyReturn(OperationType.SELECT);
@@ -186,7 +188,7 @@ public class ProtectedUserProcessorImplTest {
   // test changing the password if the user gives the wrong current password
   @Test
   public void testChangePassword2() {
-    JWTData myUser = new JWTData(0, PrivilegeLevel.GP);
+    JWTData myUser = new JWTData(0, PrivilegeLevel.STANDARD);
 
     // mock the user in the DB
     UsersRecord myUsersRecord = new UsersRecord();
@@ -207,7 +209,7 @@ public class ProtectedUserProcessorImplTest {
   // test changing the password correctly
   @Test
   public void testChangePassword3() {
-    JWTData myUser = new JWTData(0, PrivilegeLevel.GP);
+    JWTData myUser = new JWTData(0, PrivilegeLevel.STANDARD);
 
     // mock the user in the DB
     UsersRecord myUsersRecord = new UsersRecord();
@@ -228,7 +230,7 @@ public class ProtectedUserProcessorImplTest {
   // setting contacts and children fails if there's no main contact
   @Test
   public void testSetContactsAndChildren1() {
-    JWTData myUser = new JWTData(0, PrivilegeLevel.GP);
+    JWTData myUser = new JWTData(0, PrivilegeLevel.STANDARD);
     SetContactsAndChildrenRequest req = new SetContactsAndChildrenRequest(null, null, null);
 
     myJooqMock.addEmptyReturn(OperationType.SELECT);
@@ -244,7 +246,7 @@ public class ProtectedUserProcessorImplTest {
   // setting contacts and children responds correctly to non-null and non-empty children
   @Test
   public void testSetContactsAndChildren2() {
-    JWTData myUser = new JWTData(0, PrivilegeLevel.GP);
+    JWTData myUser = new JWTData(0, PrivilegeLevel.STANDARD);
 
     List<Child> children = new ArrayList<>();
     children.add(CHILD_EXAMPLE_1);
@@ -276,7 +278,7 @@ public class ProtectedUserProcessorImplTest {
   // setting contacts and children responds correctly to non-null and non-empty additional contacts
   @Test
   public void testSetContactsAndChildren3() {
-    JWTData myUser = new JWTData(0, PrivilegeLevel.GP);
+    JWTData myUser = new JWTData(0, PrivilegeLevel.STANDARD);
 
     List<Contact> additionalContacts = new ArrayList<>();
     additionalContacts.add(CONTACT_EXAMPLE_2);
@@ -309,7 +311,7 @@ public class ProtectedUserProcessorImplTest {
   // additional contacts
   @Test
   public void testSetContactsAndChildren4() {
-    JWTData myUser = new JWTData(0, PrivilegeLevel.GP);
+    JWTData myUser = new JWTData(0, PrivilegeLevel.STANDARD);
 
     List<Contact> additionalContacts = new ArrayList<>();
     additionalContacts.add(CONTACT_EXAMPLE_2);

@@ -25,7 +25,7 @@ import com.codeforcommunity.dto.auth.SessionResponse;
 import com.codeforcommunity.enums.PrivilegeLevel;
 import com.codeforcommunity.enums.VerificationKeyType;
 import com.codeforcommunity.exceptions.AuthException;
-import com.codeforcommunity.exceptions.InvalidPasswordException;
+import com.codeforcommunity.exceptions.TokenInvalidException;
 import com.codeforcommunity.requester.Emailer;
 import java.sql.Timestamp;
 import java.util.Date;
@@ -36,8 +36,6 @@ import org.jooq.generated.tables.records.UsersRecord;
 import org.jooq.generated.tables.records.VerificationKeysRecord;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 
 // Contains tests for AuthProcessorImpl.java in main
 public class AuthProcessorImplTest {
@@ -45,6 +43,7 @@ public class AuthProcessorImplTest {
   private JooqMock myJooqMock;
   private JWTCreator mockJWTCreator;
   private AuthProcessorImpl myAuthProcessorImpl;
+  private Emailer mockEmailer;
   private final String REFRESH_TOKEN_EXAMPLE = "sample refresh token";
   private final String ACCESS_TOKEN_EXAMPLE = "sample access token";
 
@@ -53,9 +52,9 @@ public class AuthProcessorImplTest {
   public void setup() {
     this.myJooqMock = new JooqMock();
     this.mockJWTCreator = mock(JWTCreator.class);
+    this.mockEmailer = mock(Emailer.class);
     this.myAuthProcessorImpl =
-        new AuthProcessorImpl(
-            myJooqMock.getContext(), mockJWTCreator, new Emailer(myJooqMock.getContext()));
+        new AuthProcessorImpl(myJooqMock.getContext(), this.mockEmailer, mockJWTCreator);
   }
 
   // test sign up where all the fields are filled in
@@ -64,7 +63,7 @@ public class AuthProcessorImplTest {
     // seed the db
     UsersRecord record = myJooqMock.getContext().newRecord(Tables.USERS);
     record.setId(0);
-    record.setPrivilegeLevel(PrivilegeLevel.GP);
+    record.setPrivilegeLevel(PrivilegeLevel.STANDARD);
     myJooqMock.addReturn(OperationType.INSERT, record);
     myJooqMock.addExistsReturn(false);
     myJooqMock.addReturn(OperationType.SELECT, record);
@@ -86,7 +85,8 @@ public class AuthProcessorImplTest {
             new AddressData("West 5th Street", "New York", "NY", "10002"),
             "555-555-5555",
             "Peanuts",
-            "Brandon's referrer");
+            "Brandon's referrer",
+            false);
 
     SessionResponse res = myAuthProcessorImpl.signUp(req);
 
@@ -137,7 +137,7 @@ public class AuthProcessorImplTest {
     String loginPass = "fundies";
 
     int recordId = 1;
-    PrivilegeLevel recordPL = PrivilegeLevel.GP;
+    PrivilegeLevel recordPL = PrivilegeLevel.STANDARD;
 
     // make a user record
     UsersRecord record = myJooqMock.getContext().newRecord(Tables.USERS);
@@ -174,7 +174,7 @@ public class AuthProcessorImplTest {
     String loginPass = "fundies";
 
     int recordId = 1;
-    PrivilegeLevel recordPL = PrivilegeLevel.GP;
+    PrivilegeLevel recordPL = PrivilegeLevel.STANDARD;
 
     // make a user record
     UsersRecord record = myJooqMock.getContext().newRecord(Tables.USERS);
@@ -209,7 +209,7 @@ public class AuthProcessorImplTest {
     String loginPass = "fundies";
 
     int recordId = 1;
-    PrivilegeLevel recordPL = PrivilegeLevel.GP;
+    PrivilegeLevel recordPL = PrivilegeLevel.STANDARD;
 
     // make a user record
     UsersRecord recordCopy = myJooqMock.getContext().newRecord(Tables.USERS);
@@ -279,8 +279,8 @@ public class AuthProcessorImplTest {
     try {
       myAuthProcessorImpl.refreshSession(invalid);
       fail();
-    } catch (AuthException e) {
-      assertEquals(e.getMessage(), "The given refresh token is invalid");
+    } catch (TokenInvalidException e) {
+      assertEquals(e.getTokenType(), "refresh");
     }
   }
 
@@ -342,23 +342,8 @@ public class AuthProcessorImplTest {
   }
 
   // test that resetting the password fails if it's too short
-  @ParameterizedTest
-  @ValueSource(strings = {"bad", "poor"})
-  public void testResetPassword1(String badPassword) {
-    String sk = "secret key";
-    ResetPasswordRequest req = new ResetPasswordRequest(sk, badPassword);
-
-    try {
-      myAuthProcessorImpl.resetPassword(req);
-      fail();
-    } catch (InvalidPasswordException e) {
-      // we're good
-    }
-  }
-
-  // test that resetting the password fails if it's too short
   @Test
-  public void testResetPassword2() {
+  public void testResetPassword1() {
     String sk = "secret key";
     String goodPassword = "good-password";
 

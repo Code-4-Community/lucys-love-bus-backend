@@ -2,10 +2,8 @@
 */target/
 *.iml
 *.properties
+*.settings
+*.classpath
+*.project
 *.log
-.classpath
-.project
-.settings/
-.vscode/
-.factorypath
 .DS_Store
