@@ -245,6 +245,7 @@ public class FailureHandler {
   private void handleUncaughtError(RoutingContext ctx, Throwable throwable) {
     String message = String.format("Internal server error caused by: %s", throwable.getMessage());
     throwable.printStackTrace();
+    logger.error(message);
     end(ctx, message, 500);
   }
 
