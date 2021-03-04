@@ -71,3 +71,4 @@ stripe_api_secret_key = sk_test_2TMIBMqcAIJmoP76SH793QzE
 stripe_webhook_signing_secret = whsec_WgFbXzt6iqcVaIkTQBAvcwXmAXX4ImTS
 cancel_registration_route = /checkout
 success_registration_route = /event-registration-confirmation/success/
+
