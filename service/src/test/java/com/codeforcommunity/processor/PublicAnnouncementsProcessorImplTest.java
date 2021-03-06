@@ -1,6 +1,7 @@
 package com.codeforcommunity.processor;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mock;
 
 import com.codeforcommunity.JooqMock;
 import com.codeforcommunity.dto.announcements.GetAnnouncementsRequest;
@@ -18,6 +19,7 @@ public class PublicAnnouncementsProcessorImplTest {
 
   private JooqMock myJooqMock;
   private PublicAnnouncementsProcessorImpl myPublicAnnouncementsProcessorImpl;
+  private Emailer mockEmailer;
 
   // use UNIX time for ease of testing
   // 04/16/2020 @ 1:20am (UTC)
@@ -31,9 +33,9 @@ public class PublicAnnouncementsProcessorImplTest {
   @BeforeEach
   public void setup() {
     this.myJooqMock = new JooqMock();
+    this.mockEmailer = mock(Emailer.class);
     this.myPublicAnnouncementsProcessorImpl =
-        new PublicAnnouncementsProcessorImpl(
-            myJooqMock.getContext(), new Emailer(myJooqMock.getContext()));
+        new PublicAnnouncementsProcessorImpl(myJooqMock.getContext(), this.mockEmailer);
   }
 
   // test getting announcements with range covering no events

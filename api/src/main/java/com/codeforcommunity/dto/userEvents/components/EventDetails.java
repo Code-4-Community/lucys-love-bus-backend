@@ -1,6 +1,6 @@
 package com.codeforcommunity.dto.userEvents.components;
 
-import com.codeforcommunity.api.ApiDto;
+import com.codeforcommunity.dto.ApiDto;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -117,28 +117,7 @@ public class EventDetails extends ApiDto {
     return fields;
   }
 
-  @Override
-  public List<String> validateFields(String fieldPrefix, boolean isNullable) {
-    if (!isNullable) {
-      return this.validateFields(fieldPrefix);
-    }
-    String fieldName = fieldPrefix + "event_details.";
-
-    List<String> fields = new ArrayList<>();
-    if (location != null && location.trim().isEmpty()) {
-      fields.add(fieldName + "location");
-    }
-    if (start != null && isStartInvalid(start)) {
-      fields.add(fieldName + "start");
-    }
-    if (start != null && end != null && start.after(end)) {
-      fields.add(fieldName + "start/end");
-    }
-
-    return fields;
-  }
-
   private boolean isStartInvalid(Timestamp start) {
-    return start.before(Date.from(Instant.now().minusSeconds(ApiDto.secondsLateEventCreation)));
+    return start.before(Date.from(Instant.now()));
   }
 }

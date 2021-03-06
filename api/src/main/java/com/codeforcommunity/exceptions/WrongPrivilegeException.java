@@ -1,7 +1,7 @@
 package com.codeforcommunity.exceptions;
 
 import com.codeforcommunity.enums.PrivilegeLevel;
-import com.codeforcommunity.rest.subrouter.FailureHandler;
+import com.codeforcommunity.rest.FailureHandler;
 import io.vertx.ext.web.RoutingContext;
 
 public class WrongPrivilegeException extends HandledException {
