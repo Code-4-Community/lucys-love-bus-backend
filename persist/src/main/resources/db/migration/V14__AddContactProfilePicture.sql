@@ -1,1 +1,5 @@
-ALTER TABLE contacts ADD COLUMN profilePicture VARCHAR(500) DEFAULT null;
+ALTER TABLE children
+ADD COLUMN profile_picture VARCHAR(500) DEFAULT NULL;
+
+ALTER TABLE contacts
+ADD COLUMN profile_picture VARCHAR(500) DEFAULT NULL;

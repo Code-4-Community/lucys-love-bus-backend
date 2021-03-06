@@ -61,8 +61,6 @@ public class UserInformationDatabaseOperations {
     String publicImageUrl =
         S3Requester.validateUploadImageToS3LucyEvents(filename, newContactData.getProfilePicture());
 
-    System.out.println("At image URL: " + publicImageUrl);
-
     newContactData.setProfilePicture(publicImageUrl); // Actually setting Image URL
 
     newContactData.setShouldSendEmails(true);
@@ -131,7 +129,7 @@ public class UserInformationDatabaseOperations {
     contactsRecord.setPronouns(contactDto.getPronouns());
     contactsRecord.setAllergies(contactDto.getAllergies());
     contactsRecord.setDiagnosis(contactDto.getDiagnosis());
-    contactsRecord.setMedications(contactDto.getMedications());
+    contactsRecord.setMedications(contactDto.getMedication());
     contactsRecord.setNotes(contactDto.getNotes());
     contactsRecord.setShouldSendEmails(contactDto.getShouldSendEmails());
     contactsRecord.setPhoneNumber(contactDto.getPhoneNumber());
