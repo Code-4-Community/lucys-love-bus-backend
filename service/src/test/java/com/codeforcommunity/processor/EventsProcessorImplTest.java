@@ -50,6 +50,7 @@ public class EventsProcessorImplTest {
 
   private EventsProcessorImpl myEventsProcessorImpl;
   private JooqMock myJooqMock;
+  private S3Requester s3Requester;
 
   // use UNIX time for ease of testing
   // 04/16/2020 @ 1:20am (UTC)
@@ -70,6 +71,7 @@ public class EventsProcessorImplTest {
     EventDatabaseOperations myEventDatabaseOperations =
         new EventDatabaseOperations(myJooqMock.getContext());
     this.myEventsProcessorImpl = new EventsProcessorImpl(myJooqMock.getContext());
+    this.s3Requester = new S3Requester();
 
     // mock Amazon S3
     AmazonS3Client mockS3Client = mock(AmazonS3Client.class);
@@ -82,7 +84,7 @@ public class EventsProcessorImplTest {
     when(mockExterns.getBucketPublicUrl()).thenReturn(BUCKET_PUBLIC_URL);
     when(mockExterns.getDirPublic()).thenReturn(DIR_NAME);
 
-    S3Requester.setExterns(mockExterns);
+    s3Requester.setExterns(mockExterns);
   }
 
   // test exception thrown for not being an admin

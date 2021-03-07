@@ -65,7 +65,7 @@ public class PostAnnouncementRequest extends ApiDto {
    * @return an optional image src of the announcement in this post request object.
    */
   public Optional<String> getImageSrc() {
-    return imageSrc != null ? Optional.of(imageSrc) : Optional.empty();
+    return isEmpty(imageSrc) ? Optional.empty() : Optional.of(imageSrc);
   }
 
   @Override
@@ -75,8 +75,11 @@ public class PostAnnouncementRequest extends ApiDto {
     if (isEmpty(title)) {
       fields.add(fieldName + "title");
     }
-    if (description == null) {
+    if (isEmpty(description)) {
       fields.add(fieldName + "description");
+    }
+    if (isEmpty(imageSrc)) {
+      fields.add(fieldName + "imageSrc");
     }
     return fields;
   }

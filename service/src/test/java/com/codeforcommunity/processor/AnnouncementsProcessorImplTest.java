@@ -3,6 +3,8 @@ package com.codeforcommunity.processor;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.any;
 
 import com.codeforcommunity.JooqMock;
 import com.codeforcommunity.auth.JWTData;
@@ -15,17 +17,26 @@ import com.codeforcommunity.enums.PrivilegeLevel;
 import com.codeforcommunity.exceptions.AdminOnlyRouteException;
 import com.codeforcommunity.exceptions.MalformedParameterException;
 import com.codeforcommunity.requester.Emailer;
+import com.codeforcommunity.requester.S3Requester;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import org.jooq.generated.Tables;
 import org.jooq.generated.tables.records.AnnouncementsRecord;
 import org.jooq.generated.tables.records.EventsRecord;
+import org.junit.Before;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 
 // Contains tests for AnnouncementsProcessorImpl.java in main
+@RunWith(MockitoJUnitRunner.class)
 public class AnnouncementsProcessorImplTest {
+
+  @Mock
+  private S3Requester mockS3Requester;
 
   private JooqMock myJooqMock;
   private AnnouncementsProcessorImpl myAnnouncementsProcessorImpl;
@@ -40,11 +51,12 @@ public class AnnouncementsProcessorImplTest {
 
   // set up all the mocks
   @BeforeEach
+  @Before
   public void setup() {
     this.myJooqMock = new JooqMock();
     this.myAnnouncementsProcessorImpl =
         new AnnouncementsProcessorImpl(
-            myJooqMock.getContext(), new Emailer(myJooqMock.getContext()));
+            myJooqMock.getContext(), new Emailer(myJooqMock.getContext()), mockS3Requester);
   }
 
   // test getting announcements with range covering no events
@@ -119,9 +131,9 @@ public class AnnouncementsProcessorImplTest {
     assertEquals(res.getAnnouncements().get(0).getId(), 0);
   }
 
-  // test getting announcements (with images) with range covering some events
+  // test getting an announcement (with an image)
   @Test
-  public void testGetAnnouncementsWithImageSrc1() {
+  public void testGetSingleAnnouncementWithImageSrc() {
     // craft the get request
     GetAnnouncementsRequest req =
         new GetAnnouncementsRequest(
@@ -146,9 +158,9 @@ public class AnnouncementsProcessorImplTest {
         "https://facts.net/wp-content/uploads/2020/07/monarch-butterfly-facts.jpg");
   }
 
-  // test getting announcements (with images) with range covering all events
+  // test getting multiple announcements (with images)
   @Test
-  public void testGetAnnouncementsWithImageSrc2() {
+  public void testGetMultipleAnnouncementsWithImageSrc() {
     // craft the get request
     GetAnnouncementsRequest req =
         new GetAnnouncementsRequest(
@@ -230,7 +242,7 @@ public class AnnouncementsProcessorImplTest {
 
   // test posting an announcement with an image, without admin privileges
   @Test
-  public void testPostAnnouncementsWithImageSrc1() {
+  public void testTryPostAnnouncementWithImageSrcWithoutAdminPrivileges() {
     // make the request object
     PostAnnouncementRequest req = new PostAnnouncementRequest("sample title", "sample description",
         "https://facts.net/wp-content/uploads/2020/07/monarch-butterfly-facts.jpg");
@@ -246,12 +258,15 @@ public class AnnouncementsProcessorImplTest {
     }
   }
 
-  // test posting an announcement with an image normally
-  @Test
-  public void testPostAnnouncementsWithImageSrc2() {
+  // test posting an announcement with an image
+  @org.junit.Test
+  public void testPostSingleAnnouncementsWithImageSrc() {
+    // mock the S3 requester to just return the same string it was given
+    when(mockS3Requester.validateUploadImageToS3LucyEvents(any(), any())).thenReturn("https://wwww.sampleimage.com");
+
     // make the request object
     PostAnnouncementRequest req = new PostAnnouncementRequest("sample title", "sample description",
-        "https://facts.net/wp-content/uploads/2020/07/monarch-butterfly-facts.jpg");
+        "https://wwww.sampleimage.com");
 
     // mock the announcement inside the DB
     AnnouncementsRecord announcement = myJooqMock.getContext().newRecord(Tables.ANNOUNCEMENTS);
@@ -259,7 +274,7 @@ public class AnnouncementsProcessorImplTest {
     announcement.setTitle("sample title");
     announcement.setCreated(new Timestamp(START_TIMESTAMP_TEST));
     announcement.setDescription("sample description");
-    announcement.setImageSrc("https://facts.net/wp-content/uploads/2020/07/monarch-butterfly-facts.jpg");
+    announcement.setImageSrc("https://wwww.sampleimage.com");
     myJooqMock.addReturn("SELECT", announcement);
     myJooqMock.addReturn("INSERT", announcement);
 
@@ -268,11 +283,11 @@ public class AnnouncementsProcessorImplTest {
 
     PostAnnouncementResponse res = myAnnouncementsProcessorImpl.postAnnouncement(req, myUserData);
 
-    assertEquals(res.getAnnouncement().getDescription(), "sample description");
-    assertEquals(res.getAnnouncement().getTitle(), "sample title");
+    assertEquals(res.getAnnouncement().getDescription(), announcement.getDescription());
+    assertEquals(res.getAnnouncement().getTitle(), announcement.getTitle());
     assertEquals(res.getAnnouncement().getId(), 0);
     assertEquals(res.getAnnouncement().getCreated(), new Timestamp(START_TIMESTAMP_TEST));
-    assertEquals(res.getAnnouncement().getImageSrc(),"https://facts.net/wp-content/uploads/2020/07/monarch-butterfly-facts.jpg");
+    assertEquals(res.getAnnouncement().getImageSrc(), announcement.getImageSrc());
   }
 
   // posting an event specific announcement fails if user isn't an admin
@@ -313,42 +328,6 @@ public class AnnouncementsProcessorImplTest {
   // posting an event specific announcement succeeds with event with no announcements yet
   @Test
   public void testPostEventSpecificAnnouncement3() {
-    PostAnnouncementRequest req = new PostAnnouncementRequest("c4c", "code for community",
-        "https://facts.net/wp-content/uploads/2020/07/monarch-butterfly-facts.jpg");
-
-    // mock the user
-    JWTData myUserData = new JWTData(0, PrivilegeLevel.ADMIN);
-
-    // mock the specific event inside the DB
-    EventsRecord event = myJooqMock.getContext().newRecord(Tables.EVENTS);
-    event.setId(1);
-    myJooqMock.addReturn("SELECT", event);
-
-    // mock the announcement inside the DB
-    AnnouncementsRecord announcement = myJooqMock.getContext().newRecord(Tables.ANNOUNCEMENTS);
-    announcement.setId(1);
-    announcement.setEventId(1);
-    announcement.setTitle("c4c");
-    announcement.setDescription("code for community");
-    announcement.setImageSrc("https://facts.net/wp-content/uploads/2020/07/monarch-butterfly-facts.jpg");
-    myJooqMock.addReturn("SELECT", announcement);
-    myJooqMock.addReturn("INSERT", announcement);
-
-    // mock sending event specific announcement email
-    myJooqMock.addReturn("SELECT", event);
-
-    PostAnnouncementResponse res =
-        myAnnouncementsProcessorImpl.postEventSpecificAnnouncement(req, myUserData, 1);
-    assertEquals(res.getAnnouncement().getEventId(), announcement.getEventId());
-    assertEquals((Integer) res.getAnnouncement().getId(), announcement.getId());
-    assertEquals(res.getAnnouncement().getTitle(), req.getTitle());
-    assertEquals(res.getAnnouncement().getDescription(), req.getDescription());
-    assertEquals(res.getAnnouncement().getImageSrc(), req.getImageSrc().get());
-  }
-
-  // posting an event specific announcement (with an image) succeeds with event with no announcements yet
-  @Test
-  public void testPostEventSpecificAnnouncementWithImageSrc1() {
     PostAnnouncementRequest req = new PostAnnouncementRequest("c4c", "code for community");
 
     // mock the user
@@ -377,6 +356,46 @@ public class AnnouncementsProcessorImplTest {
     assertEquals((Integer) res.getAnnouncement().getId(), announcement.getId());
     assertEquals(res.getAnnouncement().getTitle(), req.getTitle());
     assertEquals(res.getAnnouncement().getDescription(), req.getDescription());
+  }
+
+  // posting an event specific announcement (with an image) succeeds with event with no announcements yet
+  @org.junit.Test
+  public void testPostEventSpecificAnnouncementWithImageSrc() {
+    // mock the S3 requester to just return the same string it was given
+    when(mockS3Requester.validateUploadImageToS3LucyEvents(any(), any())).thenReturn("https://wwww.sampleimage.com");
+
+    // make the request object
+    PostAnnouncementRequest req = new PostAnnouncementRequest("c4c", "code for community",
+        "https://wwww.sampleimage.com");
+
+    // mock the user
+    JWTData myUserData = new JWTData(0, PrivilegeLevel.ADMIN);
+
+    // mock the specific event inside the DB
+    EventsRecord event = myJooqMock.getContext().newRecord(Tables.EVENTS);
+    event.setId(1);
+    myJooqMock.addReturn("SELECT", event);
+
+    // mock the announcement inside the DB
+    AnnouncementsRecord announcement = myJooqMock.getContext().newRecord(Tables.ANNOUNCEMENTS);
+    announcement.setId(1);
+    announcement.setEventId(1);
+    announcement.setTitle("c4c");
+    announcement.setDescription("code for community");
+    announcement.setImageSrc("https://wwww.sampleimage.com");
+    myJooqMock.addReturn("SELECT", announcement);
+    myJooqMock.addReturn("INSERT", announcement);
+
+    // mock sending event specific announcement email
+    myJooqMock.addReturn("SELECT", event);
+
+    PostAnnouncementResponse res =
+        myAnnouncementsProcessorImpl.postEventSpecificAnnouncement(req, myUserData, 1);
+    assertEquals(res.getAnnouncement().getEventId(), announcement.getEventId());
+    assertEquals((Integer) res.getAnnouncement().getId(), announcement.getId());
+    assertEquals(res.getAnnouncement().getTitle(), req.getTitle());
+    assertEquals(res.getAnnouncement().getDescription(), req.getDescription());
+    assertEquals(res.getAnnouncement().getImageSrc(), announcement.getImageSrc());
   }
 
   // posting an event specific announcement succeeds with event with one announcement already

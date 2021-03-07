@@ -33,10 +33,16 @@ public class AnnouncementsProcessorImpl implements IAnnouncementsProcessor {
 
   private final DSLContext db;
   private final Emailer emailer;
+  private final S3Requester s3Requester;
 
   public AnnouncementsProcessorImpl(DSLContext db, Emailer emailer) {
+    this(db, emailer, new S3Requester());
+  }
+
+  public AnnouncementsProcessorImpl(DSLContext db, Emailer emailer, S3Requester s3Requester) {
     this.db = db;
     this.emailer = emailer;
+    this.s3Requester = s3Requester;
   }
 
   @Override
@@ -123,13 +129,7 @@ public class AnnouncementsProcessorImpl implements IAnnouncementsProcessor {
               email, name, eventName, request.getTitle(), request.getDescription());
         });
 
-    // the timestamp wasn't showing correctly, so just
-    // get the announcement directly from the database
-    return announcementPojoToResponse(
-        db.selectFrom(ANNOUNCEMENTS)
-            .where(ANNOUNCEMENTS.ID.eq(newAnnouncementsRecord.getId()))
-            .fetchInto(Announcements.class)
-            .get(0));
+    return announcementPojoToResponse(newAnnouncementsRecord.into(Announcements.class));
   }
 
   @Override
@@ -168,9 +168,7 @@ public class AnnouncementsProcessorImpl implements IAnnouncementsProcessor {
     if (request.getImageSrc().isPresent()) {
       String filename = "announcement-" + UUID.randomUUID();
       String publicImageUrl =
-              S3Requester.validateUploadImageToS3LucyEvents(filename, request.getImageSrc().get());
-
-      newRecord.setImageSrc(publicImageUrl);
+              s3Requester.validateUploadImageToS3LucyEvents(filename, request.getImageSrc().get());
     }
     return newRecord;
   }

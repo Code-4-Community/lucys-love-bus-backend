@@ -28,6 +28,7 @@ public class PublicEventsProcessorImplTest {
 
   private PublicEventsProcessorImpl myPublicEventsProcessorImpl;
   private JooqMock myJooqMock;
+  private S3Requester s3Requester;
 
   // use UNIX time for ease of testing
   // 04/16/2020 @ 1:20am (UTC)
@@ -41,6 +42,7 @@ public class PublicEventsProcessorImplTest {
     EventDatabaseOperations myEventDatabaseOperations =
         new EventDatabaseOperations(myJooqMock.getContext());
     this.myPublicEventsProcessorImpl = new PublicEventsProcessorImpl(myJooqMock.getContext());
+    this.s3Requester = new S3Requester();
 
     // mock Amazon S3
     AmazonS3Client mockS3Client = mock(AmazonS3Client.class);
@@ -50,7 +52,7 @@ public class PublicEventsProcessorImplTest {
     when(mockS3Client.putObject(any(PutObjectRequest.class))).thenReturn(mockPutObjectResult);
     when(mockExterns.getS3Client()).thenReturn(mockS3Client);
 
-    S3Requester.setExterns(mockExterns);
+    s3Requester.setExterns(mockExterns);
   }
 
   // Test getting events when the given event ids don't exist

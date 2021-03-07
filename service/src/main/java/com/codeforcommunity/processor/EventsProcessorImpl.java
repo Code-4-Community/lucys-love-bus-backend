@@ -44,6 +44,7 @@ public class EventsProcessorImpl implements IEventsProcessor {
 
   private final DSLContext db;
   private final EventDatabaseOperations eventDatabaseOperations;
+  private final S3Requester s3Requester;
 
   /** Hours after the start of an event that the event will still show on upcoming pages */
   private final int registerLeniencyHours = 12;
@@ -53,6 +54,7 @@ public class EventsProcessorImpl implements IEventsProcessor {
   public EventsProcessorImpl(DSLContext db) {
     this.db = db;
     this.eventDatabaseOperations = new EventDatabaseOperations(db);
+    this.s3Requester = new S3Requester();
   }
 
   @Override
@@ -63,7 +65,7 @@ public class EventsProcessorImpl implements IEventsProcessor {
     }
 
     String publicImageUrl =
-        S3Requester.validateUploadImageToS3LucyEvents(request.getTitle(), request.getThumbnail());
+        s3Requester.validateUploadImageToS3LucyEvents(request.getTitle(), request.getThumbnail());
     request.setThumbnail(
         publicImageUrl); // Update the request to contain the URL for the DB and JSON response OR
     // null if no image given
