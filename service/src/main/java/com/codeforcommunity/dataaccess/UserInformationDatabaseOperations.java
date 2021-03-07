@@ -129,7 +129,7 @@ public class UserInformationDatabaseOperations {
     contactsRecord.setPronouns(contactDto.getPronouns());
     contactsRecord.setAllergies(contactDto.getAllergies());
     contactsRecord.setDiagnosis(contactDto.getDiagnosis());
-    contactsRecord.setMedications(contactDto.getMedication());
+    contactsRecord.setMedications(contactDto.getMedications());
     contactsRecord.setNotes(contactDto.getNotes());
     contactsRecord.setShouldSendEmails(contactDto.getShouldSendEmails());
     contactsRecord.setPhoneNumber(contactDto.getPhoneNumber());
