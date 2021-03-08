@@ -168,7 +168,7 @@ public class AnnouncementsProcessorImplTest {
     announcement1.setCreated(new Timestamp(START_TIMESTAMP_TEST));
     announcement1.setDescription("the first announcement description");
     announcement1.setImageSrc("https://facts.net/wp-content/uploads/2020/07/monarch-butterfly-facts.jpg");
-    myJooqMock.addReturn("SELECT", announcement1);
+    myJooqMock.addReturn(OperationType.SELECT, announcement1);
 
     GetAnnouncementsResponse res = myAnnouncementsProcessorImpl.getAnnouncements(req);
 
@@ -205,7 +205,7 @@ public class AnnouncementsProcessorImplTest {
     List<AnnouncementsRecord> announcements = new ArrayList<>();
     announcements.add(announcement1);
     announcements.add(announcement2);
-    myJooqMock.addReturn("SELECT", announcements);
+    myJooqMock.addReturn(OperationType.SELECT, announcements);
 
     GetAnnouncementsResponse res = myAnnouncementsProcessorImpl.getAnnouncements(req);
 
@@ -268,7 +268,7 @@ public class AnnouncementsProcessorImplTest {
         Base64TestStrings.TEST_STRING_1);
 
     // mock the user
-    JWTData myUserData = new JWTData(0, PrivilegeLevel.GP);
+    JWTData myUserData = new JWTData(0, PrivilegeLevel.STANDARD);
 
     try {
       myAnnouncementsProcessorImpl.postAnnouncement(req, myUserData);
@@ -293,8 +293,8 @@ public class AnnouncementsProcessorImplTest {
     announcement.setCreated(new Timestamp(START_TIMESTAMP_TEST));
     announcement.setDescription("sample description");
     announcement.setImageSrc(BUCKET_PUBLIC_URL + "/" + DIR_NAME + "/sample_thumbnail.gif");
-    myJooqMock.addReturn("SELECT", announcement);
-    myJooqMock.addReturn("INSERT", announcement);
+    myJooqMock.addReturn(OperationType.SELECT, announcement);
+    myJooqMock.addReturn(OperationType.INSERT, announcement);
 
     // mock the user
     JWTData myUserData = new JWTData(0, PrivilegeLevel.ADMIN);
@@ -389,18 +389,18 @@ public class AnnouncementsProcessorImplTest {
     // mock the specific event inside the DB
     EventsRecord event = myJooqMock.getContext().newRecord(Tables.EVENTS);
     event.setId(1);
-    myJooqMock.addReturn("SELECT", event);
+    myJooqMock.addReturn(OperationType.SELECT, event);
 
     // mock the announcement inside the DB
     AnnouncementsRecord announcement = myJooqMock.getContext().newRecord(Tables.ANNOUNCEMENTS);
     announcement.setEventId(1);
     announcement.setTitle("c4c");
     announcement.setDescription("code for community");
-    myJooqMock.addReturn("SELECT", announcement);
-    myJooqMock.addReturn("INSERT", announcement);
+    myJooqMock.addReturn(OperationType.SELECT, announcement);
+    myJooqMock.addReturn(OperationType.INSERT, announcement);
 
     // mock sending event specific announcement email
-    myJooqMock.addReturn("SELECT", event);
+    myJooqMock.addReturn(OperationType.SELECT, event);
 
     PostAnnouncementResponse res =
         myAnnouncementsProcessorImpl.postEventSpecificAnnouncement(req, myUserData, 1);
