@@ -1,6 +1,0 @@
-sendEmail = lovebusprograms@gmail.com
-sendPassword = gmail-App-Password
-emailHost = smtp.gmail.com
-emailPort = 465
-senderName = Lucy's Love Bus
-shouldSendEmails = false

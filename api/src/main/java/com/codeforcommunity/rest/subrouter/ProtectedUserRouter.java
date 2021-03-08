@@ -1,15 +1,16 @@
 package com.codeforcommunity.rest.subrouter;
 
 import static com.codeforcommunity.rest.ApiRouter.end;
-import static com.codeforcommunity.rest.RestFunctions.getJsonBodyAsClass;
 
 import com.codeforcommunity.api.IProtectedUserProcessor;
 import com.codeforcommunity.auth.JWTData;
-import com.codeforcommunity.dto.protected_user.ChangeEmailRequest;
 import com.codeforcommunity.dto.protected_user.SetContactsAndChildrenRequest;
 import com.codeforcommunity.dto.protected_user.UserInformation;
+import com.codeforcommunity.dto.user.ChangeEmailRequest;
 import com.codeforcommunity.dto.user.ChangePasswordRequest;
+import com.codeforcommunity.dto.user.UserDataResponse;
 import com.codeforcommunity.rest.IRouter;
+import com.codeforcommunity.rest.RestFunctions;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Route;
@@ -34,18 +35,25 @@ public class ProtectedUserRouter implements IRouter {
     registerSetUserContactInfo(router);
     registerGetUserContactInfo(router);
     registerUpdateUserContactInfo(router);
+    registerGetUserData(router);
+    registerChangeEmail(router);
 
     return router;
   }
 
   private void registerDeleteUser(Router router) {
     Route deleteUserRoute = router.delete("/");
-    deleteUserRoute.handler(this::handleDeleteUser);
+    deleteUserRoute.handler(this::handleDeleteUserRoute);
   }
 
   private void registerChangePassword(Router router) {
     Route changePasswordRoute = router.post("/change_password");
     changePasswordRoute.handler(this::handleChangePasswordRoute);
+  }
+
+  private void registerGetUserData(Router router) {
+    Route getUserDataRoute = router.get("/data");
+    getUserDataRoute.handler(this::handleGetUserDataRoute);
   }
 
   private void registerChangeEmail(Router router) {
@@ -68,7 +76,7 @@ public class ProtectedUserRouter implements IRouter {
     setUserContactInfoRoute.handler(this::handleUpdateUserContactInfo);
   }
 
-  private void handleDeleteUser(RoutingContext ctx) {
+  private void handleDeleteUserRoute(RoutingContext ctx) {
     JWTData userData = ctx.get("jwt_data");
 
     processor.deleteUser(userData);
@@ -79,18 +87,9 @@ public class ProtectedUserRouter implements IRouter {
   private void handleChangePasswordRoute(RoutingContext ctx) {
     JWTData userData = ctx.get("jwt_data");
     ChangePasswordRequest changePasswordRequest =
-        getJsonBodyAsClass(ctx, ChangePasswordRequest.class);
+        RestFunctions.getJsonBodyAsClass(ctx, ChangePasswordRequest.class);
 
     processor.changePassword(userData, changePasswordRequest);
-
-    end(ctx.response(), 200);
-  }
-
-  private void handleChangeEmailRoute(RoutingContext ctx) {
-    JWTData userData = ctx.get("jwt_data");
-    ChangeEmailRequest changeEmailRequest = getJsonBodyAsClass(ctx, ChangeEmailRequest.class);
-
-    processor.changePrimaryEmail(userData, changeEmailRequest);
 
     end(ctx.response(), 200);
   }
@@ -98,7 +97,7 @@ public class ProtectedUserRouter implements IRouter {
   private void handleSetUserContactInfo(RoutingContext ctx) {
     JWTData userData = ctx.get("jwt_data");
     SetContactsAndChildrenRequest setUserContactInfoRequest =
-        getJsonBodyAsClass(ctx, SetContactsAndChildrenRequest.class);
+        RestFunctions.getJsonBodyAsClass(ctx, SetContactsAndChildrenRequest.class);
 
     processor.setContactsAndChildren(userData, setUserContactInfoRequest);
 
@@ -115,9 +114,25 @@ public class ProtectedUserRouter implements IRouter {
 
   private void handleUpdateUserContactInfo(RoutingContext ctx) {
     JWTData userData = ctx.get("jwt_data");
-    UserInformation userInformation = getJsonBodyAsClass(ctx, UserInformation.class);
+    UserInformation userInformation = RestFunctions.getJsonBodyAsClass(ctx, UserInformation.class);
 
     processor.updatePersonalUserInformation(userInformation, userData);
+  }
+
+  private void handleGetUserDataRoute(RoutingContext ctx) {
+    JWTData userData = ctx.get("jwt_data");
+
+    UserDataResponse response = processor.getUserData(userData);
+
+    end(ctx.response(), 200, JsonObject.mapFrom(response).toString());
+  }
+
+  private void handleChangeEmailRoute(RoutingContext ctx) {
+    JWTData userData = ctx.get("jwt_data");
+    ChangeEmailRequest changeEmailRequest =
+        RestFunctions.getJsonBodyAsClass(ctx, ChangeEmailRequest.class);
+
+    processor.changeEmail(userData, changeEmailRequest);
 
     end(ctx.response(), 200);
   }

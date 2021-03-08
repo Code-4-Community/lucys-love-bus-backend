@@ -41,8 +41,8 @@ public class RequestsProcessorImpl implements IRequestsProcessor {
     // Add request to database
     // Sends an email to all administrators
 
-    if (userData.getPrivilegeLevel() != PrivilegeLevel.GP) {
-      throw new WrongPrivilegeException(PrivilegeLevel.GP);
+    if (userData.getPrivilegeLevel() != PrivilegeLevel.STANDARD) {
+      throw new WrongPrivilegeException(PrivilegeLevel.STANDARD);
     }
     List<RequestStatus> pastRequests =
         db.selectFrom(PF_REQUESTS)

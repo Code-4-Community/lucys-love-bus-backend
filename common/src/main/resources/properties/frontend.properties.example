@@ -1,5 +1,0 @@
-domain = https://lovebusprograms.org
-main_route = /
-forgot_password_route = /forgot-password-reset/%s/
-cancel_registration_route = /checkout
-success_registration_route = /event-registration-confirmation/success/

@@ -1,10 +1,10 @@
 package com.codeforcommunity.dto.auth;
 
-import com.codeforcommunity.api.ApiDto;
+import com.codeforcommunity.dto.ApiDto;
+import com.codeforcommunity.exceptions.InvalidPasswordException;
 import java.util.ArrayList;
 import java.util.List;
 
-/** Representing the ResetPasswordRequest portion of the Auth DTO */
 public class ResetPasswordRequest extends ApiDto {
 
   private String secretKey;
@@ -17,38 +17,18 @@ public class ResetPasswordRequest extends ApiDto {
 
   private ResetPasswordRequest() {}
 
-  /**
-   * Retrieves the secretKey field.
-   *
-   * @return the String secretKey field.
-   */
   public String getSecretKey() {
     return secretKey;
   }
 
-  /**
-   * Sets this ResetPasswordRequest's secretKey field to the provided secretKey.
-   *
-   * @param secretKey the value to set this secretKey field to.
-   */
   public void setSecretKey(String secretKey) {
     this.secretKey = secretKey;
   }
 
-  /**
-   * Retrieves the newPassword field.
-   *
-   * @return the String newPassword field.
-   */
   public String getNewPassword() {
     return newPassword;
   }
 
-  /**
-   * Sets this ResetPasswordRequest's newPassword field to the provided newPassword.
-   *
-   * @param newPassword the value to set this newPassword field to.
-   */
   public void setNewPassword(String newPassword) {
     this.newPassword = newPassword;
   }
@@ -57,11 +37,16 @@ public class ResetPasswordRequest extends ApiDto {
   public List<String> validateFields(String fieldPrefix) {
     String fieldName = fieldPrefix + "reset_password_request.";
     List<String> fields = new ArrayList<>();
-    if (isEmpty(secretKey)) {
+
+    if (newPassword == null) {
+      fields.add(fieldName + "new_password");
+    }
+    if (secretKey == null) {
       fields.add(fieldName + "secret_key");
     }
-    if (passwordInvalid(newPassword)) {
-      fields.add(fieldName + "new_password");
+    // Only throw this exception if there are no issues with other fields
+    if (passwordInvalid(newPassword) && fields.size() == 0) {
+      throw new InvalidPasswordException();
     }
     return fields;
   }
