@@ -34,7 +34,6 @@ import org.jooq.generated.tables.records.EventsRecord;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-
 // Contains tests for AnnouncementsProcessorImpl.java in main
 public class AnnouncementsProcessorImplTest {
 
@@ -167,14 +166,16 @@ public class AnnouncementsProcessorImplTest {
     announcement1.setTitle("the first announcement title");
     announcement1.setCreated(new Timestamp(START_TIMESTAMP_TEST));
     announcement1.setDescription("the first announcement description");
-    announcement1.setImageSrc("https://facts.net/wp-content/uploads/2020/07/monarch-butterfly-facts.jpg");
+    announcement1.setImageSrc(
+        "https://facts.net/wp-content/uploads/2020/07/monarch-butterfly-facts.jpg");
     myJooqMock.addReturn(OperationType.SELECT, announcement1);
 
     GetAnnouncementsResponse res = myAnnouncementsProcessorImpl.getAnnouncements(req);
 
     assertEquals(res.getTotalCount(), 1);
     assertEquals(res.getAnnouncements().get(0).getId(), 0);
-    assertEquals(res.getAnnouncements().get(0).getImageSrc(),
+    assertEquals(
+        res.getAnnouncements().get(0).getImageSrc(),
         "https://facts.net/wp-content/uploads/2020/07/monarch-butterfly-facts.jpg");
   }
 
@@ -194,7 +195,8 @@ public class AnnouncementsProcessorImplTest {
     announcement1.setTitle("the first announcement title");
     announcement1.setCreated(new Timestamp(START_TIMESTAMP_TEST));
     announcement1.setDescription("the first announcement description");
-    announcement1.setImageSrc("https://facts.net/wp-content/uploads/2020/07/monarch-butterfly-facts.jpg");
+    announcement1.setImageSrc(
+        "https://facts.net/wp-content/uploads/2020/07/monarch-butterfly-facts.jpg");
 
     AnnouncementsRecord announcement2 = myJooqMock.getContext().newRecord(Tables.ANNOUNCEMENTS);
     announcement2.setId(1);
@@ -212,7 +214,8 @@ public class AnnouncementsProcessorImplTest {
     assertEquals(res.getTotalCount(), 2);
     assertEquals(res.getAnnouncements().get(0).getId(), 0);
     assertEquals(res.getAnnouncements().get(1).getId(), 1);
-    assertEquals(res.getAnnouncements().get(0).getImageSrc(),
+    assertEquals(
+        res.getAnnouncements().get(0).getImageSrc(),
         "https://facts.net/wp-content/uploads/2020/07/monarch-butterfly-facts.jpg");
     assertNull(res.getAnnouncements().get(1).getImageSrc());
   }
@@ -264,8 +267,9 @@ public class AnnouncementsProcessorImplTest {
   @Test
   public void testTryPostAnnouncementWithImageSrcWithoutAdminPrivileges() {
     // make the request object
-    PostAnnouncementRequest req = new PostAnnouncementRequest("sample title", "sample description",
-        Base64TestStrings.TEST_STRING_1);
+    PostAnnouncementRequest req =
+        new PostAnnouncementRequest(
+            "sample title", "sample description", Base64TestStrings.TEST_STRING_1);
 
     // mock the user
     JWTData myUserData = new JWTData(0, PrivilegeLevel.STANDARD);
@@ -283,8 +287,9 @@ public class AnnouncementsProcessorImplTest {
   public void testPostSingleAnnouncementsWithImageSrc() {
 
     // make the request object
-    PostAnnouncementRequest req = new PostAnnouncementRequest("sample title", "sample description",
-        Base64TestStrings.TEST_STRING_1);
+    PostAnnouncementRequest req =
+        new PostAnnouncementRequest(
+            "sample title", "sample description", Base64TestStrings.TEST_STRING_1);
 
     // mock the announcement inside the DB
     AnnouncementsRecord announcement = myJooqMock.getContext().newRecord(Tables.ANNOUNCEMENTS);
@@ -376,12 +381,13 @@ public class AnnouncementsProcessorImplTest {
     assertEquals(res.getAnnouncement().getDescription(), req.getDescription());
   }
 
-  // posting an event specific announcement (with an image) succeeds with event with no announcements yet
+  // posting an event specific announcement (with an image) succeeds with event with no
+  // announcements yet
   @Test
   public void testPostEventSpecificAnnouncementWithImageSrc() {
     // make the request object
-    PostAnnouncementRequest req = new PostAnnouncementRequest("c4c", "code for community",
-        Base64TestStrings.TEST_STRING_1);
+    PostAnnouncementRequest req =
+        new PostAnnouncementRequest("c4c", "code for community", Base64TestStrings.TEST_STRING_1);
 
     // mock the user
     JWTData myUserData = new JWTData(0, PrivilegeLevel.ADMIN);
@@ -409,7 +415,8 @@ public class AnnouncementsProcessorImplTest {
     assertEquals(res.getAnnouncement().getDescription(), announcement.getDescription());
     assertEquals(res.getAnnouncement().getTitle(), announcement.getTitle());
     assertEquals(res.getAnnouncement().getId(), announcement.getId());
-    // url will have random UUID so the best we can do is check the prefix containing the s3 bucket url + directory name
+    // url will have random UUID so the best we can do is check the prefix containing the s3 bucket
+    // url + directory name
     assertTrue(res.getAnnouncement().getImageSrc().startsWith(BUCKET_PUBLIC_URL + "/" + DIR_NAME));
   }
 

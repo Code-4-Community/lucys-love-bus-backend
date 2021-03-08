@@ -17,12 +17,11 @@ import com.codeforcommunity.enums.PrivilegeLevel;
 import com.codeforcommunity.exceptions.AdminOnlyRouteException;
 import com.codeforcommunity.exceptions.MalformedParameterException;
 import com.codeforcommunity.requester.Emailer;
+import com.codeforcommunity.requester.S3Requester;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
-
-import com.codeforcommunity.requester.S3Requester;
 import org.jooq.DSLContext;
 import org.jooq.Record3;
 import org.jooq.generated.tables.pojos.Announcements;
@@ -162,7 +161,7 @@ public class AnnouncementsProcessorImpl implements IAnnouncementsProcessor {
     if (request.getImageSrc().isPresent()) {
       String filename = "announcement-" + UUID.randomUUID();
       String publicImageUrl =
-              S3Requester.validateUploadImageToS3LucyEvents(filename, request.getImageSrc().get());
+          S3Requester.validateUploadImageToS3LucyEvents(filename, request.getImageSrc().get());
 
       newRecord.setImageSrc(publicImageUrl);
     }
