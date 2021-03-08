@@ -2,10 +2,16 @@ package com.codeforcommunity.processor;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.any;
 
+import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.amazonaws.services.s3.model.PutObjectResult;
+import com.codeforcommunity.Base64TestStrings;
 import com.codeforcommunity.JooqMock;
 import com.codeforcommunity.auth.JWTData;
 import com.codeforcommunity.dto.announcements.GetAnnouncementsRequest;
@@ -24,19 +30,11 @@ import java.util.List;
 import org.jooq.generated.Tables;
 import org.jooq.generated.tables.records.AnnouncementsRecord;
 import org.jooq.generated.tables.records.EventsRecord;
-import org.junit.Before;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
 
 // Contains tests for AnnouncementsProcessorImpl.java in main
-@RunWith(MockitoJUnitRunner.class)
 public class AnnouncementsProcessorImplTest {
-
-  @Mock
-  private S3Requester mockS3Requester;
 
   private JooqMock myJooqMock;
   private AnnouncementsProcessorImpl myAnnouncementsProcessorImpl;
@@ -49,14 +47,33 @@ public class AnnouncementsProcessorImplTest {
   // 04/04/2020 @ 11:33am (UTC)
   private final int START_TIMESTAMP_TEST2 = 1586000000;
 
+  // sample public bucket URL to be used in tests
+  private final String BUCKET_PUBLIC_URL = "https://test-bucket.s3.us-east-2.amazonaws.com";
+  // sample public bucket name to be used in tests
+  private final String BUCKET_PUBLIC_NAME = "test-bucket";
+  // sample directory name to be used in tests
+  private final String DIR_NAME = "test-dir";
+
   // set up all the mocks
   @BeforeEach
-  @Before
   public void setup() {
     this.myJooqMock = new JooqMock();
     this.myAnnouncementsProcessorImpl =
         new AnnouncementsProcessorImpl(
-            myJooqMock.getContext(), new Emailer(myJooqMock.getContext()), mockS3Requester);
+            myJooqMock.getContext(), new Emailer(myJooqMock.getContext()));
+
+    // mock Amazon S3
+    AmazonS3Client mockS3Client = mock(AmazonS3Client.class);
+    PutObjectResult mockPutObjectResult = mock(PutObjectResult.class);
+    S3Requester.Externs mockExterns = mock(S3Requester.Externs.class);
+
+    when(mockS3Client.putObject(any(PutObjectRequest.class))).thenReturn(mockPutObjectResult);
+    when(mockExterns.getS3Client()).thenReturn(mockS3Client);
+    when(mockExterns.getBucketPublic()).thenReturn(BUCKET_PUBLIC_NAME);
+    when(mockExterns.getBucketPublicUrl()).thenReturn(BUCKET_PUBLIC_URL);
+    when(mockExterns.getDirPublic()).thenReturn(DIR_NAME);
+
+    S3Requester.setExterns(mockExterns);
   }
 
   // test getting announcements with range covering no events
@@ -245,7 +262,7 @@ public class AnnouncementsProcessorImplTest {
   public void testTryPostAnnouncementWithImageSrcWithoutAdminPrivileges() {
     // make the request object
     PostAnnouncementRequest req = new PostAnnouncementRequest("sample title", "sample description",
-        "https://facts.net/wp-content/uploads/2020/07/monarch-butterfly-facts.jpg");
+        Base64TestStrings.TEST_STRING_1);
 
     // mock the user
     JWTData myUserData = new JWTData(0, PrivilegeLevel.GP);
@@ -259,14 +276,12 @@ public class AnnouncementsProcessorImplTest {
   }
 
   // test posting an announcement with an image
-  @org.junit.Test
+  @Test
   public void testPostSingleAnnouncementsWithImageSrc() {
-    // mock the S3 requester to just return the same string it was given
-    when(mockS3Requester.validateUploadImageToS3LucyEvents(any(), any())).thenReturn("https://wwww.sampleimage.com");
 
     // make the request object
     PostAnnouncementRequest req = new PostAnnouncementRequest("sample title", "sample description",
-        "https://wwww.sampleimage.com");
+        Base64TestStrings.TEST_STRING_1);
 
     // mock the announcement inside the DB
     AnnouncementsRecord announcement = myJooqMock.getContext().newRecord(Tables.ANNOUNCEMENTS);
@@ -274,7 +289,7 @@ public class AnnouncementsProcessorImplTest {
     announcement.setTitle("sample title");
     announcement.setCreated(new Timestamp(START_TIMESTAMP_TEST));
     announcement.setDescription("sample description");
-    announcement.setImageSrc("https://wwww.sampleimage.com");
+    announcement.setImageSrc(BUCKET_PUBLIC_URL + "/" + DIR_NAME + "/sample_thumbnail.gif");
     myJooqMock.addReturn("SELECT", announcement);
     myJooqMock.addReturn("INSERT", announcement);
 
@@ -285,7 +300,7 @@ public class AnnouncementsProcessorImplTest {
 
     assertEquals(res.getAnnouncement().getDescription(), announcement.getDescription());
     assertEquals(res.getAnnouncement().getTitle(), announcement.getTitle());
-    assertEquals(res.getAnnouncement().getId(), 0);
+    assertEquals(res.getAnnouncement().getId(), announcement.getId());
     assertEquals(res.getAnnouncement().getCreated(), new Timestamp(START_TIMESTAMP_TEST));
     assertEquals(res.getAnnouncement().getImageSrc(), announcement.getImageSrc());
   }
@@ -359,14 +374,11 @@ public class AnnouncementsProcessorImplTest {
   }
 
   // posting an event specific announcement (with an image) succeeds with event with no announcements yet
-  @org.junit.Test
+  @Test
   public void testPostEventSpecificAnnouncementWithImageSrc() {
-    // mock the S3 requester to just return the same string it was given
-    when(mockS3Requester.validateUploadImageToS3LucyEvents(any(), any())).thenReturn("https://wwww.sampleimage.com");
-
     // make the request object
     PostAnnouncementRequest req = new PostAnnouncementRequest("c4c", "code for community",
-        "https://wwww.sampleimage.com");
+        Base64TestStrings.TEST_STRING_1);
 
     // mock the user
     JWTData myUserData = new JWTData(0, PrivilegeLevel.ADMIN);
@@ -378,11 +390,9 @@ public class AnnouncementsProcessorImplTest {
 
     // mock the announcement inside the DB
     AnnouncementsRecord announcement = myJooqMock.getContext().newRecord(Tables.ANNOUNCEMENTS);
-    announcement.setId(1);
     announcement.setEventId(1);
     announcement.setTitle("c4c");
     announcement.setDescription("code for community");
-    announcement.setImageSrc("https://wwww.sampleimage.com");
     myJooqMock.addReturn("SELECT", announcement);
     myJooqMock.addReturn("INSERT", announcement);
 
@@ -391,11 +401,13 @@ public class AnnouncementsProcessorImplTest {
 
     PostAnnouncementResponse res =
         myAnnouncementsProcessorImpl.postEventSpecificAnnouncement(req, myUserData, 1);
+
     assertEquals(res.getAnnouncement().getEventId(), announcement.getEventId());
-    assertEquals((Integer) res.getAnnouncement().getId(), announcement.getId());
-    assertEquals(res.getAnnouncement().getTitle(), req.getTitle());
-    assertEquals(res.getAnnouncement().getDescription(), req.getDescription());
-    assertEquals(res.getAnnouncement().getImageSrc(), announcement.getImageSrc());
+    assertEquals(res.getAnnouncement().getDescription(), announcement.getDescription());
+    assertEquals(res.getAnnouncement().getTitle(), announcement.getTitle());
+    assertEquals(res.getAnnouncement().getId(), announcement.getId());
+    // url will have random UUID so the best we can do is check the prefix containing the s3 bucket url + directory name
+    assertTrue(res.getAnnouncement().getImageSrc().startsWith(BUCKET_PUBLIC_URL + "/" + DIR_NAME));
   }
 
   // posting an event specific announcement succeeds with event with one announcement already

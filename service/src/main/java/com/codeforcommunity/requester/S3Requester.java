@@ -55,7 +55,7 @@ public class S3Requester {
    *
    * @param customExterns externs with a mocked s3Client
    */
-  public void setExterns(Externs customExterns) {
+  public static void setExterns(Externs customExterns) {
     externs = customExterns;
   }
 
@@ -66,7 +66,7 @@ public class S3Requester {
    * @param base64Image the potential encoding of the image.
    * @return null if the String is not an encoded base64 image, otherwise an {@link EncodedImage}.
    */
-  private EncodedImage validateBase64Image(String base64Image) {
+  private static EncodedImage validateBase64Image(String base64Image) {
     // Expected Base64 format: "data:image/{extension};base64,{imageData}"
 
     if (base64Image == null || base64Image.length() < 10) {
@@ -113,7 +113,7 @@ public class S3Requester {
    * @throws BadRequestImageException if the base64 image validation or image decoding failed.
    * @throws S3FailedUploadException if the upload to S3 failed.
    */
-  private String validateBase64ImageAndUploadToS3(
+  private static String validateBase64ImageAndUploadToS3(
       String fileName, String directoryName, String base64Encoding)
       throws BadRequestImageException, S3FailedUploadException {
     if (base64Encoding == null) {
@@ -181,7 +181,7 @@ public class S3Requester {
    * @throws BadRequestImageException if the base64 decoding failed.
    * @throws S3FailedUploadException if the upload to S3 failed.
    */
-  public String validateUploadImageToS3LucyEvents(String eventTitle, String base64Encoding)
+  public static String validateUploadImageToS3LucyEvents(String eventTitle, String base64Encoding)
       throws BadRequestImageException, S3FailedUploadException {
     String fileName = getImageFileNameWithoutExtension(eventTitle);
     return validateBase64ImageAndUploadToS3(fileName, externs.getDirPublic(), base64Encoding);
@@ -193,7 +193,7 @@ public class S3Requester {
    * @param eventTitle the title of the event.
    * @return the String for the image file name (without the file extension).
    */
-  public String getImageFileNameWithoutExtension(String eventTitle) {
+  public static String getImageFileNameWithoutExtension(String eventTitle) {
     String title =
         eventTitle.replaceAll(
             "[!@#$%^&*()=+./\\\\|<>`~\\[\\]{}?]", ""); // Remove special characters
