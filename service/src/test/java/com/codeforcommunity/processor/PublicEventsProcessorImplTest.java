@@ -11,6 +11,7 @@ import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.PutObjectResult;
 import com.codeforcommunity.JooqMock;
+import com.codeforcommunity.JooqMock.OperationType;
 import com.codeforcommunity.dataaccess.EventDatabaseOperations;
 import com.codeforcommunity.dto.userEvents.responses.GetPublicEventsResponse;
 import com.codeforcommunity.requester.S3Requester;
@@ -59,7 +60,7 @@ public class PublicEventsProcessorImplTest {
     List<Integer> eventIds = new ArrayList<>();
     eventIds.add(0);
 
-    myJooqMock.addEmptyReturn("SELECT");
+    myJooqMock.addEmptyReturn(OperationType.SELECT);
 
     GetPublicEventsResponse res = myPublicEventsProcessorImpl.getPublicEvents(eventIds);
     assertEquals(0, res.getEvents().size());
@@ -80,24 +81,24 @@ public class PublicEventsProcessorImplTest {
     event1.setEndTime(new Timestamp(System.currentTimeMillis() + 10000));
     event1.setStartTime(new Timestamp(System.currentTimeMillis() - 10000));
     event1.setPrice(2000);
-    myJooqMock.addReturn("SELECT", event1);
+    myJooqMock.addReturn(OperationType.SELECT, event1);
 
     // mock the ticket count
     Record2<Integer, Integer> ticketCount1 =
         myJooqMock.getContext().newRecord(EVENTS.ID, EVENT_REGISTRATIONS.TICKET_QUANTITY);
     ticketCount1.values(0, 5);
-    myJooqMock.addReturn("SELECT", ticketCount1);
+    myJooqMock.addReturn(OperationType.SELECT, ticketCount1);
 
     // prime the DB for getSpotsLeft()
     Record1<Integer> myEventRegistration =
         myJooqMock.getContext().newRecord(Tables.EVENTS.CAPACITY);
     myEventRegistration.values(4);
-    myJooqMock.addReturn("SELECT", myEventRegistration);
+    myJooqMock.addReturn(OperationType.SELECT, myEventRegistration);
 
     Record1<Integer> myTicketsRecord =
         myJooqMock.getContext().newRecord(Tables.EVENT_REGISTRATIONS.TICKET_QUANTITY);
     myTicketsRecord.values(1);
-    myJooqMock.addReturn("SELECT", myTicketsRecord);
+    myJooqMock.addReturn(OperationType.SELECT, myTicketsRecord);
 
     GetPublicEventsResponse res = myPublicEventsProcessorImpl.getPublicEvents(eventIds);
 
@@ -125,13 +126,13 @@ public class PublicEventsProcessorImplTest {
     List<EventsRecord> eventRecords = new ArrayList<>();
     eventRecords.add(event1);
     eventRecords.add(event2);
-    myJooqMock.addReturn("SELECT", eventRecords);
-    myJooqMock.addReturn("INSERT", eventRecords);
+    myJooqMock.addReturn(OperationType.SELECT, eventRecords);
+    myJooqMock.addReturn(OperationType.INSERT, eventRecords);
 
     Record2<Integer, Integer> registrationRecord =
         myJooqMock.getContext().newRecord(EVENTS.ID, EVENT_REGISTRATIONS.TICKET_QUANTITY);
     registrationRecord.values(2, 3);
-    myJooqMock.addReturn("SELECT", registrationRecord);
+    myJooqMock.addReturn(OperationType.SELECT, registrationRecord);
 
     Record1<Integer> myTicketsRecord =
         myJooqMock.getContext().newRecord(Tables.EVENT_REGISTRATIONS.TICKET_QUANTITY);
@@ -140,8 +141,8 @@ public class PublicEventsProcessorImplTest {
         myJooqMock.getContext().newRecord(Tables.EVENTS.CAPACITY);
     myEventRegistration.values(5);
 
-    myJooqMock.addReturn("SELECT", myTicketsRecord);
-    myJooqMock.addReturn("SELECT", myEventRegistration);
+    myJooqMock.addReturn(OperationType.SELECT, myTicketsRecord);
+    myJooqMock.addReturn(OperationType.SELECT, myEventRegistration);
 
     List<Integer> eventIds = new ArrayList<>();
     eventIds.add(0);

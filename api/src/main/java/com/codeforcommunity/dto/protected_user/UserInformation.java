@@ -1,6 +1,6 @@
 package com.codeforcommunity.dto.protected_user;
 
-import com.codeforcommunity.api.ApiDto;
+import com.codeforcommunity.dto.ApiDto;
 import com.codeforcommunity.dto.auth.AddressData;
 import com.codeforcommunity.dto.protected_user.components.Child;
 import com.codeforcommunity.dto.protected_user.components.Contact;

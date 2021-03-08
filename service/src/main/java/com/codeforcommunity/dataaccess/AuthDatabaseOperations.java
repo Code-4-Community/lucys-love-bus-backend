@@ -25,7 +25,6 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
-import java.util.Properties;
 import org.jooq.DSLContext;
 import org.jooq.generated.Tables;
 import org.jooq.generated.tables.pojos.Users;
@@ -45,13 +44,13 @@ public class AuthDatabaseOperations {
   public AuthDatabaseOperations(DSLContext db) {
     this.db = db;
 
-    Properties expirationProperties = PropertiesLoader.getExpirationProperties();
     this.secondsVerificationEmailValid =
-        Integer.parseInt(expirationProperties.getProperty("seconds_verification_email_valid"));
+        Integer.parseInt(
+            PropertiesLoader.loadProperty("expiration_seconds_verification_email_valid"));
     this.secondsForgotPasswordValid =
-        Integer.parseInt(expirationProperties.getProperty("seconds_forgot_password_valid"));
+        Integer.parseInt(PropertiesLoader.loadProperty("expiration_seconds_forgot_password_valid"));
     this.msRefreshExpiration =
-        Integer.parseInt(expirationProperties.getProperty("ms_refresh_expiration"));
+        Integer.parseInt(PropertiesLoader.loadProperty("expiration_ms_refresh"));
   }
 
   /**
@@ -92,6 +91,23 @@ public class AuthDatabaseOperations {
   }
 
   /**
+   * Gets the Users pojo associated with the given id if that user exists.
+   *
+   * @throws UserDoesNotExistException if given email does not match a user.
+   */
+  public Users getUserPojo(int userId) {
+    Optional<Users> maybeUser =
+        Optional.ofNullable(
+            db.selectFrom(USERS).where(USERS.ID.eq(userId)).fetchOneInto(Users.class));
+
+    if (maybeUser.isPresent()) {
+      return maybeUser.get();
+    } else {
+      throw new UserDoesNotExistException(userId);
+    }
+  }
+
+  /**
    * Returns true if the given username and password correspond to a user in the USER table and
    * false otherwise.
    */
@@ -111,7 +127,7 @@ public class AuthDatabaseOperations {
    * @throws EmailAlreadyInUseException if the given username and email are already used in the USER
    *     table.
    */
-  public void createNewUser(NewUserRequest request) {
+  public UsersRecord createNewUser(NewUserRequest request) {
     String email = request.getEmail();
     boolean emailUsed = db.fetchExists(db.selectFrom(USERS).where(USERS.EMAIL.eq(email)));
     if (emailUsed) {
@@ -119,10 +135,11 @@ public class AuthDatabaseOperations {
     }
 
     UsersRecord newUser = db.newRecord(USERS);
-    newUser.setEmail(email);
-    newUser.setPassHash(Passwords.createHash(request.getPassword()));
     addAddressDataToUserRecord(newUser, request.getLocation());
-    newUser.setPrivilegeLevel(PrivilegeLevel.GP);
+    newUser.setEmail(request.getEmail());
+    newUser.setPassHash(Passwords.createHash(request.getPassword()));
+    newUser.setPrivilegeLevel(PrivilegeLevel.STANDARD);
+    newUser.setPhotoRelease(request.getPhotoRelease());
     newUser.store();
 
     ContactsRecord mainContact = db.newRecord(CONTACTS);
@@ -138,17 +155,17 @@ public class AuthDatabaseOperations {
     mainContact.setReferrer(request.getReferrer());
     mainContact.store();
 
-    String verificationToken = createSecretKey(newUser.getId(), VerificationKeyType.VERIFY_EMAIL);
+    // String verificationToken = createSecretKey(newUser.getId(),
+    // VerificationKeyType.VERIFY_EMAIL);
     // TODO: Send verification email
+
+    return newUser;
   }
 
   /** Given a JWT signature, store it in the BLACKLISTED_REFRESHES table. */
   public void addToBlackList(String signature) {
     Timestamp expirationTimestamp = Timestamp.from(Instant.now().plusMillis(msRefreshExpiration));
-    db.insertInto(Tables.BLACKLISTED_REFRESHES)
-        .values(signature, expirationTimestamp)
-        .onDuplicateKeyIgnore()
-        .execute();
+    db.newRecord(Tables.BLACKLISTED_REFRESHES).values(signature, expirationTimestamp).store();
   }
 
   /** Given a JWT signature return true if it is stored in the BLACKLISTED_REFRESHES table. */
@@ -194,6 +211,8 @@ public class AuthDatabaseOperations {
    * invalidates all other keys of this type for this user.
    */
   public String createSecretKey(int userId, VerificationKeyType type) {
+
+    // Maybe add a different column besides used?
     db.update(VERIFICATION_KEYS)
         .set(VERIFICATION_KEYS.USED, true)
         .where(VERIFICATION_KEYS.USER_ID.eq(userId))

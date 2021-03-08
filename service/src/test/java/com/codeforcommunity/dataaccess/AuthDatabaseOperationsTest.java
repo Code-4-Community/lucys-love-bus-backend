@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import com.codeforcommunity.JooqMock;
+import com.codeforcommunity.JooqMock.OperationType;
 import com.codeforcommunity.auth.JWTData;
 import com.codeforcommunity.auth.Passwords;
 import com.codeforcommunity.dto.auth.AddressData;
@@ -21,7 +22,6 @@ import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
 import org.jooq.generated.Tables;
-import org.jooq.generated.tables.records.BlacklistedRefreshesRecord;
 import org.jooq.generated.tables.records.UsersRecord;
 import org.jooq.generated.tables.records.VerificationKeysRecord;
 import org.junit.jupiter.api.BeforeEach;
@@ -49,7 +49,7 @@ public class AuthDatabaseOperationsTest {
     String myEmail = "brandon@example.com";
 
     // no users in DB
-    myJooqMock.addEmptyReturn("SELECT");
+    myJooqMock.addEmptyReturn(OperationType.SELECT);
 
     try {
       myAuthDatabaseOperations.getUserJWTData(myEmail);
@@ -68,8 +68,8 @@ public class AuthDatabaseOperationsTest {
     UsersRecord myUser = myJooqMock.getContext().newRecord(Tables.USERS);
     myUser.setEmail(myEmail);
     myUser.setId(1);
-    myUser.setPrivilegeLevel(PrivilegeLevel.GP);
-    myJooqMock.addReturn("SELECT", myUser);
+    myUser.setPrivilegeLevel(PrivilegeLevel.STANDARD);
+    myJooqMock.addReturn(OperationType.SELECT, myUser);
 
     JWTData userData = myAuthDatabaseOperations.getUserJWTData(myEmail);
 
@@ -87,8 +87,8 @@ public class AuthDatabaseOperationsTest {
     myUser.setEmail(myEmail);
     myUser.setPassHash(Passwords.createHash("letmein"));
     myUser.setId(1);
-    myUser.setPrivilegeLevel(PrivilegeLevel.GP);
-    myJooqMock.addReturn("SELECT", myUser);
+    myUser.setPrivilegeLevel(PrivilegeLevel.STANDARD);
+    myJooqMock.addReturn(OperationType.SELECT, myUser);
 
     assertFalse(myAuthDatabaseOperations.isValidLogin(myEmail, "letmeout"));
   }
@@ -103,8 +103,8 @@ public class AuthDatabaseOperationsTest {
     myUser.setEmail(myEmail);
     myUser.setPassHash(Passwords.createHash("letmein"));
     myUser.setId(1);
-    myUser.setPrivilegeLevel(PrivilegeLevel.GP);
-    myJooqMock.addReturn("SELECT", myUser);
+    myUser.setPrivilegeLevel(PrivilegeLevel.STANDARD);
+    myJooqMock.addReturn(OperationType.SELECT, myUser);
 
     assertTrue(myAuthDatabaseOperations.isValidLogin(myEmail, "letmein"));
   }
@@ -114,17 +114,11 @@ public class AuthDatabaseOperationsTest {
   public void testCreateNewUser1() {
     String myEmail = "brandon@example.com";
 
-    // one user in DB
-    UsersRecord myUser = myJooqMock.getContext().newRecord(Tables.USERS);
-    myUser.setEmail(myEmail);
-    myUser.setPassHash(Passwords.createHash("letmein"));
-    myUser.setId(1);
-    myUser.setPrivilegeLevel(PrivilegeLevel.GP);
-    myJooqMock.addReturn("SELECT", myUser);
+    myJooqMock.addExistsReturn(true);
 
     NewUserRequest req =
         new NewUserRequest(
-            myEmail, "letmeout", "Brandon", "Liang", null, null, null, "Brandon's referrer");
+            myEmail, "letmeout", "Brandon", "Liang", null, null, null, "Brandon's referrer", false);
 
     try {
       myAuthDatabaseOperations.createNewUser(req);
@@ -138,7 +132,7 @@ public class AuthDatabaseOperationsTest {
   @Test
   public void testCreateNewUser2() {
     // no users in DB
-    myJooqMock.addEmptyReturn("INSERT");
+    myJooqMock.addEmptyReturn(OperationType.INSERT);
 
     String sampleEmail = "conner@example.com";
     String samplePassword = "letmeout";
@@ -158,14 +152,15 @@ public class AuthDatabaseOperationsTest {
             sampleLocation,
             samplePN,
             sampleAllergies,
-            sampleReferrer);
+            sampleReferrer,
+            false);
 
-    myJooqMock.addEmptyReturn("SELECT");
-    myJooqMock.addEmptyReturn("UPDATE");
+    myJooqMock.addEmptyReturn(OperationType.SELECT);
+    myJooqMock.addEmptyReturn(OperationType.UPDATE);
 
     myAuthDatabaseOperations.createNewUser(req);
 
-    List<Object[]> insertBindings = myJooqMock.getSqlBindings().get("INSERT");
+    List<Object[]> insertBindings = myJooqMock.getSqlOperationBindings().get(OperationType.INSERT);
 
     assertEquals(sampleFN, insertBindings.get(1)[5]);
     assertEquals(sampleLN, insertBindings.get(1)[6]);
@@ -176,11 +171,11 @@ public class AuthDatabaseOperationsTest {
   @Test
   public void testAddToBlackList() {
     // set up mock DB for inserting blacklisted refreshes
-    myJooqMock.addEmptyReturn("INSERT");
+    myJooqMock.addEmptyReturn(OperationType.INSERT);
 
     myAuthDatabaseOperations.addToBlackList("sample signature");
 
-    List<Object[]> bindings = myJooqMock.getSqlBindings().get("INSERT");
+    List<Object[]> bindings = myJooqMock.getSqlOperationBindings().get(OperationType.INSERT);
 
     assertEquals("sample signature", bindings.get(0)[0]);
   }
@@ -189,7 +184,7 @@ public class AuthDatabaseOperationsTest {
   @Test
   public void testIsOnBlackList1() {
     // set up mock DB for selecting blacklisted refreshes
-    myJooqMock.addEmptyReturn("SELECT");
+    myJooqMock.addEmptyReturn(OperationType.SELECT);
 
     assertFalse(myAuthDatabaseOperations.isOnBlackList("sample signature"));
   }
@@ -198,9 +193,7 @@ public class AuthDatabaseOperationsTest {
   @Test
   public void testIsOnBlackList2() {
     // set up mock DB for selecting blacklisted refreshes
-    BlacklistedRefreshesRecord myBRRecord =
-        new BlacklistedRefreshesRecord("sample signature", new Timestamp(TIMESTAMP_TEST));
-    myJooqMock.addReturn("SELECT", myBRRecord);
+    myJooqMock.addExistsReturn(true);
 
     assertTrue(myAuthDatabaseOperations.isOnBlackList("sample signature"));
   }
@@ -209,7 +202,7 @@ public class AuthDatabaseOperationsTest {
   @Test
   public void testValidateSecretKey1() {
     // set up mock DB for selecting no verification keys
-    myJooqMock.addEmptyReturn("SELECT");
+    myJooqMock.addEmptyReturn(OperationType.SELECT);
 
     try {
       myAuthDatabaseOperations.validateSecretKey(
@@ -228,7 +221,7 @@ public class AuthDatabaseOperationsTest {
         new VerificationKeysRecord(
             "0", 0, true, new Timestamp(TIMESTAMP_TEST), VerificationKeyType.FORGOT_PASSWORD);
 
-    myJooqMock.addReturn("SELECT", myVerificationKey);
+    myJooqMock.addReturn(OperationType.SELECT, myVerificationKey);
 
     try {
       myAuthDatabaseOperations.validateSecretKey(
@@ -247,7 +240,7 @@ public class AuthDatabaseOperationsTest {
         new VerificationKeysRecord(
             "0", 0, false, new Timestamp(TIMESTAMP_TEST), VerificationKeyType.FORGOT_PASSWORD);
 
-    myJooqMock.addReturn("SELECT", myVerificationKey);
+    myJooqMock.addReturn(OperationType.SELECT, myVerificationKey);
 
     try {
       myAuthDatabaseOperations.validateSecretKey(
@@ -269,11 +262,11 @@ public class AuthDatabaseOperationsTest {
             false,
             new Timestamp(new Date().getTime() + 100000),
             VerificationKeyType.FORGOT_PASSWORD);
-    myJooqMock.addReturn("SELECT", myVerificationKey);
+    myJooqMock.addReturn(OperationType.SELECT, myVerificationKey);
 
     UsersRecord myUserRecord = new UsersRecord();
     myUserRecord.setId(1);
-    myJooqMock.addReturn("SELECT", myUserRecord);
+    myJooqMock.addReturn(OperationType.SELECT, myUserRecord);
 
     UsersRecord usersRecordResponse =
         myAuthDatabaseOperations.validateSecretKey(
@@ -285,19 +278,19 @@ public class AuthDatabaseOperationsTest {
   // test that createSecretKey returns a token of correct length and the correct SQL bindings
   @Test
   public void testCreateSecretKey() {
-    myJooqMock.addEmptyReturn("UPDATE");
-    myJooqMock.addEmptyReturn("INSERT");
+    myJooqMock.addEmptyReturn(OperationType.UPDATE);
+    myJooqMock.addEmptyReturn(OperationType.INSERT);
 
     String token = myAuthDatabaseOperations.createSecretKey(0, VerificationKeyType.FORGOT_PASSWORD);
 
-    List<Object[]> updateBindings = myJooqMock.getSqlBindings().get("UPDATE");
-    List<Object[]> insertBindings = myJooqMock.getSqlBindings().get("INSERT");
+    List<Object[]> updateBindings = myJooqMock.getSqlOperationBindings().get(OperationType.UPDATE);
+    List<Object[]> insertBindings = myJooqMock.getSqlOperationBindings().get(OperationType.INSERT);
 
     // returns a token of correct length and the correct SQL bindings
     assertEquals(50, token.length());
     assertEquals(true, updateBindings.get(0)[0]);
     assertEquals(token, insertBindings.get(0)[0]);
     assertEquals(0, insertBindings.get(0)[1]);
-    assertEquals(VerificationKeyType.FORGOT_PASSWORD.getVal(), insertBindings.get(0)[2]);
+    assertEquals(VerificationKeyType.FORGOT_PASSWORD.ordinal(), insertBindings.get(0)[2]);
   }
 }
