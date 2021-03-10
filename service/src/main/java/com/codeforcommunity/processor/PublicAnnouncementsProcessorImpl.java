@@ -56,6 +56,7 @@ public class PublicAnnouncementsProcessorImpl implements IPublicAnnouncementsPro
         announcement.getTitle(),
         announcement.getDescription(),
         announcement.getCreated(),
-        announcement.getEventId());
+        announcement.getEventId(),
+        announcement.getImageSrc());
   }
 }
