@@ -117,6 +117,8 @@ public class ProtectedUserRouter implements IRouter {
     UserInformation userInformation = RestFunctions.getJsonBodyAsClass(ctx, UserInformation.class);
 
     processor.updatePersonalUserInformation(userInformation, userData);
+
+    end(ctx.response(), 201);
   }
 
   private void handleGetUserDataRoute(RoutingContext ctx) {
