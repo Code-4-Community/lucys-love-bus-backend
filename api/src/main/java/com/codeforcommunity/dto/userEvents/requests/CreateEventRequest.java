@@ -8,15 +8,15 @@ import java.util.List;
 /** A class to create an event request */
 public class CreateEventRequest extends ApiDto {
   private String title;
-  private Integer spotsAvailable;
+  private Integer capacity;
   private String thumbnail;
   private EventDetails details;
   private int price; // price in cents
 
   public CreateEventRequest(
-      String title, int spotsAvailable, String thumbnail, EventDetails details, int price) {
+      String title, int capacity, String thumbnail, EventDetails details, int price) {
     this.title = title;
-    this.spotsAvailable = spotsAvailable;
+    this.capacity = capacity;
     this.thumbnail = thumbnail;
     this.details = details;
     this.price = price;
@@ -47,8 +47,8 @@ public class CreateEventRequest extends ApiDto {
    *
    * @return the number of spots available
    */
-  public int getSpotsAvailable() {
-    return spotsAvailable;
+  public int getCapacity() {
+    return capacity;
   }
 
   /**
@@ -85,7 +85,7 @@ public class CreateEventRequest extends ApiDto {
     if (isEmpty(title) || title.length() > 36) {
       fields.add(fieldName + "title");
     }
-    if (spotsAvailable == null || spotsAvailable < 0) {
+    if (capacity == null || capacity < 0) {
       fields.add(fieldName + "spots_available");
     }
     if (details == null) {
