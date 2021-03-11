@@ -8,7 +8,7 @@ import java.util.List;
 /** A class to modify an event request */
 public class ModifyEventRequest extends ApiDto {
   private String title;
-  private Integer spotsAvailable;
+  private Integer capacity;
   private String thumbnail;
   private EventDetails details;
   private Integer price; // price in cents
@@ -16,9 +16,9 @@ public class ModifyEventRequest extends ApiDto {
   private ModifyEventRequest() {}
 
   public ModifyEventRequest(
-      String title, Integer spotsAvailable, String thumbnail, EventDetails details, Integer price) {
+      String title, Integer capacity, String thumbnail, EventDetails details, Integer price) {
     this.title = title;
-    this.spotsAvailable = spotsAvailable;
+    this.capacity = capacity;
     this.thumbnail = thumbnail;
     this.details = details;
     this.price = price;
@@ -38,8 +38,8 @@ public class ModifyEventRequest extends ApiDto {
    *
    * @return the number of available spots
    */
-  public Integer getSpotsAvailable() {
-    return spotsAvailable;
+  public Integer getCapacity() {
+    return capacity;
   }
 
   /**
@@ -76,7 +76,7 @@ public class ModifyEventRequest extends ApiDto {
     if (title != null && title.trim().isEmpty()) {
       fields.add(fieldName + "title");
     }
-    if (spotsAvailable != null && spotsAvailable < 1) {
+    if (capacity != null && capacity < 1) {
       fields.add(fieldName + "spots_available");
     }
     if (details != null) {

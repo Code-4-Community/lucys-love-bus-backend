@@ -171,14 +171,14 @@ public class EventsProcessorImpl implements IEventsProcessor {
     if (request.getTitle() != null) {
       record.setTitle(request.getTitle());
     }
-    if (request.getSpotsAvailable() != null) {
+    if (request.getCapacity() != null) {
       int currentRegistered = eventDatabaseOperations.getSumRegistrationRequests(eventId);
-      if (currentRegistered > request.getSpotsAvailable()) {
-        throw new InvalidEventCapacityException(request.getSpotsAvailable(), currentRegistered);
+      if (currentRegistered > request.getCapacity()) {
+        throw new InvalidEventCapacityException(request.getCapacity(), currentRegistered);
       }
-      record.setCapacity(request.getSpotsAvailable());
+      record.setCapacity(request.getCapacity());
     }
-    if (request.getThumbnail() != null) {
+    if (request.getThumbnail() != null && !request.getThumbnail().startsWith("http")) {
       String thumbnail =
           S3Requester.validateUploadImageToS3LucyEvents(request.getTitle(), request.getThumbnail());
       record.setThumbnail(thumbnail);
@@ -383,7 +383,7 @@ public class EventsProcessorImpl implements IEventsProcessor {
     newRecord.setTitle(request.getTitle());
     newRecord.setDescription(request.getDetails().getDescription());
     newRecord.setThumbnail(request.getThumbnail());
-    newRecord.setCapacity(request.getSpotsAvailable());
+    newRecord.setCapacity(request.getCapacity());
     newRecord.setLocation(request.getDetails().getLocation());
     newRecord.setStartTime(request.getDetails().getStart());
     newRecord.setEndTime(request.getDetails().getEnd());

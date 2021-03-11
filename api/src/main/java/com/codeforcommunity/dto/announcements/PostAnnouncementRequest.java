@@ -78,9 +78,6 @@ public class PostAnnouncementRequest extends ApiDto {
     if (isEmpty(description)) {
       fields.add(fieldName + "description");
     }
-    if (isEmpty(imageSrc)) {
-      fields.add(fieldName + "imageSrc");
-    }
     return fields;
   }
 }

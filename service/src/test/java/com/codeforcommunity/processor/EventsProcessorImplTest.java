@@ -136,7 +136,7 @@ public class EventsProcessorImplTest {
     // mock the event
     EventsRecord record = myJooqMock.getContext().newRecord(EVENTS);
     record.setId(0);
-    record.setCapacity(req.getSpotsAvailable());
+    record.setCapacity(req.getCapacity());
     myJooqMock.addReturn(OperationType.INSERT, record);
     myJooqMock.addReturn(OperationType.SELECT, record);
 
@@ -186,7 +186,7 @@ public class EventsProcessorImplTest {
     eventRecord.setId(1);
     eventRecord.setThumbnail(myEventRequest.getThumbnail());
     eventRecord.setTitle(myEventRequest.getTitle());
-    eventRecord.setCapacity(myEventRequest.getSpotsAvailable());
+    eventRecord.setCapacity(myEventRequest.getCapacity());
     eventRecord.setLocation(myEventDetails.getLocation());
     eventRecord.setDescription(myEventDetails.getDescription());
     eventRecord.setStartTime(myEventDetails.getStart());
@@ -748,7 +748,7 @@ public class EventsProcessorImplTest {
     assertEquals(8, updateBindings.length);
     assertEquals(req.getTitle(), updateBindings[0]);
     assertEquals(req.getDetails().getDescription(), updateBindings[1]);
-    assertEquals(req.getSpotsAvailable(), updateBindings[2]);
+    assertEquals(req.getCapacity(), updateBindings[2]);
     assertEquals(req.getDetails().getLocation(), updateBindings[3]);
     assertEquals(req.getDetails().getStart(), updateBindings[4]);
     assertEquals(req.getDetails().getEnd(), updateBindings[5]);
@@ -801,7 +801,7 @@ public class EventsProcessorImplTest {
 
     assertEquals(4, updateBindings.length);
     assertEquals(req.getTitle(), updateBindings[0]);
-    assertEquals(req.getSpotsAvailable(), updateBindings[1]);
+    assertEquals(req.getCapacity(), updateBindings[1]);
     assertEquals(myEvent.getPrice(), updateBindings[2]);
     assertEquals(myEvent.getId(), updateBindings[3]);
   }
