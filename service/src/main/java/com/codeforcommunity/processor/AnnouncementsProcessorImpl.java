@@ -17,8 +17,10 @@ import com.codeforcommunity.enums.PrivilegeLevel;
 import com.codeforcommunity.exceptions.AdminOnlyRouteException;
 import com.codeforcommunity.exceptions.MalformedParameterException;
 import com.codeforcommunity.requester.Emailer;
+import com.codeforcommunity.requester.S3Requester;
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import org.jooq.DSLContext;
 import org.jooq.Record3;
@@ -69,7 +71,8 @@ public class AnnouncementsProcessorImpl implements IAnnouncementsProcessor {
         announcement.getTitle(),
         announcement.getDescription(),
         announcement.getCreated(),
-        announcement.getEventId());
+        announcement.getEventId(),
+        announcement.getImageSrc());
   }
 
   @Override
@@ -155,6 +158,13 @@ public class AnnouncementsProcessorImpl implements IAnnouncementsProcessor {
     AnnouncementsRecord newRecord = db.newRecord(ANNOUNCEMENTS);
     newRecord.setTitle(request.getTitle());
     newRecord.setDescription(request.getDescription());
+    if (request.getImageSrc().isPresent()) {
+      String filename = "announcement-" + UUID.randomUUID();
+      String publicImageUrl =
+          S3Requester.validateUploadImageToS3LucyEvents(filename, request.getImageSrc().get());
+
+      newRecord.setImageSrc(publicImageUrl);
+    }
     return newRecord;
   }
 
