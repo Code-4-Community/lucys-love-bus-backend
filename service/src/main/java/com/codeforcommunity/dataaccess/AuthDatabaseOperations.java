@@ -21,13 +21,12 @@ import com.codeforcommunity.exceptions.UsedSecretKeyException;
 import com.codeforcommunity.exceptions.UserDoesNotExistException;
 import com.codeforcommunity.processor.AuthProcessorImpl;
 import com.codeforcommunity.propertiesLoader.PropertiesLoader;
+import com.codeforcommunity.requester.S3Requester;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-
-import com.codeforcommunity.requester.S3Requester;
 import org.jooq.DSLContext;
 import org.jooq.generated.Tables;
 import org.jooq.generated.tables.pojos.Users;
@@ -139,7 +138,7 @@ public class AuthDatabaseOperations {
 
     String filename = "profile-" + UUID.randomUUID();
     String publicImageUrl =
-            S3Requester.validateUploadImageToS3LucyEvents(filename, request.getProfilePicture());
+        S3Requester.validateUploadImageToS3LucyEvents(filename, request.getProfilePicture());
 
     UsersRecord newUser = db.newRecord(USERS);
     addAddressDataToUserRecord(newUser, request.getLocation());
@@ -164,6 +163,7 @@ public class AuthDatabaseOperations {
     mainContact.setMedications(request.getMedication());
     mainContact.setNotes(request.getNotes());
     mainContact.setPronouns(request.getPronouns());
+    mainContact.setDiagnosis(request.getDiagnosis());
     mainContact.setDateOfBirth(request.getDateOfBirth());
 
     mainContact.store();

@@ -21,6 +21,7 @@ public class NewUserRequest extends ApiDto {
   private String pronouns;
   private String profilePicture;
   private Date dateOfBirth;
+  private String diagnosis;
 
   public NewUserRequest(
       String email,
@@ -36,7 +37,8 @@ public class NewUserRequest extends ApiDto {
       String notes,
       String pronouns,
       String profilePicture,
-      Date dateOfBirth) {
+      Date dateOfBirth,
+      String diagnosis) {
     this.email = email;
     this.password = password;
     this.firstName = firstName;
@@ -237,5 +239,13 @@ public class NewUserRequest extends ApiDto {
 
   public void setDateOfBirth(Date dateOfBirth) {
     this.dateOfBirth = dateOfBirth;
+  }
+
+  public String getDiagnosis() {
+    return diagnosis;
+  }
+
+  public void setDiagnosis(String diagnosis) {
+    this.diagnosis = diagnosis;
   }
 }

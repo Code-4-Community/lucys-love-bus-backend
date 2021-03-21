@@ -91,7 +91,7 @@ public class AuthProcessorImplTest {
             null,
             null,
             null,
-            null);
+            null, null);
 
     SessionResponse res = myAuthProcessorImpl.signUp(req);
 
