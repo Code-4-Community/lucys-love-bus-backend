@@ -86,7 +86,12 @@ public class AuthProcessorImplTest {
             "555-555-5555",
             "Peanuts",
             "Brandon's referrer",
-            false);
+            false,
+            null,
+            null,
+            null,
+            null,
+            null);
 
     SessionResponse res = myAuthProcessorImpl.signUp(req);
 

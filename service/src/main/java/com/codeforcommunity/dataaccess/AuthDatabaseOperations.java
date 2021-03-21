@@ -25,6 +25,9 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
+
+import com.codeforcommunity.requester.S3Requester;
 import org.jooq.DSLContext;
 import org.jooq.generated.Tables;
 import org.jooq.generated.tables.pojos.Users;
@@ -134,6 +137,10 @@ public class AuthDatabaseOperations {
       throw new EmailAlreadyInUseException(email);
     }
 
+    String filename = "profile-" + UUID.randomUUID();
+    String publicImageUrl =
+            S3Requester.validateUploadImageToS3LucyEvents(filename, request.getProfilePicture());
+
     UsersRecord newUser = db.newRecord(USERS);
     addAddressDataToUserRecord(newUser, request.getLocation());
     newUser.setEmail(request.getEmail());
@@ -153,6 +160,12 @@ public class AuthDatabaseOperations {
     mainContact.setPhoneNumber(request.getPhoneNumber());
     mainContact.setAllergies(request.getAllergies());
     mainContact.setReferrer(request.getReferrer());
+    mainContact.setProfilePicture(publicImageUrl);
+    mainContact.setMedications(request.getMedication());
+    mainContact.setNotes(request.getNotes());
+    mainContact.setPronouns(request.getPronouns());
+    mainContact.setDateOfBirth(request.getDateOfBirth());
+
     mainContact.store();
 
     // String verificationToken = createSecretKey(newUser.getId(),

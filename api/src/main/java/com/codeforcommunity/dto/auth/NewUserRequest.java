@@ -1,6 +1,7 @@
 package com.codeforcommunity.dto.auth;
 
 import com.codeforcommunity.dto.ApiDto;
+import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,6 +16,11 @@ public class NewUserRequest extends ApiDto {
   private String allergies;
   private String referrer;
   private Boolean photoRelease;
+  private String medication;
+  private String notes;
+  private String pronouns;
+  private String profilePicture;
+  private Date dateOfBirth;
 
   public NewUserRequest(
       String email,
@@ -25,7 +31,12 @@ public class NewUserRequest extends ApiDto {
       String phoneNumber,
       String allergies,
       String referrer,
-      Boolean photoRelease) {
+      Boolean photoRelease,
+      String medication,
+      String notes,
+      String pronouns,
+      String profilePicture,
+      Date dateOfBirth) {
     this.email = email;
     this.password = password;
     this.firstName = firstName;
@@ -35,6 +46,11 @@ public class NewUserRequest extends ApiDto {
     this.allergies = allergies;
     this.referrer = referrer;
     this.photoRelease = photoRelease;
+    this.medication = medication;
+    this.notes = notes;
+    this.pronouns = pronouns;
+    this.profilePicture = profilePicture;
+    this.dateOfBirth = dateOfBirth;
   }
 
   private NewUserRequest() {}
@@ -181,5 +197,45 @@ public class NewUserRequest extends ApiDto {
 
   public void setPhotoRelease(Boolean photoRelease) {
     this.photoRelease = photoRelease;
+  }
+
+  public String getMedication() {
+    return medication;
+  }
+
+  public void setMedication(String medication) {
+    this.medication = medication;
+  }
+
+  public String getNotes() {
+    return notes;
+  }
+
+  public void setNotes(String notes) {
+    this.notes = notes;
+  }
+
+  public String getPronouns() {
+    return pronouns;
+  }
+
+  public void setPronouns(String pronouns) {
+    this.pronouns = pronouns;
+  }
+
+  public String getProfilePicture() {
+    return profilePicture;
+  }
+
+  public void setProfilePicture(String profilePicture) {
+    this.profilePicture = profilePicture;
+  }
+
+  public Date getDateOfBirth() {
+    return dateOfBirth;
+  }
+
+  public void setDateOfBirth(Date dateOfBirth) {
+    this.dateOfBirth = dateOfBirth;
   }
 }
