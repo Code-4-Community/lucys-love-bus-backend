@@ -297,20 +297,20 @@ public class Child extends ApiDto {
   }
 
   /**
-   * Returns this Contact's profilePictureBLOB.
+   * Returns this Contact's profilePicture.
    *
-   * @return this Contact's profilePictureBLOB.
+   * @return this Contact's profilePicture.
    */
   public String getProfilePicture() {
     return profilePicture;
   }
 
   /**
-   * Sets this Contact's profilePictureBLOB to the given one.
+   * Sets this Contact's profilePicture to the given one.
    *
-   * @param profilePictureBLOB the new profilePictureBLOB.
+   * @param profilePicture the new profilePicture.
    */
-  public void setProfilePicture(String profilePictureBLOB) {
-    this.profilePicture = profilePictureBLOB;
+  public void setProfilePicture(String profilePicture) {
+    this.profilePicture = profilePicture;
   }
 }

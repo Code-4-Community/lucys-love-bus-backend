@@ -131,7 +131,8 @@ public class AuthDatabaseOperationsTest {
             null,
             null,
             null,
-            null, null);
+            null,
+            null);
 
     try {
       myAuthDatabaseOperations.createNewUser(req);
@@ -171,7 +172,8 @@ public class AuthDatabaseOperationsTest {
             null,
             null,
             null,
-            null, null);
+            null,
+            null);
 
     myJooqMock.addEmptyReturn(OperationType.SELECT);
     myJooqMock.addEmptyReturn(OperationType.UPDATE);
