@@ -12,7 +12,9 @@ import com.codeforcommunity.dto.auth.AddressData;
 import com.codeforcommunity.dto.protected_user.components.Child;
 import com.codeforcommunity.dto.protected_user.components.Contact;
 import com.codeforcommunity.exceptions.UserDoesNotExistException;
+import com.codeforcommunity.requester.S3Requester;
 import java.util.List;
+import java.util.UUID;
 import org.jooq.DSLContext;
 import org.jooq.generated.tables.records.ChildrenRecord;
 import org.jooq.generated.tables.records.ContactsRecord;
@@ -55,6 +57,12 @@ public class UserInformationDatabaseOperations {
       throw new UserDoesNotExistException(userData.getUserId());
     }
 
+    String filename = "profile-" + UUID.randomUUID();
+    String publicImageUrl =
+        S3Requester.validateUploadImageToS3LucyEvents(filename, newContactData.getProfilePicture());
+
+    newContactData.setProfilePicture(publicImageUrl); // Actually setting Image URL
+
     newContactData.setShouldSendEmails(true);
     updateStoreContactRecord(mainContact, newContactData);
 
@@ -73,6 +81,12 @@ public class UserInformationDatabaseOperations {
   public void addAdditionalContacts(List<Contact> additionalContacts, JWTData userData) {
     for (Contact contact : additionalContacts) {
       ContactsRecord contactsRecord = db.newRecord(CONTACTS);
+
+      String filename = "profile-" + UUID.randomUUID();
+      String publicImageUrl =
+          S3Requester.validateUploadImageToS3LucyEvents(filename, contact.getProfilePicture());
+      contact.setProfilePicture(publicImageUrl); // Actually setting Image URL
+
       contactsRecord.setUserId(userData.getUserId());
       updateStoreContactRecord(contactsRecord, contact);
     }
@@ -85,6 +99,12 @@ public class UserInformationDatabaseOperations {
   public void addChildren(List<Child> children, JWTData userData) {
     for (Child child : children) {
       ChildrenRecord childrenRecord = db.newRecord(CHILDREN);
+
+      String filename = "profile-" + UUID.randomUUID();
+      String publicImageUrl =
+          S3Requester.validateUploadImageToS3LucyEvents(filename, child.getProfilePicture());
+      child.setProfilePicture(publicImageUrl); // Actually setting Image URL
+
       childrenRecord.setUserId(userData.getUserId());
       updateStoreChildRecord(childrenRecord, child);
     }
@@ -113,6 +133,8 @@ public class UserInformationDatabaseOperations {
     contactsRecord.setNotes(contactDto.getNotes());
     contactsRecord.setShouldSendEmails(contactDto.getShouldSendEmails());
     contactsRecord.setPhoneNumber(contactDto.getPhoneNumber());
+    contactsRecord.setProfilePicture(contactDto.getProfilePicture());
+    contactsRecord.setReferrer(contactDto.getReferrer());
 
     contactsRecord.store();
   }
@@ -129,6 +151,7 @@ public class UserInformationDatabaseOperations {
     childrenRecord.setDiagnosis(childDto.getDiagnosis());
     childrenRecord.setMedications(childDto.getMedications());
     childrenRecord.setNotes(childDto.getNotes());
+    childrenRecord.setProfilePicture(childDto.getProfilePicture());
 
     childrenRecord.store();
   }

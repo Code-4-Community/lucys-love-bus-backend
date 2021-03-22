@@ -52,7 +52,8 @@ public class ProtectedUserProcessorImplTest {
           "none",
           "he/him/his",
           true,
-          "Brandon's referrer");
+          "Brandon's referrer",
+          null);
 
   private final Contact CONTACT_EXAMPLE_2 =
       new Contact(
@@ -69,7 +70,8 @@ public class ProtectedUserProcessorImplTest {
           "helped me a lot with writing these tests :)",
           "he/him/his",
           false,
-          "Conner's referrer");
+          "Conner's referrer",
+          null);
 
   private final Contact CONTACT_EXAMPLE_3 =
       new Contact(
@@ -85,7 +87,8 @@ public class ProtectedUserProcessorImplTest {
           "analytical engine",
           "she/her/hers",
           false,
-          "Ada's referrer");
+          "Ada's referrer",
+          null);
 
   private final Child CHILD_EXAMPLE_1 =
       new Child(
@@ -100,7 +103,8 @@ public class ProtectedUserProcessorImplTest {
           "none",
           "brain damage",
           "IV fluid",
-          "do not take his helmet off");
+          "do not take his helmet off",
+          null);
 
   private final Child CHILD_EXAMPLE_2 =
       new Child(
@@ -114,6 +118,7 @@ public class ProtectedUserProcessorImplTest {
           null,
           "type-2 diabetes",
           "Metaglip",
+          null,
           null);
 
   // set up all the mocks

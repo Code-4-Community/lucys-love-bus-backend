@@ -25,6 +25,7 @@ public class Child extends ApiDto {
   private String diagnosis;
   private String medications;
   private String notes;
+  private String profilePicture;
 
   /** Creates a child with no information (all fields set to null). */
   public Child() {}
@@ -43,6 +44,7 @@ public class Child extends ApiDto {
    * @param diagnosis this child's diagnosis
    * @param medications medications this child is on
    * @param notes notes about this child
+   * @param profilePicture base64 encoded string representing the this contact's profile picture
    */
   public Child(
       Integer id,
@@ -55,7 +57,8 @@ public class Child extends ApiDto {
       String allergies,
       String diagnosis,
       String medications,
-      String notes) {
+      String notes,
+      String profilePicture) {
     this.id = id;
     this.firstName = firstName;
     this.lastName = lastName;
@@ -67,6 +70,7 @@ public class Child extends ApiDto {
     this.diagnosis = diagnosis;
     this.medications = medications;
     this.notes = notes;
+    this.profilePicture = profilePicture;
   }
 
   @Override
@@ -290,5 +294,23 @@ public class Child extends ApiDto {
    */
   public void setNotes(String notes) {
     this.notes = notes;
+  }
+
+  /**
+   * Returns this Contact's profilePicture.
+   *
+   * @return this Contact's profilePicture.
+   */
+  public String getProfilePicture() {
+    return profilePicture;
+  }
+
+  /**
+   * Sets this Contact's profilePicture to the given one.
+   *
+   * @param profilePicture the new profilePicture.
+   */
+  public void setProfilePicture(String profilePicture) {
+    this.profilePicture = profilePicture;
   }
 }

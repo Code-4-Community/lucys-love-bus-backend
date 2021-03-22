@@ -27,6 +27,7 @@ public class Contact extends ApiDto {
   private String pronouns;
   private Boolean shouldSendEmails;
   private String referrer;
+  private String profilePicture;
 
   /** Creates a contact with no information (all fields null). */
   public Contact() {}
@@ -42,10 +43,11 @@ public class Contact extends ApiDto {
    * @param phoneNumber this contact's phone number
    * @param allergies this contact's allergies
    * @param diagnosis this contact's diagnosis
-   * @param medication this contact's medications
+   * @param medications this contact's medications
    * @param notes notes about this contact's
    * @param pronouns this contact's pronouns
    * @param shouldSendEmails boolean for if contact wants to be sent emails
+   * @param profilePicture base64 encoded string representing the this contact's profile picture
    */
   public Contact(
       Integer id,
@@ -56,11 +58,12 @@ public class Contact extends ApiDto {
       String phoneNumber,
       String allergies,
       String diagnosis,
-      String medication,
+      String medications,
       String notes,
       String pronouns,
       Boolean shouldSendEmails,
-      String referrer) {
+      String referrer,
+      String profilePicture) {
     this.id = id;
     this.firstName = firstName;
     this.lastName = lastName;
@@ -69,11 +72,12 @@ public class Contact extends ApiDto {
     this.phoneNumber = phoneNumber;
     this.allergies = allergies;
     this.diagnosis = diagnosis;
-    this.medications = medication;
+    this.medications = medications;
     this.notes = notes;
     this.pronouns = pronouns;
     this.shouldSendEmails = shouldSendEmails;
     this.referrer = referrer;
+    this.profilePicture = profilePicture;
   }
 
   /**
@@ -252,7 +256,7 @@ public class Contact extends ApiDto {
    * @return this contact's medications
    */
   public String getMedications() {
-    return medications;
+    return this.medications;
   }
 
   /**
@@ -334,5 +338,23 @@ public class Contact extends ApiDto {
    */
   public void setReferrer(String referrer) {
     this.referrer = referrer;
+  }
+
+  /**
+   * Returns this Contact's profilePicture.
+   *
+   * @return this Contact's profilePicture.
+   */
+  public String getProfilePicture() {
+    return this.profilePicture;
+  }
+
+  /**
+   * Sets this Contact's profilePicture to the given one.
+   *
+   * @param profilePicture the new profilePicture.
+   */
+  public void setProfilePicture(String profilePicture) {
+    this.profilePicture = profilePicture;
   }
 }
