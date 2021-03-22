@@ -1,6 +1,5 @@
 package com.codeforcommunity.dto.announcements;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import java.sql.Timestamp;
 
 /**
@@ -15,7 +14,6 @@ public class Announcement {
   private Integer eventId;
   private String imageSrc;
 
-  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss Z")
   private Timestamp created;
 
   private Announcement() {}
