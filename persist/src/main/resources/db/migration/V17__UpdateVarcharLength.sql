@@ -1,3 +1,9 @@
+UPDATE announcements
+    SET title = SUBSTRING(title from 1 for 255);
+
+UPDATE announcements
+    SET description = SUBSTRING(title from 1 for 255);
+
 ALTER TABLE announcements
     ALTER COLUMN title
     TYPE VARCHAR(255);
