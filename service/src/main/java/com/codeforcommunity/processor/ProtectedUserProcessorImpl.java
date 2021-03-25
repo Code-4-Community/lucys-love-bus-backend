@@ -116,11 +116,10 @@ public class ProtectedUserProcessorImpl implements IProtectedUserProcessor {
     if (userData.getPrivilegeLevel() != PrivilegeLevel.ADMIN) {
       throw new AdminOnlyRouteException();
     }
-    Users user =
-            db.selectFrom(USERS).where(USERS.ID.eq(userId)).fetchOneInto(Users.class);
+    Users user = db.selectFrom(USERS).where(USERS.ID.eq(userId)).fetchOneInto(Users.class);
 
     if (user == null) {
-      throw new UserDoesNotExistException(userData.getUserId());
+      throw new UserDoesNotExistException(userId);
     }
 
     return authDatabaseOperations.getUserInformation(user);
