@@ -1,11 +1,8 @@
 package com.codeforcommunity.processor;
 
-import static org.jooq.generated.Tables.CONTACTS;
-import static org.jooq.generated.Tables.EVENTS;
-import static org.jooq.generated.Tables.EVENT_REGISTRATIONS;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.jooq.generated.Tables.*;
+import static org.jooq.generated.Tables.USERS;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -35,10 +32,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import org.jooq.Record1;
-import org.jooq.Record2;
-import org.jooq.Record4;
-import org.jooq.Result;
+import org.jooq.*;
 import org.jooq.generated.tables.records.EventsRecord;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -1001,15 +995,30 @@ public class EventsProcessorImplTest {
     when(jwtData.getPrivilegeLevel()).thenReturn(PrivilegeLevel.ADMIN);
     myJooqMock.addExistsReturn(true);
 
-    Record4<String, String, String, Integer> result =
-        myJooqMock
-            .getContext()
-            .newRecord(
-                CONTACTS.FIRST_NAME,
-                CONTACTS.LAST_NAME,
-                CONTACTS.EMAIL,
-                EVENT_REGISTRATIONS.TICKET_QUANTITY);
-    result.values("Conner", "Nilsen", "connernilsen@gmail.com", ticketCount);
+    Record9<String, String, String, Integer, Integer, PrivilegeLevel, String, String, Boolean>
+        result =
+            myJooqMock
+                .getContext()
+                .newRecord(
+                    CONTACTS.FIRST_NAME,
+                    CONTACTS.LAST_NAME,
+                    CONTACTS.EMAIL,
+                    EVENT_REGISTRATIONS.TICKET_QUANTITY,
+                    CONTACTS.USER_ID,
+                    USERS.PRIVILEGE_LEVEL,
+                    CONTACTS.PHONE_NUMBER,
+                    CONTACTS.PROFILE_PICTURE,
+                    USERS.PHOTO_RELEASE);
+    result.values(
+        "Conner",
+        "Nilsen",
+        "connernilsen@gmail.com",
+        ticketCount,
+        1,
+        PrivilegeLevel.PF,
+        "1234567890",
+        null,
+        true);
     myJooqMock.addReturn(OperationType.SELECT, result);
 
     EventRegistrations regs = myEventsProcessorImpl.getEventRegisteredUsers(1, jwtData);
@@ -1019,7 +1028,11 @@ public class EventsProcessorImplTest {
     assertEquals("Conner", reg0.getFirstName());
     assertEquals("Nilsen", reg0.getLastName());
     assertEquals("connernilsen@gmail.com", reg0.getEmail());
-    assertEquals(ticketCount, reg0.getTicketCount());
+    assertEquals(1, reg0.getUserId());
+    assertEquals(PrivilegeLevel.PF, reg0.getPrivilegeLevel());
+    assertEquals("1234567890", reg0.getPhoneNumber());
+    assertNull(reg0.getProfilePicture());
+    assertTrue(reg0.getPhotoRelease());
   }
 
   @Test
@@ -1028,25 +1041,48 @@ public class EventsProcessorImplTest {
     when(jwtData.getPrivilegeLevel()).thenReturn(PrivilegeLevel.ADMIN);
     myJooqMock.addExistsReturn(true);
 
-    Result<Record4<String, String, String, Integer>> result =
-        myJooqMock
-            .getContext()
-            .newResult(
-                CONTACTS.FIRST_NAME,
-                CONTACTS.LAST_NAME,
-                CONTACTS.EMAIL,
-                EVENT_REGISTRATIONS.TICKET_QUANTITY);
+    Result<
+            Record9<
+                String, String, String, Integer, Integer, PrivilegeLevel, String, String, Boolean>>
+        result =
+            myJooqMock
+                .getContext()
+                .newResult(
+                    CONTACTS.FIRST_NAME,
+                    CONTACTS.LAST_NAME,
+                    CONTACTS.EMAIL,
+                    EVENT_REGISTRATIONS.TICKET_QUANTITY,
+                    CONTACTS.USER_ID,
+                    USERS.PRIVILEGE_LEVEL,
+                    CONTACTS.PHONE_NUMBER,
+                    CONTACTS.PROFILE_PICTURE,
+                    USERS.PHOTO_RELEASE);
 
     for (int i = 1; i < 6; i++) {
-      Record4<String, String, String, Integer> tempRes =
-          myJooqMock
-              .getContext()
-              .newRecord(
-                  CONTACTS.FIRST_NAME,
-                  CONTACTS.LAST_NAME,
-                  CONTACTS.EMAIL,
-                  EVENT_REGISTRATIONS.TICKET_QUANTITY);
-      tempRes.values("Conner" + i, "Nilsen" + i, "connernilsen@gmail.com" + i, i);
+      Record9<String, String, String, Integer, Integer, PrivilegeLevel, String, String, Boolean>
+          tempRes =
+              myJooqMock
+                  .getContext()
+                  .newRecord(
+                      CONTACTS.FIRST_NAME,
+                      CONTACTS.LAST_NAME,
+                      CONTACTS.EMAIL,
+                      EVENT_REGISTRATIONS.TICKET_QUANTITY,
+                      CONTACTS.USER_ID,
+                      USERS.PRIVILEGE_LEVEL,
+                      CONTACTS.PHONE_NUMBER,
+                      CONTACTS.PROFILE_PICTURE,
+                      USERS.PHOTO_RELEASE);
+      tempRes.values(
+          "Conner" + i,
+          "Nilsen" + i,
+          "connernilsen@gmail.com" + i,
+          i,
+          i,
+          PrivilegeLevel.PF,
+          "1234567890",
+          null,
+          true);
       result.add(tempRes);
     }
     myJooqMock.addReturn(OperationType.SELECT, result);
@@ -1060,6 +1096,11 @@ public class EventsProcessorImplTest {
       assertEquals("Nilsen" + i, reg.getLastName());
       assertEquals("connernilsen@gmail.com" + i, reg.getEmail());
       assertEquals(i, reg.getTicketCount());
+      assertEquals(i, reg.getUserId());
+      assertEquals(PrivilegeLevel.PF, reg.getPrivilegeLevel());
+      assertEquals("1234567890", reg.getPhoneNumber());
+      assertNull(reg.getProfilePicture());
+      assertTrue(reg.getPhotoRelease());
     }
   }
 

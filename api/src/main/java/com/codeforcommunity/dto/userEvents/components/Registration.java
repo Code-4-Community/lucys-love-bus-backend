@@ -1,5 +1,7 @@
 package com.codeforcommunity.dto.userEvents.components;
 
+import com.codeforcommunity.enums.PrivilegeLevel;
+
 /** A class to represent an event registration */
 public class Registration {
   private final String firstName;
@@ -7,12 +9,21 @@ public class Registration {
   private final String email;
   private final int ticketCount;
   private final int userId;
-  private final int privilegeLevel;
+  private final PrivilegeLevel privilegeLevel;
   private final String phoneNumber;
   private final String profilePicture;
   private final boolean photoRelease;
 
-  public Registration(String firstName, String lastName, String email, int ticketCount, int userId, int privilegeLevel, String phoneNumber, String profilePicture, boolean photoRelease) {
+  public Registration(
+      String firstName,
+      String lastName,
+      String email,
+      int ticketCount,
+      int userId,
+      PrivilegeLevel privilegeLevel,
+      String phoneNumber,
+      String profilePicture,
+      boolean photoRelease) {
     this.firstName = firstName;
     this.lastName = lastName;
     this.email = email;
@@ -62,6 +73,7 @@ public class Registration {
 
   /**
    * Gets the ID of the registrant
+   *
    * @return the user ID
    */
   public int getUserId() {
@@ -70,14 +82,16 @@ public class Registration {
 
   /**
    * Gets the privilege level for the registrant
+   *
    * @return the privilege level
    */
-  public int getPrivilegeLevel() {
+  public PrivilegeLevel getPrivilegeLevel() {
     return privilegeLevel;
   }
 
   /**
    * Gets the phone number of the registrant
+   *
    * @return the phone number
    */
   public String getPhoneNumber() {
@@ -86,6 +100,7 @@ public class Registration {
 
   /**
    * Gets the profile picture of the registrant
+   *
    * @return the profile picture
    */
   public String getProfilePicture() {
@@ -94,6 +109,7 @@ public class Registration {
 
   /**
    * Gets whether the registrant has consented to photo and video release
+   *
    * @return whether the registrant has consented to photo and video release
    */
   public boolean getPhotoRelease() {
