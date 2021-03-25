@@ -25,6 +25,9 @@ public interface IProtectedUserProcessor {
   /** Returns all information associated with a user's personal account. */
   UserInformation getPersonalUserInformation(JWTData userData);
 
+  /** Admin route that returns all information associated with a given user's personal account. */
+  UserInformation getPersonalUserInformation(int userId, JWTData userData);
+
   /** Updates a user's information to match the given userInformation object */
   void updatePersonalUserInformation(UserInformation userInformation, JWTData userData);
 
