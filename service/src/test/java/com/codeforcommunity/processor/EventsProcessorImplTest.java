@@ -1,6 +1,8 @@
 package com.codeforcommunity.processor;
 
-import static org.jooq.generated.Tables.*;
+import static org.jooq.generated.Tables.CONTACTS;
+import static org.jooq.generated.Tables.EVENTS;
+import static org.jooq.generated.Tables.EVENT_REGISTRATIONS;
 import static org.jooq.generated.Tables.USERS;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -32,7 +34,10 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import org.jooq.*;
+import org.jooq.Record1;
+import org.jooq.Record2;
+import org.jooq.Record9;
+import org.jooq.Result;
 import org.jooq.generated.tables.records.EventsRecord;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
