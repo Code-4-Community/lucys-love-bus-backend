@@ -1,6 +1,7 @@
 package com.codeforcommunity.rest.subrouter;
 
 import static com.codeforcommunity.rest.ApiRouter.end;
+import static com.codeforcommunity.rest.RestFunctions.getRequestParameterAsInt;
 
 import com.codeforcommunity.api.IProtectedUserProcessor;
 import com.codeforcommunity.auth.JWTData;
@@ -34,6 +35,7 @@ public class ProtectedUserRouter implements IRouter {
     registerChangeEmail(router);
     registerSetUserContactInfo(router);
     registerGetUserContactInfo(router);
+    registerAdminGetUserContactInfo(router);
     registerUpdateUserContactInfo(router);
     registerGetUserData(router);
     registerChangeEmail(router);
@@ -69,6 +71,11 @@ public class ProtectedUserRouter implements IRouter {
   private void registerGetUserContactInfo(Router router) {
     Route setUserContactInfoRoute = router.get("/contact_info");
     setUserContactInfoRoute.handler(this::handleGetUserContactInfo);
+  }
+
+  private void registerAdminGetUserContactInfo(Router router) {
+    Route setUserContactInfoRoute = router.get("/contact_info/:user_id");
+    setUserContactInfoRoute.handler(this::handleAdminGetUserContactInfo);
   }
 
   private void registerUpdateUserContactInfo(Router router) {
@@ -108,6 +115,15 @@ public class ProtectedUserRouter implements IRouter {
     JWTData userData = ctx.get("jwt_data");
 
     UserInformation userInformation = processor.getPersonalUserInformation(userData);
+
+    end(ctx.response(), 200, JsonObject.mapFrom(userInformation).encode());
+  }
+
+  private void handleAdminGetUserContactInfo(RoutingContext ctx) {
+    int userId = getRequestParameterAsInt(ctx.request(), "user_id");
+    JWTData userData = ctx.get("jwt_data");
+
+    UserInformation userInformation = processor.getPersonalUserInformation(userId, userData);
 
     end(ctx.response(), 200, JsonObject.mapFrom(userInformation).encode());
   }
