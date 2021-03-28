@@ -10,7 +10,7 @@ ALTER TABLE announcements
 
 ALTER TABLE announcements
     ALTER COLUMN description
-    TYPE VARCHAR(255);
+    TYPE TEXT;
 
 ALTER TABLE children
     ALTER COLUMN first_name
@@ -20,13 +20,10 @@ ALTER TABLE children
     ALTER COLUMN last_name
     TYPE VARCHAR(255);
 
--- TODO: do we want more/less space for pronouns?
 ALTER TABLE children
     ALTER COLUMN pronouns
-    TYPE VARCHAR(75);
+    TYPE VARCHAR(255);
 
--- TODO: what is a school year? something like "Spring 2020"/"August-May"/...? Do we need
---  more space for this or can we do it in less?
 ALTER TABLE children
     ALTER COLUMN school_year
     TYPE VARCHAR(50);
@@ -49,7 +46,7 @@ ALTER TABLE contacts
 
 ALTER TABLE contacts
     ALTER COLUMN pronouns
-    TYPE VARCHAR(75);
+    TYPE VARCHAR(255);
 
 ALTER TABLE events
     ALTER COLUMN title
@@ -72,13 +69,25 @@ ALTER TABLE users
     ALTER COLUMN state
     TYPE VARCHAR(255);
 
--- TODO: do we want extended zip code here? shouldn't this just be an int?
 ALTER TABLE users
     ALTER COLUMN zipcode
-    TYPE VARCHAR(5);
+    TYPE VARCHAR(25);
 
--- TODO: not gonna touch thumbnail/image_src/profile_picture varchars, but are we
---  storing image bytes in db or url? if URL, is 500 long enough?
+ALTER TABLE announcements
+    ALTER COLUMN image_src
+    TYPE TEXT;
 
--- TODO: is contacts.phone_number not going to have a standardized length? does this enforceably
---  include [()-.] characters? if not, why not make it an int?
+ALTER TABLE children
+    ALTER COLUMN profile_picture
+    TYPE TEXT;
+
+ALTER TABLE contacts
+    ALTER COLUMN profile_picture
+    TYPE TEXT;
+
+ALTER TABLE events
+    ALTER COLUMN thumbnail
+    TYPE TEXT;
+
+-- TODO: is contacts.phone_number not going to have a standardized length? can this
+--  include [()-.] characters?
