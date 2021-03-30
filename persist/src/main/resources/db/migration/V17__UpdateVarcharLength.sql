@@ -34,7 +34,7 @@ ALTER TABLE children
 
 ALTER TABLE contacts
     ALTER COLUMN email
-    TYPE VARCHAR(255);
+    TYPE TEXT;
 
 ALTER TABLE contacts
     ALTER COLUMN first_name
@@ -58,7 +58,7 @@ ALTER TABLE events
 
 ALTER TABLE users
     ALTER COLUMN email
-    TYPE VARCHAR(255);
+    TYPE TEXT;
 
 ALTER TABLE users
     ALTER COLUMN city
