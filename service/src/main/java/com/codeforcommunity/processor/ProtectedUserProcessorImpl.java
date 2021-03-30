@@ -15,10 +15,8 @@ import com.codeforcommunity.dto.protected_user.components.Contact;
 import com.codeforcommunity.dto.user.ChangeEmailRequest;
 import com.codeforcommunity.dto.user.ChangePasswordRequest;
 import com.codeforcommunity.dto.user.UserDataResponse;
-import com.codeforcommunity.exceptions.EmailAlreadyInUseException;
-import com.codeforcommunity.exceptions.TableNotMatchingUserException;
-import com.codeforcommunity.exceptions.UserDoesNotExistException;
-import com.codeforcommunity.exceptions.WrongPasswordException;
+import com.codeforcommunity.enums.PrivilegeLevel;
+import com.codeforcommunity.exceptions.*;
 import com.codeforcommunity.requester.Emailer;
 import java.util.List;
 import java.util.Map;
@@ -108,6 +106,20 @@ public class ProtectedUserProcessorImpl implements IProtectedUserProcessor {
 
     if (user == null) {
       throw new UserDoesNotExistException(userData.getUserId());
+    }
+
+    return authDatabaseOperations.getUserInformation(user);
+  }
+
+  @Override
+  public UserInformation getPersonalUserInformation(int userId, JWTData userData) {
+    if (userData.getPrivilegeLevel() != PrivilegeLevel.ADMIN) {
+      throw new AdminOnlyRouteException();
+    }
+    Users user = db.selectFrom(USERS).where(USERS.ID.eq(userId)).fetchOneInto(Users.class);
+
+    if (user == null) {
+      throw new UserDoesNotExistException(userId);
     }
 
     return authDatabaseOperations.getUserInformation(user);

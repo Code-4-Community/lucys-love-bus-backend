@@ -229,10 +229,17 @@ public class EventsProcessorImpl implements IEventsProcessor {
                 CONTACTS.FIRST_NAME,
                 CONTACTS.LAST_NAME,
                 CONTACTS.EMAIL,
-                EVENT_REGISTRATIONS.TICKET_QUANTITY)
+                EVENT_REGISTRATIONS.TICKET_QUANTITY,
+                CONTACTS.USER_ID,
+                USERS.PRIVILEGE_LEVEL,
+                CONTACTS.PHONE_NUMBER,
+                CONTACTS.PROFILE_PICTURE,
+                USERS.PHOTO_RELEASE)
             .from(EVENT_REGISTRATIONS)
             .join(CONTACTS)
             .on(EVENT_REGISTRATIONS.USER_ID.eq(CONTACTS.USER_ID))
+            .join(USERS)
+            .on(EVENT_REGISTRATIONS.USER_ID.eq(USERS.ID))
             .where(EVENT_REGISTRATIONS.EVENT_ID.eq(eventId))
             .and(CONTACTS.IS_MAIN_CONTACT.isTrue())
             .fetchInto(Registration.class);
