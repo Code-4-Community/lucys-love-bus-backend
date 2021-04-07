@@ -85,6 +85,3 @@ ALTER TABLE contacts
 ALTER TABLE events
     ALTER COLUMN thumbnail
     TYPE TEXT;
-
--- TODO: is contacts.phone_number not going to have a standardized length? can this
---  include [()-.] characters?
