@@ -1,7 +1,6 @@
 package com.codeforcommunity.dto.protected_user.components;
 
 import com.codeforcommunity.dto.ApiDto;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,8 +13,6 @@ public class Contact extends ApiDto {
 
   private String firstName;
   private String lastName;
-
-  @JsonFormat(pattern = "yyyy-MM-dd")
   private Date dateOfBirth;
 
   private String email;
