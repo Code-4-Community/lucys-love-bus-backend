@@ -191,14 +191,15 @@ public class CheckoutProcessorImpl implements ICheckoutProcessor {
             .fetchOneInto(EventRegistrationsRecord.class);
     validateUpdateEventRegistration(event, registration, quantity, eventId);
     int currentQuantity = registration.getTicketQuantity();
-    if (quantity > currentQuantity) {
-      if (userData.getPrivilegeLevel() == PrivilegeLevel.STANDARD) {
-        List<LineItemRequest> requests =
-            Collections.singletonList(new LineItemRequest(eventId, quantity - currentQuantity));
-        return createEventRegistration(new PostCreateEventRegistrations(requests), userData);
-      } else {
-        registration.setPaid(false);
-      }
+    if (quantity > currentQuantity && event.getPrice() > 0) {
+      //TODO: Re-request Stripe checkout with extra tickets for events with price > 0
+//      if (userData.getPrivilegeLevel() == PrivilegeLevel.STANDARD) {
+//        List<LineItemRequest> requests =
+//            Collections.singletonList(new LineItemRequest(eventId, quantity - currentQuantity));
+//        return createEventRegistration(new PostCreateEventRegistrations(requests), userData);
+//      } else {
+//        registration.setPaid(false);
+//      }
     } else if (quantity == 0) {
       db.delete(EVENT_REGISTRATIONS)
           .where(EVENT_REGISTRATIONS.EVENT_ID.eq(eventId))
