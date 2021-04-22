@@ -11,7 +11,6 @@ import com.codeforcommunity.dto.checkout.CreateCheckoutSessionData;
 import com.codeforcommunity.dto.checkout.LineItem;
 import com.codeforcommunity.dto.checkout.LineItemRequest;
 import com.codeforcommunity.dto.checkout.PostCreateEventRegistrations;
-import com.codeforcommunity.enums.PrivilegeLevel;
 import com.codeforcommunity.exceptions.AlreadyRegisteredException;
 import com.codeforcommunity.exceptions.EventDoesNotExistException;
 import com.codeforcommunity.exceptions.InsufficientEventCapacityException;
@@ -29,7 +28,6 @@ import com.stripe.net.Webhook;
 import com.stripe.param.checkout.SessionCreateParams;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -147,17 +145,17 @@ public class CheckoutProcessorImpl implements ICheckoutProcessor {
     switch (user.getPrivilegeLevel()) {
       case STANDARD:
         // TODO: Implement Stripe checkout for paid line items
-//        if (paidLineItems.size() > 0) {
-//          Optional<String> id =
-//              Optional.of(createCheckoutSessionAndEventRegistration(paidLineItems, user));
-//          if (freeLineItems.size() > 0) {
-//            this.createEventRegistration(freeLineItems, user);
-//          }
-//          return id;
-//        } else if (freeLineItems.size() > 0) {
-//          this.createEventRegistration(freeLineItems, user);
-//          return Optional.empty();
-//        }
+        //        if (paidLineItems.size() > 0) {
+        //          Optional<String> id =
+        //              Optional.of(createCheckoutSessionAndEventRegistration(paidLineItems, user));
+        //          if (freeLineItems.size() > 0) {
+        //            this.createEventRegistration(freeLineItems, user);
+        //          }
+        //          return id;
+        //        } else if (freeLineItems.size() > 0) {
+        //          this.createEventRegistration(freeLineItems, user);
+        //          return Optional.empty();
+        //        }
       case PF:
       case ADMIN:
         this.createEventRegistration(allLineItems, user);
@@ -193,14 +191,16 @@ public class CheckoutProcessorImpl implements ICheckoutProcessor {
     validateUpdateEventRegistration(event, registration, quantity, eventId);
     int currentQuantity = registration.getTicketQuantity();
     if (quantity > currentQuantity && event.getPrice() > 0) {
-      //TODO: Re-request Stripe checkout with extra tickets for events with price > 0
-//      if (userData.getPrivilegeLevel() == PrivilegeLevel.STANDARD) {
-//        List<LineItemRequest> requests =
-//            Collections.singletonList(new LineItemRequest(eventId, quantity - currentQuantity));
-//        return createEventRegistration(new PostCreateEventRegistrations(requests), userData);
-//      } else {
-//        registration.setPaid(false);
-//      }
+      // TODO: Re-request Stripe checkout with extra tickets for events with price > 0
+      //      if (userData.getPrivilegeLevel() == PrivilegeLevel.STANDARD) {
+      //        List<LineItemRequest> requests =
+      //            Collections.singletonList(new LineItemRequest(eventId, quantity -
+      // currentQuantity));
+      //        return createEventRegistration(new PostCreateEventRegistrations(requests),
+      // userData);
+      //      } else {
+      //        registration.setPaid(false);
+      //      }
     } else if (quantity == 0) {
       db.delete(EVENT_REGISTRATIONS)
           .where(EVENT_REGISTRATIONS.EVENT_ID.eq(eventId))

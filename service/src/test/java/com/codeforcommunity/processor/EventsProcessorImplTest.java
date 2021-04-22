@@ -690,7 +690,6 @@ public class EventsProcessorImplTest {
     } catch (AdminOnlyRouteException ignored) {
     }
   }
-  
 
   // modifying an event with all fields filled in
   @Test
