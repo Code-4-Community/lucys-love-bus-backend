@@ -1,24 +1,21 @@
-package com.codeforcommunity.dto.userEvents.components;
+package com.codeforcommunity.dto.protected_user.components;
 
 import com.codeforcommunity.enums.PrivilegeLevel;
 
-/** A class to represent an event registration */
-public class Registration {
+public class UserSummary {
   private final String firstName;
   private final String lastName;
   private final String email;
-  private final int ticketCount;
   private final int userId;
   private final PrivilegeLevel privilegeLevel;
   private final String phoneNumber;
   private final String profilePicture;
   private final boolean photoRelease;
 
-  public Registration(
+  public UserSummary(
       String firstName,
       String lastName,
       String email,
-      int ticketCount,
       int userId,
       PrivilegeLevel privilegeLevel,
       String phoneNumber,
@@ -27,21 +24,11 @@ public class Registration {
     this.firstName = firstName;
     this.lastName = lastName;
     this.email = email;
-    this.ticketCount = ticketCount;
     this.userId = userId;
     this.privilegeLevel = privilegeLevel;
     this.phoneNumber = phoneNumber;
     this.profilePicture = profilePicture;
     this.photoRelease = photoRelease;
-  }
-
-  /**
-   * Gets the number of tickets requested in the registration
-   *
-   * @return the ticket count
-   */
-  public int getTicketCount() {
-    return ticketCount;
   }
 
   /**
@@ -54,7 +41,7 @@ public class Registration {
   }
 
   /**
-   * Gets the first name of the registrant
+   * Gets the first name of the user
    *
    * @return the first name
    */
@@ -63,7 +50,7 @@ public class Registration {
   }
 
   /**
-   * Gets the last name of the registrant
+   * Gets the last name of the user
    *
    * @return the last names
    */
@@ -72,7 +59,7 @@ public class Registration {
   }
 
   /**
-   * Gets the ID of the registrant
+   * Gets the ID of the user
    *
    * @return the user ID
    */
@@ -81,7 +68,7 @@ public class Registration {
   }
 
   /**
-   * Gets the privilege level for the registrant
+   * Gets the privilege level for the user
    *
    * @return the privilege level
    */
@@ -90,7 +77,7 @@ public class Registration {
   }
 
   /**
-   * Gets the phone number of the registrant
+   * Gets the phone number of the user
    *
    * @return the phone number
    */
@@ -99,7 +86,7 @@ public class Registration {
   }
 
   /**
-   * Gets the profile picture of the registrant
+   * Gets the profile picture of the user
    *
    * @return the profile picture
    */
@@ -108,9 +95,9 @@ public class Registration {
   }
 
   /**
-   * Gets whether the registrant has consented to photo and video release
+   * Gets whether the user has consented to photo and video release
    *
-   * @return whether the registrant has consented to photo and video release
+   * @return whether the user has consented to photo and video release
    */
   public boolean getPhotoRelease() {
     return photoRelease;

@@ -1,6 +1,7 @@
 package com.codeforcommunity.api;
 
 import com.codeforcommunity.auth.JWTData;
+import com.codeforcommunity.dto.protected_user.GetAllUserInfoResponse;
 import com.codeforcommunity.dto.protected_user.SetContactsAndChildrenRequest;
 import com.codeforcommunity.dto.protected_user.UserInformation;
 import com.codeforcommunity.dto.user.ChangeEmailRequest;
@@ -24,6 +25,12 @@ public interface IProtectedUserProcessor {
 
   /** Returns all information associated with a user's personal account. */
   UserInformation getPersonalUserInformation(JWTData userData);
+
+  /** Admin route that returns all information associated with a given user's personal account. */
+  UserInformation getPersonalUserInformation(int userId, JWTData userData);
+
+  /** Admin route that returns all information associated with a ALL users personal account. */
+  GetAllUserInfoResponse getAllUserInformation(JWTData userData);
 
   /** Updates a user's information to match the given userInformation object */
   void updatePersonalUserInformation(UserInformation userInformation, JWTData userData);

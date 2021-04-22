@@ -8,17 +8,17 @@ import com.codeforcommunity.auth.Passwords;
 import com.codeforcommunity.dataaccess.AuthDatabaseOperations;
 import com.codeforcommunity.dataaccess.UserInformationDatabaseOperations;
 import com.codeforcommunity.dto.auth.AddressData;
+import com.codeforcommunity.dto.protected_user.GetAllUserInfoResponse;
 import com.codeforcommunity.dto.protected_user.SetContactsAndChildrenRequest;
 import com.codeforcommunity.dto.protected_user.UserInformation;
 import com.codeforcommunity.dto.protected_user.components.Child;
 import com.codeforcommunity.dto.protected_user.components.Contact;
+import com.codeforcommunity.dto.protected_user.components.UserSummary;
 import com.codeforcommunity.dto.user.ChangeEmailRequest;
 import com.codeforcommunity.dto.user.ChangePasswordRequest;
 import com.codeforcommunity.dto.user.UserDataResponse;
-import com.codeforcommunity.exceptions.EmailAlreadyInUseException;
-import com.codeforcommunity.exceptions.TableNotMatchingUserException;
-import com.codeforcommunity.exceptions.UserDoesNotExistException;
-import com.codeforcommunity.exceptions.WrongPasswordException;
+import com.codeforcommunity.enums.PrivilegeLevel;
+import com.codeforcommunity.exceptions.*;
 import com.codeforcommunity.requester.Emailer;
 import java.util.List;
 import java.util.Map;
@@ -111,6 +111,42 @@ public class ProtectedUserProcessorImpl implements IProtectedUserProcessor {
     }
 
     return authDatabaseOperations.getUserInformation(user);
+  }
+
+  @Override
+  public UserInformation getPersonalUserInformation(int userId, JWTData userData) {
+    if (userData.getPrivilegeLevel() != PrivilegeLevel.ADMIN) {
+      throw new AdminOnlyRouteException();
+    }
+    Users user = db.selectFrom(USERS).where(USERS.ID.eq(userId)).fetchOneInto(Users.class);
+
+    if (user == null) {
+      throw new UserDoesNotExistException(userId);
+    }
+
+    return authDatabaseOperations.getUserInformation(user);
+  }
+
+  @Override
+  public GetAllUserInfoResponse getAllUserInformation(JWTData userData) {
+    if (userData.getPrivilegeLevel() != PrivilegeLevel.ADMIN) {
+      throw new AdminOnlyRouteException();
+    }
+    return new GetAllUserInfoResponse(
+        db.select(
+                CONTACTS.FIRST_NAME,
+                CONTACTS.LAST_NAME,
+                CONTACTS.EMAIL,
+                CONTACTS.USER_ID,
+                USERS.PRIVILEGE_LEVEL,
+                CONTACTS.PHONE_NUMBER,
+                CONTACTS.PROFILE_PICTURE,
+                USERS.PHOTO_RELEASE)
+            .from(USERS)
+            .join(CONTACTS)
+            .on(USERS.ID.eq(CONTACTS.USER_ID))
+            .where(CONTACTS.IS_MAIN_CONTACT.isTrue())
+            .fetchInto(UserSummary.class));
   }
 
   @Override
