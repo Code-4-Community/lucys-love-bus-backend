@@ -146,17 +146,18 @@ public class CheckoutProcessorImpl implements ICheckoutProcessor {
 
     switch (user.getPrivilegeLevel()) {
       case STANDARD:
-        if (paidLineItems.size() > 0) {
-          Optional<String> id =
-              Optional.of(createCheckoutSessionAndEventRegistration(paidLineItems, user));
-          if (freeLineItems.size() > 0) {
-            this.createEventRegistration(freeLineItems, user);
-          }
-          return id;
-        } else if (freeLineItems.size() > 0) {
-          this.createEventRegistration(freeLineItems, user);
-          return Optional.empty();
-        }
+        // TODO: Implement Stripe checkout for paid line items
+//        if (paidLineItems.size() > 0) {
+//          Optional<String> id =
+//              Optional.of(createCheckoutSessionAndEventRegistration(paidLineItems, user));
+//          if (freeLineItems.size() > 0) {
+//            this.createEventRegistration(freeLineItems, user);
+//          }
+//          return id;
+//        } else if (freeLineItems.size() > 0) {
+//          this.createEventRegistration(freeLineItems, user);
+//          return Optional.empty();
+//        }
       case PF:
       case ADMIN:
         this.createEventRegistration(allLineItems, user);
