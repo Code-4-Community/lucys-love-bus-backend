@@ -4,6 +4,7 @@ import com.codeforcommunity.dto.ApiDto;
 import com.codeforcommunity.dto.auth.AddressData;
 import com.codeforcommunity.dto.protected_user.components.Child;
 import com.codeforcommunity.dto.protected_user.components.Contact;
+import com.codeforcommunity.enums.PrivilegeLevel;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,6 +15,7 @@ public class UserInformation extends ApiDto {
   private List<Contact> additionalContacts;
   private List<Child> children;
   private AddressData location;
+  private PrivilegeLevel privilegeLevel;
 
   /**
    * Creates a new UserInformation object with the given fields.
@@ -22,16 +24,19 @@ public class UserInformation extends ApiDto {
    * @param additionalContacts the list of additional contacts
    * @param children the list of children
    * @param location the location of the user
+   *
    */
   public UserInformation(
       Contact mainContact,
       List<Contact> additionalContacts,
       List<Child> children,
-      AddressData location) {
+      AddressData location,
+      PrivilegeLevel privilegeLevel) {
     this.mainContact = mainContact;
     this.additionalContacts = additionalContacts;
     this.children = children;
     this.location = location;
+    this.privilegeLevel = privilegeLevel;
   }
 
   /** Creates a UserInformation with no information (all fields are null) */
@@ -107,6 +112,24 @@ public class UserInformation extends ApiDto {
    */
   public void setLocation(AddressData location) {
     this.location = location;
+  }
+
+  /**
+   * Returns the privilege level
+   *
+   * @return the privilege level
+   */
+  public PrivilegeLevel getPrivilegeLevel() {
+    return privilegeLevel;
+  }
+
+  /**
+   * Updates the privilege level
+   *
+   * @param privilegeLevel the new privilege level
+   */
+  public void setPrivilegeLevel(PrivilegeLevel privilegeLevel) {
+    this.privilegeLevel = privilegeLevel;
   }
 
   /**
