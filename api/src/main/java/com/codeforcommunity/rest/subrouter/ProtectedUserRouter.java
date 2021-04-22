@@ -5,6 +5,7 @@ import static com.codeforcommunity.rest.RestFunctions.getRequestParameterAsInt;
 
 import com.codeforcommunity.api.IProtectedUserProcessor;
 import com.codeforcommunity.auth.JWTData;
+import com.codeforcommunity.dto.protected_user.GetAllUserInfoResponse;
 import com.codeforcommunity.dto.protected_user.SetContactsAndChildrenRequest;
 import com.codeforcommunity.dto.protected_user.UserInformation;
 import com.codeforcommunity.dto.user.ChangeEmailRequest;
@@ -39,6 +40,7 @@ public class ProtectedUserRouter implements IRouter {
     registerUpdateUserContactInfo(router);
     registerGetUserData(router);
     registerChangeEmail(router);
+    registerGetAllUserInfo(router);
 
     return router;
   }
@@ -71,6 +73,11 @@ public class ProtectedUserRouter implements IRouter {
   private void registerGetUserContactInfo(Router router) {
     Route setUserContactInfoRoute = router.get("/contact_info");
     setUserContactInfoRoute.handler(this::handleGetUserContactInfo);
+  }
+
+  private void registerGetAllUserInfo(Router router) {
+    Route getAllUserContactInfoRoute = router.get("/user-directory");
+    getAllUserContactInfoRoute.handler(this::handleAdminGetAllUserContactInfo);
   }
 
   private void registerAdminGetUserContactInfo(Router router) {
@@ -124,6 +131,14 @@ public class ProtectedUserRouter implements IRouter {
     JWTData userData = ctx.get("jwt_data");
 
     UserInformation userInformation = processor.getPersonalUserInformation(userId, userData);
+
+    end(ctx.response(), 200, JsonObject.mapFrom(userInformation).encode());
+  }
+
+  private void handleAdminGetAllUserContactInfo(RoutingContext ctx) {
+    JWTData userData = ctx.get("jwt_data");
+
+    GetAllUserInfoResponse userInformation = processor.getAllUserInformation(userData);
 
     end(ctx.response(), 200, JsonObject.mapFrom(userInformation).encode());
   }
