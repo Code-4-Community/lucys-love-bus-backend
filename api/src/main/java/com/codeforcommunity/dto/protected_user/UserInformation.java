@@ -25,7 +25,6 @@ public class UserInformation extends ApiDto {
    * @param children the list of children
    * @param location the location of the user
    * @param privilegeLevel the privilege level of the user
-   *
    */
   public UserInformation(
       Contact mainContact,
