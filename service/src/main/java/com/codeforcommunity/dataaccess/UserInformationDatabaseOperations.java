@@ -128,8 +128,7 @@ public class UserInformationDatabaseOperations {
     } else {
       String filename = "profile-" + UUID.randomUUID();
       String publicImageUrl =
-          S3Requester.validateUploadImageToS3LucyEvents(
-              filename, contactDto.getProfilePicture());
+          S3Requester.validateUploadImageToS3LucyEvents(filename, contactDto.getProfilePicture());
       contactsRecord.setProfilePicture(publicImageUrl); // Actually setting Image URL
     }
 
@@ -151,14 +150,12 @@ public class UserInformationDatabaseOperations {
 
   /** Update and store a children record to reflect a child dto. */
   public void updateStoreChildRecord(ChildrenRecord childrenRecord, Child childDto) {
-    if (childDto.getProfilePicture() == null
-        || childDto.getProfilePicture().startsWith("http")) {
+    if (childDto.getProfilePicture() == null || childDto.getProfilePicture().startsWith("http")) {
       childrenRecord.setProfilePicture(childDto.getProfilePicture());
     } else {
       String filename = "profile-" + UUID.randomUUID();
       String publicImageUrl =
-          S3Requester.validateUploadImageToS3LucyEvents(
-              filename, childDto.getProfilePicture());
+          S3Requester.validateUploadImageToS3LucyEvents(filename, childDto.getProfilePicture());
       childrenRecord.setProfilePicture(publicImageUrl); // Actually setting Image URL
     }
 

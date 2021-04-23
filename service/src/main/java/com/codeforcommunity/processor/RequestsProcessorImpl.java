@@ -15,6 +15,7 @@ import com.codeforcommunity.enums.PrivilegeLevel;
 import com.codeforcommunity.enums.RequestStatus;
 import com.codeforcommunity.exceptions.AdminOnlyRouteException;
 import com.codeforcommunity.exceptions.OutstandingRequestException;
+import com.codeforcommunity.exceptions.RequestAlreadyDecidedException;
 import com.codeforcommunity.exceptions.RequestDoesNotExistException;
 import com.codeforcommunity.exceptions.WrongPrivilegeException;
 import com.codeforcommunity.requester.Emailer;
@@ -136,6 +137,10 @@ public class RequestsProcessorImpl implements IRequestsProcessor {
       throw new RequestDoesNotExistException(requestId);
     }
 
+    if (requestsRecord.getStatus() != RequestStatus.PENDING) {
+      throw new RequestAlreadyDecidedException();
+    }
+
     requestsRecord.setStatus(RequestStatus.APPROVED);
     requestsRecord.store(PF_REQUESTS.STATUS);
 
@@ -162,6 +167,10 @@ public class RequestsProcessorImpl implements IRequestsProcessor {
 
     if (requestsRecord == null) {
       throw new RequestDoesNotExistException(requestId);
+    }
+
+    if (requestsRecord.getStatus() != RequestStatus.PENDING) {
+      throw new RequestAlreadyDecidedException();
     }
 
     emailer.sendEmailToAllContacts(requestsRecord.getUserId(), emailer::sendRequestDenied);
