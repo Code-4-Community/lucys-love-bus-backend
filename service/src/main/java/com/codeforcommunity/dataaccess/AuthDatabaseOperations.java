@@ -90,8 +90,7 @@ public class AuthDatabaseOperations {
     AddressData locationData = extractAddressDataFromUser(user);
     PrivilegeLevel privilegeLevel = user.getPrivilegeLevel();
 
-    return new UserInformation(
-        mainContact, additionalContacts, children, locationData, privilegeLevel);
+    return new UserInformation(mainContact, additionalContacts, children, locationData, privilegeLevel);
   }
 
   /**
