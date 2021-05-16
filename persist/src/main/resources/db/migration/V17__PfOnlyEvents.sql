@@ -1,0 +1,2 @@
+ALTER TABLE events
+    ADD COLUMN for_pf_only BOOLEAN DEFAULT FALSE;
