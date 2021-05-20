@@ -12,16 +12,16 @@ public class ModifyEventRequest extends ApiDto {
   private String thumbnail;
   private EventDetails details;
   private Integer price; // price in cents
-
-  private ModifyEventRequest() {}
+  private boolean forPFOnly;
 
   public ModifyEventRequest(
-      String title, Integer capacity, String thumbnail, EventDetails details, Integer price) {
+      String title, Integer capacity, String thumbnail, EventDetails details, Integer price, boolean forPFOnly) {
     this.title = title;
     this.capacity = capacity;
     this.thumbnail = thumbnail;
     this.details = details;
     this.price = price;
+    this.forPFOnly = forPFOnly;
   }
 
   /**
@@ -67,6 +67,15 @@ public class ModifyEventRequest extends ApiDto {
    */
   public Integer getPrice() {
     return price;
+  }
+
+  /**
+   * Gets whether the event is intended for participating families only
+   *
+   * @return whether the event is intended for participating families only
+   */
+  public boolean getForPFOnly() {
+    return forPFOnly;
   }
 
   @Override

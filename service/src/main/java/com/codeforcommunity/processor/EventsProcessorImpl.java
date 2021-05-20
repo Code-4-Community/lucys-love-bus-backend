@@ -167,6 +167,7 @@ public class EventsProcessorImpl implements IEventsProcessor {
     if (userData.getPrivilegeLevel() != PrivilegeLevel.ADMIN) {
       throw new AdminOnlyRouteException();
     }
+
     EventsRecord record = db.fetchOne(EVENTS, EVENTS.ID.eq(eventId));
     if (request.getTitle() != null) {
       record.setTitle(request.getTitle());
@@ -201,6 +202,9 @@ public class EventsProcessorImpl implements IEventsProcessor {
     if (request.getPrice() != null) {
       record.setPrice(request.getPrice());
     }
+
+    record.setForPfOnly(request.getForPFOnly());
+
     record.store();
 
     return getSingleEvent(eventId, userData);
@@ -359,7 +363,8 @@ public class EventsProcessorImpl implements IEventsProcessor {
                   details,
                   ticketCounts.getOrDefault(event.getId(), 0),
                   canUserRegister(event, userData),
-                  event.getPrice());
+                  event.getPrice(),
+                  event.getForPfOnly());
             })
         .collect(Collectors.toList());
   }
@@ -381,7 +386,8 @@ public class EventsProcessorImpl implements IEventsProcessor {
         details,
         ticketsBought,
         canUserRegister(event, userData),
-        event.getPrice());
+        event.getPrice(),
+        event.getForPfOnly());
   }
 
   /** Takes a dto representation of an event and returns the database record representation. */
@@ -395,6 +401,7 @@ public class EventsProcessorImpl implements IEventsProcessor {
     newRecord.setStartTime(request.getDetails().getStart());
     newRecord.setEndTime(request.getDetails().getEnd());
     newRecord.setPrice(request.getPrice());
+    newRecord.setForPfOnly(request.getForPFOnly());
     return newRecord;
   }
 

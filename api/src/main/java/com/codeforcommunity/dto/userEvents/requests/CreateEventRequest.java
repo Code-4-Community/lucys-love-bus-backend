@@ -12,17 +12,17 @@ public class CreateEventRequest extends ApiDto {
   private String thumbnail;
   private EventDetails details;
   private int price; // price in cents
+  private boolean forPFOnly;
 
   public CreateEventRequest(
-      String title, int capacity, String thumbnail, EventDetails details, int price) {
+      String title, int capacity, String thumbnail, EventDetails details, int price, boolean forPFOnly) {
     this.title = title;
     this.capacity = capacity;
     this.thumbnail = thumbnail;
     this.details = details;
     this.price = price;
+    this.forPFOnly = forPFOnly;
   }
-
-  private CreateEventRequest() {}
 
   /**
    * Sets the thumbnail to be the given thumbnail
@@ -76,6 +76,15 @@ public class CreateEventRequest extends ApiDto {
    */
   public int getPrice() {
     return price;
+  }
+
+  /**
+   * Gets whether the event is intended for participating families only
+   *
+   * @return whether the event is intended for participating families only
+   */
+  public boolean getForPFOnly() {
+    return forPFOnly;
   }
 
   @Override
