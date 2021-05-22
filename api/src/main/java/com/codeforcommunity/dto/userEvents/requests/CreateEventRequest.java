@@ -11,11 +11,18 @@ public class CreateEventRequest extends ApiDto {
   private Integer capacity;
   private String thumbnail;
   private EventDetails details;
-  private int price; // price in cents
-  private boolean forPFOnly;
+  private Integer price; // price in cents
+  private Boolean forPFOnly;
+
+  public CreateEventRequest() {}
 
   public CreateEventRequest(
-      String title, int capacity, String thumbnail, EventDetails details, int price, boolean forPFOnly) {
+      String title,
+      Integer capacity,
+      String thumbnail,
+      EventDetails details,
+      Integer price,
+      Boolean forPFOnly) {
     this.title = title;
     this.capacity = capacity;
     this.thumbnail = thumbnail;

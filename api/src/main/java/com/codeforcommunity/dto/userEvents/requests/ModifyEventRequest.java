@@ -12,10 +12,17 @@ public class ModifyEventRequest extends ApiDto {
   private String thumbnail;
   private EventDetails details;
   private Integer price; // price in cents
-  private boolean forPFOnly;
+  private Boolean forPFOnly;
+
+  public ModifyEventRequest() {} // DONT DELETE THIS, needed for Jackson
 
   public ModifyEventRequest(
-      String title, Integer capacity, String thumbnail, EventDetails details, Integer price, boolean forPFOnly) {
+      String title,
+      Integer capacity,
+      String thumbnail,
+      EventDetails details,
+      Integer price,
+      Boolean forPFOnly) {
     this.title = title;
     this.capacity = capacity;
     this.thumbnail = thumbnail;

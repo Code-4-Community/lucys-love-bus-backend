@@ -122,7 +122,8 @@ public class EventsProcessorImplTest {
             new Timestamp(END_TIMESTAMP_TEST));
 
     CreateEventRequest req =
-        new CreateEventRequest("sample", 5, Base64TestStrings.TEST_STRING_1, myEventDetails, 10000, false);
+        new CreateEventRequest(
+            "sample", 5, Base64TestStrings.TEST_STRING_1, myEventDetails, 10000, false);
 
     JWTData goodUser = new JWTData(0, PrivilegeLevel.ADMIN);
 
@@ -191,6 +192,7 @@ public class EventsProcessorImplTest {
     eventRecord.setStartTime(myEventDetails.getStart());
     eventRecord.setEndTime(myEventDetails.getEnd());
     eventRecord.setPrice(myEventRequest.getPrice());
+    eventRecord.setForPfOnly(myEventRequest.getForPFOnly());
     myJooqMock.addReturn(OperationType.SELECT, eventRecord);
 
     // mock the DB for getting ticket counts
@@ -257,6 +259,8 @@ public class EventsProcessorImplTest {
     event1.setEndTime(new Timestamp(System.currentTimeMillis() + 10000));
     event1.setStartTime(new Timestamp(System.currentTimeMillis() - 10000));
     event1.setPrice(2000);
+    event1.setForPfOnly(false);
+
     myJooqMock.addReturn(OperationType.SELECT, event1);
 
     // mock the ticket count
@@ -291,12 +295,15 @@ public class EventsProcessorImplTest {
     event1.setCapacity(10);
     event1.setPrice(10000);
     event1.setTitle("title 1");
+    event1.setForPfOnly(false);
     event1.setEndTime(new Timestamp(END_TIMESTAMP_TEST));
+
     EventsRecord event2 = myJooqMock.getContext().newRecord(EVENTS);
     event2.setId(1);
     event2.setCapacity(50);
     event2.setTitle("title 2");
     event2.setPrice(500);
+    event2.setForPfOnly(false);
     event2.setEndTime(new Timestamp(END_TIMESTAMP_TEST + 100000));
 
     List<EventsRecord> eventRecords = new ArrayList<>();
@@ -368,6 +375,8 @@ public class EventsProcessorImplTest {
     myEvent1.setPrice(4000);
     myEvent1.setStartTime(new Timestamp(START_TIMESTAMP_TEST));
     myEvent1.setEndTime(new Timestamp(END_TIMESTAMP_TEST));
+    myEvent1.setForPfOnly(false);
+
     myJooqMock.addReturn(OperationType.SELECT, myEvent1);
 
     // mock the ticket count
@@ -407,6 +416,7 @@ public class EventsProcessorImplTest {
     myEvent1.setStartTime(new Timestamp(START_TIMESTAMP_TEST));
     myEvent1.setEndTime(new Timestamp(END_TIMESTAMP_TEST));
     myEvent1.setPrice(5000);
+    myEvent1.setForPfOnly(false);
 
     EventsRecord myEvent2 = myJooqMock.getContext().newRecord(EVENTS);
     myEvent2.setId(1);
@@ -416,6 +426,7 @@ public class EventsProcessorImplTest {
     myEvent2.setStartTime(new Timestamp(START_TIMESTAMP_TEST - 100000));
     myEvent2.setEndTime(new Timestamp(END_TIMESTAMP_TEST + 100000));
     myEvent2.setPrice(100000);
+    myEvent2.setForPfOnly(false);
 
     EventsRecord myEvent3 = myJooqMock.getContext().newRecord(EVENTS);
     myEvent3.setId(2);
@@ -425,6 +436,7 @@ public class EventsProcessorImplTest {
     myEvent3.setStartTime(new Timestamp(0));
     myEvent3.setEndTime(new Timestamp(100000));
     myEvent3.setPrice(40000);
+    myEvent3.setForPfOnly(false);
 
     List<EventsRecord> events = new ArrayList<>();
     events.add(myEvent1);
@@ -499,6 +511,7 @@ public class EventsProcessorImplTest {
     myEvent1.setStartTime(new Timestamp(START_TIMESTAMP_TEST));
     myEvent1.setEndTime(new Timestamp(END_TIMESTAMP_TEST));
     myEvent1.setPrice(50000);
+    myEvent1.setForPfOnly(false);
 
     EventsRecord myEvent2 = myJooqMock.getContext().newRecord(EVENTS);
     myEvent2.setId(1);
@@ -508,6 +521,7 @@ public class EventsProcessorImplTest {
     myEvent2.setStartTime(new Timestamp(START_TIMESTAMP_TEST - 100000));
     myEvent2.setEndTime(new Timestamp(END_TIMESTAMP_TEST + 100000));
     myEvent2.setPrice(100000);
+    myEvent2.setForPfOnly(false);
 
     EventsRecord myEvent3 = myJooqMock.getContext().newRecord(EVENTS);
     myEvent3.setId(2);
@@ -517,6 +531,7 @@ public class EventsProcessorImplTest {
     myEvent3.setStartTime(new Timestamp(0));
     myEvent3.setEndTime(new Timestamp(100000));
     myEvent3.setPrice(8000);
+    myEvent3.setForPfOnly(false);
 
     myJooqMock.addReturn(OperationType.SELECT, myEvent1);
 
@@ -589,6 +604,7 @@ public class EventsProcessorImplTest {
     myEvent1.setPrice(4000);
     myEvent1.setStartTime(new Timestamp(START_TIMESTAMP_TEST));
     myEvent1.setEndTime(new Timestamp(END_TIMESTAMP_TEST));
+    myEvent1.setForPfOnly(false);
     myJooqMock.addReturn(OperationType.SELECT, myEvent1);
 
     // mock the ticket count
@@ -621,6 +637,7 @@ public class EventsProcessorImplTest {
     myEvent1.setPrice(200);
     myEvent1.setStartTime(new Timestamp(START_TIMESTAMP_TEST));
     myEvent1.setEndTime(new Timestamp(END_TIMESTAMP_TEST));
+    myEvent1.setForPfOnly(false);
 
     EventsRecord myEvent2 = myJooqMock.getContext().newRecord(EVENTS);
     myEvent2.setId(1);
@@ -630,6 +647,7 @@ public class EventsProcessorImplTest {
     myEvent2.setPrice(10000);
     myEvent2.setStartTime(new Timestamp(0));
     myEvent2.setEndTime(new Timestamp(100000));
+    myEvent2.setForPfOnly(false);
 
     List<EventsRecord> eventsGP = new ArrayList<>();
     eventsGP.add(myEvent1);
@@ -719,6 +737,7 @@ public class EventsProcessorImplTest {
     myEvent.setPrice(500);
     myEvent.setStartTime(new Timestamp(0));
     myEvent.setEndTime(new Timestamp(0));
+    myEvent.setForPfOnly(false);
     myJooqMock.addReturn(OperationType.SELECT, myEvent);
 
     // mock event database operations
@@ -745,7 +764,7 @@ public class EventsProcessorImplTest {
 
     Object[] updateBindings = myJooqMock.getSqlOperationBindings().get(OperationType.UPDATE).get(0);
 
-    assertEquals(8, updateBindings.length);
+    assertEquals(9, updateBindings.length);
     assertEquals(req.getTitle(), updateBindings[0]);
     assertEquals(req.getDetails().getDescription(), updateBindings[1]);
     assertEquals(req.getCapacity(), updateBindings[2]);
@@ -753,7 +772,8 @@ public class EventsProcessorImplTest {
     assertEquals(req.getDetails().getStart(), updateBindings[4]);
     assertEquals(req.getDetails().getEnd(), updateBindings[5]);
     assertEquals(myEvent.getPrice(), updateBindings[6]);
-    assertEquals(myEvent.getId(), updateBindings[7]);
+    assertEquals(myEvent.getForPfOnly(), updateBindings[7]);
+    assertEquals(myEvent.getId(), updateBindings[8]);
   }
 
   // modifying an event with the event details null
@@ -773,6 +793,7 @@ public class EventsProcessorImplTest {
     myEvent.setStartTime(new Timestamp(0));
     myEvent.setEndTime(new Timestamp(0));
     myEvent.setPrice(10);
+    myEvent.setForPfOnly(false);
     myJooqMock.addReturn(OperationType.SELECT, myEvent);
 
     // mock event database operations
@@ -799,11 +820,12 @@ public class EventsProcessorImplTest {
 
     Object[] updateBindings = myJooqMock.getSqlOperationBindings().get(OperationType.UPDATE).get(0);
 
-    assertEquals(4, updateBindings.length);
+    assertEquals(5, updateBindings.length);
     assertEquals(req.getTitle(), updateBindings[0]);
     assertEquals(req.getCapacity(), updateBindings[1]);
     assertEquals(myEvent.getPrice(), updateBindings[2]);
-    assertEquals(myEvent.getId(), updateBindings[3]);
+    assertEquals(myEvent.getForPfOnly(), updateBindings[3]);
+    assertEquals(myEvent.getId(), updateBindings[4]);
   }
 
   // modifying an event with the event details null and some other fields null
@@ -823,6 +845,7 @@ public class EventsProcessorImplTest {
     myEvent.setPrice(20);
     myEvent.setStartTime(new Timestamp(0));
     myEvent.setEndTime(new Timestamp(0));
+    myEvent.setForPfOnly(false);
     myJooqMock.addReturn(OperationType.SELECT, myEvent);
     myJooqMock.addReturn(OperationType.SELECT, myEvent);
     myJooqMock.addReturn(OperationType.UPDATE, myEvent);
@@ -837,10 +860,11 @@ public class EventsProcessorImplTest {
 
     Object[] updateBindings = myJooqMock.getSqlOperationBindings().get(OperationType.UPDATE).get(0);
 
-    assertEquals(3, updateBindings.length);
+    assertEquals(4, updateBindings.length);
     assertEquals(req.getTitle(), updateBindings[0]);
     assertEquals(myEvent.getPrice(), updateBindings[1]);
-    assertEquals(myEvent.getId(), updateBindings[2]);
+    assertEquals(myEvent.getForPfOnly(), updateBindings[2]);
+    assertEquals(myEvent.getId(), updateBindings[3]);
   }
 
   // modifying an event with the every field null
@@ -860,6 +884,7 @@ public class EventsProcessorImplTest {
     myEvent.setPrice(65);
     myEvent.setStartTime(new Timestamp(0));
     myEvent.setEndTime(new Timestamp(0));
+    myEvent.setForPfOnly(false);
     myJooqMock.addReturn(OperationType.SELECT, myEvent);
     myJooqMock.addReturn(OperationType.SELECT, myEvent);
     myJooqMock.addReturn(OperationType.UPDATE, myEvent);
@@ -874,7 +899,7 @@ public class EventsProcessorImplTest {
 
     List<Object[]> updateBindings = myJooqMock.getSqlOperationBindings().get(OperationType.UPDATE);
 
-    assertTrue(updateBindings.isEmpty());
+    assertEquals(updateBindings.size(), 1);
   }
 
   // modifying an event with some details fields non-null and some non-details fields non-null
@@ -900,6 +925,7 @@ public class EventsProcessorImplTest {
     myEvent.setPrice(50);
     myEvent.setStartTime(new Timestamp(0));
     myEvent.setEndTime(new Timestamp(0));
+    myEvent.setForPfOnly(false);
     myJooqMock.addReturn(OperationType.SELECT, myEvent);
     myJooqMock.addReturn(OperationType.SELECT, myEvent);
     myJooqMock.addReturn(OperationType.UPDATE, myEvent);
@@ -914,12 +940,13 @@ public class EventsProcessorImplTest {
 
     Object[] updateBindings = myJooqMock.getSqlOperationBindings().get(OperationType.UPDATE).get(0);
 
-    assertEquals(5, updateBindings.length);
+    assertEquals(6, updateBindings.length);
     assertEquals(req.getTitle(), updateBindings[0]);
     assertEquals(req.getDetails().getDescription(), updateBindings[1]);
     assertEquals(req.getDetails().getLocation(), updateBindings[2]);
     assertEquals(req.getPrice(), updateBindings[3]);
-    assertEquals(myEvent.getId(), updateBindings[4]);
+    assertEquals(myEvent.getForPfOnly(), updateBindings[4]);
+    assertEquals(myEvent.getId(), updateBindings[5]);
   }
 
   // deleting an event fails if the user isn't an admin
@@ -1121,6 +1148,8 @@ public class EventsProcessorImplTest {
     eventResult.setTitle("TITLE");
     eventResult.setId(1);
     eventResult.setPrice(500);
+    eventResult.setForPfOnly(false);
+
     myJooqMock.addReturn(OperationType.SELECT, eventResult);
     if (count >= 0) {
       Record2<Integer, Integer> record =
