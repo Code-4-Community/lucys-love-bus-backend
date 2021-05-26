@@ -13,7 +13,7 @@ public class SingleEventResponse {
   private int ticketCount;
   private boolean canRegister;
   private int price;
-  private boolean forPfOnly;
+  private boolean forPFOnly;
 
   public SingleEventResponse(
       int id,
@@ -35,7 +35,7 @@ public class SingleEventResponse {
     this.ticketCount = ticketCount;
     this.canRegister = canRegister;
     this.price = price;
-    this.forPfOnly = forPFOnly;
+    this.forPFOnly = forPFOnly;
   }
 
   private SingleEventResponse() {}
@@ -126,7 +126,7 @@ public class SingleEventResponse {
    *
    * @return whether the event is intended for participating families only
    */
-  public boolean getForPfOnly() {
-    return forPfOnly;
+  public boolean getForPFOnly() {
+    return forPFOnly;
   }
 }

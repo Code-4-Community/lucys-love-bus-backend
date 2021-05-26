@@ -10,6 +10,7 @@ public class PublicSingleEventResponse {
   private String thumbnail;
   private EventDetails details;
   private int price;
+  private boolean forPFOnly;
 
   public PublicSingleEventResponse(
       int id,
@@ -18,7 +19,8 @@ public class PublicSingleEventResponse {
       int capacity,
       String thumbnail,
       EventDetails details,
-      int price) {
+      int price,
+      boolean forPFOnly) {
     this.id = id;
     this.title = title;
     this.spotsAvailable = spotsAvailable;
@@ -26,6 +28,7 @@ public class PublicSingleEventResponse {
     this.thumbnail = thumbnail;
     this.details = details;
     this.price = price;
+    this.forPFOnly = forPFOnly;
   }
 
   public int getId() {
@@ -54,5 +57,14 @@ public class PublicSingleEventResponse {
 
   public int getPrice() {
     return price;
+  }
+
+  /**
+   * Gets whether the event is intended for participating families only
+   *
+   * @return whether the event is intended for participating families only
+   */
+  public boolean getForPFOnly() {
+    return forPFOnly;
   }
 }

@@ -71,7 +71,8 @@ public class PublicEventsProcessorImpl implements IPublicEventsProcessor {
                   event.getCapacity(),
                   event.getThumbnail(),
                   details,
-                  event.getPrice());
+                  event.getPrice(),
+                  event.getForPfOnly());
             })
         .collect(Collectors.toList());
   }
