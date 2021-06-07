@@ -81,6 +81,7 @@ public class PublicEventsProcessorImplTest {
     event1.setEndTime(new Timestamp(System.currentTimeMillis() + 10000));
     event1.setStartTime(new Timestamp(System.currentTimeMillis() - 10000));
     event1.setPrice(2000);
+    event1.setForPfOnly(false);
     myJooqMock.addReturn(OperationType.SELECT, event1);
 
     // mock the ticket count
@@ -116,12 +117,14 @@ public class PublicEventsProcessorImplTest {
     event1.setPrice(10000);
     event1.setTitle("title 1");
     event1.setEndTime(new Timestamp(END_TIMESTAMP_TEST));
+    event1.setForPfOnly(false);
     EventsRecord event2 = myJooqMock.getContext().newRecord(Tables.EVENTS);
     event2.setId(1);
     event2.setCapacity(50);
     event2.setTitle("title 2");
     event2.setPrice(500);
     event2.setEndTime(new Timestamp(END_TIMESTAMP_TEST + 100000));
+    event2.setForPfOnly(false);
 
     List<EventsRecord> eventRecords = new ArrayList<>();
     eventRecords.add(event1);
