@@ -92,6 +92,7 @@ public class EventsProcessorImplTest {
     EventDetails myEventDetails =
         new EventDetails(
             "my event",
+            "please arrive 5 min early",
             "boston",
             new Timestamp(START_TIMESTAMP_TEST),
             new Timestamp(END_TIMESTAMP_TEST));
@@ -117,6 +118,7 @@ public class EventsProcessorImplTest {
     EventDetails myEventDetails =
         new EventDetails(
             "my event",
+            null,
             "boston",
             new Timestamp(START_TIMESTAMP_TEST),
             new Timestamp(END_TIMESTAMP_TEST));
@@ -174,6 +176,7 @@ public class EventsProcessorImplTest {
     EventDetails myEventDetails =
         new EventDetails(
             "my event",
+            null,
             "boston",
             new Timestamp(START_TIMESTAMP_TEST),
             new Timestamp(END_TIMESTAMP_TEST));
@@ -188,6 +191,7 @@ public class EventsProcessorImplTest {
     eventRecord.setCapacity(myEventRequest.getCapacity());
     eventRecord.setLocation(myEventDetails.getLocation());
     eventRecord.setDescription(myEventDetails.getDescription());
+    eventRecord.setPrivateDescription(myEventDetails.getPrivateDescription());
     eventRecord.setStartTime(myEventDetails.getStart());
     eventRecord.setEndTime(myEventDetails.getEnd());
     eventRecord.setPrice(myEventRequest.getPrice());
@@ -703,6 +707,7 @@ public class EventsProcessorImplTest {
             null,
             new EventDetails(
                 "new description",
+                "remember to bring a jacket ;)",
                 "new location",
                 new Timestamp(START_TIMESTAMP_TEST),
                 new Timestamp(END_TIMESTAMP_TEST)),
@@ -714,6 +719,7 @@ public class EventsProcessorImplTest {
     myEvent.setTitle("old title");
     myEvent.setCapacity(5);
     myEvent.setDescription("old description");
+    myEvent.setPrivateDescription("old private description");
     myEvent.setLocation("old location");
     myEvent.setPrice(500);
     myEvent.setStartTime(new Timestamp(0));
@@ -768,6 +774,7 @@ public class EventsProcessorImplTest {
     myEvent.setTitle("old title");
     myEvent.setCapacity(5);
     myEvent.setDescription("old description");
+    myEvent.setPrivateDescription("old private description");
     myEvent.setLocation("old location");
     myEvent.setStartTime(new Timestamp(0));
     myEvent.setEndTime(new Timestamp(0));
@@ -818,6 +825,7 @@ public class EventsProcessorImplTest {
     myEvent.setTitle("old title");
     myEvent.setCapacity(5);
     myEvent.setDescription("old description");
+    myEvent.setPrivateDescription("old private description");
     myEvent.setLocation("old location");
     myEvent.setPrice(20);
     myEvent.setStartTime(new Timestamp(0));
@@ -855,6 +863,7 @@ public class EventsProcessorImplTest {
     myEvent.setTitle("old title");
     myEvent.setCapacity(5);
     myEvent.setDescription("old description");
+    myEvent.setPrivateDescription("old private description");
     myEvent.setLocation("old location");
     myEvent.setPrice(65);
     myEvent.setStartTime(new Timestamp(0));
@@ -886,7 +895,7 @@ public class EventsProcessorImplTest {
             "edited title",
             null,
             null,
-            new EventDetails("new description", "new location", null, null),
+            new EventDetails("new description", null, "new location", null, null),
             50);
 
     EventsRecord myEvent = myJooqMock.getContext().newRecord(EVENTS);
@@ -894,6 +903,7 @@ public class EventsProcessorImplTest {
     myEvent.setTitle("old title");
     myEvent.setCapacity(5);
     myEvent.setDescription("old description");
+    myEvent.setPrivateDescription("old private description");
     myEvent.setLocation("old location");
     myEvent.setPrice(50);
     myEvent.setStartTime(new Timestamp(0));

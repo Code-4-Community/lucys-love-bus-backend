@@ -59,6 +59,7 @@ public class ServiceMain {
 
   /** Connect to the database and create a DSLContext so jOOQ can interact with it. */
   private void createDatabaseConnection() throws ClassNotFoundException {
+
     // Load configuration from db.properties file
     String databaseDriver = PropertiesLoader.loadProperty("database_driver");
     String databaseUrl = PropertiesLoader.loadProperty("database_url");

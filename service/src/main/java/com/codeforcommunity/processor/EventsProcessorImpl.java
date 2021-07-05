@@ -81,6 +81,19 @@ public class EventsProcessorImpl implements IEventsProcessor {
       throw new EventDoesNotExistException(eventId);
     }
 
+    GetEventsResponse res = this.getEventsSignedUp(new GetUserEventsRequest(), userData);
+    boolean userRegisteredForEvent = false;
+    for (SingleEventResponse registeredEvent : res.getEvents()) {
+      if (registeredEvent.getId() == eventId) {
+        userRegisteredForEvent = true;
+        break;
+      }
+    }
+
+    if (!userRegisteredForEvent) {
+      event.setPrivateDescription(null);
+    }
+
     return eventPojoToResponse(event, userData);
   }
 
@@ -347,6 +360,7 @@ public class EventsProcessorImpl implements IEventsProcessor {
               EventDetails details =
                   new EventDetails(
                       event.getDescription(),
+                      event.getPrivateDescription(),
                       event.getLocation(),
                       event.getStartTime(),
                       event.getEndTime());
@@ -371,7 +385,11 @@ public class EventsProcessorImpl implements IEventsProcessor {
 
     EventDetails details =
         new EventDetails(
-            event.getDescription(), event.getLocation(), event.getStartTime(), event.getEndTime());
+            event.getDescription(),
+            event.getPrivateDescription(),
+            event.getLocation(),
+            event.getStartTime(),
+            event.getEndTime());
     return new SingleEventResponse(
         event.getId(),
         event.getTitle(),
