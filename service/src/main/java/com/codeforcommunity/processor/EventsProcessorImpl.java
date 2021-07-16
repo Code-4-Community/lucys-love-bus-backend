@@ -81,18 +81,34 @@ public class EventsProcessorImpl implements IEventsProcessor {
       throw new EventDoesNotExistException(eventId);
     }
 
-    GetEventsResponse res = this.getEventsSignedUp(new GetUserEventsRequest(), userData);
+    // getting all of the users registered for this event
+    // TODO: is it bad that we're pretending to be an admin in this method call?
+    EventRegistrations registrations = this.getEventRegisteredUsers(eventId, new JWTData(0, PrivilegeLevel.ADMIN));
     boolean userRegisteredForEvent = false;
-    for (SingleEventResponse registeredEvent : res.getEvents()) {
-      if (registeredEvent.getId() == eventId) {
+    for (Registration reg : registrations.getRegistrations()) {
+      if (reg.getUserId() == userData.getUserId()) {
         userRegisteredForEvent = true;
         break;
       }
     }
 
-    if (!userRegisteredForEvent) {
+    // hide the private description if the user isn't registered and they're not an admin
+    if (!userRegisteredForEvent && userData.getPrivilegeLevel() != PrivilegeLevel.ADMIN) {
       event.setPrivateDescription(null);
     }
+
+    //    GetEventsResponse res = this.getEventsSignedUp(new GetUserEventsRequest(), userData);
+    //    boolean userRegisteredForEvent = false;
+    //    for (SingleEventResponse registeredEvent : res.getEvents()) {
+    //      if (registeredEvent.getId() == eventId) {
+    //        userRegisteredForEvent = true;
+    //        break;
+    //      }
+    //    }
+    //
+    //    if (!userRegisteredForEvent) {
+    //      event.setPrivateDescription(null);
+    //    }
 
     return eventPojoToResponse(event, userData);
   }
@@ -200,6 +216,9 @@ public class EventsProcessorImpl implements IEventsProcessor {
       EventDetails details = request.getDetails();
       if (details.getDescription() != null) {
         record.setDescription(details.getDescription());
+      }
+      if (details.getPrivateDescription() != null) {
+        record.setPrivateDescription(details.getPrivateDescription());
       }
       if (details.getLocation() != null) {
         record.setLocation(details.getLocation());
@@ -407,6 +426,7 @@ public class EventsProcessorImpl implements IEventsProcessor {
     EventsRecord newRecord = db.newRecord(EVENTS);
     newRecord.setTitle(request.getTitle());
     newRecord.setDescription(request.getDetails().getDescription());
+    newRecord.setPrivateDescription(request.getDetails().getPrivateDescription());
     newRecord.setThumbnail(request.getThumbnail());
     newRecord.setCapacity(request.getCapacity());
     newRecord.setLocation(request.getDetails().getLocation());
