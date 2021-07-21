@@ -57,11 +57,16 @@ public class UserInformationDatabaseOperations {
       throw new UserDoesNotExistException(userData.getUserId());
     }
 
-    String filename = "profile-" + UUID.randomUUID();
-    String publicImageUrl =
-        S3Requester.validateUploadImageToS3LucyEvents(filename, newContactData.getProfilePicture());
-
-    newContactData.setProfilePicture(publicImageUrl); // Actually setting Image URL
+    if (newContactData.getProfilePicture() == null
+        || newContactData.getProfilePicture().startsWith("http")) {
+      newContactData.setProfilePicture(newContactData.getProfilePicture());
+    } else {
+      String filename = "profile-" + UUID.randomUUID();
+      String publicImageUrl =
+          S3Requester.validateUploadImageToS3LucyEvents(
+              filename, newContactData.getProfilePicture());
+      newContactData.setProfilePicture(publicImageUrl); // Actually setting Image URL
+    }
 
     newContactData.setShouldSendEmails(true);
     updateStoreContactRecord(mainContact, newContactData);
@@ -81,11 +86,6 @@ public class UserInformationDatabaseOperations {
   public void addAdditionalContacts(List<Contact> additionalContacts, JWTData userData) {
     for (Contact contact : additionalContacts) {
       ContactsRecord contactsRecord = db.newRecord(CONTACTS);
-
-      String filename = "profile-" + UUID.randomUUID();
-      String publicImageUrl =
-          S3Requester.validateUploadImageToS3LucyEvents(filename, contact.getProfilePicture());
-      contact.setProfilePicture(publicImageUrl); // Actually setting Image URL
 
       contactsRecord.setUserId(userData.getUserId());
       updateStoreContactRecord(contactsRecord, contact);
@@ -122,6 +122,16 @@ public class UserInformationDatabaseOperations {
 
   /** Update and store a contact record to reflect a contact dto. */
   public void updateStoreContactRecord(ContactsRecord contactsRecord, Contact contactDto) {
+    if (contactDto.getProfilePicture() == null
+        || contactDto.getProfilePicture().startsWith("http")) {
+      contactsRecord.setProfilePicture(contactDto.getProfilePicture());
+    } else {
+      String filename = "profile-" + UUID.randomUUID();
+      String publicImageUrl =
+          S3Requester.validateUploadImageToS3LucyEvents(filename, contactDto.getProfilePicture());
+      contactsRecord.setProfilePicture(publicImageUrl); // Actually setting Image URL
+    }
+
     contactsRecord.setFirstName(contactDto.getFirstName());
     contactsRecord.setLastName(contactDto.getLastName());
     contactsRecord.setDateOfBirth(contactDto.getDateOfBirth());
@@ -133,7 +143,6 @@ public class UserInformationDatabaseOperations {
     contactsRecord.setNotes(contactDto.getNotes());
     contactsRecord.setShouldSendEmails(contactDto.getShouldSendEmails());
     contactsRecord.setPhoneNumber(contactDto.getPhoneNumber());
-    contactsRecord.setProfilePicture(contactDto.getProfilePicture());
     contactsRecord.setReferrer(contactDto.getReferrer());
 
     contactsRecord.store();
@@ -141,6 +150,15 @@ public class UserInformationDatabaseOperations {
 
   /** Update and store a children record to reflect a child dto. */
   public void updateStoreChildRecord(ChildrenRecord childrenRecord, Child childDto) {
+    if (childDto.getProfilePicture() == null || childDto.getProfilePicture().startsWith("http")) {
+      childrenRecord.setProfilePicture(childDto.getProfilePicture());
+    } else {
+      String filename = "profile-" + UUID.randomUUID();
+      String publicImageUrl =
+          S3Requester.validateUploadImageToS3LucyEvents(filename, childDto.getProfilePicture());
+      childrenRecord.setProfilePicture(publicImageUrl); // Actually setting Image URL
+    }
+
     childrenRecord.setFirstName(childDto.getFirstName());
     childrenRecord.setLastName(childDto.getLastName());
     childrenRecord.setDateOfBirth(childDto.getDateOfBirth());
@@ -151,7 +169,6 @@ public class UserInformationDatabaseOperations {
     childrenRecord.setDiagnosis(childDto.getDiagnosis());
     childrenRecord.setMedications(childDto.getMedications());
     childrenRecord.setNotes(childDto.getNotes());
-    childrenRecord.setProfilePicture(childDto.getProfilePicture());
 
     childrenRecord.store();
   }

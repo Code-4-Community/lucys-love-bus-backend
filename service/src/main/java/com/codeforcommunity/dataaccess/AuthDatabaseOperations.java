@@ -88,8 +88,9 @@ public class AuthDatabaseOperations {
     List<Child> children =
         db.selectFrom(CHILDREN).where(CHILDREN.USER_ID.eq(user.getId())).fetchInto(Child.class);
     AddressData locationData = extractAddressDataFromUser(user);
+    PrivilegeLevel privilegeLevel = user.getPrivilegeLevel();
 
-    return new UserInformation(mainContact, additionalContacts, children, locationData);
+    return new UserInformation(mainContact, additionalContacts, children, locationData, privilegeLevel);
   }
 
   /**
@@ -178,7 +179,10 @@ public class AuthDatabaseOperations {
   /** Given a JWT signature, store it in the BLACKLISTED_REFRESHES table. */
   public void addToBlackList(String signature) {
     Timestamp expirationTimestamp = Timestamp.from(Instant.now().plusMillis(msRefreshExpiration));
-    db.newRecord(Tables.BLACKLISTED_REFRESHES).values(signature, expirationTimestamp).store();
+    db.insertInto(Tables.BLACKLISTED_REFRESHES)
+            .values(signature, expirationTimestamp)
+            .onDuplicateKeyIgnore()
+            .execute();
   }
 
   /** Given a JWT signature return true if it is stored in the BLACKLISTED_REFRESHES table. */

@@ -8,10 +8,12 @@ import com.codeforcommunity.auth.Passwords;
 import com.codeforcommunity.dataaccess.AuthDatabaseOperations;
 import com.codeforcommunity.dataaccess.UserInformationDatabaseOperations;
 import com.codeforcommunity.dto.auth.AddressData;
+import com.codeforcommunity.dto.protected_user.GetAllUserInfoResponse;
 import com.codeforcommunity.dto.protected_user.SetContactsAndChildrenRequest;
 import com.codeforcommunity.dto.protected_user.UserInformation;
 import com.codeforcommunity.dto.protected_user.components.Child;
 import com.codeforcommunity.dto.protected_user.components.Contact;
+import com.codeforcommunity.dto.protected_user.components.UserSummary;
 import com.codeforcommunity.dto.user.ChangeEmailRequest;
 import com.codeforcommunity.dto.user.ChangePasswordRequest;
 import com.codeforcommunity.dto.user.UserDataResponse;
@@ -123,6 +125,28 @@ public class ProtectedUserProcessorImpl implements IProtectedUserProcessor {
     }
 
     return authDatabaseOperations.getUserInformation(user);
+  }
+
+  @Override
+  public GetAllUserInfoResponse getAllUserInformation(JWTData userData) {
+    if (userData.getPrivilegeLevel() != PrivilegeLevel.ADMIN) {
+      throw new AdminOnlyRouteException();
+    }
+    return new GetAllUserInfoResponse(
+        db.select(
+                CONTACTS.FIRST_NAME,
+                CONTACTS.LAST_NAME,
+                CONTACTS.EMAIL,
+                CONTACTS.USER_ID,
+                USERS.PRIVILEGE_LEVEL,
+                CONTACTS.PHONE_NUMBER,
+                CONTACTS.PROFILE_PICTURE,
+                USERS.PHOTO_RELEASE)
+            .from(USERS)
+            .join(CONTACTS)
+            .on(USERS.ID.eq(CONTACTS.USER_ID))
+            .where(CONTACTS.IS_MAIN_CONTACT.isTrue())
+            .fetchInto(UserSummary.class));
   }
 
   @Override

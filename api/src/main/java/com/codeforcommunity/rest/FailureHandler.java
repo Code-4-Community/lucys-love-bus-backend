@@ -223,6 +223,11 @@ public class FailureHandler {
     end(ctx, message, 409);
   }
 
+  public void handleRequestAlreadyDecidedException(RoutingContext ctx) {
+    String message = "This request has already been decided";
+    end(ctx, message, 409);
+  }
+
   public void handleStripeExternalException(RoutingContext ctx, StripeExternalException exception) {
     String message =
         "A call to Stripe's API returned an internal server error: " + exception.getMessage();

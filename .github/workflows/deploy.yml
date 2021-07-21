@@ -40,7 +40,7 @@ jobs:
         run: mvn -B clean verify
 
       - name: Generate deployment package
-        run: zip build.zip Dockerfile service/target/service-1.0-SNAPSHOT-jar-with-dependencies.jar
+        run: zip build.zip Dockerfile service/target/service-1.0-SNAPSHOT-jar-with-dependencies.jar .ebextensions/size.config
 
       - name: Deploy to EB
         uses: einaregilsson/beanstalk-deploy@v14
