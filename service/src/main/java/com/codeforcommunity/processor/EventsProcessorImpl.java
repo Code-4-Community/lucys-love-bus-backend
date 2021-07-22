@@ -82,8 +82,7 @@ public class EventsProcessorImpl implements IEventsProcessor {
     }
 
     // getting all of the users registered for this event
-    // TODO: is it bad that we're pretending to be an admin in this method call?
-    EventRegistrations registrations = this.getEventRegisteredUsers(eventId, new JWTData(0, PrivilegeLevel.ADMIN));
+    EventRegistrations registrations = this.getEventRegisteredUsers(eventId);
     boolean userRegisteredForEvent = false;
     for (Registration reg : registrations.getRegistrations()) {
       if (reg.getUserId() == userData.getUserId()) {
@@ -96,19 +95,6 @@ public class EventsProcessorImpl implements IEventsProcessor {
     if (!userRegisteredForEvent && userData.getPrivilegeLevel() != PrivilegeLevel.ADMIN) {
       event.setPrivateDescription(null);
     }
-
-    //    GetEventsResponse res = this.getEventsSignedUp(new GetUserEventsRequest(), userData);
-    //    boolean userRegisteredForEvent = false;
-    //    for (SingleEventResponse registeredEvent : res.getEvents()) {
-    //      if (registeredEvent.getId() == eventId) {
-    //        userRegisteredForEvent = true;
-    //        break;
-    //      }
-    //    }
-    //
-    //    if (!userRegisteredForEvent) {
-    //      event.setPrivateDescription(null);
-    //    }
 
     return eventPojoToResponse(event, userData);
   }
@@ -252,6 +238,16 @@ public class EventsProcessorImpl implements IEventsProcessor {
       throw new AdminOnlyRouteException();
     }
 
+    return this.getEventRegisteredUsers(eventId);
+  }
+
+  /**
+   * Returns an EventRegistrations object containing all of the users registered for this event
+   *
+   * @param eventId id of the event
+   * @return an EventRegistrations object containing all of the users registered for this event
+   */
+  private EventRegistrations getEventRegisteredUsers(int eventId) {
     if (!db.fetchExists(EVENTS.where(EVENTS.ID.eq(eventId)))) {
       throw new EventDoesNotExistException(eventId);
     }

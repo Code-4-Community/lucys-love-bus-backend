@@ -90,7 +90,8 @@ public class AuthDatabaseOperations {
     AddressData locationData = extractAddressDataFromUser(user);
     PrivilegeLevel privilegeLevel = user.getPrivilegeLevel();
 
-    return new UserInformation(mainContact, additionalContacts, children, locationData, privilegeLevel);
+    return new UserInformation(
+        mainContact, additionalContacts, children, locationData, privilegeLevel);
   }
 
   /**
@@ -180,9 +181,9 @@ public class AuthDatabaseOperations {
   public void addToBlackList(String signature) {
     Timestamp expirationTimestamp = Timestamp.from(Instant.now().plusMillis(msRefreshExpiration));
     db.insertInto(Tables.BLACKLISTED_REFRESHES)
-            .values(signature, expirationTimestamp)
-            .onDuplicateKeyIgnore()
-            .execute();
+        .values(signature, expirationTimestamp)
+        .onDuplicateKeyIgnore()
+        .execute();
   }
 
   /** Given a JWT signature return true if it is stored in the BLACKLISTED_REFRESHES table. */

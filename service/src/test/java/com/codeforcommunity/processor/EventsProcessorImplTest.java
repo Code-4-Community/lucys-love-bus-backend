@@ -196,6 +196,8 @@ public class EventsProcessorImplTest {
     eventRecord.setEndTime(myEventDetails.getEnd());
     eventRecord.setPrice(myEventRequest.getPrice());
     myJooqMock.addReturn(OperationType.SELECT, eventRecord);
+    // mocking db for getting users registered for the event
+    myJooqMock.addReturn(OperationType.SELECT, eventRecord);
 
     // mock the DB for getting ticket counts
     Record2<Integer, Integer> registrationRecord =
