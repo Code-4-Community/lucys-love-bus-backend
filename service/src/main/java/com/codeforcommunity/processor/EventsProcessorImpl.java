@@ -1,11 +1,5 @@
 package com.codeforcommunity.processor;
 
-import static org.jooq.generated.Tables.CHILDREN;
-import static org.jooq.generated.Tables.CONTACTS;
-import static org.jooq.generated.Tables.EVENTS;
-import static org.jooq.generated.Tables.EVENT_REGISTRATIONS;
-import static org.jooq.generated.Tables.USERS;
-
 import com.codeforcommunity.api.IEventsProcessor;
 import com.codeforcommunity.auth.JWTData;
 import com.codeforcommunity.dataaccess.EventDatabaseOperations;
@@ -25,6 +19,13 @@ import com.codeforcommunity.exceptions.EventDoesNotExistException;
 import com.codeforcommunity.exceptions.InvalidEventCapacityException;
 import com.codeforcommunity.exceptions.S3FailedUploadException;
 import com.codeforcommunity.requester.S3Requester;
+import org.jooq.DSLContext;
+import org.jooq.Record;
+import org.jooq.SelectConditionStep;
+import org.jooq.SelectSeekStep1;
+import org.jooq.generated.tables.pojos.Events;
+import org.jooq.generated.tables.records.EventsRecord;
+
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -33,12 +34,13 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import org.jooq.DSLContext;
-import org.jooq.Record;
-import org.jooq.SelectConditionStep;
-import org.jooq.SelectSeekStep1;
-import org.jooq.generated.tables.pojos.Events;
-import org.jooq.generated.tables.records.EventsRecord;
+
+import static org.jooq.generated.Tables.ANNOUNCEMENTS;
+import static org.jooq.generated.Tables.CHILDREN;
+import static org.jooq.generated.Tables.CONTACTS;
+import static org.jooq.generated.Tables.EVENTS;
+import static org.jooq.generated.Tables.EVENT_REGISTRATIONS;
+import static org.jooq.generated.Tables.USERS;
 
 public class EventsProcessorImpl implements IEventsProcessor {
 
@@ -211,6 +213,9 @@ public class EventsProcessorImpl implements IEventsProcessor {
     if (userData.getPrivilegeLevel() != PrivilegeLevel.ADMIN) {
       throw new AdminOnlyRouteException();
     }
+
+    db.delete(ANNOUNCEMENTS).where(ANNOUNCEMENTS.EVENT_ID.eq((eventId))).execute();
+    db.delete(EVENT_REGISTRATIONS).where(EVENT_REGISTRATIONS.EVENT_ID.eq(eventId)).execute();
     db.delete(EVENTS).where(EVENTS.ID.eq(eventId)).execute();
   }
 
