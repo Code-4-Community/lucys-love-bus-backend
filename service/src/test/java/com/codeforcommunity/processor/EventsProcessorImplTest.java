@@ -197,7 +197,9 @@ public class EventsProcessorImplTest {
     eventRecord.setPrice(myEventRequest.getPrice());
     myJooqMock.addReturn(OperationType.SELECT, eventRecord);
     // mocking db for getting users registered for the event
+    myJooqMock.addExistsReturn(true);
     myJooqMock.addReturn(OperationType.SELECT, eventRecord);
+
 
     // mock the DB for getting ticket counts
     Record2<Integer, Integer> registrationRecord =
@@ -741,6 +743,9 @@ public class EventsProcessorImplTest {
 
     myJooqMock.addReturn(OperationType.UPDATE, myEvent);
     myJooqMock.addReturn(OperationType.SELECT, myEvent);
+    // mocking db for getting users registered for the event
+    myJooqMock.addExistsReturn(true);
+    myJooqMock.addReturn(OperationType.SELECT, myEvent);
 
     // mock the ticket count
     Record2<Integer, Integer> ticketCount =
@@ -752,7 +757,8 @@ public class EventsProcessorImplTest {
 
     Object[] updateBindings = myJooqMock.getSqlOperationBindings().get(OperationType.UPDATE).get(0);
 
-    assertEquals(8, updateBindings.length);
+    assertEquals(9, updateBindings.length);
+    // TODO: create a method assertBindingsEqual() to check if the bindings are equal without caring about order
     assertEquals(req.getTitle(), updateBindings[0]);
     assertEquals(req.getDetails().getDescription(), updateBindings[1]);
     assertEquals(req.getCapacity(), updateBindings[2]);
@@ -760,7 +766,8 @@ public class EventsProcessorImplTest {
     assertEquals(req.getDetails().getStart(), updateBindings[4]);
     assertEquals(req.getDetails().getEnd(), updateBindings[5]);
     assertEquals(myEvent.getPrice(), updateBindings[6]);
-    assertEquals(myEvent.getId(), updateBindings[7]);
+    assertEquals(req.getDetails().getPrivateDescription(), updateBindings[7]);
+    assertEquals(myEvent.getId(), updateBindings[8]);
   }
 
   // modifying an event with the event details null
