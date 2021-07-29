@@ -25,6 +25,7 @@ import org.jooq.SelectConditionStep;
 import org.jooq.SelectSeekStep1;
 import org.jooq.generated.tables.pojos.Events;
 import org.jooq.generated.tables.records.EventsRecord;
+import org.jooq.impl.DSL;
 
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -214,9 +215,13 @@ public class EventsProcessorImpl implements IEventsProcessor {
       throw new AdminOnlyRouteException();
     }
 
-    db.delete(ANNOUNCEMENTS).where(ANNOUNCEMENTS.EVENT_ID.eq((eventId))).execute();
-    db.delete(EVENT_REGISTRATIONS).where(EVENT_REGISTRATIONS.EVENT_ID.eq(eventId)).execute();
-    db.delete(EVENTS).where(EVENTS.ID.eq(eventId)).execute();
+    db.transaction(
+        configuration -> {
+          DSLContext ctx = DSL.using(configuration);
+          ctx.delete(ANNOUNCEMENTS).where(ANNOUNCEMENTS.EVENT_ID.eq((eventId))).execute();
+          ctx.delete(EVENT_REGISTRATIONS).where(EVENT_REGISTRATIONS.EVENT_ID.eq(eventId)).execute();
+          ctx.delete(EVENTS).where(EVENTS.ID.eq(eventId)).execute();
+        });
   }
 
   @Override
