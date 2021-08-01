@@ -803,6 +803,9 @@ public class EventsProcessorImplTest {
 
     myJooqMock.addReturn(OperationType.UPDATE, myEvent);
     myJooqMock.addReturn(OperationType.SELECT, myEvent);
+    // mocking db for getting users registered for the event
+    myJooqMock.addExistsReturn(true);
+    myJooqMock.addReturn(OperationType.SELECT, myEvent);
 
     // mock the ticket count
     Record2<Integer, Integer> ticketCount =
@@ -842,6 +845,9 @@ public class EventsProcessorImplTest {
     myJooqMock.addReturn(OperationType.SELECT, myEvent);
     myJooqMock.addReturn(OperationType.SELECT, myEvent);
     myJooqMock.addReturn(OperationType.UPDATE, myEvent);
+    // mocking db for getting users registered for the event
+    myJooqMock.addExistsReturn(true);
+    myJooqMock.addReturn(OperationType.SELECT, myEvent);
 
     // mock the ticket count
     Record2<Integer, Integer> ticketCount =
@@ -880,6 +886,10 @@ public class EventsProcessorImplTest {
     myJooqMock.addReturn(OperationType.SELECT, myEvent);
     myJooqMock.addReturn(OperationType.SELECT, myEvent);
     myJooqMock.addReturn(OperationType.UPDATE, myEvent);
+
+    // mocking db for getting users registered for the event
+    myJooqMock.addExistsReturn(true);
+    myJooqMock.addReturn(OperationType.SELECT, myEvent);
 
     // mock the ticket count
     Record2<Integer, Integer> ticketCount =
@@ -920,6 +930,10 @@ public class EventsProcessorImplTest {
     myJooqMock.addReturn(OperationType.SELECT, myEvent);
     myJooqMock.addReturn(OperationType.SELECT, myEvent);
     myJooqMock.addReturn(OperationType.UPDATE, myEvent);
+
+    // mocking db for getting users registered for the event
+    myJooqMock.addExistsReturn(true);
+    myJooqMock.addReturn(OperationType.SELECT, myEvent);
 
     // mock the ticket count
     Record2<Integer, Integer> ticketCount =
