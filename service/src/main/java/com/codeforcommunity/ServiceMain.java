@@ -4,6 +4,7 @@ import com.codeforcommunity.api.IAnnouncementsProcessor;
 import com.codeforcommunity.api.IAuthProcessor;
 import com.codeforcommunity.api.ICheckoutProcessor;
 import com.codeforcommunity.api.IEventsProcessor;
+import com.codeforcommunity.api.IPostsProcessor;
 import com.codeforcommunity.api.IProtectedUserProcessor;
 import com.codeforcommunity.api.IPublicAnnouncementsProcessor;
 import com.codeforcommunity.api.IPublicEventsProcessor;
@@ -16,6 +17,7 @@ import com.codeforcommunity.processor.AnnouncementsProcessorImpl;
 import com.codeforcommunity.processor.AuthProcessorImpl;
 import com.codeforcommunity.processor.CheckoutProcessorImpl;
 import com.codeforcommunity.processor.EventsProcessorImpl;
+import com.codeforcommunity.processor.PostsProcessorImpl;
 import com.codeforcommunity.processor.ProtectedUserProcessorImpl;
 import com.codeforcommunity.processor.PublicAnnouncementsProcessorImpl;
 import com.codeforcommunity.processor.PublicEventsProcessorImpl;
@@ -98,6 +100,7 @@ public class ServiceMain {
     IPublicAnnouncementsProcessor publicAnnouncementsProcessor =
         new PublicAnnouncementsProcessorImpl(this.db, emailer);
     ICheckoutProcessor checkoutProcessor = new CheckoutProcessorImpl(this.db, emailer);
+    IPostsProcessor postsProcessor = new PostsProcessorImpl(this.db, emailer);
 
     ApiRouter router =
         new ApiRouter(
@@ -109,6 +112,7 @@ public class ServiceMain {
             announcementProcessor,
             publicAnnouncementsProcessor,
             checkoutProcessor,
+            postsProcessor,
             jwtAuthorizer);
 
     startApiServer(router, vertx);
