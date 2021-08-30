@@ -14,21 +14,10 @@ public class GetPostsResponse {
   /**
    * Constructs a GetPostsResponse object containing the given data as the response.
    *
-   * @param totalCount the total number of posts contained in this response object
    * @param posts the list of posts contained in this response object
    */
-  public GetPostsResponse(int totalCount, List<Post> posts) {
-    this.totalCount = totalCount;
+  public GetPostsResponse(List<Post> posts) {
     this.posts = posts;
-  }
-
-  /**
-   * Gets the total number of posts in this response object.
-   *
-   * @return total number of posts in this response object
-   */
-  public int getTotalCount() {
-    return totalCount;
   }
 
   /**

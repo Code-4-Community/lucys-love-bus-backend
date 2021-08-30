@@ -30,7 +30,7 @@ public class PostsProcessorImpl implements IPostsProcessor {
     List<Posts> posts = db.selectFrom(POSTS).orderBy(POSTS.ID.desc()).fetchInto(Posts.class);
 
     return new GetPostsResponse(
-        posts.size(), posts.stream().map(this::convertPostObject).collect(Collectors.toList()));
+        posts.stream().map(this::convertPostObject).collect(Collectors.toList()));
   }
 
   @Override
