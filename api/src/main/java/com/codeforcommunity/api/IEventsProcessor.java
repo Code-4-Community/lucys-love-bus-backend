@@ -31,4 +31,8 @@ public interface IEventsProcessor {
   EventRegistrations getEventRegisteredUsers(int eventId, JWTData userData);
 
   String getEventRSVPs(int eventId, JWTData userData);
+
+  int getNumberOfEventRegistrations();
+
+  int getNumberOfEventRegistrationsPastMonth();
 }

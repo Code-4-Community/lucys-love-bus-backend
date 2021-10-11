@@ -41,6 +41,8 @@ public class EventsRouter implements IRouter {
     registerModifyEvent(router);
     registerDeleteEvent(router);
     registerGetEventRegisteredUsers(router);
+    registerGetNumberOfRegistrations(router);
+    registerGetNumberOfRegistrationsPastMonth(router);
     registerGetEventRSVPs(router);
 
     return router;
@@ -89,6 +91,16 @@ public class EventsRouter implements IRouter {
   private void registerGetEventRSVPs(Router router) {
     Route getUsersSignedUpEventRoute = router.get("/:event_id/rsvps");
     getUsersSignedUpEventRoute.handler(this::handleGetEventRSVPs);
+  }
+
+  private void registerGetNumberOfRegistrations(Router router) {
+    Route getNumberofRegistrations = router.get("/num_registrations");
+    getNumberofRegistrations.handler(this::handleGetNumberOfRegistrations);
+  }
+
+  private void registerGetNumberOfRegistrationsPastMonth(Router router) {
+    Route getNumberofRegistrationsPastMonth = router.get("/num_registrations_past_month");
+    getNumberofRegistrationsPastMonth.handler(this::handleGetNumberOfRegistrationsPastMonth);
   }
 
   private void handleGetEvents(RoutingContext ctx) {
@@ -163,6 +175,16 @@ public class EventsRouter implements IRouter {
 
     EventRegistrations regs = processor.getEventRegisteredUsers(eventId, userData);
     end(ctx.response(), 200, JsonObject.mapFrom(regs).encode());
+  }
+
+  private void handleGetNumberOfRegistrations(RoutingContext ctx) {
+    int numRegistrations = processor.getNumberOfEventRegistrations();
+    end(ctx.response(), 200, String.valueOf(numRegistrations), "text/csv");
+  }
+
+  private void handleGetNumberOfRegistrationsPastMonth(RoutingContext ctx) {
+    int numRegistrationsPastMonth = processor.getNumberOfEventRegistrationsPastMonth();
+    end(ctx.response(), 200, String.valueOf(numRegistrationsPastMonth), "text/csv");
   }
 
   private void handleGetEventRSVPs(RoutingContext ctx) {

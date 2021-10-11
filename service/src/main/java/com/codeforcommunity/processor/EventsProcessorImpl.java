@@ -1,5 +1,12 @@
 package com.codeforcommunity.processor;
 
+import static org.jooq.generated.Tables.ANNOUNCEMENTS;
+import static org.jooq.generated.Tables.CHILDREN;
+import static org.jooq.generated.Tables.CONTACTS;
+import static org.jooq.generated.Tables.EVENTS;
+import static org.jooq.generated.Tables.EVENT_REGISTRATIONS;
+import static org.jooq.generated.Tables.USERS;
+
 import com.codeforcommunity.api.IEventsProcessor;
 import com.codeforcommunity.auth.JWTData;
 import com.codeforcommunity.dataaccess.EventDatabaseOperations;
@@ -19,14 +26,6 @@ import com.codeforcommunity.exceptions.EventDoesNotExistException;
 import com.codeforcommunity.exceptions.InvalidEventCapacityException;
 import com.codeforcommunity.exceptions.S3FailedUploadException;
 import com.codeforcommunity.requester.S3Requester;
-import org.jooq.DSLContext;
-import org.jooq.Record;
-import org.jooq.SelectConditionStep;
-import org.jooq.SelectSeekStep1;
-import org.jooq.generated.tables.pojos.Events;
-import org.jooq.generated.tables.records.EventsRecord;
-import org.jooq.impl.DSL;
-
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -35,13 +34,13 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-import static org.jooq.generated.Tables.ANNOUNCEMENTS;
-import static org.jooq.generated.Tables.CHILDREN;
-import static org.jooq.generated.Tables.CONTACTS;
-import static org.jooq.generated.Tables.EVENTS;
-import static org.jooq.generated.Tables.EVENT_REGISTRATIONS;
-import static org.jooq.generated.Tables.USERS;
+import org.jooq.DSLContext;
+import org.jooq.Record;
+import org.jooq.SelectConditionStep;
+import org.jooq.SelectSeekStep1;
+import org.jooq.generated.tables.pojos.Events;
+import org.jooq.generated.tables.records.EventsRecord;
+import org.jooq.impl.DSL;
 
 public class EventsProcessorImpl implements IEventsProcessor {
 
@@ -255,6 +254,21 @@ public class EventsProcessorImpl implements IEventsProcessor {
             .fetchInto(Registration.class);
 
     return new EventRegistrations(regs);
+  }
+
+  @Override
+  public int getNumberOfEventRegistrations() {
+    return db.fetchCount(EVENT_REGISTRATIONS);
+  }
+
+  @Override
+  public int getNumberOfEventRegistrationsPastMonth() {
+    return db.fetchCount(
+        db.select(EVENT_REGISTRATIONS.ID)
+            .from(EVENT_REGISTRATIONS)
+            .join(EVENTS)
+            .on(EVENTS.ID.eq(EVENT_REGISTRATIONS.EVENT_ID))
+            .where("start_time >= (select date_trunc('day', NOW() - interval '1 month'))"));
   }
 
   /**
