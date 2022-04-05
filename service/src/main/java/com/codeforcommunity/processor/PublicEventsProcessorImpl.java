@@ -61,6 +61,7 @@ public class PublicEventsProcessorImpl implements IPublicEventsProcessor {
               EventDetails details =
                   new EventDetails(
                       event.getDescription(),
+                      null,
                       event.getLocation(),
                       event.getStartTime(),
                       event.getEndTime());

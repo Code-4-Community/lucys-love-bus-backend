@@ -10,12 +10,19 @@ import java.util.List;
 /** A class to represent the details of an event. */
 public class EventDetails extends ApiDto {
   private String description;
+  private String privateDescription;
   private String location;
   private Timestamp start;
   private Timestamp end;
 
-  public EventDetails(String description, String location, Timestamp start, Timestamp end) {
+  public EventDetails(
+      String description,
+      String privateDescription,
+      String location,
+      Timestamp start,
+      Timestamp end) {
     this.description = description;
+    this.privateDescription = privateDescription;
     this.location = location;
     this.start = start;
     this.end = end;
@@ -39,6 +46,24 @@ public class EventDetails extends ApiDto {
    */
   public void setDescription(String description) {
     this.description = description;
+  }
+
+  /**
+   * Gets the event's private description.
+   *
+   * @return the event's private description
+   */
+  public String getPrivateDescription() {
+    return privateDescription;
+  }
+
+  /**
+   * Sets the given private description as the description of the event
+   *
+   * @param privateDescription the private description to be set
+   */
+  public void setPrivateDescription(String privateDescription) {
+    this.privateDescription = privateDescription;
   }
 
   /**

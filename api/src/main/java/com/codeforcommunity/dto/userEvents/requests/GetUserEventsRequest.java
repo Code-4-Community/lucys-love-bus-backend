@@ -16,6 +16,12 @@ public class GetUserEventsRequest {
     this.count = count;
   }
 
+  public GetUserEventsRequest() {
+    this.endDate = Optional.empty();
+    this.startDate = Optional.empty();
+    this.count = Optional.empty();
+  }
+
   /**
    * Gets the end date of the event.
    *
