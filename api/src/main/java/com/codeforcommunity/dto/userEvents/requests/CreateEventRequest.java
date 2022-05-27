@@ -82,7 +82,7 @@ public class CreateEventRequest extends ApiDto {
   public List<String> validateFields(String fieldPrefix) {
     String fieldName = fieldPrefix + "create_event_request.";
     List<String> fields = new ArrayList<>();
-    if (isEmpty(title) || title.length() > 36) {
+    if (isEmpty(title)) {
       fields.add(fieldName + "title");
     }
     if (capacity == null || capacity < 0) {
