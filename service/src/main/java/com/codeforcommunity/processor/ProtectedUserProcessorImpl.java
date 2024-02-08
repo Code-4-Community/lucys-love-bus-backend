@@ -173,7 +173,7 @@ public class ProtectedUserProcessorImpl implements IProtectedUserProcessor {
     }
 
     if (Passwords.isExpectedPassword(changeEmailRequest.getPassword(), user.getPassHash())) {
-      if (db.fetchExists(USERS, USERS.EMAIL.eq(changeEmailRequest.getNewEmail()))) {
+      if (db.fetchExists(USERS, USERS.EMAIL.equalIgnoreCase(changeEmailRequest.getNewEmail()))) {
         throw new EmailAlreadyInUseException(changeEmailRequest.getNewEmail());
       }
 
