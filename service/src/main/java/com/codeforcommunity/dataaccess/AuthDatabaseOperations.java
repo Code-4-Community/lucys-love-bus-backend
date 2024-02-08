@@ -63,7 +63,7 @@ public class AuthDatabaseOperations {
   public JWTData getUserJWTData(String email) {
     Optional<Users> maybeUser =
         Optional.ofNullable(
-            db.selectFrom(USERS).where(USERS.EMAIL.eq(email)).fetchOneInto(Users.class));
+            db.selectFrom(USERS).where(USERS.EMAIL.equalIgnoreCase(email)).fetchOneInto(Users.class));
 
     if (maybeUser.isPresent()) {
       Users user = maybeUser.get();
@@ -117,7 +117,7 @@ public class AuthDatabaseOperations {
   public boolean isValidLogin(String email, String pass) {
     Optional<Users> maybeUser =
         Optional.ofNullable(
-            db.selectFrom(USERS).where(USERS.EMAIL.eq(email)).fetchOneInto(Users.class));
+            db.selectFrom(USERS).where(USERS.EMAIL.equalIgnoreCase(email)).fetchOneInto(Users.class));
 
     return maybeUser
         .filter(user -> Passwords.isExpectedPassword(pass, user.getPassHash()))
@@ -132,7 +132,7 @@ public class AuthDatabaseOperations {
    */
   public UsersRecord createNewUser(NewUserRequest request) {
     String email = request.getEmail();
-    boolean emailUsed = db.fetchExists(db.selectFrom(USERS).where(USERS.EMAIL.eq(email)));
+    boolean emailUsed = db.fetchExists(db.selectFrom(USERS).where(USERS.EMAIL.equalIgnoreCase(email)));
     if (emailUsed) {
       throw new EmailAlreadyInUseException(email);
     }
