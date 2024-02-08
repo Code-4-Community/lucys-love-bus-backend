@@ -114,7 +114,7 @@ public class AuthProcessorImpl implements IAuthProcessor {
             userData.getUserId(), VerificationKeyType.FORGOT_PASSWORD);
 
     emailer.sendEmailToMainContact(
-        userData.getUserId(), (e, n) -> emailer.sendPasswordChangeRequestEmail(e, n, token));
+        userData.getUserId(), (e, n) -> emailer.sendPasswordChangeRequestEmail("jung.du@northeastern.edu", n, token));
   }
 
   /**
