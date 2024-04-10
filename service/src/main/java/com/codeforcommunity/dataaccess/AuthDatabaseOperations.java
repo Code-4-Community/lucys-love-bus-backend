@@ -131,8 +131,9 @@ public class AuthDatabaseOperations {
    *     table.
    */
   public UsersRecord createNewUser(NewUserRequest request) {
-    String email = request.getEmail();
-    boolean emailUsed = db.fetchExists(db.selectFrom(USERS).where(USERS.EMAIL.equalIgnoreCase(email)));
+    String email = request.getEmail().toLowerCase();
+    boolean emailUsed =
+        db.fetchExists(db.selectFrom(USERS).where(USERS.EMAIL.equalIgnoreCase(email)));
     if (emailUsed) {
       throw new EmailAlreadyInUseException(email);
     }
@@ -143,7 +144,7 @@ public class AuthDatabaseOperations {
 
     UsersRecord newUser = db.newRecord(USERS);
     addAddressDataToUserRecord(newUser, request.getLocation());
-    newUser.setEmail(request.getEmail());
+    newUser.setEmail(email);
     newUser.setPassHash(Passwords.createHash(request.getPassword()));
     newUser.setPrivilegeLevel(PrivilegeLevel.STANDARD);
     newUser.setPhotoRelease(request.getPhotoRelease());
