@@ -4,6 +4,7 @@ import com.codeforcommunity.api.IAnnouncementsProcessor;
 import com.codeforcommunity.api.IAuthProcessor;
 import com.codeforcommunity.api.ICheckoutProcessor;
 import com.codeforcommunity.api.IEventsProcessor;
+import com.codeforcommunity.api.IPostsProcessor;
 import com.codeforcommunity.api.IProtectedUserProcessor;
 import com.codeforcommunity.api.IPublicAnnouncementsProcessor;
 import com.codeforcommunity.api.IPublicEventsProcessor;
@@ -15,6 +16,7 @@ import com.codeforcommunity.rest.subrouter.CheckoutRouter;
 import com.codeforcommunity.rest.subrouter.CommonRouter;
 import com.codeforcommunity.rest.subrouter.EventsRouter;
 import com.codeforcommunity.rest.subrouter.PfRequestRouter;
+import com.codeforcommunity.rest.subrouter.PostsRouter;
 import com.codeforcommunity.rest.subrouter.ProtectedUserRouter;
 import com.codeforcommunity.rest.subrouter.PublicAnnouncementsRouter;
 import com.codeforcommunity.rest.subrouter.PublicEventsRouter;
@@ -34,6 +36,7 @@ public class ApiRouter implements IRouter {
   private final PublicAnnouncementsRouter publicAnnouncementsRouter;
   private final CheckoutRouter checkoutRouter;
   private final WebhooksRouter webhooksRouter;
+  private final PostsRouter postsRouter;
 
   public ApiRouter(
       IAuthProcessor authProcessor,
@@ -44,6 +47,7 @@ public class ApiRouter implements IRouter {
       IAnnouncementsProcessor announcementEventsProcessor,
       IPublicAnnouncementsProcessor publicAnnouncementsProcessor,
       ICheckoutProcessor checkoutProcessor,
+      IPostsProcessor postsProcessor,
       JWTAuthorizer jwtAuthorizer) {
 
     this.commonRouter = new CommonRouter(jwtAuthorizer);
@@ -56,6 +60,7 @@ public class ApiRouter implements IRouter {
     this.publicAnnouncementsRouter = new PublicAnnouncementsRouter(publicAnnouncementsProcessor);
     this.checkoutRouter = new CheckoutRouter(checkoutProcessor);
     this.webhooksRouter = new WebhooksRouter(checkoutProcessor);
+    this.postsRouter = new PostsRouter(postsProcessor);
   }
 
   /** Initialize a router and register all route handlers on it. */
@@ -66,6 +71,7 @@ public class ApiRouter implements IRouter {
     router.mountSubRouter("/webhooks", webhooksRouter.initializeRouter(vertx));
     router.mountSubRouter("/events", publicEventsRouter.initializeRouter(vertx));
     router.mountSubRouter("/announcements", publicAnnouncementsRouter.initializeRouter(vertx));
+    router.mountSubRouter("/posts", postsRouter.initializeRouter(vertx));
     router.mountSubRouter("/protected", defineProtectedRoutes(vertx));
 
     return router;
