@@ -18,7 +18,6 @@ import io.vertx.ext.web.Route;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import java.sql.Timestamp;
-import java.util.List;
 import java.util.Optional;
 
 public class EventsRouter implements IRouter {
@@ -92,11 +91,9 @@ public class EventsRouter implements IRouter {
   }
 
   private void handleGetEvents(RoutingContext ctx) {
-
-    List<Integer> intIds = getMultipleQueryParams(ctx, "ids", str -> Integer.parseInt(str));
     JWTData userData = ctx.get("jwt_data");
 
-    GetEventsResponse response = processor.getEvents(intIds, userData);
+    GetEventsResponse response = processor.getEvents(userData);
 
     end(ctx.response(), 200, JsonObject.mapFrom(response).encode());
   }

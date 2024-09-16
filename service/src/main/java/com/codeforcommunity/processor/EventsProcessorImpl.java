@@ -1,5 +1,12 @@
 package com.codeforcommunity.processor;
 
+import static org.jooq.generated.Tables.ANNOUNCEMENTS;
+import static org.jooq.generated.Tables.CHILDREN;
+import static org.jooq.generated.Tables.CONTACTS;
+import static org.jooq.generated.Tables.EVENTS;
+import static org.jooq.generated.Tables.EVENT_REGISTRATIONS;
+import static org.jooq.generated.Tables.USERS;
+
 import com.codeforcommunity.api.IEventsProcessor;
 import com.codeforcommunity.auth.JWTData;
 import com.codeforcommunity.dataaccess.EventDatabaseOperations;
@@ -19,14 +26,6 @@ import com.codeforcommunity.exceptions.EventDoesNotExistException;
 import com.codeforcommunity.exceptions.InvalidEventCapacityException;
 import com.codeforcommunity.exceptions.S3FailedUploadException;
 import com.codeforcommunity.requester.S3Requester;
-import org.jooq.DSLContext;
-import org.jooq.Record;
-import org.jooq.SelectConditionStep;
-import org.jooq.SelectSeekStep1;
-import org.jooq.generated.tables.pojos.Events;
-import org.jooq.generated.tables.records.EventsRecord;
-import org.jooq.impl.DSL;
-
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -35,13 +34,13 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-import static org.jooq.generated.Tables.ANNOUNCEMENTS;
-import static org.jooq.generated.Tables.CHILDREN;
-import static org.jooq.generated.Tables.CONTACTS;
-import static org.jooq.generated.Tables.EVENTS;
-import static org.jooq.generated.Tables.EVENT_REGISTRATIONS;
-import static org.jooq.generated.Tables.USERS;
+import org.jooq.DSLContext;
+import org.jooq.Record;
+import org.jooq.SelectConditionStep;
+import org.jooq.SelectSeekStep1;
+import org.jooq.generated.tables.pojos.Events;
+import org.jooq.generated.tables.records.EventsRecord;
+import org.jooq.impl.DSL;
 
 public class EventsProcessorImpl implements IEventsProcessor {
 
@@ -88,8 +87,20 @@ public class EventsProcessorImpl implements IEventsProcessor {
   }
 
   @Override
-  public GetEventsResponse getEvents(List<Integer> eventIds, JWTData userData) {
+  public GetEventsResponse getEventsByIds(List<Integer> eventIds, JWTData userData) {
     List<Events> e = db.selectFrom(EVENTS).where(EVENTS.ID.in(eventIds)).fetchInto(Events.class);
+    return new GetEventsResponse(listOfEventsToListOfSingleEventResponse(e, userData), e.size());
+  }
+
+  @Override
+  public GetEventsResponse getEvents(JWTData userData) {
+    Timestamp startDate =
+        Timestamp.from(Instant.now().minus(registerLeniencyHours, ChronoUnit.HOURS));
+    List<Events> e =
+        db.selectFrom(EVENTS)
+            .where(EVENTS.START_TIME.greaterOrEqual(startDate))
+            .orderBy(EVENTS.START_TIME.asc())
+            .fetchInto(Events.class);
     return new GetEventsResponse(listOfEventsToListOfSingleEventResponse(e, userData), e.size());
   }
 
@@ -191,6 +202,9 @@ public class EventsProcessorImpl implements IEventsProcessor {
       if (details.getDescription() != null) {
         record.setDescription(details.getDescription());
       }
+      if (details.getPrivateDescription() != null) {
+        record.setPrivateDescription(details.getPrivateDescription());
+      }
       if (details.getLocation() != null) {
         record.setLocation(details.getLocation());
       }
@@ -230,6 +244,16 @@ public class EventsProcessorImpl implements IEventsProcessor {
       throw new AdminOnlyRouteException();
     }
 
+    return this.getEventRegisteredUsers(eventId);
+  }
+
+  /**
+   * Returns an EventRegistrations object containing all of the users registered for this event
+   *
+   * @param eventId id of the event
+   * @return an EventRegistrations object containing all of the users registered for this event
+   */
+  private EventRegistrations getEventRegisteredUsers(int eventId) {
     if (!db.fetchExists(EVENTS.where(EVENTS.ID.eq(eventId)))) {
       throw new EventDoesNotExistException(eventId);
     }
@@ -352,36 +376,38 @@ public class EventsProcessorImpl implements IEventsProcessor {
       List<Events> events, JWTData userData) {
     Map<Integer, Integer> ticketCounts = getTicketCounts(events, userData.getUserId());
     return events.stream()
-        .map(
-            event -> {
-              EventDetails details =
-                  new EventDetails(
-                      event.getDescription(),
-                      event.getLocation(),
-                      event.getStartTime(),
-                      event.getEndTime());
-              return new SingleEventResponse(
-                  event.getId(),
-                  event.getTitle(),
-                  eventDatabaseOperations.getSpotsLeft(event.getId()),
-                  event.getCapacity(),
-                  event.getThumbnail(),
-                  details,
-                  ticketCounts.getOrDefault(event.getId(), 0),
-                  canUserRegister(event, userData),
-                  event.getPrice());
-            })
+        .map(event -> eventPojoToResponse(event, userData))
         .collect(Collectors.toList());
   }
 
   /** Takes a database representation of a single event and returns the dto representation. */
   private SingleEventResponse eventPojoToResponse(Events event, JWTData userData) {
+
+    // getting all of the users registered for this event
+    EventRegistrations registrations = this.getEventRegisteredUsers(event.getId());
+    boolean userRegisteredForEvent = false;
+    for (Registration reg : registrations.getRegistrations()) {
+      if (reg.getUserId() == userData.getUserId()) {
+        userRegisteredForEvent = true;
+        break;
+      }
+    }
+
+    // hide the private description if the user isn't registered and they're not an admin
+    if (!userRegisteredForEvent && userData.getPrivilegeLevel() != PrivilegeLevel.ADMIN) {
+      event.setPrivateDescription(null);
+    }
+
     int ticketsBought =
         getTicketCounts(Arrays.asList(event), userData.getUserId()).getOrDefault(event.getId(), 0);
 
     EventDetails details =
         new EventDetails(
-            event.getDescription(), event.getLocation(), event.getStartTime(), event.getEndTime());
+            event.getDescription(),
+            event.getPrivateDescription(),
+            event.getLocation(),
+            event.getStartTime(),
+            event.getEndTime());
     return new SingleEventResponse(
         event.getId(),
         event.getTitle(),
@@ -399,6 +425,7 @@ public class EventsProcessorImpl implements IEventsProcessor {
     EventsRecord newRecord = db.newRecord(EVENTS);
     newRecord.setTitle(request.getTitle());
     newRecord.setDescription(request.getDetails().getDescription());
+    newRecord.setPrivateDescription(request.getDetails().getPrivateDescription());
     newRecord.setThumbnail(request.getThumbnail());
     newRecord.setCapacity(request.getCapacity());
     newRecord.setLocation(request.getDetails().getLocation());
