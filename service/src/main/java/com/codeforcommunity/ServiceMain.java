@@ -120,3 +120,4 @@ public class ServiceMain {
     apiMain.startApi(vertx);
   }
 }
+
