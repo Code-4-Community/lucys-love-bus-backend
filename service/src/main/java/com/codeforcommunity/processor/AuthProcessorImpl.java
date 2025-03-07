@@ -17,6 +17,7 @@ import com.codeforcommunity.exceptions.AuthException;
 import com.codeforcommunity.exceptions.EmailAlreadyInUseException;
 import com.codeforcommunity.exceptions.TokenInvalidException;
 import com.codeforcommunity.exceptions.UserDoesNotExistException;
+import com.codeforcommunity.logger.SLogger;
 import com.codeforcommunity.requester.Emailer;
 import java.util.Optional;
 import org.jooq.DSLContext;
@@ -24,6 +25,7 @@ import org.jooq.generated.tables.records.UsersRecord;
 
 public class AuthProcessorImpl implements IAuthProcessor {
 
+  private static final SLogger logger = new SLogger(AuthProcessorImpl.class);
   private final AuthDatabaseOperations authDatabaseOperations;
   private final Emailer emailer;
   private final JWTCreator jwtCreator;
@@ -102,19 +104,31 @@ public class AuthProcessorImpl implements IAuthProcessor {
   public void requestPasswordReset(ForgotPasswordRequest request) {
     String email = request.getEmail();
     JWTData userData;
+
+    logger.info(String.format("Initiating password reset for [%s]", email));
+
     try {
       userData = authDatabaseOperations.getUserJWTData(email);
     } catch (UserDoesNotExistException e) {
       // Don't tell the client that the email doesn't exist
+      logger.error(String.format("Could not request password reset for [%s]: user does not exist", email));
       return;
     }
 
-    String token =
-        authDatabaseOperations.createSecretKey(
-            userData.getUserId(), VerificationKeyType.FORGOT_PASSWORD);
+    try {
+      String token =
+          authDatabaseOperations.createSecretKey(
+              userData.getUserId(), VerificationKeyType.FORGOT_PASSWORD);
 
-    emailer.sendEmailToMainContact(
-        userData.getUserId(), (e, n) -> emailer.sendPasswordChangeRequestEmail(e, n, token));
+      logger.info("Created verification key");
+
+      emailer.sendEmailToMainContact(
+          userData.getUserId(), (e, n) -> emailer.sendPasswordChangeRequestEmail(e, n, token));
+
+      logger.info("Sent verification email");
+    } catch (Exception e) {
+      logger.error(String.format("Error processing reset request: %s", e.getMessage()));
+    }
   }
 
   /**
