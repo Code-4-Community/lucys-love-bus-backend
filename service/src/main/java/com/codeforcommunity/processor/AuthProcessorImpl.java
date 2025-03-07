@@ -127,7 +127,7 @@ public class AuthProcessorImpl implements IAuthProcessor {
 
       logger.info("Sent verification email");
     } catch (Exception e) {
-      logger.error(String.format("Error processing reset request: %s", e.getMessage()));
+      logger.error(String.format("Error processing reset request for email [%s]: %s", email, e.getMessage()));
     }
   }
 
