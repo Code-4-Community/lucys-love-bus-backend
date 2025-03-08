@@ -18,7 +18,9 @@ public interface IEventsProcessor {
 
   SingleEventResponse getSingleEvent(int eventId, JWTData userData);
 
-  GetEventsResponse getEvents(List<Integer> event, JWTData userData);
+  GetEventsResponse getEventsByIds(List<Integer> event, JWTData userData);
+
+  GetEventsResponse getEvents(JWTData userData);
 
   GetEventsResponse getEventsSignedUp(GetUserEventsRequest request, JWTData userData);
 
